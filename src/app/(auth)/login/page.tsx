@@ -5,11 +5,13 @@ import { Label } from '@/components/ui/label'
 import { SubmitButton } from '@/components/buttons/submit-button'
 import Link from 'next/link'
 
-export default function LoginPage({
+export default async function LoginPage({
     searchParams,
 }: {
-    searchParams: { message?: string; error?: string }
+    searchParams: Promise<{ message?: string; error?: string }>
 }) {
+    const { message, error } = await searchParams
+
     return (
         <Card className="border-none shadow-xl">
             <CardHeader className="space-y-1">
@@ -19,15 +21,15 @@ export default function LoginPage({
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {searchParams.message && (
+                {message && (
                     <div className="mb-4 p-3 bg-green-50 text-green-700 text-sm rounded-lg border border-green-200">
-                        {searchParams.message}
+                        {message}
                     </div>
                 )}
 
-                {searchParams.error && (
+                {error && (
                     <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
-                        {searchParams.error}
+                        {error}
                     </div>
                 )}
 

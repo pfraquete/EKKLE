@@ -6,12 +6,13 @@ import { ReportForm } from '@/components/forms/report-form'
 export default async function MeetingPage({
     params,
 }: {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }) {
+    const { id } = await params
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    const meeting = await getMeetingData(params.id)
+    const meeting = await getMeetingData(id)
 
     if (!meeting) {
         notFound()
