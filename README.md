@@ -1,24 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Videira São José dos Campos - Gestão de Células
 
-## Getting Started
+Sistema de gestão de células da igreja Videira São José dos Campos, construído com Next.js e Supabase.
 
-First, run the development server:
+## Pré-requisitos
+
+- Node.js 18+ instalado
+- Conta no [Supabase](https://supabase.com)
+- (Opcional) Conta no [Railway](https://railway.app) para deploy
+
+## Configuração Inicial
+
+### 1. Clonar o repositório
+
+```bash
+git clone <url-do-repositorio>
+cd videirasaojosedoscampos
+```
+
+### 2. Instalar dependências
+
+```bash
+npm install
+```
+
+### 3. Configurar variáveis de ambiente
+
+Copie o arquivo `.env.example` para `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Edite o arquivo `.env.local` e preencha com suas credenciais do Supabase:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-publica-aqui
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+**Como obter as credenciais do Supabase:**
+
+1. Acesse seu projeto no [Supabase Dashboard](https://supabase.com/dashboard)
+2. Vá em **Settings** → **API**
+3. Copie:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon/public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### 4. Executar o servidor de desenvolvimento
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000) no navegador para ver o resultado.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy no Railway
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Configurar variáveis de ambiente no Railway
+
+1. Acesse seu projeto no [Railway Dashboard](https://railway.app/dashboard)
+2. Clique em **Variables**
+3. Adicione as seguintes variáveis:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-publica-aqui
+NEXT_PUBLIC_APP_URL=https://seu-app.up.railway.app
+```
+
+⚠️ **IMPORTANTE**: Sem essas variáveis configuradas, você verá o erro "Database error querying schema" ao tentar acessar o sistema.
+
+### Deploy automático
+
+O Railway está configurado para fazer deploy automático quando você fizer push para o repositório.
 
 ## Learn More
 
