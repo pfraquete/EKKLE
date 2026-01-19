@@ -57,6 +57,7 @@ export async function signOut() {
     redirect('/login')
 }
 
+
 export async function forgotPassword(formData: FormData) {
     const supabase = await createClient()
 
@@ -67,10 +68,10 @@ export async function forgotPassword(formData: FormData) {
     })
 
     if (error) {
-        return { error: error.message }
+        redirect(`/forgot-password?error=${encodeURIComponent(error.message)}`)
     }
 
-    return { success: true }
+    redirect(`/forgot-password?message=${encodeURIComponent('Link de recuperação enviado! Verifique seu email.')}`)
 }
 
 export async function resetPassword(formData: FormData) {
