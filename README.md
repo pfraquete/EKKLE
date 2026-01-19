@@ -23,7 +23,54 @@ cd videirasaojosedoscampos
 npm install
 ```
 
-### 3. Configurar variáveis de ambiente
+### 3. Configurar o banco de dados no Supabase
+
+⚠️ **ETAPA CRÍTICA**: Você precisa criar o banco de dados antes de rodar a aplicação!
+
+**3.1. Criar/Acessar projeto no Supabase:**
+
+1. Acesse [Supabase Dashboard](https://supabase.com/dashboard)
+2. Crie um novo projeto ou selecione um existente
+3. Aguarde a criação do banco de dados (leva ~2 minutos)
+
+**3.2. Executar o schema SQL:**
+
+1. No dashboard do Supabase, vá em **SQL Editor** (ícone de banco de dados no menu lateral)
+2. Clique em **New query**
+3. Copie todo o conteúdo do arquivo `supabase-schema.sql` (na raiz do projeto)
+4. Cole no editor SQL e clique em **Run** (ou pressione Ctrl+Enter)
+5. Aguarde a execução (deve completar sem erros)
+
+**3.3. Criar seu primeiro usuário:**
+
+1. Vá em **Authentication** → **Users** no dashboard do Supabase
+2. Clique em **Add user** → **Create new user**
+3. Preencha email e senha
+4. Copie o **User UID** (você vai precisar)
+
+**3.4. Criar o perfil do primeiro usuário:**
+
+1. Volte ao **SQL Editor**
+2. Execute este comando (SUBSTITUA os valores):
+
+```sql
+INSERT INTO profiles (id, church_id, full_name, email, role, member_stage, is_active)
+VALUES (
+  'SEU-USER-UID-AQUI',  -- Cole o User UID do passo 3.3
+  '00000000-0000-0000-0000-000000000001',  -- ID da igreja padrão
+  'Seu Nome Completo',
+  'seu@email.com',
+  'PASTOR',  -- Ou 'LEADER' ou 'MEMBER'
+  'MEMBER',
+  true
+);
+```
+
+3. Clique em **Run**
+
+✅ Pronto! Seu banco de dados está configurado e você tem um usuário administrador.
+
+### 4. Configurar variáveis de ambiente
 
 Copie o arquivo `.env.example` para `.env.local`:
 
@@ -47,7 +94,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
    - **anon/public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-### 4. Executar o servidor de desenvolvimento
+### 5. Executar o servidor de desenvolvimento
 
 ```bash
 npm run dev
@@ -57,11 +104,16 @@ Abra [http://localhost:3000](http://localhost:3000) no navegador para ver o resu
 
 ## Deploy no Railway
 
+### Pré-requisito: Configure o banco de dados primeiro!
+
+⚠️ **IMPORTANTE**: Antes de fazer deploy, você DEVE configurar o banco de dados no Supabase seguindo o **passo 3** acima. Sem o banco de dados configurado, você verá o erro "Database error querying schema".
+
 ### Configurar variáveis de ambiente no Railway
 
 1. Acesse seu projeto no [Railway Dashboard](https://railway.app/dashboard)
-2. Clique em **Variables**
-3. Adicione as seguintes variáveis:
+2. Selecione seu serviço/projeto
+3. Clique na aba **Variables**
+4. Adicione as seguintes variáveis:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
@@ -69,11 +121,25 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-publica-aqui
 NEXT_PUBLIC_APP_URL=https://seu-app.up.railway.app
 ```
 
-⚠️ **IMPORTANTE**: Sem essas variáveis configuradas, você verá o erro "Database error querying schema" ao tentar acessar o sistema.
+**Como obter os valores:**
+- `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Veja o **passo 4** acima
+- `NEXT_PUBLIC_APP_URL`: Sua URL do Railway (pode ver na aba **Settings** → **Domains**)
 
 ### Deploy automático
 
 O Railway está configurado para fazer deploy automático quando você fizer push para o repositório.
+
+### Checklist de Deploy ✅
+
+Antes de testar o sistema em produção, verifique:
+
+- [ ] Banco de dados criado no Supabase (executou `supabase-schema.sql`)
+- [ ] Primeiro usuário criado no Supabase Authentication
+- [ ] Perfil do primeiro usuário criado na tabela `profiles`
+- [ ] Variáveis de ambiente configuradas no Railway
+- [ ] Deploy concluído sem erros no Railway
+- [ ] Consegue acessar a URL do Railway
+- [ ] Consegue fazer login com o usuário criado
 
 ## Learn More
 
