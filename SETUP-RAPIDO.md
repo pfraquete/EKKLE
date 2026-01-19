@@ -1,8 +1,9 @@
 # 🚨 Como Resolver o Erro "Database error querying schema"
+## Sistema: Igreja Videira São José dos Campos - Gestão de Células
 
 ## O Problema
 
-Seu sistema no Railway está rodando, mas **o banco de dados não foi configurado**. Por isso você vê o erro ao tentar fazer login.
+O sistema da igreja no Railway está rodando, mas **o banco de dados não foi configurado**. Por isso você vê o erro ao tentar fazer login.
 
 ## ✅ Solução Rápida (5 minutos)
 
@@ -44,11 +45,11 @@ Seu sistema no Railway está rodando, mas **o banco de dados não foi configurad
 ```sql
 INSERT INTO profiles (id, church_id, full_name, email, role, member_stage, is_active)
 VALUES (
-  'SEU-USER-UID-AQUI',  -- ⚠️ COLE O UID AQUI
-  '00000000-0000-0000-0000-000000000001',
+  'SEU-USER-UID-AQUI',  -- ⚠️ COLE O UID DO USUÁRIO QUE VOCÊ CRIOU
+  '00000000-0000-0000-0000-000000000001',  -- ID da Igreja Videira SJC
   'Seu Nome Completo',  -- ⚠️ MUDE PARA SEU NOME
-  'seu@email.com',      -- ⚠️ MUDE PARA SEU EMAIL
-  'PASTOR',
+  'seu@email.com',      -- ⚠️ MUDE PARA O EMAIL QUE VOCÊ CRIOU
+  'PASTOR',  -- Você será administrador do sistema
   'MEMBER',
   true
 );
@@ -58,7 +59,7 @@ VALUES (
 
 ### 5️⃣ Teste o Login
 
-1. Acesse: https://www.meuacesso.pro
+1. Acesse: https://videirasaojosedoscampos-production.up.railway.app (ou www.meuacesso.pro se tiver domínio customizado)
 2. Faça login com:
    - Email: o que você criou no passo 3
    - Senha: a que você criou no passo 3
@@ -78,7 +79,7 @@ Se seguiu os passos corretamente, o sistema vai funcionar! Você deve ser redire
 3. **Variáveis de ambiente**: Confirme no Railway que as variáveis estão corretas:
    - `NEXT_PUBLIC_SUPABASE_URL`: https://lzykenasmeyeznbyvtat.supabase.co
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: (a chave que já está configurada)
-   - `NEXT_PUBLIC_APP_URL`: https://www.meuacesso.pro
+   - `NEXT_PUBLIC_APP_URL`: https://videirasaojosedoscampos-production.up.railway.app
 
 ---
 
