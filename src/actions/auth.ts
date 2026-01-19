@@ -72,3 +72,24 @@ export async function forgotPassword(formData: FormData) {
 
     return { success: true }
 }
+
+export async function resetPassword(formData: FormData) {
+    const supabase = await createClient()
+
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (password !== confirmPassword) {
+        return redirect('/reset-password?error=As senhas não coincidem')
+    }
+
+    const { error } = await supabase.auth.updateUser({
+        password: password
+    })
+
+    if (error) {
+        return redirect(`/reset-password?error=${encodeURIComponent(error.message)}`)
+    }
+
+    redirect('/dashboard?message=Senha atualizada com sucesso')
+}
