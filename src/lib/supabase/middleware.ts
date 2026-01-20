@@ -45,14 +45,26 @@ export async function updateSession(request: NextRequest) {
     if (!user && !isPublicRoute) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
-        return NextResponse.redirect(url)
+        const redirectResponse = NextResponse.redirect(url)
+
+        // Copy cookies from supabaseResponse (which might have refreshed session)
+        const allCookies = supabaseResponse.cookies.getAll()
+        allCookies.forEach(cookie => redirectResponse.cookies.set(cookie))
+
+        return redirectResponse
     }
 
     // Logado tentando acessar login
     if (user && isPublicRoute) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
-        return NextResponse.redirect(url)
+        const redirectResponse = NextResponse.redirect(url)
+
+        // Copy cookies from supabaseResponse
+        const allCookies = supabaseResponse.cookies.getAll()
+        allCookies.forEach(cookie => redirectResponse.cookies.set(cookie))
+
+        return redirectResponse
     }
 
     return supabaseResponse
