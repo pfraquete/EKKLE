@@ -54,15 +54,12 @@ CREATE TABLE IF NOT EXISTS cells (
 -- Add foreign key to profiles.cell_id after cells table is created
 DO $$
 BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint
-        WHERE conname = 'profiles_cell_id_fkey'
-    ) THEN
-        ALTER TABLE profiles
-        ADD CONSTRAINT profiles_cell_id_fkey
-        FOREIGN KEY (cell_id) REFERENCES cells(id) ON DELETE SET NULL;
-    END IF;
+    ALTER TABLE profiles
+    ADD CONSTRAINT profiles_cell_id_fkey
+    FOREIGN KEY (cell_id) REFERENCES cells(id) ON DELETE SET NULL;
+EXCEPTION
+    WHEN duplicate_object THEN
+        NULL;
 END;
 $$;
 
