@@ -5,12 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { StartMeetingButton } from '@/components/buttons/start-meeting-button'
 import {
     Users,
     MapPin,
     Clock,
-    AlertTriangle,
     ChevronRight,
     Sparkles,
     CheckCircle2,
@@ -47,7 +45,7 @@ export default async function MinhaCelulaPage() {
         )
     }
 
-    const { cell, stats, members, recentMeetings, alerts, activeMeeting } = data
+    const { cell, stats, members, recentMeetings } = data
 
     return (
         <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -109,44 +107,68 @@ export default async function MinhaCelulaPage() {
                 </Card>
             </div>
 
-            {/* High-Impact Action Area */}
-            <div className="fixed bottom-24 left-0 right-0 px-6 z-40 pointer-events-none">
-                <div className="max-w-md mx-auto pointer-events-auto">
-                    {activeMeeting ? (
-                        <Link href={`/minha-celula/reuniao/${activeMeeting.id}`}>
-                            <Button className="w-full h-16 text-lg font-black bg-amber-500 hover:bg-amber-600 shadow-2xl shadow-amber-500/40 rounded-[2rem] text-white border-b-4 border-amber-700 active:border-b-0 transition-all">
-                                📝 CONTINUAR RELATÓRIO
-                            </Button>
-                        </Link>
-                    ) : (
-                        <StartMeetingButton cellId={cell.id} />
-                    )}
-                </div>
-            </div>
-
-            {/* Critical Alerts */}
-            {alerts.length > 0 && (
-                <Card className="border-none bg-destructive/10 shadow-2xl rounded-3xl overflow-hidden group">
-                    <div className="h-1 w-full bg-destructive animate-pulse" />
-                    <CardHeader className="py-4 px-6 flex-row items-center gap-3 space-y-0">
-                        <div className="p-2 bg-destructive/20 rounded-xl">
-                            <AlertTriangle className="h-5 w-5 text-destructive" />
-                        </div>
-                        <CardTitle className="text-base font-black text-destructive uppercase tracking-tight">
-                            Ação Necessária
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="px-6 pb-5 space-y-2">
-                        {alerts.map((alert, i) => (
-                            <div key={i} className="flex items-start gap-2 text-sm text-foreground/80 font-semibold p-3 bg-destructive/5 rounded-2xl border border-destructive/10 italic">
-                                <span>•</span> {alert.message}
+            <div className="grid grid-cols-1 gap-8">
+                {/* Reuniões Section */}
+                <Card className="border-none shadow-xl rounded-[2.5rem] bg-card overflow-hidden">
+                    <CardHeader className="p-8 pb-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-primary/10 rounded-2xl">
+                                    <Calendar className="h-5 w-5 text-primary" />
+                                </div>
+                                <CardTitle className="text-xl font-black text-foreground">
+                                    Reuniões
+                                </CardTitle>
                             </div>
-                        ))}
+                            <Link
+                                href="/minha-celula/reunioes"
+                                className="h-10 px-4 flex items-center gap-1.5 text-xs font-black text-primary hover:bg-primary/5 rounded-full border border-primary/10 transition-colors uppercase tracking-widest"
+                            >
+                                Ver todas <ChevronRight className="h-4 w-4" />
+                            </Link>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-8 pt-0">
+                        {recentMeetings.length === 0 ? (
+                            <div className="text-center py-10 bg-muted/20 rounded-[2rem] border-2 border-dashed border-muted">
+                                <p className="text-sm text-muted-foreground font-bold italic">Nenhuma reunião lançada.</p>
+                            </div>
+                        ) : (
+                            <div className="relative space-y-4">
+                                {recentMeetings.slice(0, 3).map(meeting => (
+                                    <Link
+                                        key={meeting.id}
+                                        href={`/minha-celula/reunioes/${meeting.id}`}
+                                        className="relative flex items-center justify-between p-6 rounded-[2rem] bg-muted/30 border border-border/50 hover:border-primary/50 hover:bg-muted/50 transition-all group"
+                                    >
+                                        <div className="flex items-center gap-6">
+                                            <div className="relative z-10 w-12 h-12 rounded-2xl bg-background border border-border flex flex-col items-center justify-center shrink-0">
+                                                <span className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-0.5">
+                                                    {format(new Date(meeting.date), "MMM", { locale: ptBR })}
+                                                </span>
+                                                <span className="text-lg font-black text-foreground leading-none">
+                                                    {format(new Date(meeting.date), "dd")}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <p className="font-black text-lg text-foreground tracking-tight">
+                                                    Reunião
+                                                </p>
+                                                <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">
+                                                    {meeting.presentCount} presentes
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center border border-border group-hover:bg-primary group-hover:text-white transition-all">
+                                            <ChevronRight className="h-5 w-5" />
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
-            )}
 
-            <div className="grid grid-cols-1 gap-8">
                 {/* Members Section */}
                 <Card className="border-none shadow-xl rounded-[2.5rem] bg-card overflow-hidden">
                     <CardHeader className="p-8 pb-4">
@@ -169,112 +191,27 @@ export default async function MinhaCelulaPage() {
                     </CardHeader>
                     <CardContent className="p-8 pt-0 space-y-4">
                         <div className="grid grid-cols-1 gap-3">
-                            {members.length === 0 ? (
-                                <div className="text-center py-10 bg-muted/20 rounded-[2rem] border-2 border-dashed border-muted">
-                                    <p className="text-sm text-muted-foreground font-bold italic">Nenhum membro cadastrado.</p>
-                                </div>
-                            ) : members.map(member => (
+                            {members.slice(0, 5).map(member => (
                                 <div
                                     key={member.id}
-                                    className="flex items-center gap-4 p-4 rounded-3xl bg-muted/40 border border-border/50 transition-all hover:bg-muted/60 hover:scale-[1.02] cursor-pointer group"
+                                    className="flex items-center gap-4 p-4 rounded-3xl bg-muted/40 border border-border/50"
                                 >
-                                    <Avatar className="h-12 w-12 border-2 border-background shadow-lg ring-2 ring-primary/20">
+                                    <Avatar className="h-12 w-12">
                                         <AvatarImage src={member.photoUrl || undefined} className="object-cover" />
                                         <AvatarFallback className="bg-primary/10 text-primary font-black">
-                                            {member.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                                            {member.fullName[0].toUpperCase()}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1">
                                         <p className="font-black text-foreground text-base tracking-tight">{member.fullName}</p>
-                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Membro de Célula</p>
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Membro</p>
                                     </div>
-                                    {member.consecutiveAbsences >= 2 ? (
-                                        <Badge variant="destructive" className="h-8 rounded-xl font-black px-3 animate-bounce">
-                                            {member.consecutiveAbsences} Faltas
-                                        </Badge>
-                                    ) : (
-                                        <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                                        </div>
-                                    )}
+                                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                                    </div>
                                 </div>
                             ))}
                         </div>
-
-                        {stats.membersCount > 5 && (
-                            <Link
-                                href="/minha-celula/membros"
-                                className="block text-center text-[10px] font-black text-muted-foreground hover:text-primary transition-colors py-4 uppercase tracking-[0.2em]"
-                            >
-                                + E outros {stats.membersCount - 5} membros
-                            </Link>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* History Section */}
-                <Card className="border-none shadow-xl rounded-[2.5rem] bg-card overflow-hidden">
-                    <CardHeader className="p-8 pb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-3 bg-primary/10 rounded-2xl">
-                                <Calendar className="h-5 w-5 text-primary" />
-                            </div>
-                            <CardTitle className="text-xl font-black text-foreground">
-                                Últimas Reuniões
-                            </CardTitle>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-8 pt-0">
-                        {recentMeetings.length === 0 ? (
-                            <div className="text-center py-10 bg-muted/20 rounded-[2rem] border-2 border-dashed border-muted">
-                                <p className="text-sm text-muted-foreground font-bold italic">Nenhuma reunião realizada ainda.</p>
-                            </div>
-                        ) : (
-                            <div className="relative space-y-4">
-                                <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-border/50" />
-                                {recentMeetings.map(meeting => (
-                                    <Link
-                                        key={meeting.id}
-                                        href={`/minha-celula/reuniao/${meeting.id}`}
-                                        className="relative flex items-center justify-between p-6 rounded-[2rem] bg-muted/30 border border-border/50 hover:border-primary/50 hover:bg-muted/50 hover:scale-[1.02] transition-all group"
-                                    >
-                                        <div className="flex items-center gap-6">
-                                            <div className="relative z-10 w-12 h-12 rounded-2xl bg-background border border-border flex flex-col items-center justify-center shrink-0 shadow-sm transition-colors group-hover:border-primary">
-                                                <span className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-0.5">
-                                                    {format(new Date(meeting.date), "MMM", { locale: ptBR })}
-                                                </span>
-                                                <span className="text-lg font-black text-foreground leading-none">
-                                                    {format(new Date(meeting.date), "dd")}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <p className="font-black text-lg text-foreground tracking-tight">
-                                                    Reunião do Dia
-                                                </p>
-                                                <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">
-                                                    {meeting.presentCount} presentes
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            {meeting.hasReport ? (
-                                                <div className="hidden sm:flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
-                                                    <CheckCircle2 className="h-3 w-3" />
-                                                    OK
-                                                </div>
-                                            ) : (
-                                                <div className="hidden sm:flex items-center gap-2 bg-amber-500/10 text-amber-500 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
-                                                    Pendente
-                                                </div>
-                                            )}
-                                            <div className="w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all border border-border group-hover:border-primary">
-                                                <ChevronRight className="h-5 w-5" />
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
             </div>
@@ -287,10 +224,10 @@ export default async function MinhaCelulaPage() {
                         Membro
                     </div>
                 </Link>
-                <Link href="/cultos" className="group">
-                    <div className="flex items-center justify-center gap-3 w-full h-16 font-black border-2 border-border/50 rounded-[1.5rem] bg-card hover:bg-primary/5 hover:border-primary/30 transition-all text-sm uppercase tracking-widest">
-                        <Activity className="h-5 w-5 text-primary group-hover:scale-125 transition-transform" />
-                        Culto
+                <Link href="/minha-celula/reunioes/nova" className="group">
+                    <div className="flex items-center justify-center gap-3 w-full h-16 font-black border-2 border-border/50 rounded-[1.5rem] bg-primary/10 hover:bg-primary/20 hover:border-primary/30 transition-all text-sm uppercase tracking-widest text-primary">
+                        <Plus className="h-5 w-5 group-hover:scale-125 transition-transform" />
+                        Reunião
                     </div>
                 </Link>
             </div>

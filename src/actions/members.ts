@@ -39,7 +39,8 @@ export async function createMember(formData: FormData) {
             cell_id: validatedData.cellId,
             church_id: validatedData.churchId,
             role: 'MEMBER',
-            is_active: true
+            is_active: true,
+            birthday: validatedData.birthday || null
         })
 
     if (error) throw new Error(error.message)
@@ -71,6 +72,7 @@ export async function updateMember(id: string, formData: FormData) {
             email: validatedData.email || null,
             member_stage: validatedData.memberStage,
             cell_id: validatedData.cellId,
+            birthday: validatedData.birthday || null
         })
         .eq('id', id)
 
