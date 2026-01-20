@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createCell, getPotentialLeaders } from '@/actions/cells'
+import { createCell } from '@/actions/cells'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Loader2, ChevronLeft, Home, UserCheck } from 'lucide-react'
+import { Loader2, ChevronLeft, Home, Mail, User } from 'lucide-react'
 
 interface NovaCelulaFormProps {
     churchId: string
@@ -17,11 +16,6 @@ interface NovaCelulaFormProps {
 export function NovaCelulaForm({ churchId }: NovaCelulaFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [leaders, setLeaders] = useState<{ id: string, full_name: string }[]>([])
-
-    useEffect(() => {
-        getPotentialLeaders(churchId).then(setLeaders)
-    }, [churchId])
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -35,7 +29,7 @@ export function NovaCelulaForm({ churchId }: NovaCelulaFormProps) {
             router.refresh()
         } catch (error) {
             console.error(error)
-            alert('Erro ao criar célula.')
+            alert('Erro ao criar célula e cadastrar líder.')
             setIsSubmitting(false)
         }
     }
@@ -56,7 +50,7 @@ export function NovaCelulaForm({ churchId }: NovaCelulaFormProps) {
                             <Home className="h-6 w-6" />
                         </div>
                         <CardTitle>Dados da Célula</CardTitle>
-                        <CardDescription>Defina o nome e o líder responsável pelo novo grupo.</CardDescription>
+                        <CardDescription>Cadastre a nova célula e as informações do líder.</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6 space-y-5">
                         <div className="space-y-2">
@@ -70,26 +64,42 @@ export function NovaCelulaForm({ churchId }: NovaCelulaFormProps) {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="leaderId" className="text-xs font-bold text-gray-400 uppercase">Líder Responsável</Label>
-                            <Select name="leaderId">
-                                <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl font-medium">
-                                    <SelectValue placeholder="Selecione um líder" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {leaders.map(leader => (
-                                        <SelectItem key={leader.id} value={leader.id}>
-                                            {leader.full_name}
-                                        </SelectItem>
-                                    ))}
-                                    {leaders.length === 0 && (
-                                        <div className="p-2 text-center text-xs text-gray-400">Nenhum perfil disponível</div>
-                                    )}
-                                </SelectContent>
-                            </Select>
-                            <p className="text-[10px] text-gray-400 font-medium px-1">
-                                Ao selecionar um líder, o cargo dele será atualizado para "Líder" automaticamente.
-                            </p>
+                        <div className="pt-4 border-t border-gray-50">
+                            <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <User className="h-4 w-4 text-primary" />
+                                Informações do Líder
+                            </h4>
+
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="leaderName" className="text-xs font-bold text-gray-400 uppercase">Nome do Líder</Label>
+                                    <Input
+                                        id="leaderName"
+                                        name="leaderName"
+                                        placeholder="Nome completo do líder"
+                                        required
+                                        className="h-12 bg-gray-50/50 border-gray-100 rounded-xl font-medium"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="leaderEmail" className="text-xs font-bold text-gray-400 uppercase">E-mail do Líder</Label>
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <Input
+                                            id="leaderEmail"
+                                            name="leaderEmail"
+                                            type="email"
+                                            placeholder="email@exemplo.com"
+                                            required
+                                            className="h-12 pl-10 bg-gray-50/50 border-gray-100 rounded-xl font-medium"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 font-medium px-1">
+                                        Se o líder não tiver conta, uma será criada com a senha padrão <strong>videirasjc</strong>.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -103,10 +113,10 @@ export function NovaCelulaForm({ churchId }: NovaCelulaFormProps) {
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="h-6 w-6 mr-3 animate-spin" />
-                                CRIANDO...
+                                PROCESSANDO...
                             </>
                         ) : (
-                            'CRIAR CÉLULA'
+                            'CRIAR CÉLULA E LÍDER'
                         )}
                     </Button>
                 </div>
