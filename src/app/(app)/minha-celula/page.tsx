@@ -12,7 +12,6 @@ import {
     Clock,
     AlertTriangle,
     ChevronRight,
-    CalendarDays,
     Sparkles,
     CheckCircle2,
     Calendar,
