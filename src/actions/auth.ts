@@ -21,14 +21,26 @@ export interface Profile {
 export async function getProfile(): Promise<Profile | null> {
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return null
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    const { data: profile } = await supabase
+    if (authError || !user) {
+        console.log('[getProfile] Auth Error or No User:', authError?.message || 'No user')
+        return null
+    }
+
+    console.log('[getProfile] User found:', user.id)
+
+    const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single()
+
+    if (profileError) {
+        console.error('[getProfile] Profile Query Error:', profileError.message)
+    }
+
+    console.log('[getProfile] Profile result:', profile ? 'Found' : 'Not Found')
 
     return profile
 }
