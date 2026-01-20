@@ -317,11 +317,11 @@ export async function getCellDetails(cellId: string, churchId: string): Promise<
             neighborhood: cell.neighborhood,
             dayOfWeek: cell.day_of_week,
             meetingTime: cell.meeting_time,
-            leader: cell.leader && Array.isArray(cell.leader) && cell.leader[0]
+            leader: cell.leader
                 ? {
-                    id: cell.leader[0].id,
-                    fullName: cell.leader[0].full_name,
-                    photoUrl: cell.leader[0].photo_url
+                    id: (cell.leader as any).id,
+                    fullName: (cell.leader as any).full_name,
+                    photoUrl: (cell.leader as any).photo_url
                 }
                 : null
         },
