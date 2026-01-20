@@ -108,7 +108,7 @@ export async function getAllCellsOverview(churchId: string): Promise<CellOvervie
       name,
       status,
       leader:profiles!leader_id(full_name),
-      members:profiles(id),
+      members:profiles!profiles_cell_id_fkey(id),
       meetings:cell_meetings(
         id,
         date,
@@ -118,7 +118,10 @@ export async function getAllCellsOverview(churchId: string): Promise<CellOvervie
         .eq('church_id', churchId)
         .order('name')
 
-    if (error) return []
+    if (error) {
+        console.error('[getAllCellsOverview] Error fetching cells:', error)
+        return []
+    }
 
     const lastWeek = new Date()
     lastWeek.setDate(lastWeek.getDate() - 7)
