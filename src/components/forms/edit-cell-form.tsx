@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, ChevronLeft, Home, MapPin, Calendar, Clock, User } from 'lucide-react'
+import { Loader2, ChevronLeft, Home, MapPin, User } from 'lucide-react'
 
 interface EditCellFormProps {
     cell: {
