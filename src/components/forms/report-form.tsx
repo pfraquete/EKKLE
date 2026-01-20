@@ -130,7 +130,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
     const presentCount = Object.values(attendance).filter(Boolean).length
 
     return (
-        <div className="space-y-6 max-w-lg mx-auto pb-32">
+        <div className="space-y-6 max-w-lg mx-auto pb-32 bg-zinc-950 min-h-screen p-4 rounded-[2.5rem]">
             {/* Dynamic Floating Header (Mobile Friendly) */}
             <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 flex items-center justify-between border-b border-border shadow-sm">
                 <div className="flex items-center gap-3">
@@ -150,7 +150,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </div>
 
             {/* Checklist Section */}
-            <Card className="border-none shadow-md overflow-hidden bg-card">
+            <Card className="border-none shadow-md overflow-hidden bg-zinc-900 rounded-[2rem]">
                 <CardHeader className="bg-primary/5 pb-3">
                     <CardTitle className="text-base flex items-center gap-2 text-foreground">
                         <ClipboardCheck className="h-5 w-5 text-primary" />
@@ -197,7 +197,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </Card>
 
             {/* Attendance Section */}
-            <Card className="border-none shadow-md overflow-hidden bg-card">
+            <Card className="border-none shadow-md overflow-hidden bg-zinc-900 rounded-[2rem]">
                 <CardHeader className="bg-primary/5 pb-3">
                     <CardTitle className="text-base flex items-center justify-between text-foreground">
                         <div className="flex items-center gap-2">
@@ -244,7 +244,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </Card>
 
             {/* Visitors Section */}
-            <Card className="border-none shadow-md overflow-hidden bg-card">
+            <Card className="border-none shadow-md overflow-hidden bg-zinc-900 rounded-[2rem]">
                 <CardHeader className="bg-primary/5 pb-3">
                     <CardTitle className="text-base flex items-center gap-2 text-foreground">
                         <UserPlus className="h-5 w-5 text-primary" />
@@ -261,7 +261,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                                 placeholder="Ex: Carlos Silva"
                                 value={newVisitor.name}
                                 onChange={e => setNewVisitor(prev => ({ ...prev, name: e.target.value }))}
-                                className="h-12 rounded-xl bg-background"
+                                className="h-12 rounded-xl bg-zinc-950/50 border-zinc-800 text-white placeholder:text-zinc-600"
                             />
                         </div>
                         <div className="space-y-2">
@@ -270,7 +270,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                                 placeholder="(12) 99999-9999"
                                 value={newVisitor.phone}
                                 onChange={e => setNewVisitor(prev => ({ ...prev, phone: e.target.value }))}
-                                className="h-12 rounded-xl bg-background"
+                                className="h-12 rounded-xl bg-zinc-950/50 border-zinc-800 text-white placeholder:text-zinc-600"
                             />
                         </div>
                         <Button
@@ -315,7 +315,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </Card>
 
             {/* Metrics Section */}
-            <Card className="border-none shadow-md overflow-hidden bg-card">
+            <Card className="border-none shadow-md overflow-hidden bg-zinc-900 rounded-[2rem]">
                 <CardHeader className="bg-primary/5 pb-3">
                     <CardTitle className="text-base flex items-center gap-2 text-foreground">
                         <BarChart3 className="h-5 w-5 text-primary" />
@@ -379,7 +379,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </Card>
 
             {/* Observations Section */}
-            <Card className="border-none shadow-md overflow-hidden bg-card">
+            <Card className="border-none shadow-md overflow-hidden bg-zinc-900 rounded-[2rem]">
                 <CardHeader className="bg-primary/5 pb-3">
                     <CardTitle className="text-base flex items-center gap-2 text-foreground">
                         <MessageSquare className="h-5 w-5 text-primary" />
@@ -393,7 +393,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                         value={observations}
                         onChange={e => setObservations(e.target.value)}
                         rows={4}
-                        className="rounded-2xl bg-background border-border italic"
+                        className="rounded-2xl bg-zinc-950/50 border-zinc-800 italic text-white placeholder:text-zinc-600"
                     />
                 </CardContent>
             </Card>

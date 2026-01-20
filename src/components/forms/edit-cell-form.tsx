@@ -54,16 +54,16 @@ export function EditCellForm({ cell, potentialLeaders }: EditCellFormProps) {
     }
 
     return (
-        <div className="space-y-6 pb-20 max-w-lg mx-auto">
+        <div className="space-y-6 pb-20 max-w-lg mx-auto bg-zinc-950 min-h-screen p-4 rounded-[2.5rem]">
             <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
                     <ChevronLeft className="h-6 w-6" />
                 </Button>
-                <h1 className="text-xl font-bold text-foreground">Editar Célula</h1>
+                <h1 className="text-xl font-black text-white px-2">Editar Célula</h1>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                <Card className="border-none shadow-xl rounded-3xl overflow-hidden">
+                <Card className="border-none bg-zinc-900 shadow-2xl rounded-[2rem] overflow-hidden">
                     <CardHeader className="bg-primary/5 pb-6">
                         <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-4">
                             <Home className="h-6 w-6" />
@@ -79,7 +79,7 @@ export function EditCellForm({ cell, potentialLeaders }: EditCellFormProps) {
                                 name="name"
                                 defaultValue={cell.name}
                                 required
-                                className="h-12 bg-muted/40 border-border rounded-xl font-medium"
+                                className="h-12 bg-zinc-950/50 border-zinc-800 rounded-xl font-medium text-white placeholder:text-zinc-600"
                             />
                         </div>
 
@@ -87,7 +87,7 @@ export function EditCellForm({ cell, potentialLeaders }: EditCellFormProps) {
                             <div className="space-y-2">
                                 <Label htmlFor="dayOfWeek" className="text-xs font-bold text-muted-foreground uppercase">Dia da Semana</Label>
                                 <Select name="dayOfWeek" defaultValue={cell.dayOfWeek?.toString()}>
-                                    <SelectTrigger className="h-12 bg-muted/40 border-border rounded-xl font-medium">
+                                    <SelectTrigger className="h-12 bg-zinc-950/50 border-zinc-800 rounded-xl font-medium text-white">
                                         <SelectValue placeholder="Selecione..." />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -104,7 +104,7 @@ export function EditCellForm({ cell, potentialLeaders }: EditCellFormProps) {
                                     name="meetingTime"
                                     type="time"
                                     defaultValue={cell.meetingTime?.slice(0, 5)}
-                                    className="h-12 bg-muted/40 border-border rounded-xl font-medium"
+                                    className="h-12 bg-zinc-950/50 border-zinc-800 rounded-xl font-medium text-white"
                                 />
                             </div>
                         </div>
@@ -117,7 +117,7 @@ export function EditCellForm({ cell, potentialLeaders }: EditCellFormProps) {
                                     id="neighborhood"
                                     name="neighborhood"
                                     defaultValue={cell.neighborhood || ''}
-                                    className="h-12 pl-10 bg-muted/40 border-border rounded-xl font-medium"
+                                    className="h-12 pl-10 bg-zinc-950/50 border-zinc-800 rounded-xl font-medium text-white placeholder:text-zinc-600"
                                 />
                             </div>
                         </div>
@@ -128,7 +128,7 @@ export function EditCellForm({ cell, potentialLeaders }: EditCellFormProps) {
                                 id="address"
                                 name="address"
                                 defaultValue={cell.address || ''}
-                                className="h-12 bg-muted/40 border-border rounded-xl font-medium"
+                                className="h-12 bg-zinc-950/50 border-zinc-800 rounded-xl font-medium text-white placeholder:text-zinc-600"
                             />
                         </div>
 
@@ -140,7 +140,7 @@ export function EditCellForm({ cell, potentialLeaders }: EditCellFormProps) {
                             <div className="space-y-2">
                                 <Label htmlFor="leaderId" className="text-xs font-bold text-muted-foreground uppercase">Responsável</Label>
                                 <Select name="leaderId" defaultValue={cell.leaderId || undefined}>
-                                    <SelectTrigger className="h-12 bg-muted/40 border-border rounded-xl font-medium">
+                                    <SelectTrigger className="h-12 bg-zinc-950/50 border-zinc-800 rounded-xl font-medium text-white">
                                         <SelectValue placeholder="Selecione um líder..." />
                                     </SelectTrigger>
                                     <SelectContent>
