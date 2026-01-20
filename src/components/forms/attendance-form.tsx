@@ -28,8 +28,8 @@ import {
 
 interface Member {
     id: string
-    full_name: string
-    photo_url: string | null
+    fullName: string
+    photoUrl: string | null
 }
 
 interface Props {
@@ -178,13 +178,13 @@ export function AttendanceForm({ members, cellId, churchId }: Props) {
                             `}
                         >
                             <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-                                <AvatarImage src={member.photo_url || undefined} />
+                                <AvatarImage src={member.photoUrl || undefined} />
                                 <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                                    {member.full_name[0]}
+                                    {member.fullName[0]}
                                 </AvatarFallback>
                             </Avatar>
                             <span className={`flex-1 text-left text-sm font-bold ${attendance[member.id] ? 'text-white' : 'text-zinc-600 italic line-through'}`}>
-                                {member.full_name}
+                                {member.fullName}
                             </span>
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${attendance[member.id] ? 'bg-primary text-white shadow-md' : 'bg-zinc-800 text-zinc-600'}`}>
                                 {attendance[member.id] ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}

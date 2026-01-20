@@ -232,7 +232,7 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
             membersCount: members.length,
             avgAttendance
         },
-        members: processedMembers.slice(0, 5),
+        members: processedMembers,
         recentMeetings,
         alerts,
         activeMeeting
