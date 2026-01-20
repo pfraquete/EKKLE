@@ -140,6 +140,9 @@ export async function getChurchMembers(churchId: string) {
         .eq('is_active', true)
         .order('full_name')
 
-    if (error) return []
+    if (error) {
+        console.error('Error fetching members:', error)
+        return []
+    }
     return data
 }

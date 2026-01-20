@@ -37,13 +37,6 @@ export async function createCell(formData: FormData) {
         const leaderEmail = formData.get('leaderEmail') as string
         const leaderName = formData.get('leaderName') as string
 
-        console.log('--- CREATE CELL DEBUG ---')
-        console.log('Payload:', { name, churchId, leaderEmail, leaderName })
-
-        if (!churchId || churchId === 'undefined') {
-            throw new Error('Church ID is missing or invalid')
-        }
-
         let leaderId: string | null = null
 
         // 1. Check if profile already exists
@@ -139,6 +132,7 @@ export async function createCell(formData: FormData) {
 
         revalidatePath('/dashboard')
         revalidatePath('/celulas')
+        revalidatePath('/membros')
         revalidatePath('/configuracoes')
         return cell
     } catch (error: any) {
