@@ -96,3 +96,58 @@ export async function resetPassword(formData: FormData) {
 
     redirect('/dashboard?message=Senha atualizada com sucesso')
 }
+export async function updateProfile(formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Não autenticado')
+
+    const fullName = formData.get('fullName') as string
+    const phone = formData.get('phone') as string
+    const file = formData.get('avatar') as File | null
+
+    let photoUrl = formData.get('currentPhotoUrl') as string || null
+
+    if (file && file.size > 0) {
+        // Upload new avatar
+        const fileExt = file.name.split('.').pop()
+        const filePath = `${user.id}/avatar-${Math.random()}.${fileExt}`
+
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: true
+            })
+
+        if (uploadError) {
+            console.error('Upload error:', uploadError)
+            throw new Error('Falha ao fazer upload da imagem')
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath)
+
+        photoUrl = publicUrl
+    }
+
+    const { error } = await supabase
+        .from('profiles')
+        .update({
+            full_name: fullName,
+            phone: phone,
+            photo_url: photoUrl
+        })
+        .eq('id', user.id)
+
+    if (error) {
+        console.error('Update profile error:', error)
+        throw new Error('Falha ao atualizar perfil')
+    }
+
+    revalidatePath('/configuracoes')
+    revalidatePath('/dashboard')
+    revalidatePath('/', 'layout')
+
+    return { success: true }
+}
