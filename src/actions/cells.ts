@@ -17,7 +17,7 @@ export async function getPotentialLeaders(churchId: string) {
     const supabase = await createClient()
 
     // Find users that are not already leading a cell or are marked as potential leaders
-    const { data, error } = await supabase
+    const { data } = await supabase
         .from('profiles')
         .select('id, full_name')
         .eq('church_id', churchId)
@@ -50,8 +50,12 @@ export async function createCell(formData: FormData) {
             leaderId = existingProfile.id
         } else {
             // 2. Check if user exists in AUTH but not in PROFILES
-            const { data: { users }, error: listError } = await adminSupabase.auth.admin.listUsers()
-            const authUser = users.find(u => u.email === leaderEmail)
+            const { data: userData, error: listError } = await adminSupabase.auth.admin.listUsers()
+            if (listError) {
+                console.error('Error listing auth users:', listError)
+                throw new Error('Falha ao buscar usuários: ' + listError.message)
+            }
+            const authUser = userData.users.find(user => user.email === leaderEmail)
 
             if (authUser) {
                 leaderId = authUser.id
@@ -135,8 +139,9 @@ export async function createCell(formData: FormData) {
         revalidatePath('/membros')
         revalidatePath('/configuracoes')
         return cell
-    } catch (error: any) {
-        console.error('CRITICAL ERROR in createCell:', error)
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.error('CRITICAL ERROR in createCell:', message)
         throw error
     }
 }

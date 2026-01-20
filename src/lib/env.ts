@@ -10,7 +10,7 @@ export function validateEnv() {
   }
 
   const missingVars = Object.entries(requiredEnvVars)
-    .filter(([_, value]) => !value)
+    .filter(([, value]) => !value)
     .map(([key]) => key)
 
   if (missingVars.length > 0) {
@@ -28,7 +28,7 @@ export function validateEnv() {
   try {
     new URL(requiredEnvVars.NEXT_PUBLIC_SUPABASE_URL!)
     new URL(requiredEnvVars.NEXT_PUBLIC_APP_URL!)
-  } catch (error) {
+  } catch {
     throw new Error(
       'Invalid URL format in environment variables. ' +
       'NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_APP_URL must be valid URLs.'

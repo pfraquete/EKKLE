@@ -71,6 +71,30 @@ export interface CellDetails {
     }[]
 }
 
+interface CellMemberRow {
+    id: string
+    full_name: string
+    photo_url: string | null
+}
+
+interface CellMeetingAttendance {
+    status: string
+}
+
+interface CellMeetingRow {
+    id: string
+    date: string
+    status: string
+    report?: { id: string } | null
+    attendance?: CellMeetingAttendance[] | null
+}
+
+interface AttendanceRow {
+    profile_id: string
+    status: string
+    context_id: string
+}
+
 export async function getMyCellData(profileId: string): Promise<MyCellData | null> {
     const supabase = await createClient()
 
@@ -86,9 +110,9 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
 
     // Fetch data in parallel
     const [
-        { data: members },
-        { data: meetings },
-        { data: activeMeeting }
+        membersResponse,
+        meetingsResponse,
+        activeMeetingResponse
     ] = await Promise.all([
         // Group members
         supabase
@@ -123,21 +147,25 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
     ])
 
     // Process members and absences
-    const memberIds = (members || []).map(m => m.id)
-    let memberAttendances: any[] = []
+    const members = (membersResponse.data || []) as CellMemberRow[]
+    const meetings = (meetingsResponse.data || []) as CellMeetingRow[]
+    const activeMeeting = (activeMeetingResponse.data || null) as { id: string; date: string } | null
 
-    if (memberIds.length > 0 && (meetings || []).length > 0) {
-        const meetingIds = (meetings || []).map(m => m.id)
+    const memberIds = members.map(member => member.id)
+    let memberAttendances: AttendanceRow[] = []
+
+    if (memberIds.length > 0 && meetings.length > 0) {
+        const meetingIds = meetings.map(meeting => meeting.id)
         const { data: att } = await supabase
             .from('attendance')
             .select('profile_id, status, context_id')
             .in('profile_id', memberIds)
             .in('context_id', meetingIds)
             .order('context_date', { ascending: false })
-        memberAttendances = att || []
+        memberAttendances = (att || []) as AttendanceRow[]
     }
 
-    const processedMembers = (members || []).map(member => {
+    const processedMembers = members.map(member => {
         const memberAtts = memberAttendances.filter(a => a.profile_id === member.id)
         let consecutiveAbsences = 0
         for (const a of memberAtts) {
@@ -156,10 +184,11 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
     })
 
     // Calculate avg attendance
-    const totals = (meetings || []).reduce(
+    const totals = meetings.reduce(
         (acc, m) => {
-            const present = (m.attendance as any[])?.filter(a => a.status === 'PRESENT').length || 0
-            const total = (m.attendance as any[])?.length || 0
+            const attendance = m.attendance || []
+            const present = attendance.filter(a => a.status === 'PRESENT').length
+            const total = attendance.length
             return {
                 present: acc.present + present,
                 total: acc.total + total
@@ -170,10 +199,10 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
     const avgAttendance = totals.total === 0 ? 0 : Math.round((totals.present / totals.total) * 100)
 
     // Recent meetings summary
-    const recentMeetings = (meetings || []).map(m => ({
+    const recentMeetings = meetings.map(m => ({
         id: m.id,
         date: m.date,
-        presentCount: (m.attendance as any[])?.filter(a => a.status === 'PRESENT').length || 0,
+        presentCount: (m.attendance || []).filter(a => a.status === 'PRESENT').length,
         hasReport: !!m.report
     }))
 
@@ -199,13 +228,13 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
             meetingTime: cell.meeting_time
         },
         stats: {
-            membersCount: members?.length || 0,
+            membersCount: members.length,
             avgAttendance
         },
         members: processedMembers.slice(0, 5),
         recentMeetings,
         alerts,
-        activeMeeting: activeMeeting || null
+        activeMeeting
     }
 }
 
@@ -231,7 +260,7 @@ export async function getCellDetails(cellId: string, churchId: string): Promise<
 
     if (cellError || !cell) return null
 
-    const [{ data: members }, { data: meetings }] = await Promise.all([
+    const [membersResponse, meetingsResponse] = await Promise.all([
         supabase
             .from('profiles')
             .select('id, full_name, photo_url')
@@ -252,10 +281,14 @@ export async function getCellDetails(cellId: string, churchId: string): Promise<
             .limit(8)
     ])
 
-    const totals = (meetings || []).reduce(
+    const members = (membersResponse.data || []) as CellMemberRow[]
+    const meetings = (meetingsResponse.data || []) as CellMeetingRow[]
+
+    const totals = meetings.reduce(
         (acc, meeting) => {
-            const present = (meeting.attendance as any[])?.filter(a => a.status === 'PRESENT').length || 0
-            const total = (meeting.attendance as any[])?.length || 0
+            const attendance = meeting.attendance || []
+            const present = attendance.filter(a => a.status === 'PRESENT').length
+            const total = attendance.length
             return {
                 present: acc.present + present,
                 total: acc.total + total
@@ -266,11 +299,11 @@ export async function getCellDetails(cellId: string, churchId: string): Promise<
 
     const avgAttendance = totals.total === 0 ? 0 : Math.round((totals.present / totals.total) * 100)
 
-    const recentMeetings = (meetings || []).map(meeting => ({
+    const recentMeetings = meetings.map(meeting => ({
         id: meeting.id,
         date: meeting.date,
         status: meeting.status,
-        presentCount: (meeting.attendance as any[])?.filter(a => a.status === 'PRESENT').length || 0,
+        presentCount: (meeting.attendance || []).filter(a => a.status === 'PRESENT').length,
         hasReport: !!meeting.report
     }))
 
@@ -292,10 +325,10 @@ export async function getCellDetails(cellId: string, churchId: string): Promise<
                 : null
         },
         stats: {
-            membersCount: members?.length || 0,
+            membersCount: members.length,
             avgAttendance
         },
-        members: (members || []).map(member => ({
+        members: members.map(member => ({
             id: member.id,
             fullName: member.full_name,
             photoUrl: member.photo_url

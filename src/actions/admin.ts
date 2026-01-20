@@ -19,6 +19,25 @@ export interface CellOverview {
     hasRecentReport: boolean
 }
 
+interface CellReportRow {
+    meeting_id: string
+}
+
+interface CellMeetingRow {
+    id: string
+    date: string
+    report: { id: string } | null
+}
+
+interface CellOverviewRow {
+    id: string
+    name: string
+    status: 'ACTIVE' | 'INACTIVE'
+    leader: { full_name: string | null } | null
+    members: { id: string }[] | null
+    meetings: CellMeetingRow[] | null
+}
+
 export async function getPastorDashboardData(churchId: string) {
     const supabase = await createClient()
 
@@ -45,14 +64,14 @@ export async function getPastorDashboardData(churchId: string) {
         .eq('church_id', churchId)
         .gte('created_at', lastWeek.toISOString())
 
-    const reportedMeetingIds = recentReports?.map((r: { meeting_id: string }) => r.meeting_id) || []
+    const reportedMeetingIds = recentReports?.map((report: CellReportRow) => report.meeting_id) || []
 
     const { data: recentMeetings } = await supabase
         .from('cell_meetings')
         .select('cell_id')
         .in('id', reportedMeetingIds)
 
-    const distinctReportingCells = new Set(recentMeetings?.map((m: { cell_id: string }) => m.cell_id) || [])
+    const distinctReportingCells = new Set(recentMeetings?.map((meeting: { cell_id: string }) => meeting.cell_id) || [])
     const cellsWithoutReports = (cellsCount || 0) - distinctReportingCells.size
 
     // 4. Overall Attendance (Last 4 weeks)
@@ -66,7 +85,7 @@ export async function getPastorDashboardData(churchId: string) {
         .gte('context_date', lastMonth.toISOString().split('T')[0])
 
     const totalPossible = attendanceData?.length || 0
-    const totalPresent = attendanceData?.filter((a: { status: string }) => a.status === 'PRESENT').length || 0
+    const totalPresent = attendanceData?.filter((attendance: { status: string }) => attendance.status === 'PRESENT').length || 0
     const overallAttendance = totalPossible === 0 ? 0 : Math.round((totalPresent / totalPossible) * 100)
 
     return {
@@ -104,15 +123,15 @@ export async function getAllCellsOverview(churchId: string): Promise<CellOvervie
     const lastWeek = new Date()
     lastWeek.setDate(lastWeek.getDate() - 7)
 
-    return cells.map((cell: any) => {
+    return ((cells || []) as CellOverviewRow[]).map(cell => {
         // Sort meetings by date desc
-        const sortedMeetings = cell.meetings?.sort((a: any, b: any) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-        ) || []
+        const sortedMeetings = [...(cell.meetings || [])].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
 
         const lastMeeting = sortedMeetings[0]
-        const hasRecentReport = sortedMeetings.some((m: any) =>
-            new Date(m.date) >= lastWeek && m.report
+        const hasRecentReport = sortedMeetings.some(meeting =>
+            new Date(meeting.date) >= lastWeek && meeting.report
         )
 
         return {

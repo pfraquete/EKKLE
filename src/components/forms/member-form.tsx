@@ -7,14 +7,22 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, Trash2, Camera, ChevronLeft, User, Phone, Mail, Calendar } from 'lucide-react'
-import Link from 'next/link'
-
 interface MemberFormProps {
-    initialData?: any
+    initialData?: MemberFormData
     cellId: string
     churchId: string
+}
+
+interface MemberFormData {
+    id?: string
+    full_name?: string
+    photo_url?: string | null
+    phone?: string | null
+    email?: string | null
+    member_stage?: string
+    birthday?: string | null
 }
 
 export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {

@@ -1,17 +1,9 @@
 import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import {
-    Settings,
-    User,
-    Mail,
-    Shield,
-    Home,
-    Smartphone,
-    LogOut
-} from 'lucide-react'
+import { User, Mail, Shield, Smartphone } from 'lucide-react'
 
 export default async function SettingsPage() {
     const profile = await getProfile()
