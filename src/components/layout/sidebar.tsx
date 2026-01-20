@@ -18,6 +18,8 @@ interface SidebarProps {
     profile: Profile
 }
 
+import Image from 'next/image'
+
 export function Sidebar({ profile }: SidebarProps) {
     const pathname = usePathname()
 
@@ -64,10 +66,19 @@ export function Sidebar({ profile }: SidebarProps) {
     return (
         <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200">
             <div className="p-6 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                    V
+                <div className="relative w-10 h-10">
+                    <Image
+                        src="/logo.png"
+                        alt="Videira SJC Logo"
+                        fill
+                        className="object-contain"
+                        priority
+                    />
                 </div>
-                <span className="font-bold text-lg">Videira SJC</span>
+                <div className="flex flex-col">
+                    <span className="font-black text-lg leading-none tracking-tighter text-gray-900 uppercase">Videira</span>
+                    <span className="font-bold text-[10px] text-primary tracking-[0.2em] uppercase">SJC</span>
+                </div>
             </div>
 
             <nav className="flex-1 px-4 space-y-1">

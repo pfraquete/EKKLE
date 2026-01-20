@@ -39,38 +39,63 @@ export async function createCell(formData: FormData) {
 
         let leaderId: string | null = null
 
-        // 1. Check if user already exists
-        const { data: existingUser } = await adminSupabase
+        // 1. Check if profile already exists
+        const { data: existingProfile } = await adminSupabase
             .from('profiles')
             .select('id')
             .eq('email', leaderEmail)
             .single()
 
-        if (existingUser) {
-            leaderId = existingUser.id
+        if (existingProfile) {
+            leaderId = existingProfile.id
         } else {
-            // 2. Create new user via Admin API
-            const { data: newUser, error: createError } = await adminSupabase.auth.admin.createUser({
-                email: leaderEmail,
-                password: 'videirasjc',
-                email_confirm: true,
-                user_metadata: {
+            // 2. Check if user exists in AUTH but not in PROFILES
+            const { data: { users }, error: listError } = await adminSupabase.auth.admin.listUsers()
+            const authUser = users.find(u => u.email === leaderEmail)
+
+            if (authUser) {
+                leaderId = authUser.id
+            } else {
+                // 3. Create new user via Admin API
+                const { data: newUser, error: createError } = await adminSupabase.auth.admin.createUser({
+                    email: leaderEmail,
+                    password: 'videirasjc',
+                    email_confirm: true,
+                    user_metadata: {
+                        full_name: leaderName,
+                        role: 'LEADER',
+                        church_id: churchId
+                    }
+                })
+
+                if (createError) {
+                    console.error('Error creating leader user:', createError)
+                    throw new Error('Falha ao criar usuário líder: ' + createError.message)
+                }
+                leaderId = newUser.user.id
+            }
+
+            // Ensure profile exists (it might be missing if trigger failed or user was orphaned)
+            const { data: checkProfile } = await adminSupabase
+                .from('profiles')
+                .select('id')
+                .eq('id', leaderId)
+                .single()
+
+            if (!checkProfile) {
+                await adminSupabase.from('profiles').insert({
+                    id: leaderId,
+                    email: leaderEmail,
                     full_name: leaderName,
                     role: 'LEADER',
                     church_id: churchId
-                }
-            })
-
-            if (createError) {
-                console.error('Error creating leader user:', createError)
-                throw new Error('Falha ao criar usuário líder: ' + createError.message)
+                })
             }
-            leaderId = newUser.user.id
 
-            // Wait a bit for triggers
+            // Wait a bit for consistency
             await new Promise(resolve => setTimeout(resolve, 800))
 
-            // 3. Send welcome email (non-blocking)
+            // 4. Send welcome email (non-blocking)
             sendLeaderWelcomeEmail(leaderEmail, leaderName).catch(e => console.error('Silent email error:', e))
         }
 
