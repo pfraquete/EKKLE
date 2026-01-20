@@ -319,9 +319,9 @@ export async function getCellDetails(cellId: string, churchId: string): Promise<
             meetingTime: cell.meeting_time,
             leader: cell.leader
                 ? {
-                    id: (cell.leader as any).id,
-                    fullName: (cell.leader as any).full_name,
-                    photoUrl: (cell.leader as any).photo_url
+                    id: (cell.leader as unknown as { id: string }).id,
+                    fullName: (cell.leader as unknown as { full_name: string }).full_name,
+                    photoUrl: (cell.leader as unknown as { photo_url: string | null }).photo_url
                 }
                 : null
         },
