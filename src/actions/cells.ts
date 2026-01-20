@@ -145,3 +145,65 @@ export async function createCell(formData: FormData) {
         throw error
     }
 }
+export async function updateCell(cellId: string, formData: FormData) {
+    try {
+        const supabase = await createClient()
+        const adminSupabase = getAdminClient()
+
+        const name = formData.get('name') as string
+        const address = formData.get('address') as string
+        const neighborhood = formData.get('neighborhood') as string
+        const dayOfWeek = formData.get('dayOfWeek') ? parseInt(formData.get('dayOfWeek') as string) : null
+        const meetingTime = formData.get('meetingTime') as string || null
+        const leaderId = formData.get('leaderId') as string
+
+        // 1. Get current cell data to check if leader changed
+        const { data: currentCell } = await supabase
+            .from('cells')
+            .select('leader_id')
+            .eq('id', cellId)
+            .single()
+
+        const oldLeaderId = currentCell?.leader_id
+
+        // 2. Update cell
+        const { error: cellError } = await supabase
+            .from('cells')
+            .update({
+                name,
+                address,
+                neighborhood,
+                day_of_week: dayOfWeek,
+                meeting_time: meetingTime,
+                leader_id: leaderId
+            })
+            .eq('id', cellId)
+
+        if (cellError) throw new Error('Falha ao atualizar célula: ' + cellError.message)
+
+        // 3. Handle leader change in profiles
+        if (oldLeaderId !== leaderId) {
+            // New leader: ensure they have the role and are linked to this cell
+            await adminSupabase
+                .from('profiles')
+                .update({
+                    role: 'LEADER',
+                    cell_id: cellId
+                })
+                .eq('id', leaderId)
+
+            // Old leader: if they were only leading this cell, we don't necessarily strip their role 
+            // but we might want to update their cell_id if they are no longer in this cell.
+            // For now, let's just make sure the new leader is correctly set.
+        }
+
+        revalidatePath('/celulas')
+        revalidatePath(`/celulas/${cellId}`)
+        revalidatePath('/dashboard')
+
+        return { success: true }
+    } catch (error) {
+        console.error('Error in updateCell:', error)
+        throw error
+    }
+}

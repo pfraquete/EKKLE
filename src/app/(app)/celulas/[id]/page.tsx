@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { CalendarDays, ChevronLeft, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -51,9 +52,18 @@ export default async function CellDetailsPage({ params }: CellDetailsPageProps) 
                             <h1 className="text-2xl font-black text-foreground">{cell.name}</h1>
                             <p className="text-sm text-muted-foreground font-medium">Resumo da célula</p>
                         </div>
-                        <Badge variant={cell.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                            {statusLabel}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                            {profile.role === 'PASTOR' && (
+                                <Link href={`/celulas/${cell.id}/editar`}>
+                                    <Button variant="outline" size="sm" className="rounded-xl font-bold">
+                                        Editar
+                                    </Button>
+                                </Link>
+                            )}
+                            <Badge variant={cell.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                                {statusLabel}
+                            </Badge>
+                        </div>
                     </div>
 
                     <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
@@ -190,6 +200,6 @@ export default async function CellDetailsPage({ params }: CellDetailsPageProps) 
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </div >
     )
 }
