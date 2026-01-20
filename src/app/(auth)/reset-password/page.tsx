@@ -10,7 +10,7 @@ export default async function ResetPasswordPage({
 }: {
     searchParams: Promise<{ code?: string; error?: string; message?: string }>
 }) {
-    const { code, error, message } = await searchParams
+    const { error, message } = await searchParams
 
     return (
         <Card className="border-none shadow-xl w-full max-w-md">

@@ -7,14 +7,23 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, Trash2, Camera, ChevronLeft, User, Phone, Mail, Calendar } from 'lucide-react'
-import Link from 'next/link'
-
+import Image from 'next/image'
 interface MemberFormProps {
-    initialData?: any
+    initialData?: MemberFormData
     cellId: string
     churchId: string
+}
+
+interface MemberFormData {
+    id?: string
+    full_name?: string
+    photo_url?: string | null
+    phone?: string | null
+    email?: string | null
+    member_stage?: string
+    birthday?: string | null
 }
 
 export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
@@ -89,9 +98,15 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                 {/* Photo Upload Placeholder */}
                 <div className="flex flex-col items-center gap-4 py-4">
                     <div className="relative">
-                        <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border overflow-hidden shadow-inner">
+                        <div className="relative w-24 h-24 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border overflow-hidden shadow-inner">
                             {initialData?.photo_url ? (
-                                <img src={initialData.photo_url} alt="Profile" className="w-full h-full object-cover" />
+                                <Image
+                                    src={initialData.photo_url}
+                                    alt="Profile"
+                                    fill
+                                    className="object-cover"
+                                    sizes="96px"
+                                />
                             ) : (
                                 <User className="h-10 w-10 text-muted-foreground/50" />
                             )}

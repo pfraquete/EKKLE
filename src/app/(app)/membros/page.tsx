@@ -1,8 +1,7 @@
 import { getChurchMembers } from '@/actions/admin'
 import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -13,8 +12,17 @@ import {
     ChevronRight,
     Home
 } from 'lucide-react'
-import Link from 'next/link'
 import { Input } from '@/components/ui/input'
+
+interface ChurchMember {
+    id: string
+    full_name: string
+    photo_url: string | null
+    member_stage: string
+    phone: string | null
+    email: string | null
+    cell: { name: string | null } | null
+}
 
 export default async function MembersPage() {
     const profile = await getProfile()
@@ -25,7 +33,7 @@ export default async function MembersPage() {
         redirect('/dashboard')
     }
 
-    const members = await getChurchMembers(profile.church_id) as any[]
+    const members = await getChurchMembers(profile.church_id) as ChurchMember[]
 
     const getStageBadge = (stage: string) => {
         switch (stage) {
