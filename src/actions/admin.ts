@@ -126,3 +126,20 @@ export async function getAllCellsOverview(churchId: string): Promise<CellOvervie
         }
     })
 }
+
+export async function getChurchMembers(churchId: string) {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+            *,
+            cell:cells(name)
+        `)
+        .eq('church_id', churchId)
+        .eq('is_active', true)
+        .order('full_name')
+
+    if (error) return []
+    return data
+}
