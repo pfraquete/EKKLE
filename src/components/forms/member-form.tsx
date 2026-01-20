@@ -72,14 +72,14 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
     }
 
     return (
-        <div className="space-y-6 pb-20 max-w-lg mx-auto">
+        <div className="space-y-6 pb-20 max-w-lg mx-auto bg-zinc-950 min-h-screen p-4 rounded-[2.5rem]">
             {/* Dynamic Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
                         <ChevronLeft className="h-6 w-6" />
                     </Button>
-                    <h1 className="text-xl font-bold text-foreground">
+                    <h1 className="text-xl font-black text-white px-2">
                         {initialData ? 'Editar Membro' : 'Novo Membro'}
                     </h1>
                 </div>
@@ -120,10 +120,10 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Toque para adicionar foto</p>
                 </div>
 
-                <Card className="border-none shadow-xl rounded-3xl">
+                <Card className="border-none bg-zinc-900 shadow-2xl rounded-[2rem] overflow-hidden">
                     <CardContent className="pt-6 space-y-5">
                         <div className="space-y-2">
-                            <Label htmlFor="fullName" className="text-xs font-bold text-muted-foreground uppercase">Nome Completo</Label>
+                            <Label htmlFor="fullName" className="text-xs font-black text-zinc-500 uppercase tracking-widest px-1">Nome Completo</Label>
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -132,13 +132,13 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     placeholder="Nome Completo"
                                     defaultValue={initialData?.full_name || ''}
                                     required
-                                    className="pl-10 h-12 bg-muted/20 border-border rounded-xl text-foreground placeholder:text-muted-foreground"
+                                    className="pl-10 h-12 bg-zinc-900/50 border-zinc-800 rounded-xl text-white placeholder:text-zinc-500"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-xs font-bold text-muted-foreground uppercase">WhatsApp</Label>
+                            <Label htmlFor="phone" className="text-xs font-black text-zinc-500 uppercase tracking-widest px-1">WhatsApp</Label>
                             <div className="relative">
                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -146,13 +146,13 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     name="phone"
                                     placeholder="(12) 99999-9999"
                                     defaultValue={initialData?.phone || ''}
-                                    className="pl-10 h-12 bg-muted/20 border-border rounded-xl text-foreground placeholder:text-muted-foreground"
+                                    className="pl-10 h-12 bg-zinc-900/50 border-zinc-800 rounded-xl text-white placeholder:text-zinc-500"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-xs font-bold text-muted-foreground uppercase">Email (Opcional)</Label>
+                            <Label htmlFor="email" className="text-xs font-black text-zinc-500 uppercase tracking-widest px-1">Email (Opcional)</Label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -161,15 +161,15 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     type="email"
                                     placeholder="exemplo@email.com"
                                     defaultValue={initialData?.email || ''}
-                                    className="pl-10 h-12 bg-muted/20 border-border rounded-xl text-foreground placeholder:text-muted-foreground"
+                                    className="pl-10 h-12 bg-zinc-900/50 border-zinc-800 rounded-xl text-white placeholder:text-zinc-500"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="memberStage" className="text-xs font-bold text-muted-foreground uppercase">Vínculo com a Célula</Label>
+                            <Label htmlFor="memberStage" className="text-xs font-black text-zinc-500 uppercase tracking-widest px-1">Vínculo com a Célula</Label>
                             <Select name="memberStage" defaultValue={initialData?.member_stage || 'MEMBER'}>
-                                <SelectTrigger className="h-12 bg-muted/20 border-border rounded-xl text-foreground">
+                                <SelectTrigger className="h-12 bg-zinc-900/50 border-zinc-800 rounded-xl text-white">
                                     <SelectValue placeholder="Selecione o vínculo" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -185,7 +185,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="birthday" className="text-xs font-bold text-muted-foreground uppercase">Data de Nascimento</Label>
+                            <Label htmlFor="birthday" className="text-xs font-black text-zinc-500 uppercase tracking-widest px-1">Data de Nascimento</Label>
                             <div className="relative">
                                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -193,7 +193,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     name="birthday"
                                     type="date"
                                     defaultValue={initialData?.birthday || ''}
-                                    className="pl-10 h-12 bg-muted/20 border-border rounded-xl appearance-none text-foreground"
+                                    className="pl-10 h-12 bg-zinc-900/50 border-zinc-800 rounded-xl appearance-none text-white"
                                 />
                             </div>
                         </div>
