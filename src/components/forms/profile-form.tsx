@@ -27,11 +27,17 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(profile.photo_url)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
             const url = URL.createObjectURL(file)
             setPreviewUrl(url)
+
+            // Auto-submit form when photo is chosen
+            const form = e.target.form
+            if (form) {
+                form.requestSubmit()
+            }
         }
     }
 
@@ -64,6 +70,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <AvatarImage src={previewUrl || undefined} className="object-cover" />
+                                {isSubmitting && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full z-10">
+                                        <Loader2 className="h-8 w-8 text-white animate-spin" />
+                                    </div>
+                                )}
                                 <AvatarFallback className="bg-primary text-white text-3xl font-black">
                                     {profile.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'}
                                 </AvatarFallback>
@@ -114,7 +125,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                                 name="fullName"
                                 defaultValue={profile.full_name}
                                 required
-                                className="h-12 bg-muted/40 border-border rounded-xl font-medium"
+                                className="h-12 bg-muted/20 border-border rounded-xl font-medium text-foreground placeholder:text-muted-foreground"
                             />
                         </div>
                         <div className="space-y-2">
@@ -126,7 +137,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                                     name="phone"
                                     defaultValue={profile.phone || ''}
                                     placeholder="(00) 00000-0000"
-                                    className="h-12 pl-10 bg-muted/40 border-border rounded-xl font-medium"
+                                    className="h-12 pl-10 bg-muted/20 border-border rounded-xl font-medium text-foreground placeholder:text-muted-foreground"
                                 />
                             </div>
                         </div>

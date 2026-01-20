@@ -110,7 +110,7 @@ export async function updateProfile(formData: FormData) {
     if (file && file.size > 0) {
         // Upload new avatar
         const fileExt = file.name.split('.').pop()
-        const filePath = `${user.id}/avatar-${Math.random()}.${fileExt}`
+        const filePath = `${user.id}/avatar-${Date.now()}.${fileExt}`
 
         const { error: uploadError } = await supabase.storage
             .from('avatars')

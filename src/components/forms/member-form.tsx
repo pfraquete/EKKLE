@@ -127,9 +127,12 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
+                                    id="fullName"
+                                    name="fullName"
+                                    placeholder="Nome Completo"
                                     defaultValue={initialData?.full_name || ''}
                                     required
-                                    className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
+                                    className="pl-10 h-12 bg-muted/20 border-border rounded-xl text-foreground placeholder:text-muted-foreground"
                                 />
                             </div>
                         </div>
@@ -143,7 +146,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     name="phone"
                                     placeholder="(12) 99999-9999"
                                     defaultValue={initialData?.phone || ''}
-                                    className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
+                                    className="pl-10 h-12 bg-muted/20 border-border rounded-xl text-foreground placeholder:text-muted-foreground"
                                 />
                             </div>
                         </div>
@@ -158,7 +161,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     type="email"
                                     placeholder="exemplo@email.com"
                                     defaultValue={initialData?.email || ''}
-                                    className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
+                                    className="pl-10 h-12 bg-muted/20 border-border rounded-xl text-foreground placeholder:text-muted-foreground"
                                 />
                             </div>
                         </div>
@@ -166,7 +169,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                         <div className="space-y-2">
                             <Label htmlFor="memberStage" className="text-xs font-bold text-muted-foreground uppercase">Vínculo com a Célula</Label>
                             <Select name="memberStage" defaultValue={initialData?.member_stage || 'MEMBER'}>
-                                <SelectTrigger className="h-12 bg-muted/40 border-border rounded-xl">
+                                <SelectTrigger className="h-12 bg-muted/20 border-border rounded-xl text-foreground">
                                     <SelectValue placeholder="Selecione o vínculo" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -187,7 +190,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     name="birthday"
                                     type="date"
                                     defaultValue={initialData?.birthday || ''}
-                                    className="pl-10 h-12 bg-muted/40 border-border rounded-xl appearance-none"
+                                    className="pl-10 h-12 bg-muted/20 border-border rounded-xl appearance-none text-foreground"
                                 />
                             </div>
                         </div>
