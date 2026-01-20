@@ -57,6 +57,7 @@ export default async function LoginPage({
                                 id="email"
                                 name="email"
                                 type="email"
+                                autoComplete="email"
                                 placeholder="exemplo@igreja.com"
                                 required
                                 className="h-11"
@@ -77,6 +78,7 @@ export default async function LoginPage({
                                 id="password"
                                 name="password"
                                 type="password"
+                                autoComplete="current-password"
                                 placeholder="••••••••"
                                 required
                                 className="h-11"
