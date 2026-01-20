@@ -38,6 +38,39 @@ export interface MyCellData {
     } | null
 }
 
+export interface CellDetails {
+    cell: {
+        id: string
+        name: string
+        status: 'ACTIVE' | 'INACTIVE'
+        address: string | null
+        neighborhood: string | null
+        dayOfWeek: number | null
+        meetingTime: string | null
+        leader: {
+            id: string
+            fullName: string
+            photoUrl: string | null
+        } | null
+    }
+    stats: {
+        membersCount: number
+        avgAttendance: number
+    }
+    members: {
+        id: string
+        fullName: string
+        photoUrl: string | null
+    }[]
+    recentMeetings: {
+        id: string
+        date: string
+        status: string
+        presentCount: number
+        hasReport: boolean
+    }[]
+}
+
 export async function getMyCellData(profileId: string): Promise<MyCellData | null> {
     const supabase = await createClient()
 
@@ -173,5 +206,100 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
         recentMeetings,
         alerts,
         activeMeeting: activeMeeting || null
+    }
+}
+
+export async function getCellDetails(cellId: string, churchId: string): Promise<CellDetails | null> {
+    const supabase = await createClient()
+
+    const { data: cell, error: cellError } = await supabase
+        .from('cells')
+        .select(`
+            id,
+            name,
+            status,
+            address,
+            neighborhood,
+            day_of_week,
+            meeting_time,
+            leader_id,
+            leader:profiles!leader_id(id, full_name, photo_url)
+        `)
+        .eq('id', cellId)
+        .eq('church_id', churchId)
+        .maybeSingle()
+
+    if (cellError || !cell) return null
+
+    const [{ data: members }, { data: meetings }] = await Promise.all([
+        supabase
+            .from('profiles')
+            .select('id, full_name, photo_url')
+            .eq('cell_id', cell.id)
+            .eq('is_active', true)
+            .order('full_name'),
+        supabase
+            .from('cell_meetings')
+            .select(`
+                id,
+                date,
+                status,
+                report:cell_reports(id),
+                attendance(status)
+            `)
+            .eq('cell_id', cell.id)
+            .order('date', { ascending: false })
+            .limit(8)
+    ])
+
+    const totals = (meetings || []).reduce(
+        (acc, meeting) => {
+            const present = (meeting.attendance as any[])?.filter(a => a.status === 'PRESENT').length || 0
+            const total = (meeting.attendance as any[])?.length || 0
+            return {
+                present: acc.present + present,
+                total: acc.total + total
+            }
+        },
+        { present: 0, total: 0 }
+    )
+
+    const avgAttendance = totals.total === 0 ? 0 : Math.round((totals.present / totals.total) * 100)
+
+    const recentMeetings = (meetings || []).map(meeting => ({
+        id: meeting.id,
+        date: meeting.date,
+        status: meeting.status,
+        presentCount: (meeting.attendance as any[])?.filter(a => a.status === 'PRESENT').length || 0,
+        hasReport: !!meeting.report
+    }))
+
+    return {
+        cell: {
+            id: cell.id,
+            name: cell.name,
+            status: cell.status,
+            address: cell.address,
+            neighborhood: cell.neighborhood,
+            dayOfWeek: cell.day_of_week,
+            meetingTime: cell.meeting_time,
+            leader: cell.leader
+                ? {
+                    id: cell.leader.id,
+                    fullName: cell.leader.full_name,
+                    photoUrl: cell.leader.photo_url
+                }
+                : null
+        },
+        stats: {
+            membersCount: members?.length || 0,
+            avgAttendance
+        },
+        members: (members || []).map(member => ({
+            id: member.id,
+            fullName: member.full_name,
+            photoUrl: member.photo_url
+        })),
+        recentMeetings
     }
 }
