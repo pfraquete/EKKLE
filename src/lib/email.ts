@@ -1,14 +1,20 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendLeaderWelcomeEmail(email: string, name: string) {
-    try {
-        const { data, error } = await resend.emails.send({
-            from: 'Videira SJC <onboarding@resend.dev>', // In production, use your verified domain
-            to: email,
-            subject: 'Bem-vindo(a) à Liderança - Videira SJC',
-            html: `
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    console.error('RESEND_API_KEY is not configured. Email not sent.');
+    return { success: false, error: 'API Key missing' };
+  }
+
+  const resend = new Resend(apiKey);
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Videira SJC <onboarding@resend.dev>', // In production, use your verified domain
+      to: email,
+      subject: 'Bem-vindo(a) à Liderança - Videira SJC',
+      html: `
         <div style="font-family: sans-serif; color: #333;">
           <h1 style="color: #e11d48;">Olá, ${name}!</h1>
           <p>Sua nova célula foi criada e agora você faz parte oficial da liderança da Videira SJC.</p>
@@ -22,16 +28,16 @@ export async function sendLeaderWelcomeEmail(email: string, name: string) {
           <p style="margin-top: 30px; font-size: 12px; color: #666;">© 2026 Videira São José dos Campos</p>
         </div>
       `,
-        });
+    });
 
-        if (error) {
-            console.error('Error sending email:', error);
-            return { success: false, error };
-        }
-
-        return { success: true, data };
-    } catch (error) {
-        console.error('Email service unexpected error:', error);
-        return { success: false, error };
+    if (error) {
+      console.error('Error sending email:', error);
+      return { success: false, error };
     }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Email service unexpected error:', error);
+    return { success: false, error };
+  }
 }
