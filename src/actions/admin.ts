@@ -45,14 +45,14 @@ export async function getPastorDashboardData(churchId: string) {
         .eq('church_id', churchId)
         .gte('created_at', lastWeek.toISOString())
 
-    const reportedMeetingIds = recentReports?.map(r => r.meeting_id) || []
+    const reportedMeetingIds = recentReports?.map((r: { meeting_id: string }) => r.meeting_id) || []
 
     const { data: recentMeetings } = await supabase
         .from('cell_meetings')
         .select('cell_id')
         .in('id', reportedMeetingIds)
 
-    const distinctReportingCells = new Set(recentMeetings?.map(m => m.cell_id) || [])
+    const distinctReportingCells = new Set(recentMeetings?.map((m: { cell_id: string }) => m.cell_id) || [])
     const cellsWithoutReports = (cellsCount || 0) - distinctReportingCells.size
 
     // 4. Overall Attendance (Last 4 weeks)
@@ -66,7 +66,7 @@ export async function getPastorDashboardData(churchId: string) {
         .gte('context_date', lastMonth.toISOString().split('T')[0])
 
     const totalPossible = attendanceData?.length || 0
-    const totalPresent = attendanceData?.filter(a => a.status === 'PRESENT').length || 0
+    const totalPresent = attendanceData?.filter((a: { status: string }) => a.status === 'PRESENT').length || 0
     const overallAttendance = totalPossible === 0 ? 0 : Math.round((totalPresent / totalPossible) * 100)
 
     return {

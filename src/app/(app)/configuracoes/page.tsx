@@ -33,7 +33,7 @@ export default async function SettingsPage() {
                         <Avatar className="h-28 w-28 border-4 border-primary/10 shadow-lg">
                             <AvatarImage src={profile.photo_url || undefined} />
                             <AvatarFallback className="bg-primary text-white text-3xl font-black">
-                                {profile.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                                {profile.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || '??'}
                             </AvatarFallback>
                         </Avatar>
 

@@ -25,7 +25,7 @@ export default async function MembersPage() {
         redirect('/dashboard')
     }
 
-    const members = await getChurchMembers(profile.church_id)
+    const members = await getChurchMembers(profile.church_id) as any[]
 
     const getStageBadge = (stage: string) => {
         switch (stage) {
@@ -100,7 +100,7 @@ export default async function MembersPage() {
                                         <Avatar className="h-12 w-12 border-2 border-white shadow-sm shrink-0">
                                             <AvatarImage src={member.photo_url || undefined} />
                                             <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                                                {member.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                                                {(member.full_name || 'Sem Nome').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="min-w-0">

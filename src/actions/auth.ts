@@ -15,6 +15,7 @@ export interface Profile {
     role: 'PASTOR' | 'LEADER' | 'MEMBER'
     cell_id: string | null
     is_active: boolean
+    joined_at: string | null
 }
 
 export async function getProfile(): Promise<Profile | null> {
