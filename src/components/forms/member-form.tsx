@@ -59,7 +59,9 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
         if (!confirm('Tem certeza que deseja remover este membro?')) return
         setIsDeleting(true)
         try {
-            await deleteMember(initialData.id)
+            if (initialData?.id) {
+                await deleteMember(initialData.id)
+            }
             router.push('/minha-celula/membros')
             router.refresh()
         } catch (error) {
@@ -125,10 +127,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
-                                    id="fullName"
-                                    name="fullName"
-                                    placeholder="Nome do membro"
-                                    defaultValue={initialData?.full_name}
+                                    defaultValue={initialData?.full_name || ''}
                                     required
                                     className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
                                 />
@@ -143,7 +142,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     id="phone"
                                     name="phone"
                                     placeholder="(12) 99999-9999"
-                                    defaultValue={initialData?.phone}
+                                    defaultValue={initialData?.phone || ''}
                                     className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
                                 />
                             </div>
@@ -158,7 +157,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     name="email"
                                     type="email"
                                     placeholder="exemplo@email.com"
-                                    defaultValue={initialData?.email}
+                                    defaultValue={initialData?.email || ''}
                                     className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
                                 />
                             </div>
@@ -187,7 +186,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     id="birthday"
                                     name="birthday"
                                     type="date"
-                                    defaultValue={initialData?.birthday}
+                                    defaultValue={initialData?.birthday || ''}
                                     className="pl-10 h-12 bg-muted/40 border-border rounded-xl appearance-none"
                                 />
                             </div>

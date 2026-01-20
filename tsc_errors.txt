@@ -1,0 +1,11 @@
+﻿src/actions/cell.ts(151,22): error TS2352: Conversion of type '{ id: any; date: any; status: any; report: { id: any; }[]; attendance: { status: any; }[]; }[]' to type 'CellMeetingRow[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: any; date: any; status: any; report: { id: any; }[]; attendance: { status: any; }[]; }' is not comparable to type 'CellMeetingRow'.
+    Types of property 'report' are incompatible.
+      Property 'id' is missing in type '{ id: any; }[]' but required in type '{ id: string; }'.
+src/actions/cell.ts(285,22): error TS2352: Conversion of type '{ id: any; date: any; status: any; report: { id: any; }[]; attendance: { status: any; }[]; }[]' to type 'CellMeetingRow[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: any; date: any; status: any; report: { id: any; }[]; attendance: { status: any; }[]; }' is not comparable to type 'CellMeetingRow'.
+    Types of property 'report' are incompatible.
+      Property 'id' is missing in type '{ id: any; }[]' but required in type '{ id: string; }'.
+src/actions/cell.ts(321,37): error TS2339: Property 'id' does not exist on type '{ id: any; full_name: any; photo_url: any; }[]'.
+src/actions/cell.ts(322,43): error TS2339: Property 'full_name' does not exist on type '{ id: any; full_name: any; photo_url: any; }[]'.
+src/actions/cell.ts(323,43): error TS2339: Property 'photo_url' does not exist on type '{ id: any; full_name: any; photo_url: any; }[]'.

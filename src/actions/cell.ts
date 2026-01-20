@@ -85,9 +85,10 @@ interface CellMeetingRow {
     id: string
     date: string
     status: string
-    report?: { id: string } | null
+    report?: { id: string }[] | null
     attendance?: CellMeetingAttendance[] | null
 }
+
 
 interface AttendanceRow {
     profile_id: string
@@ -203,7 +204,7 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
         id: m.id,
         date: m.date,
         presentCount: (m.attendance || []).filter(a => a.status === 'PRESENT').length,
-        hasReport: !!m.report
+        hasReport: (m.report?.length || 0) > 0
     }))
 
     // Alerts
@@ -304,7 +305,7 @@ export async function getCellDetails(cellId: string, churchId: string): Promise<
         date: meeting.date,
         status: meeting.status,
         presentCount: (meeting.attendance || []).filter(a => a.status === 'PRESENT').length,
-        hasReport: !!meeting.report
+        hasReport: (meeting.report?.length || 0) > 0
     }))
 
     return {
@@ -316,11 +317,11 @@ export async function getCellDetails(cellId: string, churchId: string): Promise<
             neighborhood: cell.neighborhood,
             dayOfWeek: cell.day_of_week,
             meetingTime: cell.meeting_time,
-            leader: cell.leader
+            leader: cell.leader && Array.isArray(cell.leader) && cell.leader[0]
                 ? {
-                    id: cell.leader.id,
-                    fullName: cell.leader.full_name,
-                    photoUrl: cell.leader.photo_url
+                    id: cell.leader[0].id,
+                    fullName: cell.leader[0].full_name,
+                    photoUrl: cell.leader[0].photo_url
                 }
                 : null
         },

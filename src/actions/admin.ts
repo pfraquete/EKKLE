@@ -26,14 +26,14 @@ interface CellReportRow {
 interface CellMeetingRow {
     id: string
     date: string
-    report: { id: string } | null
+    report: { id: string }[] | null
 }
 
 interface CellOverviewRow {
     id: string
     name: string
     status: 'ACTIVE' | 'INACTIVE'
-    leader: { full_name: string | null } | null
+    leader: { full_name: string | null }[] | null
     members: { id: string }[] | null
     meetings: CellMeetingRow[] | null
 }
