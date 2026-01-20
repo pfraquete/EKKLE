@@ -131,13 +131,14 @@ export async function getAllCellsOverview(churchId: string): Promise<CellOvervie
 
         const lastMeeting = sortedMeetings[0]
         const hasRecentReport = sortedMeetings.some(meeting =>
-            new Date(meeting.date) >= lastWeek && meeting.report
+            new Date(meeting.date) >= lastWeek && (meeting.report?.length ?? 0) > 0
         )
+        const leaderName = cell.leader?.[0]?.full_name || 'Sem Líder'
 
         return {
             id: cell.id,
             name: cell.name,
-            leaderName: cell.leader?.full_name || 'Sem Líder',
+            leaderName,
             membersCount: cell.members?.length || 0,
             lastMeetingDate: lastMeeting?.date || null,
             status: cell.status,
