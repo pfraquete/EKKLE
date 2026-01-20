@@ -12,16 +12,17 @@ import { ptBR } from 'date-fns/locale'
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
 interface CellDetailsPageProps {
-    params: {
+    params: Promise<{
         id: string
-    }
+    }>
 }
 
 export default async function CellDetailsPage({ params }: CellDetailsPageProps) {
+    const { id } = await params
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    const data = await getCellDetails(params.id, profile.church_id)
+    const data = await getCellDetails(id, profile.church_id)
     if (!data) redirect('/celulas')
 
     const isAuthorized = profile.role === 'PASTOR'
