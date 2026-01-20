@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createFullMeetingReport } from '@/actions/meetings'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -19,15 +18,13 @@ import {
     X,
     ChevronLeft,
     Users,
-    ClipboardCheck,
     UserPlus,
     BarChart3,
     MessageSquare,
     Trash2,
     Calendar as CalendarIcon
 } from 'lucide-react'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+
 
 interface Member {
     id: string
@@ -246,6 +243,44 @@ export function AttendanceForm({ members, cellId, churchId }: Props) {
                             </div>
                         ))}
                     </div>
+                </CardContent>
+            </Card>
+
+            {/* Checklist Section */}
+            <Card className="border-none shadow-md overflow-hidden bg-zinc-900 rounded-[2rem]">
+                <CardHeader className="pb-3 border-b border-white/5">
+                    <CardTitle className="text-base flex items-center gap-2 text-white">
+                        <Check className="h-5 w-5 text-primary" />
+                        Checklist
+                    </CardTitle>
+                    <CardDescription className="text-zinc-500">Momentos da reunião</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-4 grid grid-cols-2 gap-3">
+                    {[
+                        { id: 'icebreaker', label: 'Quebra-gelo' },
+                        { id: 'worship', label: 'Louvor' },
+                        { id: 'word', label: 'Palavra' },
+                        { id: 'prayer', label: 'Oração' },
+                        { id: 'snack', label: 'Lanche/Comunhão' },
+                    ].map((item) => (
+                        <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setChecklist(prev => ({ ...prev, [item.id]: !prev[item.id as keyof typeof prev] }))}
+                            className={`
+                                flex items-center gap-2 p-3 rounded-xl transition-all border text-xs font-bold
+                                ${checklist[item.id as keyof typeof checklist]
+                                    ? 'bg-primary/20 border-primary/40 text-white'
+                                    : 'bg-zinc-950/30 border-zinc-800 text-zinc-500'
+                                }
+                            `}
+                        >
+                            <div className={`w-5 h-5 rounded flex items-center justify-center border ${checklist[item.id as keyof typeof checklist] ? 'bg-primary border-primary' : 'border-zinc-700'}`}>
+                                {checklist[item.id as keyof typeof checklist] && <Check className="h-3 w-3 text-white" />}
+                            </div>
+                            {item.label}
+                        </button>
+                    ))}
                 </CardContent>
             </Card>
 

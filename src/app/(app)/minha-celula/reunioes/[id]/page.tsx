@@ -3,11 +3,10 @@ import { getProfile } from '@/actions/auth'
 import { redirect, notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronLeft, Calendar, Users, UserPlus, FileText, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, Users, UserPlus, FileText, CheckCircle2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default async function MeetingSummaryPage({
     params,
@@ -21,8 +20,8 @@ export default async function MeetingSummaryPage({
     const meeting = await getMeetingData(id)
     if (!meeting) notFound()
 
-    const presentMembers = meeting.attendance.filter((a: any) => a.profile_id && a.status === 'PRESENT')
-    const visitors = meeting.attendance.filter((a: any) => a.visitor_name)
+    const presentMembers = meeting.attendance.filter((a: { profile_id?: string, status: string }) => a.profile_id && a.status === 'PRESENT')
+    const visitors = meeting.attendance.filter((a: { visitor_name?: string }) => a.visitor_name)
 
     return (
         <div className="space-y-6 max-w-lg mx-auto pb-32 p-4 bg-zinc-950 min-h-screen rounded-[2.5rem]">
@@ -64,13 +63,13 @@ export default async function MeetingSummaryPage({
                 <CardContent className="pt-4 space-y-3">
                     {presentMembers.length === 0 ? (
                         <p className="text-center text-sm text-zinc-600 italic">Nenhum membro registrado.</p>
-                    ) : presentMembers.map((att: any) => (
+                    ) : presentMembers.map((att: { id: string, profile_id: string }) => (
                         <div key={att.id} className="flex items-center gap-3 p-3 bg-zinc-950/50 rounded-2xl border border-zinc-800">
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
                                 <CheckCircle2 className="h-4 w-4" />
                             </div>
                             <span className="text-sm font-bold text-white">
-                                {meeting.cell.members.find((m: any) => m.id === att.profile_id)?.full_name || 'Membro'}
+                                {meeting.cell.members.find((m: { id: string, full_name: string }) => m.id === att.profile_id)?.full_name || 'Membro'}
                             </span>
                         </div>
                     ))}
@@ -87,7 +86,7 @@ export default async function MeetingSummaryPage({
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 space-y-3">
-                        {visitors.map((v: any) => (
+                        {visitors.map((v: { id: string, visitor_name: string, visitor_phone?: string }) => (
                             <div key={v.id} className="flex items-center justify-between p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
                                 <span className="text-sm font-bold text-white">{v.visitor_name}</span>
                                 {v.visitor_phone && <span className="text-[10px] font-black text-blue-400">{v.visitor_phone}</span>}
@@ -108,7 +107,7 @@ export default async function MeetingSummaryPage({
                     </CardHeader>
                     <CardContent className="pt-4">
                         <p className="text-sm text-zinc-400 leading-relaxed italic">
-                            "{meeting.report[0].observations}"
+                            &quot;{meeting.report[0].observations}&quot;
                         </p>
                     </CardContent>
                 </Card>

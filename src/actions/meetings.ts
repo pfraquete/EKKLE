@@ -64,7 +64,29 @@ export async function getMeetingData(meetingId: string) {
     return meeting
 }
 
-export async function createFullMeetingReport(data: any) {
+export interface FullMeetingReportInput {
+    cellId: string
+    churchId: string
+    date: string
+    hasIcebreaker: boolean
+    hasWorship: boolean
+    hasWord: boolean
+    hasPrayer: boolean
+    hasSnack: boolean
+    memberAttendance: {
+        profileId: string
+        present: boolean
+    }[]
+    visitorsArray: {
+        name: string
+        phone?: string
+    }[]
+    visitorsCount: number
+    decisionsCount: number
+    observations?: string
+}
+
+export async function createFullMeetingReport(data: FullMeetingReportInput) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Não autenticado')
@@ -104,7 +126,7 @@ export async function createFullMeetingReport(data: any) {
     if (reportError) throw new Error(reportError.message)
 
     // 3. Register member attendance
-    const memberRecords = data.memberAttendance.map((m: any) => ({
+    const memberRecords = data.memberAttendance.map((m) => ({
         church_id: data.churchId,
         context_type: 'CELL_MEETING',
         context_id: meeting.id,
@@ -119,7 +141,7 @@ export async function createFullMeetingReport(data: any) {
     }
 
     // 4. Register visitors
-    const visitorRecords = data.visitorsArray.map((v: any) => ({
+    const visitorRecords = data.visitorsArray.map((v) => ({
         church_id: data.churchId,
         context_type: 'CELL_MEETING',
         context_id: meeting.id,
