@@ -12,22 +12,22 @@ export function Header({ profile }: HeaderProps) {
     return (
         <header className="h-16 border-b border-border bg-background flex items-center justify-between px-6">
             <div>
-                <h2 className="text-gray-500 text-sm font-medium">
+                <h2 className="text-muted-foreground text-sm font-medium">
                     Bem-vindo de volta,
                 </h2>
-                <p className="font-bold text-gray-900 leading-tight">
+                <p className="font-bold text-foreground leading-tight">
                     {profile.full_name.split(' ')[0]}
                 </p>
             </div>
 
             <div className="flex items-center gap-4">
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                     <Bell className="h-5 w-5" />
                 </button>
 
-                <div className="flex items-center gap-3 pl-4 border-l border-gray-100">
+                <div className="flex items-center gap-3 pl-4 border-l border-border">
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-semibold text-gray-900 leading-none">
+                        <p className="text-sm font-semibold text-foreground leading-none">
                             {profile.full_name}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">

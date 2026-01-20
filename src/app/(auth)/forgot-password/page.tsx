@@ -18,7 +18,7 @@ export default async function ForgotPasswordPage({
         <Card className="border-none shadow-xl w-full max-w-md">
             <CardHeader className="space-y-1">
                 <div className="flex items-center gap-2 mb-2">
-                    <Link href="/login" className="text-gray-500 hover:text-primary transition-colors">
+                    <Link href="/login" className="text-muted-foreground hover:text-primary transition-colors">
                         <ArrowLeft className="h-5 w-5" />
                     </Link>
                     <CardTitle className="text-2xl font-bold">Recuperar Senha</CardTitle>
@@ -29,13 +29,13 @@ export default async function ForgotPasswordPage({
             </CardHeader>
             <CardContent>
                 {message && (
-                    <div className="mb-4 p-3 bg-green-50 text-green-700 text-sm rounded-lg border border-green-200">
+                    <div className="mb-4 p-3 bg-emerald-500/10 text-emerald-300 text-sm rounded-lg border border-emerald-500/30">
                         {message}
                     </div>
                 )}
 
                 {error && (
-                    <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+                    <div className="mb-4 p-3 bg-red-500/10 text-red-300 text-sm rounded-lg border border-red-500/30">
                         {error}
                     </div>
                 )}

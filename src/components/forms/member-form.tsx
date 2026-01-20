@@ -68,7 +68,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                     <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
                         <ChevronLeft className="h-6 w-6" />
                     </Button>
-                    <h1 className="text-xl font-bold text-gray-900">
+                    <h1 className="text-xl font-bold text-foreground">
                         {initialData ? 'Editar Membro' : 'Novo Membro'}
                     </h1>
                 </div>
@@ -78,7 +78,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                         size="icon"
                         onClick={handleDelete}
                         disabled={isDeleting}
-                        className="text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full"
+                        className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 rounded-full"
                     >
                         {isDeleting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
                     </Button>
@@ -89,70 +89,70 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                 {/* Photo Upload Placeholder */}
                 <div className="flex flex-col items-center gap-4 py-4">
                     <div className="relative">
-                        <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden shadow-inner">
+                        <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border overflow-hidden shadow-inner">
                             {initialData?.photo_url ? (
                                 <img src={initialData.photo_url} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
-                                <User className="h-10 w-10 text-gray-300" />
+                                <User className="h-10 w-10 text-muted-foreground/50" />
                             )}
                         </div>
                         <button type="button" className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-105 transition-transform">
                             <Camera className="h-4 w-4" />
                         </button>
                     </div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Toque para adicionar foto</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Toque para adicionar foto</p>
                 </div>
 
                 <Card className="border-none shadow-xl rounded-3xl">
                     <CardContent className="pt-6 space-y-5">
                         <div className="space-y-2">
-                            <Label htmlFor="fullName" className="text-xs font-bold text-gray-400 uppercase">Nome Completo</Label>
+                            <Label htmlFor="fullName" className="text-xs font-bold text-muted-foreground uppercase">Nome Completo</Label>
                             <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="fullName"
                                     name="fullName"
                                     placeholder="Nome do membro"
                                     defaultValue={initialData?.full_name}
                                     required
-                                    className="pl-10 h-12 bg-gray-50/50 border-gray-100 rounded-xl"
+                                    className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-xs font-bold text-gray-400 uppercase">WhatsApp</Label>
+                            <Label htmlFor="phone" className="text-xs font-bold text-muted-foreground uppercase">WhatsApp</Label>
                             <div className="relative">
-                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="phone"
                                     name="phone"
                                     placeholder="(12) 99999-9999"
                                     defaultValue={initialData?.phone}
-                                    className="pl-10 h-12 bg-gray-50/50 border-gray-100 rounded-xl"
+                                    className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-xs font-bold text-gray-400 uppercase">Email (Opcional)</Label>
+                            <Label htmlFor="email" className="text-xs font-bold text-muted-foreground uppercase">Email (Opcional)</Label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="email"
                                     name="email"
                                     type="email"
                                     placeholder="exemplo@email.com"
                                     defaultValue={initialData?.email}
-                                    className="pl-10 h-12 bg-gray-50/50 border-gray-100 rounded-xl"
+                                    className="pl-10 h-12 bg-muted/40 border-border rounded-xl"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="memberStage" className="text-xs font-bold text-gray-400 uppercase">Vínculo com a Célula</Label>
+                            <Label htmlFor="memberStage" className="text-xs font-bold text-muted-foreground uppercase">Vínculo com a Célula</Label>
                             <Select name="memberStage" defaultValue={initialData?.member_stage || 'MEMBER'}>
-                                <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                                <SelectTrigger className="h-12 bg-muted/40 border-border rounded-xl">
                                     <SelectValue placeholder="Selecione o vínculo" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -165,15 +165,15 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="birthday" className="text-xs font-bold text-gray-400 uppercase">Data de Nascimento</Label>
+                            <Label htmlFor="birthday" className="text-xs font-bold text-muted-foreground uppercase">Data de Nascimento</Label>
                             <div className="relative">
-                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="birthday"
                                     name="birthday"
                                     type="date"
                                     defaultValue={initialData?.birthday}
-                                    className="pl-10 h-12 bg-gray-50/50 border-gray-100 rounded-xl appearance-none"
+                                    className="pl-10 h-12 bg-muted/40 border-border rounded-xl appearance-none"
                                 />
                             </div>
                         </div>
@@ -181,7 +181,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                 </Card>
 
                 {/* Floating Save Button */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none">
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none">
                     <Button
                         type="submit"
                         disabled={isSubmitting}

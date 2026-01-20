@@ -29,10 +29,10 @@ export default async function MembersPage() {
 
     const getStageBadge = (stage: string) => {
         switch (stage) {
-            case 'VISITOR': return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">Visitante</Badge>
-            case 'REGULAR_VISITOR': return <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Frequenta</Badge>
-            case 'MEMBER': return <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">Membro</Badge>
-            case 'LEADER': return <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">Líder</Badge>
+            case 'VISITOR': return <Badge variant="outline" className="text-blue-300 border-blue-500/30 bg-blue-500/10">Visitante</Badge>
+            case 'REGULAR_VISITOR': return <Badge variant="outline" className="text-amber-300 border-amber-500/30 bg-amber-500/10">Frequenta</Badge>
+            case 'MEMBER': return <Badge variant="outline" className="text-emerald-300 border-emerald-500/30 bg-emerald-500/10">Membro</Badge>
+            case 'LEADER': return <Badge variant="outline" className="text-primary border-primary/30 bg-primary/10">Líder</Badge>
             default: return null
         }
     }
@@ -41,17 +41,17 @@ export default async function MembersPage() {
         <div className="space-y-6 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900">Membros</h1>
-                    <p className="text-sm text-gray-500 font-medium tracking-tight">Lista geral da igreja • Videira SJC</p>
+                    <h1 className="text-2xl font-black text-foreground">Membros</h1>
+                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Lista geral da igreja • Videira SJC</p>
                 </div>
             </div>
 
             {/* Search Bar */}
             <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                     placeholder="Buscar por nome ou célula..."
-                    className="pl-10 h-12 bg-white rounded-2xl border-gray-100 shadow-sm"
+                    className="pl-10 h-12 bg-background rounded-2xl border-border shadow-sm"
                 />
             </div>
 
@@ -84,20 +84,20 @@ export default async function MembersPage() {
             {/* Members List */}
             <Card className="border-none shadow-xl overflow-hidden rounded-3xl">
                 <CardContent className="p-0">
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-border">
                         {members.length === 0 ? (
                             <div className="p-20 text-center">
-                                <Users className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-                                <p className="text-gray-400 font-medium">Nenhum membro cadastrado.</p>
+                                <Users className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
+                                <p className="text-muted-foreground font-medium">Nenhum membro cadastrado.</p>
                             </div>
                         ) : (
                             members.map(member => (
                                 <div
                                     key={member.id}
-                                    className="flex items-center justify-between p-4 hover:bg-gray-50 transition-all group"
+                                    className="flex items-center justify-between p-4 hover:bg-muted/50 transition-all group"
                                 >
                                     <div className="flex items-center gap-4 min-w-0">
-                                        <Avatar className="h-12 w-12 border-2 border-white shadow-sm shrink-0">
+                                        <Avatar className="h-12 w-12 border-2 border-background shadow-sm shrink-0">
                                             <AvatarImage src={member.photo_url || undefined} />
                                             <AvatarFallback className="bg-primary/10 text-primary font-bold">
                                                 {(member.full_name || 'Sem Nome').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
@@ -105,10 +105,10 @@ export default async function MembersPage() {
                                         </Avatar>
                                         <div className="min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <h4 className="font-bold text-gray-900 truncate">{member.full_name}</h4>
+                                                <h4 className="font-bold text-foreground truncate">{member.full_name}</h4>
                                                 {getStageBadge(member.member_stage)}
                                             </div>
-                                            <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium mt-0.5">
+                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium mt-0.5">
                                                 <Home className="h-3 w-3" />
                                                 <span className="truncate">{member.cell?.name || 'Sem Célula'}</span>
                                             </div>
@@ -116,11 +116,11 @@ export default async function MembersPage() {
                                     </div>
 
                                     <div className="flex items-center gap-4">
-                                        <div className="hidden sm:flex flex-col items-end text-xs font-medium text-gray-400">
+                                        <div className="hidden sm:flex flex-col items-end text-xs font-medium text-muted-foreground">
                                             {member.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {member.phone}</span>}
                                             {member.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {member.email}</span>}
                                         </div>
-                                        <ChevronRight className="h-5 w-5 text-gray-200 group-hover:text-primary transition-colors" />
+                                        <ChevronRight className="h-5 w-5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                                     </div>
                                 </div>
                             ))

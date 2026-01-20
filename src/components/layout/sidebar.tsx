@@ -76,7 +76,7 @@ export function Sidebar({ profile }: SidebarProps) {
                     />
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-black text-lg leading-none tracking-tighter text-gray-900 uppercase">Videira</span>
+                    <span className="font-black text-lg leading-none tracking-tighter text-sidebar-foreground uppercase">Videira</span>
                     <span className="font-bold text-[10px] text-primary tracking-[0.2em] uppercase">SJC</span>
                 </div>
             </div>
@@ -100,10 +100,10 @@ export function Sidebar({ profile }: SidebarProps) {
                 ))}
             </nav>
 
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-sidebar-border">
                 <button
                     onClick={() => signOut()}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                    className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-destructive rounded-lg hover:bg-destructive/10 transition-colors"
                 >
                     <LogOut className="h-5 w-5" />
                     Sair

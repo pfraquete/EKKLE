@@ -61,7 +61,7 @@ export default async function CellsPage() {
                                         <div className="hidden sm:block text-right">
                                             <p className="text-sm font-bold text-foreground">{cell.membersCount} membros</p>
                                             {cell.lastMeetingDate && (
-                                                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-0.5">
+                                                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5">
                                                     {format(new Date(cell.lastMeetingDate), "dd MMM", { locale: ptBR })}
                                                 </p>
                                             )}
@@ -73,7 +73,7 @@ export default async function CellsPage() {
                                             ) : (
                                                 <Clock className="h-5 w-5 text-amber-500" />
                                             )}
-                                            <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-primary transition-colors" />
+                                            <ChevronRight className="h-5 w-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                                         </div>
                                     </div>
                                 </Link>
