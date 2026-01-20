@@ -12,7 +12,8 @@ import {
     Search,
     Phone,
     Mail,
-    MoreVertical
+    MoreVertical,
+    CalendarDays
 } from 'lucide-react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
@@ -112,6 +113,12 @@ export default async function MembrosPage() {
                                                     {member.email}
                                                 </span>
                                             )}
+                                            {member.last_attendance && (
+                                                <span className="flex items-center gap-1 text-primary/80 shrink-0">
+                                                    <CalendarDays className="h-3 w-3" />
+                                                    {new Date(member.last_attendance + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -124,6 +131,6 @@ export default async function MembrosPage() {
                     ))
                 )}
             </div>
-        </div>
+        </div >
     )
 }

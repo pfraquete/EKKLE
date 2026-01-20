@@ -138,6 +138,18 @@ export async function createFullMeetingReport(data: FullMeetingReportInput) {
 
     if (memberRecords.length > 0) {
         await supabase.from('attendance').insert(memberRecords)
+
+        // Update last_attendance for present members
+        const presentProfileIds = data.memberAttendance
+            .filter(m => m.present)
+            .map(m => m.profileId)
+
+        if (presentProfileIds.length > 0) {
+            await supabase
+                .from('profiles')
+                .update({ last_attendance: data.date })
+                .in('id', presentProfileIds)
+        }
     }
 
     // 4. Register visitors
