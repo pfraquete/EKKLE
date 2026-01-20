@@ -28,12 +28,12 @@ export default async function MinhaCelulaPage() {
 
     if (!data) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-white rounded-3xl shadow-sm border border-gray-100">
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-4xl mb-6">
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-card rounded-3xl shadow-sm border border-border">
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center text-4xl mb-6">
                     ⛪
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Sem Célula Atribuída</h2>
-                <p className="text-gray-500 max-w-xs mx-auto">
+                <h2 className="text-xl font-bold text-foreground mb-2">Sem Célula Atribuída</h2>
+                <p className="text-muted-foreground max-w-xs mx-auto">
                     Você ainda não foi vinculado como líder a uma célula ativa. Entre em contato com seu pastor.
                 </p>
             </div>
@@ -92,16 +92,16 @@ export default async function MinhaCelulaPage() {
 
             {/* Alertas Críticos */}
             {alerts.length > 0 && (
-                <Card className="border-red-100 bg-red-50 shadow-sm">
+                <Card className="border border-red-500/30 bg-red-500/10 shadow-sm">
                     <CardHeader className="py-3 px-4 flex-row items-center gap-2 space-y-0">
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                        <CardTitle className="text-sm font-bold text-red-800">
+                        <AlertTriangle className="h-4 w-4 text-red-300" />
+                        <CardTitle className="text-sm font-bold text-red-200">
                             Atenção
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="px-4 pb-3 space-y-1">
                         {alerts.map((alert, i) => (
-                            <p key={i} className="text-sm text-red-700 font-medium">• {alert.message}</p>
+                            <p key={i} className="text-sm text-red-200 font-medium">• {alert.message}</p>
                         ))}
                     </CardContent>
                 </Card>
@@ -111,7 +111,7 @@ export default async function MinhaCelulaPage() {
             <Card className="border-none shadow-lg">
                 <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg font-bold flex items-center gap-2 text-gray-900">
+                        <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
                             <Users className="h-5 w-5 text-primary" />
                             Membros
                         </CardTitle>
@@ -125,20 +125,20 @@ export default async function MinhaCelulaPage() {
                 </CardHeader>
                 <CardContent className="space-y-3 pt-2">
                     {members.length === 0 ? (
-                        <p className="text-sm text-gray-400 text-center py-4 italic">Nenhum membro cadastrado.</p>
+                        <p className="text-sm text-muted-foreground text-center py-4 italic">Nenhum membro cadastrado.</p>
                     ) : members.map(member => (
                         <div
                             key={member.id}
-                            className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 border border-gray-100"
+                            className="flex items-center gap-4 p-3 rounded-xl bg-muted/40 border border-border"
                         >
-                            <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                            <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                                 <AvatarImage src={member.photoUrl || undefined} />
                                 <AvatarFallback className="bg-primary/10 text-primary font-bold">
                                     {member.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
-                                <p className="font-bold text-gray-900 text-sm">{member.fullName}</p>
+                                <p className="font-bold text-foreground text-sm">{member.fullName}</p>
                             </div>
                             {member.consecutiveAbsences >= 2 && (
                                 <Badge variant="destructive" className="font-bold">
@@ -151,7 +151,7 @@ export default async function MinhaCelulaPage() {
                     {stats.membersCount > 5 && (
                         <Link
                             href="/minha-celula/membros"
-                            className="block text-center text-xs font-bold text-gray-400 hover:text-primary transition-colors py-1"
+                            className="block text-center text-xs font-bold text-muted-foreground hover:text-primary transition-colors py-1"
                         >
                             E outros {stats.membersCount - 5} membros
                         </Link>
@@ -162,7 +162,7 @@ export default async function MinhaCelulaPage() {
             {/* Histórico Recente */}
             <Card className="border-none shadow-lg">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-gray-900">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
                         <CalendarDays className="h-5 w-5 text-primary" />
                         Últimas Reuniões
                     </CardTitle>
@@ -170,7 +170,7 @@ export default async function MinhaCelulaPage() {
                 <CardContent className="pt-2">
                     {recentMeetings.length === 0 ? (
                         <div className="text-center py-8">
-                            <p className="text-sm text-gray-400 italic">Nenhuma reunião realizada ainda.</p>
+                            <p className="text-sm text-muted-foreground italic">Nenhuma reunião realizada ainda.</p>
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -178,23 +178,23 @@ export default async function MinhaCelulaPage() {
                                 <Link
                                     key={meeting.id}
                                     href={`/minha-celula/reuniao/${meeting.id}`}
-                                    className="flex items-center justify-between p-4 rounded-xl bg-white border border-gray-100 hover:border-primary/30 hover:shadow-md transition-all group"
+                                    className="flex items-center justify-between p-4 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all group"
                                 >
                                     <div>
-                                        <p className="font-bold text-gray-900">
+                                        <p className="font-bold text-foreground">
                                             {format(new Date(meeting.date), "dd 'de' MMMM", { locale: ptBR })}
                                         </p>
-                                        <p className="text-xs text-gray-500 font-medium">
+                                        <p className="text-xs text-muted-foreground font-medium">
                                             {meeting.presentCount} {meeting.presentCount === 1 ? 'presente' : 'presentes'}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {meeting.hasReport ? (
-                                            <Badge variant="secondary" className="bg-green-100 text-green-700 border-none font-bold">✓ Relatório</Badge>
+                                            <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 font-bold">✓ Relatório</Badge>
                                         ) : (
-                                            <Badge variant="outline" className="text-amber-600 border-amber-200">Pendente</Badge>
+                                            <Badge variant="outline" className="text-amber-300 border-amber-500/30">Pendente</Badge>
                                         )}
-                                        <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-primary transition-colors" />
+                                        <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                                     </div>
                                 </Link>
                             ))}

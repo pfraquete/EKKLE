@@ -28,10 +28,10 @@ export default async function MeetingPage({
     if (meeting.status === 'COMPLETED') {
         // Show summary instead of form (could be a future component)
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-white rounded-3xl shadow-sm">
-                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center text-4xl mb-6">✅</div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Relatório já Enviado</h2>
-                <p className="text-gray-500 mb-6">Esta reunião já foi finalizada. Consulte os detalhes no histórico.</p>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-card rounded-3xl shadow-sm">
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center text-4xl mb-6">✅</div>
+                <h2 className="text-xl font-bold text-foreground mb-2">Relatório já Enviado</h2>
+                <p className="text-muted-foreground mb-6">Esta reunião já foi finalizada. Consulte os detalhes no histórico.</p>
                 <a href="/minha-celula" className="text-primary font-bold">Voltar para Minha Célula</a>
             </div>
         )

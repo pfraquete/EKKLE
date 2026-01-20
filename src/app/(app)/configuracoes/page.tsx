@@ -21,13 +21,13 @@ export default async function SettingsPage() {
         <div className="space-y-6 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900">Configurações</h1>
-                    <p className="text-sm text-gray-500 font-medium tracking-tight">Perfil e Preferências • Videira SJC</p>
+                    <h1 className="text-2xl font-black text-foreground">Configurações</h1>
+                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Perfil e Preferências • Videira SJC</p>
                 </div>
             </div>
 
             {/* Profile Overview Card */}
-            <Card className="border-none shadow-xl overflow-hidden rounded-3xl bg-white">
+            <Card className="border-none shadow-xl overflow-hidden rounded-3xl bg-card">
                 <CardContent className="p-8">
                     <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
                         <Avatar className="h-28 w-28 border-4 border-primary/10 shadow-lg">
@@ -39,16 +39,16 @@ export default async function SettingsPage() {
 
                         <div className="space-y-2 flex-1">
                             <div className="flex flex-col md:flex-row items-center gap-3">
-                                <h2 className="text-3xl font-black text-gray-900">{profile.full_name}</h2>
+                                <h2 className="text-3xl font-black text-foreground">{profile.full_name}</h2>
                                 <Badge className="bg-primary/10 text-primary border-none font-black px-4 py-1">
                                     {profile.role}
                                 </Badge>
                             </div>
                             <div className="space-y-1">
-                                <p className="flex items-center justify-center md:justify-start gap-2 text-gray-500 font-medium">
+                                <p className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground font-medium">
                                     <Mail className="h-4 w-4" /> {profile.email || 'E-mail não cadastrado'}
                                 </p>
-                                <p className="flex items-center justify-center md:justify-start gap-2 text-gray-500 font-medium">
+                                <p className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground font-medium">
                                     <Shield className="h-4 w-4" /> Permissões de {profile.role === 'PASTOR' ? 'Administrador' : 'Líder'}
                                 </p>
                             </div>
@@ -68,16 +68,16 @@ export default async function SettingsPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-1">
-                            <label className="text-[10px] uppercase font-black text-gray-400 tracking-wider">Nome Completo</label>
-                            <p className="font-bold text-gray-900">{profile.full_name}</p>
+                            <label className="text-[10px] uppercase font-black text-muted-foreground tracking-wider">Nome Completo</label>
+                            <p className="font-bold text-foreground">{profile.full_name}</p>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] uppercase font-black text-gray-400 tracking-wider">Telefone</label>
-                            <p className="font-bold text-gray-900">{profile.phone || '—'}</p>
+                            <label className="text-[10px] uppercase font-black text-muted-foreground tracking-wider">Telefone</label>
+                            <p className="font-bold text-foreground">{profile.phone || '—'}</p>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] uppercase font-black text-gray-400 tracking-wider">Data de Ingresso</label>
-                            <p className="font-bold text-gray-900">
+                            <label className="text-[10px] uppercase font-black text-muted-foreground tracking-wider">Data de Ingresso</label>
+                            <p className="font-bold text-foreground">
                                 {profile.joined_at ? new Date(profile.joined_at).toLocaleDateString('pt-BR') : '—'}
                             </p>
                         </div>
@@ -93,19 +93,19 @@ export default async function SettingsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
+                        <div className="flex items-center justify-between p-3 bg-muted/40 rounded-2xl">
                             <div>
-                                <p className="text-sm font-bold text-gray-900">Versão</p>
-                                <p className="text-xs text-gray-500">v1.0.0-production</p>
+                                <p className="text-sm font-bold text-foreground">Versão</p>
+                                <p className="text-xs text-muted-foreground">v1.0.0-production</p>
                             </div>
-                            <Badge variant="outline" className="font-bold text-green-600 bg-green-50 border-green-100">Atualizado</Badge>
+                            <Badge variant="outline" className="font-bold text-emerald-300 bg-emerald-500/10 border-emerald-500/30">Atualizado</Badge>
                         </div>
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
+                        <div className="flex items-center justify-between p-3 bg-muted/40 rounded-2xl">
                             <div>
-                                <p className="text-sm font-bold text-gray-900">Servidor</p>
-                                <p className="text-xs text-gray-500">Região: US-East</p>
+                                <p className="text-sm font-bold text-foreground">Servidor</p>
+                                <p className="text-xs text-muted-foreground">Região: US-East</p>
                             </div>
-                            <Badge variant="outline" className="font-bold text-blue-600 bg-blue-50 border-blue-100">Online</Badge>
+                            <Badge variant="outline" className="font-bold text-blue-300 bg-blue-500/10 border-blue-500/30">Online</Badge>
                         </div>
                     </CardContent>
                 </Card>
@@ -113,7 +113,7 @@ export default async function SettingsPage() {
 
             {/* Footer */}
             <div className="text-center pt-8 opacity-40">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[2px]">MVP Célula v1.0 • Desenvolvido para Videira SJC</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Desenvolvido para Videira SJC</p>
             </div>
         </div>
     )
