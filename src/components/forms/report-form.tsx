@@ -132,31 +132,31 @@ export function ReportForm({ meeting, members, churchId }: Props) {
     return (
         <div className="space-y-6 max-w-lg mx-auto pb-32">
             {/* Dynamic Floating Header (Mobile Friendly) */}
-            <div className="sticky top-0 z-10 bg-gray-50/80 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 flex items-center justify-between border-b border-gray-200 shadow-sm">
+            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 flex items-center justify-between border-b border-border shadow-sm">
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
                         <ChevronLeft className="h-6 w-6" />
                     </Button>
                     <div>
-                        <h1 className="font-bold text-gray-900 leading-none">{meeting.cell.name}</h1>
+                        <h1 className="font-bold text-foreground leading-none">{meeting.cell.name}</h1>
                         <p className="text-[10px] text-primary uppercase tracking-wider font-bold mt-1">
                             {format(new Date(meeting.date), "EEEE, dd/MM", { locale: ptBR })}
                         </p>
                     </div>
                 </div>
-                <Badge className="bg-primary text-white font-bold h-7 px-3">
+                <Badge className="bg-primary text-primary-foreground font-bold h-7 px-3">
                     Relatório 60s
                 </Badge>
             </div>
 
             {/* Checklist Section */}
-            <Card className="border-none shadow-md overflow-hidden">
+            <Card className="border-none shadow-md overflow-hidden bg-card">
                 <CardHeader className="bg-primary/5 pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-foreground">
                         <ClipboardCheck className="h-5 w-5 text-primary" />
                         Checklist da Reunião
                     </CardTitle>
-                    <CardDescription>O que aconteceu hoje?</CardDescription>
+                    <CardDescription className="text-muted-foreground">O que aconteceu hoje?</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4 grid grid-cols-1 gap-1">
                     {[
@@ -169,18 +169,18 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                         <label
                             key={item.key}
                             className={`
-                flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all
+                flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border
                 ${checklist[item.key as keyof typeof checklist]
-                                    ? 'bg-primary/10 border border-primary/20'
-                                    : 'bg-white border border-gray-100'
+                                    ? 'bg-primary/10 border-primary/20'
+                                    : 'bg-card border-border hover:bg-muted/50'
                                 }
               `}
                         >
                             <div className="flex items-center gap-3">
-                                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${checklist[item.key as keyof typeof checklist] ? 'bg-primary border-primary' : 'bg-white border-gray-300'}`}>
-                                    {checklist[item.key as keyof typeof checklist] && <Check className="h-4 w-4 text-white" />}
+                                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${checklist[item.key as keyof typeof checklist] ? 'bg-primary border-primary' : 'bg-card border-muted-foreground/30'}`}>
+                                    {checklist[item.key as keyof typeof checklist] && <Check className="h-4 w-4 text-primary-foreground" />}
                                 </div>
-                                <span className={`text-sm font-semibold ${checklist[item.key as keyof typeof checklist] ? 'text-primary' : 'text-gray-600'}`}>
+                                <span className={`text-sm font-semibold ${checklist[item.key as keyof typeof checklist] ? 'text-primary' : 'text-muted-foreground'}`}>
                                     {item.label}
                                 </span>
                             </div>
@@ -197,9 +197,9 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </Card>
 
             {/* Attendance Section */}
-            <Card className="border-none shadow-md overflow-hidden">
+            <Card className="border-none shadow-md overflow-hidden bg-card">
                 <CardHeader className="bg-primary/5 pb-3">
-                    <CardTitle className="text-base flex items-center justify-between">
+                    <CardTitle className="text-base flex items-center justify-between text-foreground">
                         <div className="flex items-center gap-2">
                             <Users className="h-5 w-5 text-primary" />
                             Membros Presentes
@@ -208,11 +208,11 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                             {presentCount}/{members.length}
                         </Badge>
                     </CardTitle>
-                    <CardDescription>Toque nos membros que faltaram</CardDescription>
+                    <CardDescription className="text-muted-foreground">Toque nos membros que faltaram</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4 space-y-2">
                     {members.length === 0 ? (
-                        <p className="text-center text-sm text-gray-400 py-4 italic">Sem membros castrados na célula.</p>
+                        <p className="text-center text-sm text-muted-foreground py-4 italic">Sem membros castrados na célula.</p>
                     ) : members.map(member => (
                         <button
                             key={member.id}
@@ -221,21 +221,21 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                             className={`
                 w-full flex items-center gap-4 p-3 rounded-2xl transition-all border
                 ${attendance[member.id]
-                                    ? 'bg-green-50/50 border-green-100 border-l-4 border-l-green-500'
-                                    : 'bg-gray-50 border-gray-100 border-l-4 border-l-gray-300 opacity-60'
+                                    ? 'bg-green-500/10 border-green-500/20 border-l-4 border-l-green-500'
+                                    : 'bg-muted border-border border-l-4 border-l-muted-foreground/30 opacity-60'
                                 }
               `}
                         >
-                            <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                            <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                                 <AvatarImage src={member.photo_url || undefined} />
                                 <AvatarFallback className="bg-primary/10 text-primary font-bold">
                                     {member.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
-                            <span className={`flex-1 text-left text-sm font-bold ${attendance[member.id] ? 'text-gray-900' : 'text-gray-500 italic line-through'}`}>
+                            <span className={`flex-1 text-left text-sm font-bold ${attendance[member.id] ? 'text-foreground' : 'text-muted-foreground italic line-through'}`}>
                                 {member.full_name}
                             </span>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${attendance[member.id] ? 'bg-green-500 text-white shadow-md' : 'bg-gray-200 text-gray-400'}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${attendance[member.id] ? 'bg-green-500 text-white shadow-md' : 'bg-muted text-muted-foreground'}`}>
                                 {attendance[member.id] ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
                             </div>
                         </button>
@@ -244,40 +244,40 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </Card>
 
             {/* Visitors Section */}
-            <Card className="border-none shadow-md overflow-hidden">
+            <Card className="border-none shadow-md overflow-hidden bg-card">
                 <CardHeader className="bg-primary/5 pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-foreground">
                         <UserPlus className="h-5 w-5 text-primary" />
                         Visitantes na Reunião
                     </CardTitle>
-                    <CardDescription>Cadastre quem visitou sua célula</CardDescription>
+                    <CardDescription className="text-muted-foreground">Cadastre quem visitou sua célula</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4 space-y-4">
                     {/* Quick Add Form */}
-                    <div className="space-y-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 border-dashed">
+                    <div className="space-y-3 p-4 bg-muted/30 rounded-2xl border border-border border-dashed">
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-gray-400">NOME DO VISITANTE</Label>
+                            <Label className="text-xs font-bold text-muted-foreground">NOME DO VISITANTE</Label>
                             <Input
                                 placeholder="Ex: Carlos Silva"
                                 value={newVisitor.name}
                                 onChange={e => setNewVisitor(prev => ({ ...prev, name: e.target.value }))}
-                                className="h-12 rounded-xl bg-white"
+                                className="h-12 rounded-xl bg-background"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-gray-400">WHATSAPP (OPCIONAL)</Label>
+                            <Label className="text-xs font-bold text-muted-foreground">WHATSAPP (OPCIONAL)</Label>
                             <Input
                                 placeholder="(12) 99999-9999"
                                 value={newVisitor.phone}
                                 onChange={e => setNewVisitor(prev => ({ ...prev, phone: e.target.value }))}
-                                className="h-12 rounded-xl bg-white"
+                                className="h-12 rounded-xl bg-background"
                             />
                         </div>
                         <Button
                             variant="outline"
                             onClick={addVisitor}
                             disabled={newVisitor.name.trim().length < 2}
-                            className="w-full h-11 rounded-xl border-primary text-primary font-bold hover:bg-primary/5"
+                            className="w-full h-11 rounded-xl border-primary text-primary font-bold hover:bg-primary/5 hover:text-primary"
                         >
                             <Plus className="h-4 w-4 mr-2" />
                             Adicionar à Lista
@@ -289,15 +289,15 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                         {visitors.map((v, i) => (
                             <div
                                 key={i}
-                                className="flex items-center justify-between p-3 bg-blue-50/50 border border-blue-100 rounded-xl"
+                                className="flex items-center justify-between p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl"
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xs uppercase">
                                         {v.name[0]}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-blue-900">{v.name}</p>
-                                        {v.phone && <p className="text-[10px] font-medium text-blue-700">{v.phone}</p>}
+                                        <p className="text-sm font-bold text-foreground">{v.name}</p>
+                                        {v.phone && <p className="text-[10px] font-medium text-blue-400">{v.phone}</p>}
                                     </div>
                                 </div>
                                 <Button
@@ -315,19 +315,19 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </Card>
 
             {/* Metrics Section */}
-            <Card className="border-none shadow-md overflow-hidden">
+            <Card className="border-none shadow-md overflow-hidden bg-card">
                 <CardHeader className="bg-primary/5 pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-foreground">
                         <BarChart3 className="h-5 w-5 text-primary" />
                         Métricas de Impacto
                     </CardTitle>
-                    <CardDescription>Quantifique os frutos de hoje</CardDescription>
+                    <CardDescription className="text-muted-foreground">Quantifique os frutos de hoje</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4 space-y-6">
-                    <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 border-l-4 border-l-blue-400">
+                    <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border border-l-4 border-l-blue-400">
                         <div className="space-y-0.5">
-                            <Label className="text-sm font-bold text-gray-900">Visitantes (1ª Vez)</Label>
-                            <p className="text-[10px] text-gray-500">Pessoas novas na célula</p>
+                            <Label className="text-sm font-bold text-foreground">Visitantes (1ª Vez)</Label>
+                            <p className="text-[10px] text-muted-foreground">Pessoas novas na célula</p>
                         </div>
                         <div className="flex items-center gap-4">
                             <Button
@@ -350,10 +350,10 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 border-l-4 border-l-amber-400">
+                    <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border border-l-4 border-l-amber-400">
                         <div className="space-y-0.5">
-                            <Label className="text-sm font-bold text-gray-900">Decisões por Cristo</Label>
-                            <p className="text-[10px] text-gray-500">Conversões ou reconciliações</p>
+                            <Label className="text-sm font-bold text-foreground">Decisões por Cristo</Label>
+                            <p className="text-[10px] text-muted-foreground">Conversões ou reconciliações</p>
                         </div>
                         <div className="flex items-center gap-4">
                             <Button
@@ -364,11 +364,11 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                             >
                                 <Minus className="h-5 w-5" />
                             </Button>
-                            <span className="w-6 text-center text-xl font-black text-amber-600">{decisionsCount}</span>
+                            <span className="w-6 text-center text-xl font-black text-amber-500">{decisionsCount}</span>
                             <Button
                                 variant="outline"
                                 size="icon"
-                                className="h-10 w-10 rounded-full border-2 border-amber-500 text-amber-600"
+                                className="h-10 w-10 rounded-full border-2 border-amber-500 text-amber-500"
                                 onClick={() => setDecisionsCount(prev => prev + 1)}
                             >
                                 <Plus className="h-5 w-5" />
@@ -379,13 +379,13 @@ export function ReportForm({ meeting, members, churchId }: Props) {
             </Card>
 
             {/* Observations Section */}
-            <Card className="border-none shadow-md overflow-hidden">
+            <Card className="border-none shadow-md overflow-hidden bg-card">
                 <CardHeader className="bg-primary/5 pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-foreground">
                         <MessageSquare className="h-5 w-5 text-primary" />
                         Observações e Pedidos
                     </CardTitle>
-                    <CardDescription>Opcional: Compartilhe algo com seu pastor</CardDescription>
+                    <CardDescription className="text-muted-foreground">Opcional: Compartilhe algo com seu pastor</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4">
                     <Textarea
@@ -393,13 +393,13 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                         value={observations}
                         onChange={e => setObservations(e.target.value)}
                         rows={4}
-                        className="rounded-2xl bg-white border-gray-100 italic"
+                        className="rounded-2xl bg-background border-border italic"
                     />
                 </CardContent>
             </Card>
 
             {/* Floating Action Button for Submission */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-gray-50 to-transparent z-20 pointer-events-none">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none">
                 <Button
                     onClick={handleSubmit}
                     disabled={isSubmitting}

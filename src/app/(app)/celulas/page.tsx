@@ -18,8 +18,8 @@ export default async function CellsPage() {
         <div className="space-y-6 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900">Células</h1>
-                    <p className="text-sm text-gray-500 font-medium tracking-tight">Gestão de grupos • Videira SJC</p>
+                    <h1 className="text-2xl font-black text-foreground">Células</h1>
+                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Gestão de grupos • Videira SJC</p>
                 </div>
                 <Link href="/celulas/nova">
                     <Button className="rounded-2xl shadow-lg h-11 px-6 font-bold">
@@ -29,37 +29,37 @@ export default async function CellsPage() {
                 </Link>
             </div>
 
-            <Card className="border-none shadow-xl overflow-hidden rounded-3xl">
+            <Card className="border-none shadow-xl overflow-hidden rounded-3xl bg-card">
                 <CardContent className="p-0">
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-border">
                         {cells.length === 0 ? (
                             <div className="p-20 text-center">
-                                <Home className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-                                <p className="text-gray-400 font-medium">Nenhuma célula cadastrada.</p>
+                                <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground font-medium">Nenhuma célula cadastrada.</p>
                             </div>
                         ) : (
                             cells.map(cell => (
                                 <Link
                                     key={cell.id}
                                     href={`/celulas/${cell.id}`}
-                                    className="flex items-center justify-between p-5 hover:bg-gray-50 transition-all group"
+                                    className="flex items-center justify-between p-5 hover:bg-muted/50 transition-all group"
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={`
                                             w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white shadow-lg
-                                            ${cell.hasRecentReport ? 'bg-primary' : 'bg-amber-400 shadow-amber-200'}
+                                            ${cell.hasRecentReport ? 'bg-primary text-primary-foreground' : 'bg-amber-400 shadow-amber-200/20 text-amber-950'}
                                         `}>
                                             {cell.name[0]}
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-gray-900">{cell.name}</h4>
-                                            <p className="text-xs text-gray-500 font-medium mt-0.5">Líder: {cell.leaderName}</p>
+                                            <h4 className="font-bold text-foreground">{cell.name}</h4>
+                                            <p className="text-xs text-muted-foreground font-medium mt-0.5">Líder: {cell.leaderName}</p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-6">
                                         <div className="hidden sm:block text-right">
-                                            <p className="text-sm font-bold text-gray-900">{cell.membersCount} membros</p>
+                                            <p className="text-sm font-bold text-foreground">{cell.membersCount} membros</p>
                                             {cell.lastMeetingDate && (
                                                 <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-0.5">
                                                     {format(new Date(cell.lastMeetingDate), "dd MMM", { locale: ptBR })}

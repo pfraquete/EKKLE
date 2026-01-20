@@ -57,27 +57,27 @@ export default async function MembersPage() {
 
             {/* Stats Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-50 text-center">
-                    <p className="text-2xl font-black text-gray-900">{members.length}</p>
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Total</p>
+                <div className="bg-card p-4 rounded-3xl shadow-sm border border-border text-center">
+                    <p className="text-2xl font-black text-foreground">{members.length}</p>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Total</p>
                 </div>
-                <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-50 text-center">
-                    <p className="text-2xl font-black text-green-600">
+                <div className="bg-card p-4 rounded-3xl shadow-sm border border-border text-center">
+                    <p className="text-2xl font-black text-green-500">
                         {members.filter(m => m.member_stage === 'MEMBER').length}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Membros</p>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Membros</p>
                 </div>
-                <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-50 text-center">
-                    <p className="text-2xl font-black text-blue-600">
+                <div className="bg-card p-4 rounded-3xl shadow-sm border border-border text-center">
+                    <p className="text-2xl font-black text-blue-500">
                         {members.filter(m => m.member_stage === 'VISITOR').length}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Visitantes</p>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Visitantes</p>
                 </div>
-                <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-50 text-center">
+                <div className="bg-card p-4 rounded-3xl shadow-sm border border-border text-center">
                     <p className="text-2xl font-black text-primary">
                         {members.filter(m => m.member_stage === 'LEADER').length}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Líderes</p>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Líderes</p>
                 </div>
             </div>
 

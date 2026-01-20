@@ -26,14 +26,14 @@ export default async function LoginPage({
                         priority
                     />
                 </div>
-                <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Videira SJC</h1>
-                <p className="text-sm text-gray-500 font-medium">Gestão de Células & Liderança</p>
+                <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase">Videira SJC</h1>
+                <p className="text-sm text-muted-foreground font-medium">Gestão de Células & Liderança</p>
             </div>
 
-            <Card className="border-none shadow-2xl rounded-3xl overflow-hidden">
-                <CardHeader className="space-y-1 bg-gray-50/50 border-b border-gray-100">
-                    <CardTitle className="text-xl font-bold">Acesse sua conta</CardTitle>
-                    <CardDescription>
+            <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-card">
+                <CardHeader className="space-y-1 bg-muted/50 border-b border-border">
+                    <CardTitle className="text-xl font-bold text-foreground">Acesse sua conta</CardTitle>
+                    <CardDescription className="text-muted-foreground">
                         Entre com seu email e senha para acessar sua célula
                     </CardDescription>
                 </CardHeader>
