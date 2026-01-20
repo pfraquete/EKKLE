@@ -173,10 +173,13 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                     <SelectValue placeholder="Selecione o vínculo" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="VISITOR">Visitante (1ª Vez)</SelectItem>
-                                    <SelectItem value="REGULAR_VISITOR">Frequenta Regularmente</SelectItem>
+                                    <SelectItem value="PASTOR">Pastor</SelectItem>
+                                    <SelectItem value="LEADER">Líder de Célula</SelectItem>
+                                    <SelectItem value="TRAINING_LEADER">Líder em Treinamento</SelectItem>
+                                    <SelectItem value="GUARDIAN_ANGEL">Anjo da Guarda</SelectItem>
                                     <SelectItem value="MEMBER">Membro da Célula</SelectItem>
-                                    <SelectItem value="LEADER">Líder Auxiliar</SelectItem>
+                                    <SelectItem value="REGULAR_VISITOR">Frequentador Assíduo</SelectItem>
+                                    <SelectItem value="VISITOR">Visitante</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

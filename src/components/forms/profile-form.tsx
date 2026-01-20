@@ -125,7 +125,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                                 name="fullName"
                                 defaultValue={profile.full_name}
                                 required
-                                className="h-12 bg-muted/20 border-border rounded-xl font-medium text-foreground placeholder:text-muted-foreground"
+                                className="h-12 bg-zinc-900/50 border-zinc-800 rounded-xl font-medium text-white placeholder:text-zinc-500"
                             />
                         </div>
                         <div className="space-y-2">
@@ -137,7 +137,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                                     name="phone"
                                     defaultValue={profile.phone || ''}
                                     placeholder="(00) 00000-0000"
-                                    className="h-12 pl-10 bg-muted/20 border-border rounded-xl font-medium text-foreground placeholder:text-muted-foreground"
+                                    className="h-12 pl-10 bg-zinc-900/50 border-zinc-800 rounded-xl font-medium text-white placeholder:text-zinc-500"
                                 />
                             </div>
                         </div>

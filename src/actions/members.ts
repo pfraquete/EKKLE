@@ -9,7 +9,7 @@ const memberSchema = z.object({
     phone: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
     birthday: z.string().optional(),
-    memberStage: z.enum(['VISITOR', 'REGULAR_VISITOR', 'MEMBER', 'LEADER']),
+    memberStage: z.enum(['VISITOR', 'REGULAR_VISITOR', 'MEMBER', 'GUARDIAN_ANGEL', 'TRAINING_LEADER', 'LEADER', 'PASTOR']),
     cellId: z.string().uuid(),
     churchId: z.string().uuid()
 })
