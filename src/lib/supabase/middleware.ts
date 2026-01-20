@@ -35,10 +35,6 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    console.log('[Middleware] Path:', request.nextUrl.pathname)
-    console.log('[Middleware] Auth Status:', user ? 'Logged In' : 'Logged Out')
-    console.log('[Middleware] Cookies Present:', request.cookies.getAll().map(c => c.name).join(', '))
-
     // Rotas públicas
     const publicRoutes = ['/login', '/forgot-password', '/reset-password']
     const isPublicRoute = publicRoutes.some(route =>

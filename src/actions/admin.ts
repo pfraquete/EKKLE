@@ -154,7 +154,7 @@ export async function getChurchMembers(churchId: string) {
         .from('profiles')
         .select(`
             *,
-            cell:cells(name)
+            cell:cells!profiles_cell_id_fkey(name)
         `)
         .eq('church_id', churchId)
         .eq('is_active', true)
