@@ -45,7 +45,7 @@ export default async function MinhaCelulaPage() {
     return (
         <div className="space-y-6 pb-20">
             {/* Célula Info Card */}
-            <Card className="overflow-hidden border-none shadow-xl bg-primary text-white">
+            <Card className="overflow-hidden border-none shadow-xl bg-primary text-primary-foreground">
                 <CardContent className="pt-8 pb-6 bg-gradient-to-br from-primary to-primary/80">
                     <h1 className="text-2xl font-extrabold mb-1">{cell.name}</h1>
 
