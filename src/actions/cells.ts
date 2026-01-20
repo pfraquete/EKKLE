@@ -64,7 +64,7 @@ export async function createCell(formData: FormData) {
                     user_metadata: {
                         full_name: leaderName,
                         role: 'LEADER',
-                        church_id: churchId
+                        church_id: churchId // The trigger uses ->> 'church_id'
                     }
                 })
 
