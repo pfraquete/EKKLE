@@ -12,7 +12,7 @@ export interface DashboardStats {
 export interface CellOverview {
     id: string
     name: string
-    leaderName: string | null
+    leaderName: string
     membersCount: number
     lastMeetingDate: string | null
     status: 'ACTIVE' | 'INACTIVE'
