@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendLeaderWelcomeEmail } from '@/lib/email'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { generateSecurePassword } from '@/lib/utils'
 
 // Create a service role client for administrative tasks
 const getAdminClient = () => {
@@ -38,6 +39,7 @@ export async function createCell(formData: FormData) {
         const leaderName = formData.get('leaderName') as string
 
         let leaderId: string | null = null
+        let generatedPassword: string | null = null
 
         // 1. Check if profile already exists
         const { data: existingProfile } = await adminSupabase
@@ -60,10 +62,13 @@ export async function createCell(formData: FormData) {
             if (authUser) {
                 leaderId = authUser.id
             } else {
-                // 3. Create new user via Admin API
+                // 3. Generate secure random password
+                generatedPassword = generateSecurePassword(12)
+
+                // 4. Create new user via Admin API
                 const { data: newUser, error: createError } = await adminSupabase.auth.admin.createUser({
                     email: leaderEmail,
-                    password: 'ekkle2026',
+                    password: generatedPassword,
                     email_confirm: true,
                     user_metadata: {
                         full_name: leaderName,
@@ -99,8 +104,10 @@ export async function createCell(formData: FormData) {
             // Wait a bit for consistency
             await new Promise(resolve => setTimeout(resolve, 800))
 
-            // 4. Send welcome email (non-blocking)
-            sendLeaderWelcomeEmail(leaderEmail, leaderName).catch(e => console.error('Silent email error:', e))
+            // 5. Send welcome email with generated password (non-blocking)
+            if (generatedPassword) {
+                sendLeaderWelcomeEmail(leaderEmail, leaderName, generatedPassword).catch(e => console.error('Silent email error:', e))
+            }
         }
 
         // 4. Create the cell

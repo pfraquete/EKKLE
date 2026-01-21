@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Loader2, Trash2, Camera, ChevronLeft, User, Phone, Mail, Calendar } from 'lucide-react'
 import Image from 'next/image'
 interface MemberFormProps {
@@ -30,6 +31,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -55,13 +57,13 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
         }
     }
 
-    const handleDelete = async () => {
-        if (!confirm('Tem certeza que deseja remover este membro?')) return
+    const handleDeleteConfirm = async () => {
         setIsDeleting(true)
         try {
             if (initialData?.id) {
                 await deleteMember(initialData.id)
             }
+            setShowDeleteDialog(false)
             router.push('/minha-celula/membros')
             router.refresh()
         } catch (error) {
@@ -87,11 +89,11 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={handleDelete}
+                        onClick={() => setShowDeleteDialog(true)}
                         disabled={isDeleting}
                         className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 rounded-full"
                     >
-                        {isDeleting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
+                        <Trash2 className="h-5 w-5" />
                     </Button>
                 )}
             </div>
@@ -218,6 +220,19 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                     </Button>
                 </div>
             </form>
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+                onConfirm={handleDeleteConfirm}
+                title="Remover Membro"
+                description={`Tem certeza que deseja remover ${initialData?.full_name || 'este membro'}? Esta ação não pode ser desfeita.`}
+                confirmText="Remover"
+                cancelText="Cancelar"
+                variant="destructive"
+                isLoading={isDeleting}
+            />
         </div>
     )
 }
