@@ -1,4 +1,5 @@
 import { getPastorDashboardData, getAllCellsOverview, getGrowthData } from '@/actions/admin'
+import { getWhatsAppInstance } from '@/actions/whatsapp'
 export const dynamic = 'force-dynamic'
 
 import { getProfile } from '@/actions/auth'
@@ -10,7 +11,8 @@ import {
     Home,
     AlertCircle,
     TrendingUp,
-    Plus
+    Plus,
+    MessageSquare
 } from 'lucide-react'
 import Link from 'next/link'
 import { CellsList } from '@/components/dashboard/cells-list'
@@ -20,6 +22,7 @@ import { getEvents } from '@/actions/admin'
 import { Calendar, Download } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { cn } from '@/lib/utils'
 
 export default async function DashboardPage() {
     const profile = await getProfile()
@@ -35,6 +38,7 @@ export default async function DashboardPage() {
     const cells = await getAllCellsOverview(profile.church_id)
     const growthData = await getGrowthData(profile.church_id)
     const events = await getEvents(profile.church_id)
+    const { data: whatsapp } = await getWhatsAppInstance(profile.church_id)
 
     const upcomingEvents = events
         .filter(e => new Date(e.start_time) >= new Date())
@@ -48,6 +52,18 @@ export default async function DashboardPage() {
                     <p className="text-sm text-muted-foreground font-medium tracking-tight">Painel Pastoral • Ekkle</p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Link href="/configuracoes/whatsapp">
+                        <Button
+                            variant={whatsapp?.status === 'CONNECTED' ? 'secondary' : 'outline'}
+                            className={cn(
+                                "rounded-2xl h-11 px-4 font-bold border-2",
+                                whatsapp?.status === 'CONNECTED' ? "bg-green-500/10 text-green-500 border-green-500/20" : "border-2"
+                            )}
+                        >
+                            <MessageSquare className="h-5 w-5 mr-2" />
+                            {whatsapp?.status === 'CONNECTED' ? 'WhatsApp Ativo' : 'Configurar Zap'}
+                        </Button>
+                    </Link>
                     <Link href="/importar">
                         <Button variant="outline" className="rounded-2xl h-11 px-4 font-bold border-2">
                             <Download className="h-5 w-5 mr-2" />
