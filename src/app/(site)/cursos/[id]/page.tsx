@@ -1,9 +1,11 @@
 import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
+import { getCourseEnrollment } from '@/actions/courses'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { BookOpen, Video, ArrowLeft, Lock, Clock } from 'lucide-react'
+import { EnrollButton } from '@/components/courses/enroll-button'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -59,17 +61,8 @@ export default async function CursoPage({ params }: PageProps) {
   } = await supabase.auth.getUser()
 
   // Check if user is enrolled (if authenticated)
-  let isEnrolled = false
-  if (user) {
-    const { data: enrollment } = await supabase
-      .from('course_enrollments')
-      .select('id')
-      .eq('course_id', id)
-      .eq('profile_id', user.id)
-      .single()
-
-    isEnrolled = !!enrollment
-  }
+  const enrollment = user ? await getCourseEnrollment(id) : null
+  const isEnrolled = !!enrollment
 
   const totalDuration = videos?.reduce((acc, video) => acc + (video.duration_seconds || 0), 0) || 0
 
@@ -178,30 +171,18 @@ export default async function CursoPage({ params }: PageProps) {
               )}
 
               {/* Enrollment CTA */}
-              {!isEnrolled && (
-                <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <p className="text-sm text-gray-600 mb-4">
+              <div className="mt-6">
+                {!isEnrolled && (
+                  <p className="text-sm text-gray-600 mb-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
                     Faça login ou crie uma conta para acessar o conteúdo completo do curso
                   </p>
-                  <Link
-                    href="/membro"
-                    className="block w-full bg-primary text-white text-center px-4 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-                  >
-                    {user ? 'Inscrever-se no Curso' : 'Criar Conta'}
-                  </Link>
-                </div>
-              )}
-
-              {isEnrolled && (
-                <div className="mt-6">
-                  <Link
-                    href={`/membro/cursos/${id}`}
-                    className="block w-full bg-primary text-white text-center px-4 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-                  >
-                    Continuar Curso
-                  </Link>
-                </div>
-              )}
+                )}
+                <EnrollButton
+                  courseId={id}
+                  isEnrolled={isEnrolled}
+                  isAuthenticated={!!user}
+                />
+              </div>
             </div>
           </div>
         </div>
