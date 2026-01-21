@@ -86,7 +86,7 @@ export async function createServiceAttendance(input: ServiceAttendanceInput) {
         if (insertError) throw new Error(insertError.message)
     }
 
-    revalidatePath('/cultos')
+    revalidatePath('/presenca-cultos')
     return { success: true }
 }
 
