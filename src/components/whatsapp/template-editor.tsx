@@ -49,7 +49,10 @@ export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorPro
 
         setLoading(true)
         try {
-            const { data, error: upsertError } = await upsertTemplate(template as any)
+            const { data, error: upsertError } = await upsertTemplate({
+                ...template,
+                church_id: churchId
+            } as MessageTemplate)
             if (upsertError) throw upsertError
 
             if (data) {
