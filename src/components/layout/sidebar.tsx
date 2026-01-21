@@ -68,15 +68,14 @@ export function Sidebar({ profile }: SidebarProps) {
                 <div className="relative w-10 h-10">
                     <Image
                         src="/logo.png"
-                        alt="Videira SJC Logo"
+                        alt="Ekkle Logo"
                         fill
                         className="object-contain"
                         priority
                     />
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-black text-lg leading-none tracking-tighter text-sidebar-foreground uppercase">Videira</span>
-                    <span className="font-bold text-[10px] text-primary tracking-[0.2em] uppercase">SJC</span>
+                    <span className="font-black text-lg leading-none tracking-tighter text-sidebar-foreground uppercase">Ekkle</span>
                 </div>
             </div>
 

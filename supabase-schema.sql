@@ -1,5 +1,5 @@
 -- =====================================================
--- Videira São José dos Campos - Database Schema
+-- Ekkle - Database Schema
 -- =====================================================
 -- Execute this SQL in your Supabase SQL Editor
 -- https://supabase.com/dashboard/project/_/sql/new
@@ -291,7 +291,7 @@ CREATE TRIGGER update_attendance_updated_at BEFORE UPDATE ON attendance
 
 -- Insert a default church (CHANGE THIS!)
 INSERT INTO churches (id, name)
-VALUES ('00000000-0000-0000-0000-000000000001', 'Videira São José dos Campos')
+VALUES ('00000000-0000-0000-0000-000000000001', 'Ekkle')
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================

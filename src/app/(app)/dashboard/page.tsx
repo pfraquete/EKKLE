@@ -37,7 +37,7 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-black text-foreground">Visão Geral</h1>
-                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Painel Pastoral • Videira SJC</p>
+                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Painel Pastoral • Ekkle</p>
                 </div>
                 <Link href="/celulas/nova">
                     <Button className="rounded-2xl shadow-lg h-11 px-6 font-bold">
@@ -160,7 +160,7 @@ export default async function DashboardPage() {
 
             {/* Footer Info */}
             <div className="flex items-center justify-between px-2 opacity-40">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Videira SJC</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Ekkle</p>
             </div>
         </div>
     )

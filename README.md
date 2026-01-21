@@ -1,6 +1,6 @@
-# Videira São José dos Campos - Gestão de Células
+# Ekkle - Gestão de Células
 
-Sistema de gestão de células da igreja Videira São José dos Campos, construído com Next.js e Supabase.
+Sistema de gestão de células Ekkle, construído com Next.js e Supabase.
 
 ## Pré-requisitos
 
@@ -14,7 +14,7 @@ Sistema de gestão de células da igreja Videira São José dos Campos, constru�
 
 ```bash
 git clone <url-do-repositorio>
-cd videirasaojosedoscampos
+cd ekkle
 ```
 
 ### 2. Instalar dependências
@@ -118,7 +118,7 @@ Abra [http://localhost:3000](http://localhost:3000) no navegador para ver o resu
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-publica-aqui
-NEXT_PUBLIC_APP_URL=https://seu-app.up.railway.app
+NEXT_PUBLIC_APP_URL=https://ekkle.up.railway.app
 ```
 
 **Como obter os valores:**

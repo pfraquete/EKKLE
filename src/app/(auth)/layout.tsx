@@ -10,12 +10,12 @@ export default function AuthLayout({
             <div className="mb-8 flex flex-col items-center text-center">
                 <Image
                     src="/logo.png"
-                    alt="Videira SJC"
+                    alt="Ekkle"
                     width={120}
                     height={120}
                     className="mb-4 rounded-full shadow-lg"
                 />
-                <h1 className="text-2xl font-bold text-foreground">Videira São José dos Campos</h1>
+                <h1 className="text-2xl font-bold text-foreground">Ekkle</h1>
                 <p className="text-sm text-muted-foreground">Gestão de Células</p>
             </div>
             <div className="w-full max-w-sm">

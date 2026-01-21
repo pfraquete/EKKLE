@@ -20,13 +20,13 @@ export default async function LoginPage({
                 <div className="relative w-24 h-24 mb-2">
                     <Image
                         src="/logo.png"
-                        alt="Videira SJC Logo"
+                        alt="Ekkle Logo"
                         fill
                         className="object-contain"
                         priority
                     />
                 </div>
-                <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase">Videira SJC</h1>
+                <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase">Ekkle</h1>
                 <p className="text-sm text-muted-foreground font-medium">Gestão de Células & Liderança</p>
             </div>
 
@@ -58,7 +58,7 @@ export default async function LoginPage({
                                 name="email"
                                 type="email"
                                 autoComplete="email"
-                                placeholder="exemplo@igreja.com"
+                                placeholder="exemplo@ekkle.com"
                                 required
                                 className="h-11"
                             />
