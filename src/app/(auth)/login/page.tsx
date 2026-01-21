@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { SubmitButton } from '@/components/buttons/submit-button'
 import Link from 'next/link'
 
-import Image from 'next/image'
+
 
 export default async function LoginPage({
     searchParams,
