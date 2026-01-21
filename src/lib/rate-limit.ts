@@ -111,6 +111,7 @@ export class RateLimitError extends Error {
 /**
  * Decorator-style wrapper for server actions with rate limiting
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withRateLimit<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   options: Omit<RateLimitOptions, 'identifier'> & {

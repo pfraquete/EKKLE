@@ -19,7 +19,7 @@ export function generateSecurePassword(length: number = 12): string {
   const allChars = uppercase + lowercase + numbers + special
 
   // Ensure at least one character from each category
-  let password = [
+  const password = [
     uppercase[Math.floor(Math.random() * uppercase.length)],
     lowercase[Math.floor(Math.random() * lowercase.length)],
     numbers[Math.floor(Math.random() * numbers.length)],

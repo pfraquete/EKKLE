@@ -14,7 +14,7 @@ interface ExportPDFOptions {
  * @param options Export options with filename, title and HTML content
  */
 export function exportToPDF(options: ExportPDFOptions) {
-  const { filename, title, content } = options
+  const { title, content } = options
 
   // Create a hidden iframe
   const iframe = document.createElement('iframe')
@@ -151,10 +151,10 @@ export function exportToPDF(options: ExportPDFOptions) {
         <div class="footer">
           <p>Gerado por Ekkle • Sistema de Gestão de Células</p>
           <p>Data: ${new Date().toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-          })}</p>
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  })}</p>
         </div>
       </body>
     </html>
@@ -213,10 +213,10 @@ export function generateMeetingReportHTML(data: {
         <tr>
           <th>Data</th>
           <td>${new Date(data.date + 'T00:00:00').toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-          })}</td>
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  })}</td>
         </tr>
         <tr>
           <th>Líder</th>

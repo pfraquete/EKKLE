@@ -1,6 +1,5 @@
 'use client'
 
-import { ReactNode } from 'react'
 import { Button } from './button'
 import { Loader2, AlertTriangle } from 'lucide-react'
 
