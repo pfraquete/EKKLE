@@ -41,12 +41,20 @@ interface CellOverviewRow {
 export async function getPastorDashboardData(churchId: string) {
     const supabase = await createClient()
 
-    // 1. Total Members
-    const { count: membersCount } = await supabase
+    // 1. Total Members (from both profiles and members table)
+    const { count: profilesCount } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .eq('church_id', churchId)
         .eq('is_active', true)
+
+    const { count: congregationCount } = await supabase
+        .from('members')
+        .select('*', { count: 'exact', head: true })
+        .eq('church_id', churchId)
+        .eq('is_active', true)
+
+    const totalMembers = (profilesCount || 0) + (congregationCount || 0)
 
     // 2. Total Cells
     const { count: cellsCount } = await supabase
@@ -90,7 +98,7 @@ export async function getPastorDashboardData(churchId: string) {
 
     return {
         stats: {
-            totalMembers: membersCount || 0,
+            totalMembers: totalMembers,
             totalCells: cellsCount || 0,
             overallAttendance,
             cellsWithoutReports: Math.max(0, cellsWithoutReports)
@@ -189,8 +197,8 @@ export async function getGrowthData(churchId: string): Promise<GrowthData[]> {
         const startDate = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]
         const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]
 
-        // Count members created in this month
-        const { count: membersCount } = await supabase
+        // Count members created in this month (Profiles + Members table)
+        const { count: profilesMemberCount } = await supabase
             .from('profiles')
             .select('*', { count: 'exact', head: true })
             .eq('church_id', churchId)
@@ -198,9 +206,25 @@ export async function getGrowthData(churchId: string): Promise<GrowthData[]> {
             .gte('created_at', startDate)
             .lte('created_at', endDate)
 
+        const { count: congregationMemberCount } = await supabase
+            .from('members')
+            .select('*', { count: 'exact', head: true })
+            .eq('church_id', churchId)
+            .in('member_stage', ['MEMBER', 'LEADER'])
+            .gte('created_at', startDate)
+            .lte('created_at', endDate)
+
         // Count visitors in this month
-        const { count: visitorsCount } = await supabase
+        const { count: profilesVisitorCount } = await supabase
             .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('church_id', churchId)
+            .in('member_stage', ['VISITOR', 'REGULAR_VISITOR'])
+            .gte('created_at', startDate)
+            .lte('created_at', endDate)
+
+        const { count: congregationVisitorCount } = await supabase
+            .from('members')
             .select('*', { count: 'exact', head: true })
             .eq('church_id', churchId)
             .in('member_stage', ['VISITOR', 'REGULAR_VISITOR'])
@@ -209,10 +233,145 @@ export async function getGrowthData(churchId: string): Promise<GrowthData[]> {
 
         months.push({
             month: monthName,
-            members: membersCount || 0,
-            visitors: visitorsCount || 0
+            members: (profilesMemberCount || 0) + (congregationMemberCount || 0),
+            visitors: (profilesVisitorCount || 0) + (congregationVisitorCount || 0)
         })
     }
 
     return months
+}
+
+export interface EventData {
+    id: string
+    title: string
+    description: string | null
+    location: string | null
+    start_time: string
+    end_time: string | null
+    event_type: 'SERVICE' | 'EVENT' | 'COMMUNITY' | 'OTHER'
+}
+
+export async function getEvents(churchId: string): Promise<EventData[]> {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('church_id', churchId)
+        .order('start_time', { ascending: true })
+
+    if (error) {
+        console.error('[getEvents] Error fetching events:', error)
+        return []
+    }
+
+    return (data || []) as EventData[]
+}
+
+export async function createEvent(churchId: string, event: Omit<EventData, 'id'>) {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('events')
+        .insert([{ ...event, church_id: churchId }])
+        .select()
+        .single()
+
+    if (error) {
+        console.error('[createEvent] Error creating event:', error)
+        throw new Error('Falha ao criar evento')
+    }
+
+    return data
+}
+
+export async function importMembers(churchId: string, members: Record<string, unknown>[]) {
+    const supabase = await createClient()
+
+    // 1. Get existing cells to map names to IDs
+    const { data: existingCells } = await supabase
+        .from('cells')
+        .select('id, name')
+        .eq('church_id', churchId)
+
+    const cellMap = new Map((existingCells || []).map(c => [c.name.toLowerCase(), c.id]))
+
+    const results = {
+        success: 0,
+        errors: 0
+    }
+
+    // Process in batches of 50 to avoid timeouts/limits
+    const batchSize = 50
+    for (let i = 0; i < members.length; i += batchSize) {
+        const batch = members.slice(i, i + batchSize)
+        const toInsert = []
+
+        for (const member of batch) {
+            try {
+                let cellId = null
+                const cellNameField = (member.cell_name || member.celula || member.Célula || member.Cell) as string | undefined
+                const cellName = cellNameField
+
+                if (cellName) {
+                    const normalizedCellName = cellName.trim().toLowerCase()
+                    if (cellMap.has(normalizedCellName)) {
+                        cellId = cellMap.get(normalizedCellName)
+                    } else {
+                        // Create new cell synchronously for the first one, then add to map
+                        const { data: newCell } = await supabase
+                            .from('cells')
+                            .insert([{
+                                name: cellName.trim(),
+                                church_id: churchId,
+                                status: 'ACTIVE'
+                            }])
+                            .select()
+                            .single()
+
+                        if (newCell) {
+                            cellId = newCell.id
+                            cellMap.set(normalizedCellName, cellId)
+                        }
+                    }
+                }
+
+                const memberStageField = (member.member_stage || member.estagio || member.estágio || 'MEMBER') as string
+                const memberStage = memberStageField.toUpperCase()
+                const validStages = ['VISITOR', 'REGULAR_VISITOR', 'MEMBER', 'LEADER']
+                const finalStage = validStages.includes(memberStage) ? memberStage : 'MEMBER'
+
+                const fullNameField = (member.full_name || member.Nome || member.nome || 'Membro Importado') as string
+                const phoneField = (member.phone || member.telefone || member.Telefone || '') as string | number
+
+                toInsert.push({
+                    full_name: fullNameField,
+                    email: (member.email as string) || null,
+                    phone: String(phoneField),
+                    cell_id: cellId,
+                    church_id: churchId,
+                    member_stage: finalStage,
+                    is_active: true
+                })
+            } catch (e) {
+                console.error('Error processing member in batch:', e)
+                results.errors++
+            }
+        }
+
+        if (toInsert.length > 0) {
+            const { error } = await supabase
+                .from('members')
+                .insert(toInsert)
+
+            if (error) {
+                console.error('Error inserting batch:', error)
+                results.errors += toInsert.length
+            } else {
+                results.success += toInsert.length
+            }
+        }
+    }
+
+    return results
 }

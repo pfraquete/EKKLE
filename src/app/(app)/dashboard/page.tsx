@@ -1,4 +1,6 @@
 import { getPastorDashboardData, getAllCellsOverview, getGrowthData } from '@/actions/admin'
+export const dynamic = 'force-dynamic'
+
 import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,6 +15,11 @@ import {
 import Link from 'next/link'
 import { CellsList } from '@/components/dashboard/cells-list'
 import { GrowthChart } from '@/components/dashboard/growth-chart'
+// import { GuidedTour } from '@/components/dashboard/guided-tour'
+import { getEvents } from '@/actions/admin'
+import { Calendar, Download } from 'lucide-react'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 export default async function DashboardPage() {
     const profile = await getProfile()
@@ -27,6 +34,11 @@ export default async function DashboardPage() {
     const { stats } = await getPastorDashboardData(profile.church_id)
     const cells = await getAllCellsOverview(profile.church_id)
     const growthData = await getGrowthData(profile.church_id)
+    const events = await getEvents(profile.church_id)
+
+    const upcomingEvents = events
+        .filter(e => new Date(e.start_time) >= new Date())
+        .slice(0, 3)
 
     return (
         <div className="space-y-6 pb-20">
@@ -35,12 +47,20 @@ export default async function DashboardPage() {
                     <h1 className="text-2xl font-black text-foreground">Visão Geral</h1>
                     <p className="text-sm text-muted-foreground font-medium tracking-tight">Painel Pastoral • Ekkle</p>
                 </div>
-                <Link href="/celulas/nova">
-                    <Button className="rounded-2xl shadow-lg h-11 px-6 font-bold">
-                        <Plus className="h-5 w-5 mr-2" />
-                        Nova Célula
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-2">
+                    <Link href="/importar">
+                        <Button variant="outline" className="rounded-2xl h-11 px-4 font-bold border-2">
+                            <Download className="h-5 w-5 mr-2" />
+                            Importar
+                        </Button>
+                    </Link>
+                    <Link href="/celulas/nova">
+                        <Button className="rounded-2xl shadow-lg h-11 px-6 font-bold">
+                            <Plus className="h-5 w-5 mr-2" />
+                            Nova Célula
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* KPI Grid */}
@@ -86,8 +106,46 @@ export default async function DashboardPage() {
                 </Card>
             </div>
 
-            {/* Growth Chart */}
-            <GrowthChart data={growthData} />
+            {/* Activities & Growth */}
+            <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                    <GrowthChart data={growthData} />
+                </div>
+                <div className="space-y-4">
+                    <Card className="border-none shadow-sm h-full">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Próximos Eventos</p>
+                                <Link href="/calendario">
+                                    <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold uppercase tracking-wider text-blue-600">Ver Tudo</Button>
+                                </Link>
+                            </div>
+                            <div className="space-y-4">
+                                {upcomingEvents.length > 0 ? upcomingEvents.map(event => (
+                                    <div key={event.id} className="flex gap-4">
+                                        <div className="w-10 h-10 bg-muted rounded-xl flex flex-col items-center justify-center flex-shrink-0">
+                                            <span className="text-[10px] font-black uppercase leading-none">{format(new Date(event.start_time), 'MMM', { locale: ptBR })}</span>
+                                            <span className="text-md font-black leading-none">{format(new Date(event.start_time), 'dd')}</span>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold truncate">{event.title}</p>
+                                            <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                                <Calendar className="h-3 w-3" />
+                                                {format(new Date(event.start_time), "EEEE 'às' HH:mm", { locale: ptBR })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )) : (
+                                    <div className="text-center py-6">
+                                        <Calendar className="h-8 w-8 text-muted/30 mx-auto mb-2" />
+                                        <p className="text-xs text-muted-foreground font-medium">Nenhum evento agendado</p>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
 
             {/* Cells List with Search */}
             <CellsList cells={cells} />
