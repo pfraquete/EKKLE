@@ -20,7 +20,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-export default async function MemberDetailsPage({ params }: { params: { id: string } }) {
+export default async function MemberDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     const { member, attendance } = await getMemberDetails(id)
 
