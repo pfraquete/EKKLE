@@ -3,11 +3,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import {
-  createSubscription as createPagarmeSubscription,
+  createEkkleSubscription,
+  createEkklePlan,
   cancelSubscription as cancelPagarmeSubscription,
   getSubscription as getPagarmeSubscription,
-  createPlan,
+  getSubscriptionInvoices as getPagarmeInvoices,
   formatCurrency,
+  PagarmeError,
 } from '@/lib/pagarme';
 
 // =====================================================
@@ -53,6 +55,7 @@ export interface SubscriptionInvoice {
   due_date: string | null;
   boleto_url: string | null;
   pix_qr_code: string | null;
+  created_at?: string;
 }
 
 // =====================================================
@@ -156,10 +159,22 @@ interface CreateSubscriptionInput {
   customer: {
     name: string;
     email: string;
-    document: string; // CPF ou CNPJ
+    document: string;
     phone?: string;
   };
-  card_hash?: string;
+  card?: {
+    number: string;
+    holderName: string;
+    expMonth: number;
+    expYear: number;
+    cvv: string;
+    billingAddress?: {
+      line1: string;
+      zipCode: string;
+      city: string;
+      state: string;
+    };
+  };
 }
 
 export async function createChurchSubscription(input: CreateSubscriptionInput) {
@@ -201,16 +216,16 @@ export async function createChurchSubscription(input: CreateSubscriptionInput) {
   let pagarmePlanId = plan.pagarme_plan_id;
   if (!pagarmePlanId) {
     try {
-      const days = plan.interval === 'month' ? 30 : 365;
-      const pagarmePlan = await createPlan({
+      const pagarmePlan = await createEkklePlan({
         name: plan.name,
-        amount: plan.price_cents,
-        days: days,
-        trial_days: plan.trial_days,
-        payment_methods: ['credit_card', 'boleto'],
+        description: plan.description || '',
+        priceCents: plan.price_cents,
+        interval: plan.interval,
+        intervalCount: plan.interval_count,
+        trialDays: plan.trial_days,
       });
       
-      pagarmePlanId = pagarmePlan.id.toString();
+      pagarmePlanId = pagarmePlan.id;
       
       // Update plan with Pagar.me ID
       await supabase
@@ -224,60 +239,30 @@ export async function createChurchSubscription(input: CreateSubscriptionInput) {
   }
 
   try {
-    // Parse phone if provided
-    let phone;
-    if (input.customer.phone) {
-      const cleanPhone = input.customer.phone.replace(/\D/g, '');
-      if (cleanPhone.length >= 10) {
-        phone = {
-          ddd: cleanPhone.substring(0, 2),
-          number: cleanPhone.substring(2),
-        };
-      }
-    }
-
     // Create subscription in Pagar.me
-    const postbackUrl = process.env.NEXT_PUBLIC_APP_URL 
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/pagarme`
-      : undefined;
-
-    const pagarmeSubscription = await createPagarmeSubscription({
-      plan_id: pagarmePlanId!,
-      payment_method: input.payment_method,
+    const pagarmeSubscription = await createEkkleSubscription({
+      planId: pagarmePlanId!,
+      paymentMethod: input.payment_method,
       customer: {
         name: input.customer.name,
         email: input.customer.email,
-        document_number: input.customer.document.replace(/\D/g, ''),
-        phone,
+        document: input.customer.document,
+        phone: input.customer.phone,
       },
-      card_hash: input.card_hash,
-      postback_url: postbackUrl,
+      card: input.card,
       metadata: {
         church_id: profile.church_id,
         plan_id: plan.id,
       },
     });
 
-    // Calculate period dates
-    const now = new Date();
-    const periodEnd = new Date(now);
-    if (plan.interval === 'month') {
-      periodEnd.setMonth(periodEnd.getMonth() + plan.interval_count);
-    } else {
-      periodEnd.setFullYear(periodEnd.getFullYear() + plan.interval_count);
-    }
+    // Calculate period dates from response
+    const currentCycle = pagarmeSubscription.current_cycle;
+    const periodStart = currentCycle?.start_at || new Date().toISOString();
+    const periodEnd = currentCycle?.end_at || calculatePeriodEnd(plan.interval, plan.interval_count);
 
     // Map Pagar.me status to our status
-    const statusMap: Record<string, string> = {
-      trialing: 'trialing',
-      paid: 'active',
-      pending_payment: 'pending',
-      unpaid: 'unpaid',
-      canceled: 'canceled',
-      ended: 'expired',
-    };
-
-    const status = statusMap[pagarmeSubscription.status] || 'pending';
+    const status = mapPagarmeStatus(pagarmeSubscription.status);
 
     // Create subscription in database
     const { data: subscription, error: subscriptionError } = await supabase
@@ -285,11 +270,11 @@ export async function createChurchSubscription(input: CreateSubscriptionInput) {
       .insert({
         church_id: profile.church_id,
         plan_id: plan.id,
-        pagarme_subscription_id: pagarmeSubscription.id.toString(),
-        pagarme_customer_id: pagarmeSubscription.customer?.id?.toString(),
+        pagarme_subscription_id: pagarmeSubscription.id,
+        pagarme_customer_id: pagarmeSubscription.customer?.id,
         status,
-        current_period_start: now.toISOString(),
-        current_period_end: periodEnd.toISOString(),
+        current_period_start: periodStart,
+        current_period_end: periodEnd,
       })
       .select()
       .single();
@@ -299,21 +284,21 @@ export async function createChurchSubscription(input: CreateSubscriptionInput) {
       return { success: false, error: 'Erro ao salvar assinatura' };
     }
 
-    // Create initial invoice record
-    const currentTransaction = pagarmeSubscription.current_transaction;
-    if (currentTransaction) {
-      await supabase.from('subscription_invoices').insert({
-        subscription_id: subscription.id,
-        church_id: profile.church_id,
-        pagarme_invoice_id: currentTransaction.id?.toString(),
-        pagarme_charge_id: currentTransaction.id?.toString(),
-        amount_cents: plan.price_cents,
-        status: currentTransaction.status === 'paid' ? 'paid' : 'pending',
-        payment_method: input.payment_method,
-        paid_at: currentTransaction.status === 'paid' ? now.toISOString() : null,
-        boleto_url: currentTransaction.boleto_url,
-        boleto_barcode: currentTransaction.boleto_barcode,
-      });
+    // Get boleto URL if payment method is boleto
+    let boletoUrl: string | undefined;
+    let boletoBarcode: string | undefined;
+
+    if (input.payment_method === 'boleto') {
+      try {
+        const invoices = await getPagarmeInvoices(pagarmeSubscription.id);
+        const firstInvoice = invoices.data?.[0];
+        if (firstInvoice?.charge?.last_transaction) {
+          boletoUrl = firstInvoice.charge.last_transaction.boleto_url;
+          boletoBarcode = firstInvoice.charge.last_transaction.boleto_barcode;
+        }
+      } catch (e) {
+        console.error('Error fetching invoice:', e);
+      }
     }
 
     revalidatePath('/configuracoes/assinatura');
@@ -322,19 +307,25 @@ export async function createChurchSubscription(input: CreateSubscriptionInput) {
     return {
       success: true,
       subscription,
-      boleto_url: currentTransaction?.boleto_url,
-      boleto_barcode: currentTransaction?.boleto_barcode,
+      boleto_url: boletoUrl,
+      boleto_barcode: boletoBarcode,
     };
   } catch (error: any) {
     console.error('Error creating subscription:', error);
     
     // Parse Pagar.me error
     let errorMessage = 'Erro ao processar pagamento';
-    if (error.response?.errors) {
-      const errors = error.response.errors;
-      if (Array.isArray(errors) && errors.length > 0) {
-        errorMessage = errors.map((e: any) => e.message).join(', ');
+    if (error instanceof PagarmeError) {
+      if (error.data?.errors) {
+        const errors = error.data.errors;
+        if (Array.isArray(errors) && errors.length > 0) {
+          errorMessage = errors.map((e: any) => e.message || e.description).join(', ');
+        }
+      } else if (error.data?.message) {
+        errorMessage = error.data.message;
       }
+    } else if (error.message) {
+      errorMessage = error.message;
     }
     
     return { success: false, error: errorMessage };
@@ -376,7 +367,7 @@ export async function cancelChurchSubscription(cancelImmediately: boolean = fals
   try {
     // Cancel in Pagar.me
     if (subscription.pagarme_subscription_id) {
-      await cancelPagarmeSubscription(subscription.pagarme_subscription_id);
+      await cancelPagarmeSubscription(subscription.pagarme_subscription_id, cancelImmediately);
     }
 
     // Update in database
@@ -455,21 +446,19 @@ export async function syncSubscriptionStatus() {
   try {
     const pagarmeSubscription = await getPagarmeSubscription(subscription.pagarme_subscription_id);
     
-    const statusMap: Record<string, string> = {
-      trialing: 'trialing',
-      paid: 'active',
-      pending_payment: 'pending',
-      unpaid: 'unpaid',
-      canceled: 'canceled',
-      ended: 'expired',
-    };
-
-    const newStatus = statusMap[pagarmeSubscription.status] || subscription.status;
+    const newStatus = mapPagarmeStatus(pagarmeSubscription.status);
 
     const supabase = await createClient();
+    
+    const updateData: any = { status: newStatus };
+    
+    if (pagarmeSubscription.current_cycle?.end_at) {
+      updateData.current_period_end = pagarmeSubscription.current_cycle.end_at;
+    }
+
     await supabase
       .from('subscriptions')
-      .update({ status: newStatus })
+      .update(updateData)
       .eq('id', subscription.id);
 
     revalidatePath('/configuracoes/assinatura');
@@ -479,4 +468,28 @@ export async function syncSubscriptionStatus() {
     console.error('Error syncing subscription:', error);
     return { success: false, error: 'Erro ao sincronizar assinatura' };
   }
+}
+
+// =====================================================
+// HELPERS
+// =====================================================
+
+function mapPagarmeStatus(pagarmeStatus: string): string {
+  const statusMap: Record<string, string> = {
+    active: 'active',
+    canceled: 'canceled',
+    future: 'pending',
+    pending: 'pending',
+  };
+  return statusMap[pagarmeStatus] || pagarmeStatus;
+}
+
+function calculatePeriodEnd(interval: 'month' | 'year', intervalCount: number): string {
+  const now = new Date();
+  if (interval === 'month') {
+    now.setMonth(now.getMonth() + intervalCount);
+  } else {
+    now.setFullYear(now.getFullYear() + intervalCount);
+  }
+  return now.toISOString();
 }

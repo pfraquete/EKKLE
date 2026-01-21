@@ -8,29 +8,42 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const PAGARME_API_KEY = process.env.PAGARME_API_KEY || '';
+const PAGARME_WEBHOOK_SECRET = process.env.PAGARME_WEBHOOK_SECRET || '';
 
-// Validate Pagar.me postback signature
+// Validate Pagar.me webhook signature (API v5)
 function validateSignature(signature: string | null, payload: string): boolean {
-  if (!signature || !PAGARME_API_KEY) return false;
+  if (!signature || !PAGARME_WEBHOOK_SECRET) {
+    console.log('Missing signature or webhook secret');
+    return false;
+  }
 
+  // Pagar.me v5 usa HMAC SHA256
   const expectedSignature = crypto
-    .createHmac('sha1', PAGARME_API_KEY)
+    .createHmac('sha256', PAGARME_WEBHOOK_SECRET)
     .update(payload)
     .digest('hex');
 
-  return signature === `sha1=${expectedSignature}` || signature === expectedSignature;
+  // A assinatura pode vir com prefixo sha256= ou não
+  const cleanSignature = signature.replace('sha256=', '');
+  
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(cleanSignature),
+      Buffer.from(expectedSignature)
+    );
+  } catch {
+    // Se os buffers tiverem tamanhos diferentes
+    return cleanSignature === expectedSignature;
+  }
 }
 
-// Map Pagar.me status to our status
+// Map Pagar.me v5 status to our status
 function mapSubscriptionStatus(pagarmeStatus: string): string {
   const statusMap: Record<string, string> = {
-    trialing: 'trialing',
-    paid: 'active',
-    pending_payment: 'pending',
-    unpaid: 'unpaid',
+    active: 'active',
     canceled: 'canceled',
-    ended: 'expired',
+    future: 'pending',
+    pending: 'pending',
   };
   return statusMap[pagarmeStatus] || pagarmeStatus;
 }
@@ -38,11 +51,24 @@ function mapSubscriptionStatus(pagarmeStatus: string): string {
 function mapInvoiceStatus(pagarmeStatus: string): string {
   const statusMap: Record<string, string> = {
     paid: 'paid',
-    pending_payment: 'pending',
-    waiting_payment: 'pending',
-    refused: 'failed',
-    refunded: 'refunded',
+    pending: 'pending',
+    scheduled: 'pending',
     canceled: 'canceled',
+    failed: 'failed',
+  };
+  return statusMap[pagarmeStatus] || pagarmeStatus;
+}
+
+function mapChargeStatus(pagarmeStatus: string): string {
+  const statusMap: Record<string, string> = {
+    paid: 'paid',
+    pending: 'pending',
+    processing: 'pending',
+    failed: 'failed',
+    canceled: 'canceled',
+    overpaid: 'paid',
+    underpaid: 'pending',
+    chargedback: 'refunded',
   };
   return statusMap[pagarmeStatus] || pagarmeStatus;
 }
@@ -52,38 +78,74 @@ export async function POST(request: NextRequest) {
     const payload = await request.text();
     const signature = request.headers.get('x-hub-signature');
 
+    // Parse event data
+    let eventData: any;
+    try {
+      eventData = JSON.parse(payload);
+    } catch {
+      console.error('Invalid JSON payload');
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
+
     // Log webhook event
-    const eventData = JSON.parse(payload);
-    
+    const eventType = eventData.type || 'unknown';
+    console.log(`Received Pagar.me webhook: ${eventType}`);
+
     // Save webhook event to database
     await supabase.from('webhook_events').insert({
-      event_type: eventData.event || eventData.object || 'unknown',
+      event_type: eventType,
       pagarme_event_id: eventData.id?.toString(),
       payload: eventData,
       processed: false,
     });
 
-    // Validate signature (optional in development)
-    if (process.env.NODE_ENV === 'production') {
+    // Validate signature in production
+    if (process.env.NODE_ENV === 'production' && PAGARME_WEBHOOK_SECRET) {
       if (!validateSignature(signature, payload)) {
         console.error('Invalid webhook signature');
+        
+        // Update event with error
+        await supabase
+          .from('webhook_events')
+          .update({ error: 'Invalid signature' })
+          .eq('pagarme_event_id', eventData.id?.toString());
+          
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
       }
     }
 
-    const event = eventData.event;
-    const object = eventData.object;
+    // Process event based on type
+    const data = eventData.data;
+    
+    switch (eventType) {
+      // Subscription events
+      case 'subscription.created':
+      case 'subscription.updated':
+      case 'subscription.canceled':
+        await handleSubscriptionEvent(eventType, data);
+        break;
 
-    console.log(`Processing Pagar.me webhook: ${event} for ${object}`);
+      // Invoice events
+      case 'invoice.created':
+      case 'invoice.updated':
+      case 'invoice.paid':
+      case 'invoice.payment_failed':
+      case 'invoice.canceled':
+        await handleInvoiceEvent(eventType, data);
+        break;
 
-    // Handle subscription events
-    if (object === 'subscription') {
-      await handleSubscriptionEvent(eventData);
-    }
+      // Charge events
+      case 'charge.created':
+      case 'charge.updated':
+      case 'charge.paid':
+      case 'charge.payment_failed':
+      case 'charge.refunded':
+      case 'charge.pending':
+        await handleChargeEvent(eventType, data);
+        break;
 
-    // Handle transaction events (for invoices)
-    if (object === 'transaction') {
-      await handleTransactionEvent(eventData);
+      default:
+        console.log(`Unhandled event type: ${eventType}`);
     }
 
     // Mark event as processed
@@ -108,15 +170,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleSubscriptionEvent(eventData: any) {
-  const subscriptionId = eventData.id?.toString();
-  const status = mapSubscriptionStatus(eventData.status);
-  const currentPeriodEnd = eventData.current_period_end;
+async function handleSubscriptionEvent(eventType: string, data: any) {
+  const subscriptionId = data?.id?.toString();
+  const status = mapSubscriptionStatus(data?.status);
 
   if (!subscriptionId) {
     console.error('No subscription ID in event');
     return;
   }
+
+  console.log(`Processing subscription event: ${eventType} for ${subscriptionId}`);
 
   // Find subscription by Pagar.me ID
   const { data: subscription, error: findError } = await supabase
@@ -136,8 +199,9 @@ async function handleSubscriptionEvent(eventData: any) {
     updated_at: new Date().toISOString(),
   };
 
-  if (currentPeriodEnd) {
-    updateData.current_period_end = new Date(currentPeriodEnd).toISOString();
+  // Update period end from current cycle
+  if (data?.current_cycle?.end_at) {
+    updateData.current_period_end = data.current_cycle.end_at;
   }
 
   if (status === 'canceled') {
@@ -156,25 +220,27 @@ async function handleSubscriptionEvent(eventData: any) {
   console.log(`Subscription ${subscriptionId} updated to status: ${status}`);
 }
 
-async function handleTransactionEvent(eventData: any) {
-  const transactionId = eventData.id?.toString();
-  const status = mapInvoiceStatus(eventData.status);
-  const subscriptionId = eventData.subscription_id?.toString();
+async function handleInvoiceEvent(eventType: string, data: any) {
+  const invoiceId = data?.id?.toString();
+  const subscriptionId = data?.subscription?.id?.toString();
+  const status = mapInvoiceStatus(data?.status);
 
-  if (!transactionId) {
-    console.error('No transaction ID in event');
+  if (!invoiceId) {
+    console.error('No invoice ID in event');
     return;
   }
 
-  // Try to find invoice by transaction ID
-  let { data: invoice, error: findError } = await supabase
+  console.log(`Processing invoice event: ${eventType} for ${invoiceId}`);
+
+  // Try to find existing invoice
+  let { data: invoice } = await supabase
     .from('subscription_invoices')
     .select('*')
-    .eq('pagarme_charge_id', transactionId)
+    .eq('pagarme_invoice_id', invoiceId)
     .single();
 
-  // If not found by charge ID, try to find by subscription and create new invoice
-  if (findError && subscriptionId) {
+  // If not found, try to create from subscription
+  if (!invoice && subscriptionId) {
     const { data: subscription } = await supabase
       .from('subscriptions')
       .select('*, plan:subscription_plans(*)')
@@ -182,19 +248,25 @@ async function handleTransactionEvent(eventData: any) {
       .single();
 
     if (subscription) {
-      // Create new invoice record
+      const charge = data?.charge;
+      const lastTransaction = charge?.last_transaction;
+
       const { data: newInvoice, error: insertError } = await supabase
         .from('subscription_invoices')
         .insert({
           subscription_id: subscription.id,
           church_id: subscription.church_id,
-          pagarme_charge_id: transactionId,
-          amount_cents: eventData.amount || subscription.plan?.price_cents || 0,
+          pagarme_invoice_id: invoiceId,
+          pagarme_charge_id: charge?.id?.toString(),
+          amount_cents: data?.amount || subscription.plan?.price_cents || 0,
           status,
-          payment_method: eventData.payment_method,
+          payment_method: charge?.payment_method,
           paid_at: status === 'paid' ? new Date().toISOString() : null,
-          boleto_url: eventData.boleto_url,
-          boleto_barcode: eventData.boleto_barcode,
+          due_date: data?.due_at,
+          boleto_url: lastTransaction?.boleto_url,
+          boleto_barcode: lastTransaction?.boleto_barcode,
+          pix_qr_code: lastTransaction?.qr_code,
+          pix_qr_code_url: lastTransaction?.qr_code_url,
         })
         .select()
         .single();
@@ -218,9 +290,18 @@ async function handleTransactionEvent(eventData: any) {
       updateData.paid_at = new Date().toISOString();
     }
 
-    if (eventData.boleto_url) {
-      updateData.boleto_url = eventData.boleto_url;
-      updateData.boleto_barcode = eventData.boleto_barcode;
+    // Update boleto/pix info if available
+    const charge = data?.charge;
+    const lastTransaction = charge?.last_transaction;
+    
+    if (lastTransaction?.boleto_url) {
+      updateData.boleto_url = lastTransaction.boleto_url;
+      updateData.boleto_barcode = lastTransaction.boleto_barcode;
+    }
+    
+    if (lastTransaction?.qr_code) {
+      updateData.pix_qr_code = lastTransaction.qr_code;
+      updateData.pix_qr_code_url = lastTransaction.qr_code_url;
     }
 
     const { error: updateError } = await supabase
@@ -232,7 +313,7 @@ async function handleTransactionEvent(eventData: any) {
       console.error('Error updating invoice:', updateError);
     }
 
-    console.log(`Invoice ${invoice.id} updated to status: ${status}`);
+    console.log(`Invoice ${invoiceId} updated to status: ${status}`);
 
     // If payment was successful, ensure subscription is active
     if (status === 'paid' && subscriptionId) {
@@ -244,7 +325,75 @@ async function handleTransactionEvent(eventData: any) {
   }
 }
 
+async function handleChargeEvent(eventType: string, data: any) {
+  const chargeId = data?.id?.toString();
+  const status = mapChargeStatus(data?.status);
+
+  if (!chargeId) {
+    console.error('No charge ID in event');
+    return;
+  }
+
+  console.log(`Processing charge event: ${eventType} for ${chargeId}`);
+
+  // Find invoice by charge ID
+  const { data: invoice, error: findError } = await supabase
+    .from('subscription_invoices')
+    .select('*, subscription:subscriptions(*)')
+    .eq('pagarme_charge_id', chargeId)
+    .single();
+
+  if (findError || !invoice) {
+    console.log('Invoice not found for charge:', chargeId);
+    return;
+  }
+
+  // Update invoice status
+  const updateData: any = {
+    status,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (status === 'paid') {
+    updateData.paid_at = new Date().toISOString();
+  }
+
+  // Update boleto/pix info
+  const lastTransaction = data?.last_transaction;
+  if (lastTransaction?.boleto_url) {
+    updateData.boleto_url = lastTransaction.boleto_url;
+    updateData.boleto_barcode = lastTransaction.boleto_barcode;
+  }
+  if (lastTransaction?.qr_code) {
+    updateData.pix_qr_code = lastTransaction.qr_code;
+    updateData.pix_qr_code_url = lastTransaction.qr_code_url;
+  }
+
+  const { error: updateError } = await supabase
+    .from('subscription_invoices')
+    .update(updateData)
+    .eq('id', invoice.id);
+
+  if (updateError) {
+    console.error('Error updating invoice from charge:', updateError);
+  }
+
+  // Update subscription status if charge was paid
+  if (status === 'paid' && invoice.subscription) {
+    await supabase
+      .from('subscriptions')
+      .update({ status: 'active' })
+      .eq('id', invoice.subscription.id);
+  }
+
+  console.log(`Invoice ${invoice.id} updated from charge ${chargeId} to status: ${status}`);
+}
+
 // Handle GET requests (for webhook verification)
 export async function GET() {
-  return NextResponse.json({ status: 'Webhook endpoint active' });
+  return NextResponse.json({ 
+    status: 'Webhook endpoint active',
+    endpoint: '/api/webhooks/pagarme',
+    version: 'v5'
+  });
 }

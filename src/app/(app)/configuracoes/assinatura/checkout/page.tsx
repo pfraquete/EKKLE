@@ -148,26 +148,12 @@ export default function CheckoutPage() {
         }
       }
 
-      // Generate card hash if using credit card
-      let cardHash: string | undefined;
+      // Validate card data if using credit card
       if (paymentMethod === 'credit_card') {
-        // In production, use Pagar.me's encryption key to generate card hash
-        // For now, we'll send the card data directly (not recommended for production)
         const expiryParts = formData.cardExpiry.split('/');
-        const cardData = {
-          card_number: formData.cardNumber.replace(/\s/g, ''),
-          card_holder_name: formData.cardHolder,
-          card_expiration_date: expiryParts[0] + expiryParts[1],
-          card_cvv: formData.cardCvv,
-        };
-
-        // In a real implementation, you would use:
-        // const pagarme = await import('pagarme');
-        // const client = await pagarme.client.connect({ encryption_key: 'ek_test_xxx' });
-        // cardHash = await client.security.encrypt(cardData);
-        
-        // For now, we'll encode it (NOT SECURE - only for development)
-        cardHash = btoa(JSON.stringify(cardData));
+        if (expiryParts.length !== 2) {
+          throw new Error('Data de validade inválida');
+        }
       }
 
       const result = await createChurchSubscription({
@@ -179,7 +165,13 @@ export default function CheckoutPage() {
           document: formData.document.replace(/\D/g, ''),
           phone: formData.phone,
         },
-        card_hash: cardHash,
+        card: paymentMethod === 'credit_card' ? {
+          number: formData.cardNumber.replace(/\s/g, ''),
+          holderName: formData.cardHolder,
+          expMonth: parseInt(formData.cardExpiry.split('/')[0]),
+          expYear: 2000 + parseInt(formData.cardExpiry.split('/')[1]),
+          cvv: formData.cardCvv,
+        } : undefined,
       });
 
       if (!result.success) {
