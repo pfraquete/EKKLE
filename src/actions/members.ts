@@ -143,3 +143,56 @@ export async function getMembers(cellId: string) {
     if (error) return []
     return data
 }
+
+export async function getMemberDetails(id: string) {
+    const supabase = await createClient()
+
+    // 1. Get profile/member info
+    const { data: member, error: memberError } = await supabase
+        .from('profiles')
+        .select(`
+            *,
+            cell:cells (
+                id,
+                name
+            )
+        `)
+        .eq('id', id)
+        .single()
+
+    if (memberError) {
+        // Try 'members' table if not in 'profiles'
+        const { data: m, error: mError } = await supabase
+            .from('members')
+            .select(`
+                *,
+                cell:cells (
+                    id,
+                    name
+                )
+            `)
+            .eq('id', id)
+            .single()
+
+        if (mError) throw mError
+        return { member: m, attendance: [] } // Members don't have attendance yet in the same way? Or they do?
+    }
+
+    // 2. Get attendance history
+    const { data: attendance } = await supabase
+        .from('attendance')
+        .select(`
+            id,
+            context_type,
+            context_date,
+            status,
+            checked_in_by_profile:profiles!attendance_checked_in_by_fkey (
+                full_name
+            )
+        `)
+        .eq('profile_id', id)
+        .order('context_date', { ascending: false })
+        .limit(20)
+
+    return { member, attendance: attendance || [] }
+}

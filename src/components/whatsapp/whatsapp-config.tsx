@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MessageSquare, RefreshCw, LogOut, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { MessageSquare, RefreshCw, LogOut, CheckCircle2, AlertCircle, Loader2, Settings2 } from 'lucide-react'
 import { setupWhatsApp, disconnectWhatsApp, checkWhatsAppStatus } from '@/actions/whatsapp'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 interface WhatsAppConfigProps {
     churchId: string
@@ -119,6 +120,19 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
                         </div>
                     ) : (
                         <div className="space-y-6">
+                            <div className="flex items-center justify-between p-4 bg-green-500/5 rounded-2xl border border-green-500/10 mb-4">
+                                <div className="space-y-0.5">
+                                    <p className="text-sm font-bold text-green-700">Automações Ativas</p>
+                                    <p className="text-[10px] text-green-600/70">As mensagens automáticas estão configuradas.</p>
+                                </div>
+                                <Link href="/configuracoes/whatsapp/templates">
+                                    <Button variant="outline" size="sm" className="bg-white hover:bg-green-50 border-green-200 text-green-600 font-bold h-8">
+                                        <Settings2 className="h-3.5 w-3.5 mr-2" />
+                                        Personalizar Mensagens
+                                    </Button>
+                                </Link>
+                            </div>
+
                             {instance.status !== 'CONNECTED' && instance.qr_code && (
                                 <div className="flex flex-col items-center space-y-4 p-6 bg-muted/30 rounded-2xl border-2 border-dashed border-muted">
                                     <div className="bg-white p-4 rounded-xl shadow-inner">
