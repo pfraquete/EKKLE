@@ -1,9 +1,10 @@
 import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { ProfileForm } from '@/components/forms/profile-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Smartphone } from 'lucide-react'
+import { Smartphone, Globe, MessageSquare, ChevronRight } from 'lucide-react'
 
 export default async function SettingsPage() {
     const profile = await getProfile()
@@ -19,6 +20,46 @@ export default async function SettingsPage() {
             </div>
 
             <ProfileForm profile={profile} />
+
+            {/* Additional Settings - Only for Pastors */}
+            {profile.role === 'PASTOR' && (
+                <Card className="border-none shadow-lg rounded-3xl">
+                    <CardHeader>
+                        <CardTitle className="text-lg font-bold text-foreground">
+                            Configurações Adicionais
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <Link
+                            href="/configuracoes/site"
+                            className="flex items-center justify-between p-4 bg-muted/40 rounded-2xl hover:bg-muted/60 transition-colors"
+                        >
+                            <div className="flex items-center gap-3">
+                                <Globe className="h-5 w-5 text-primary" />
+                                <div>
+                                    <p className="text-sm font-bold text-foreground">Site Público</p>
+                                    <p className="text-xs text-muted-foreground">Configure o site da igreja</p>
+                                </div>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </Link>
+
+                        <Link
+                            href="/configuracoes/whatsapp"
+                            className="flex items-center justify-between p-4 bg-muted/40 rounded-2xl hover:bg-muted/60 transition-colors"
+                        >
+                            <div className="flex items-center gap-3">
+                                <MessageSquare className="h-5 w-5 text-primary" />
+                                <div>
+                                    <p className="text-sm font-bold text-foreground">WhatsApp</p>
+                                    <p className="text-xs text-muted-foreground">Integração e templates</p>
+                                </div>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </Link>
+                    </CardContent>
+                </Card>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* App Status Card */}
