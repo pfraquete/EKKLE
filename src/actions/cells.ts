@@ -63,7 +63,7 @@ export async function createCell(formData: FormData) {
                 // 3. Create new user via Admin API
                 const { data: newUser, error: createError } = await adminSupabase.auth.admin.createUser({
                     email: leaderEmail,
-                    password: 'videirasjc',
+                    password: 'ekkle2026',
                     email_confirm: true,
                     user_metadata: {
                         full_name: leaderName,

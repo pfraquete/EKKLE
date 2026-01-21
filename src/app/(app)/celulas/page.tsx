@@ -19,7 +19,7 @@ export default async function CellsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-black text-foreground">Células</h1>
-                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Gestão de grupos • Videira SJC</p>
+                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Gestão de grupos • Ekkle</p>
                 </div>
                 <Link href="/celulas/nova">
                     <Button className="rounded-2xl shadow-lg h-11 px-6 font-bold">

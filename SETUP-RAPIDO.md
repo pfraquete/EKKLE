@@ -58,7 +58,7 @@ VALUES (
 
 ### 5️⃣ Teste o Login
 
-1. Acesse: https://www.meuacesso.pro
+1. Acesse: https://ekkle.up.railway.app
 2. Faça login com:
    - Email: o que você criou no passo 3
    - Senha: a que você criou no passo 3
@@ -78,7 +78,7 @@ Se seguiu os passos corretamente, o sistema vai funcionar! Você deve ser redire
 3. **Variáveis de ambiente**: Confirme no Railway que as variáveis estão corretas:
    - `NEXT_PUBLIC_SUPABASE_URL`: https://lzykenasmeyeznbyvtat.supabase.co
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: (a chave que já está configurada)
-   - `NEXT_PUBLIC_APP_URL`: https://www.meuacesso.pro
+   - `NEXT_PUBLIC_APP_URL`: https://ekkle.up.railway.app
 
 ---
 

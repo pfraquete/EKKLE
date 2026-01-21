@@ -47,7 +47,7 @@ export default async function ForgotPasswordPage({
                             id="email"
                             name="email"
                             type="email"
-                            placeholder="exemplo@igreja.com"
+                            placeholder="exemplo@ekkle.com"
                             required
                             className="h-11"
                         />

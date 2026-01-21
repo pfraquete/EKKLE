@@ -14,7 +14,7 @@ export default async function SettingsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-black text-foreground">Configurações</h1>
-                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Perfil e Preferências • Videira SJC</p>
+                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Perfil e Preferências • Ekkle</p>
                 </div>
             </div>
 
@@ -53,7 +53,7 @@ export default async function SettingsPage() {
 
             {/* Footer */}
             <div className="text-center pt-8 opacity-40">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Desenvolvido para Videira SJC</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Desenvolvido para Ekkle</p>
             </div>
         </div>
     )

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Videira SJC • Gestão de Células",
-  description: "Sistema de gestão de células da Videira São José dos Campos",
+  title: "Ekkle • Gestão de Células",
+  description: "Sistema de gestão de células Ekkle",
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',

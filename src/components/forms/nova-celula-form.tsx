@@ -96,7 +96,7 @@ export function NovaCelulaForm({ churchId }: NovaCelulaFormProps) {
                                         />
                                     </div>
                                     <p className="text-[10px] text-muted-foreground font-medium px-1">
-                                        Se o líder não tiver conta, uma será criada com a senha padrão <strong>videirasjc</strong>.
+                                        Se o líder não tiver conta, uma será criada com a senha padrão <strong>ekkle2026</strong>.
                                     </p>
                                 </div>
                             </div>

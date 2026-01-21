@@ -36,7 +36,7 @@ export default async function MinhaCelulaPage() {
                 </div>
                 <h2 className="text-2xl font-black text-foreground mb-3">Sem Célula Vinculada</h2>
                 <p className="text-muted-foreground max-w-sm mx-auto font-medium leading-relaxed">
-                    Você ainda não foi vinculado como líder. <br />Entre em contato com a secretaria da igreja para regularizar seu acesso.
+                    Você ainda não foi vinculado como líder. <br />Entre em contato com a administração para regularizar seu acesso.
                 </p>
                 <Button variant="outline" className="mt-8 rounded-2xl font-bold h-12 px-8" asChild>
                     <Link href="/dashboard">Voltar ao Dashboard</Link>
