@@ -4,18 +4,26 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MessageSquare, RefreshCw, LogOut, CheckCircle2, AlertCircle, Loader2, Settings2 } from 'lucide-react'
+import { MessageSquare, RefreshCw, LogOut, CheckCircle2, Loader2, Settings2 } from 'lucide-react'
 import { setupWhatsApp, disconnectWhatsApp, checkWhatsAppStatus } from '@/actions/whatsapp'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import Image from 'next/image'
+
+interface WhatsAppInstance {
+    instance_name: string
+    status: string
+    qr_code?: string
+    last_ping?: string
+}
 
 interface WhatsAppConfigProps {
     churchId: string
-    initialInstance: any
+    initialInstance: WhatsAppInstance | null
 }
 
 export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProps) {
-    const [instance, setInstance] = useState(initialInstance)
+    const [instance, setInstance] = useState<WhatsAppInstance | null>(initialInstance)
     const [loading, setLoading] = useState(false)
     const [checking, setChecking] = useState(false)
 
@@ -26,7 +34,7 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
             interval = setInterval(async () => {
                 const status = await checkWhatsAppStatus(churchId, instance.instance_name)
                 if (status === 'CONNECTED') {
-                    setInstance((prev: any) => ({ ...prev, status: 'CONNECTED' }))
+                    setInstance((prev) => prev ? ({ ...prev, status: 'CONNECTED' }) : null)
                     toast.success('WhatsApp conectado com sucesso!')
                     clearInterval(interval)
                 }
@@ -40,9 +48,9 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
         setLoading(true)
         try {
             await setupWhatsApp(churchId)
-            // Re-fetch or update state
-            window.location.reload() // Simple way to refresh state from server
-        } catch (error) {
+            window.location.reload()
+        } catch (err) {
+            console.error('Setup WhatsApp error:', err)
             toast.error('Erro ao configurar WhatsApp')
         } finally {
             setLoading(false)
@@ -50,13 +58,15 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
     }
 
     const handleDisconnect = async () => {
+        if (!instance) return
         if (!confirm('Tem certeza que deseja desconectar o WhatsApp?')) return
         setLoading(true)
         try {
             await disconnectWhatsApp(churchId, instance.instance_name)
             setInstance(null)
             toast.success('WhatsApp desconectado')
-        } catch (error) {
+        } catch (err) {
+            console.error('Disconnect error:', err)
             toast.error('Erro ao desconectar')
         } finally {
             setLoading(false)
@@ -64,13 +74,15 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
     }
 
     const handleCheckStatus = async () => {
+        if (!instance) return
         setChecking(true)
         try {
             const status = await checkWhatsAppStatus(churchId, instance.instance_name)
-            setInstance((prev: any) => ({ ...prev, status }))
+            setInstance((prev) => prev ? ({ ...prev, status }) : null)
             if (status === 'CONNECTED') toast.success('WhatsApp está conectado')
             else toast.info('WhatsApp ainda não está conectado')
-        } catch (error) {
+        } catch (err) {
+            console.error('Check status error:', err)
             toast.error('Erro ao verificar status')
         } finally {
             setChecking(false)
@@ -135,11 +147,12 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
 
                             {instance.status !== 'CONNECTED' && instance.qr_code && (
                                 <div className="flex flex-col items-center space-y-4 p-6 bg-muted/30 rounded-2xl border-2 border-dashed border-muted">
-                                    <div className="bg-white p-4 rounded-xl shadow-inner">
-                                        <img
+                                    <div className="bg-white p-4 rounded-xl shadow-inner relative w-64 h-64">
+                                        <Image
                                             src={instance.qr_code}
                                             alt="WhatsApp QR Code"
-                                            className="w-64 h-64"
+                                            fill
+                                            className="object-contain"
                                         />
                                     </div>
                                     <div className="text-center space-y-2">

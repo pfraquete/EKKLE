@@ -8,11 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
     ChevronLeft,
     Calendar,
-    User,
     Home,
     Phone,
     Mail,
-    TrendingUp,
     Clock,
     CheckCircle2,
     XCircle

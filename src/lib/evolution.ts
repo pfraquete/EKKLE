@@ -19,6 +19,22 @@ export interface EvolutionInstance {
     profilePicture?: string;
 }
 
+export interface EvolutionResponse {
+    success?: boolean;
+    message?: string;
+    [key: string]: unknown;
+}
+
+export interface EvolutionQrResponse {
+    base64: string;
+}
+
+export interface EvolutionStateResponse {
+    instance: {
+        state: ConnectionState;
+    };
+}
+
 export class EvolutionService {
     private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const url = `${EVOLUTION_API_URL}${endpoint}`;
@@ -31,18 +47,18 @@ export class EvolutionService {
         const response = await fetch(url, { ...options, headers });
 
         if (!response.ok) {
-            const error = await response.json().catch(() => ({ message: 'Unknown error' }));
+            const error = (await response.json().catch(() => ({ message: 'Unknown error' }))) as { message?: string };
             throw new Error(error.message || `Evolution API error: ${response.status}`);
         }
 
-        return response.json();
+        return response.json() as Promise<T>;
     }
 
     /**
      * Create a new WhatsApp instance
      */
-    static async createInstance(instanceName: string): Promise<any> {
-        return this.request('/instance/create', {
+    static async createInstance(instanceName: string): Promise<EvolutionResponse> {
+        return this.request<EvolutionResponse>('/instance/create', {
             method: 'POST',
             body: JSON.stringify({
                 instanceName,
@@ -56,7 +72,7 @@ export class EvolutionService {
      * Get QR Code for an instance
      */
     static async getQrCode(instanceName: string): Promise<{ base64: string }> {
-        const response = await this.request<any>(`/instance/connect/${instanceName}`);
+        const response = await this.request<EvolutionQrResponse>(`/instance/connect/${instanceName}`);
         return { base64: response.base64 };
     }
 
@@ -64,7 +80,7 @@ export class EvolutionService {
      * Get connection state
      */
     static async getConnectionState(instanceName: string): Promise<ConnectionState> {
-        const response = await this.request<any>(`/instance/connectionState/${instanceName}`);
+        const response = await this.request<EvolutionStateResponse>(`/instance/connectionState/${instanceName}`);
         return response.instance.state;
     }
 
@@ -89,8 +105,8 @@ export class EvolutionService {
     /**
      * Send a text message
      */
-    static async sendText(instanceName: string, to: string, text: string): Promise<any> {
-        return this.request(`/message/sendText/${instanceName}`, {
+    static async sendText(instanceName: string, to: string, text: string): Promise<EvolutionResponse> {
+        return this.request<EvolutionResponse>(`/message/sendText/${instanceName}`, {
             method: 'POST',
             body: JSON.stringify({
                 number: to,
@@ -107,10 +123,10 @@ export class EvolutionService {
     }
 
     /**
-     * Send buttons (Evolution API 1.x / 2.x support may vary)
+     * Send buttons
      */
-    static async sendButtons(instanceName: string, to: string, text: string, footer: string, buttons: any[]): Promise<any> {
-        return this.request(`/message/sendButtons/${instanceName}`, {
+    static async sendButtons(instanceName: string, to: string, text: string, footer: string, buttons: unknown[]): Promise<EvolutionResponse> {
+        return this.request<EvolutionResponse>(`/message/sendButtons/${instanceName}`, {
             method: 'POST',
             body: JSON.stringify({
                 number: to,

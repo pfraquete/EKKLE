@@ -3,9 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { upsertTemplate, MessageTemplate } from '@/actions/templates'
 import { toast } from 'sonner'
@@ -16,7 +14,9 @@ interface TemplateEditorProps {
     initialTemplates: MessageTemplate[]
 }
 
-const CATEGORIES = [
+type TemplateCategory = 'BIRTHDAY' | 'REMINDER' | 'WELCOME' | 'CUSTOM'
+
+const CATEGORIES: { value: TemplateCategory; label: string }[] = [
     { value: 'BIRTHDAY', label: 'Aniversário' },
     { value: 'REMINDER', label: 'Lembrete de Reunião' },
     { value: 'WELCOME', label: 'Boas-vindas' },
@@ -25,20 +25,22 @@ const CATEGORIES = [
 
 export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorProps) {
     const [templates, setTemplates] = useState<Partial<MessageTemplate>[]>(initialTemplates)
-    const [activeTab, setActiveTab] = useState(initialTemplates[0]?.category || 'BIRTHDAY')
+    const [activeTab, setActiveTab] = useState<TemplateCategory>(
+        (initialTemplates[0]?.category as TemplateCategory) || 'BIRTHDAY'
+    )
     const [loading, setLoading] = useState(false)
 
-    const getCurrentTemplate = (category: string) => {
+    const getCurrentTemplate = (category: TemplateCategory) => {
         return templates.find(t => t.category === category) || {
             church_id: churchId,
-            category: category as any,
+            category: category,
             name: `Template de ${category}`,
             content: '',
             is_active: true
         }
     }
 
-    const handleSave = async (category: string) => {
+    const handleSave = async (category: TemplateCategory) => {
         const template = getCurrentTemplate(category)
         if (!template.content) {
             toast.error('O conteúdo do template não pode estar vazio')
@@ -47,28 +49,31 @@ export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorPro
 
         setLoading(true)
         try {
-            const { data, error } = await upsertTemplate(template as any)
-            if (error) throw error
+            const { data, error: upsertError } = await upsertTemplate(template as any)
+            if (upsertError) throw upsertError
 
-            setTemplates(prev => {
-                const index = prev.findIndex(t => t.category === category)
-                if (index >= 0) {
-                    const next = [...prev]
-                    next[index] = data
-                    return next
-                }
-                return [...prev, data]
-            })
+            if (data) {
+                setTemplates(prev => {
+                    const index = prev.findIndex(t => t.category === category)
+                    if (index >= 0) {
+                        const next = [...prev]
+                        next[index] = data
+                        return next
+                    }
+                    return [...prev, data]
+                })
+            }
 
             toast.success('Template salvo com sucesso!')
         } catch (error) {
+            console.error('Save template error:', error)
             toast.error('Erro ao salvar template')
         } finally {
             setLoading(false)
         }
     }
 
-    const updateContent = (category: string, content: string) => {
+    const updateContent = (category: TemplateCategory, content: string) => {
         setTemplates(prev => {
             const index = prev.findIndex(t => t.category === category)
             if (index >= 0) {
@@ -76,7 +81,7 @@ export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorPro
                 next[index] = { ...next[index], content }
                 return next
             }
-            return [...prev, { church_id: churchId, category: category as any, content, is_active: true, name: `Template de ${category}` }]
+            return [...prev, { church_id: churchId, category: category, content, is_active: true, name: `Template de ${category}` }]
         })
     }
 
@@ -89,7 +94,7 @@ export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorPro
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <Tabs value={activeTab} onValueChange={setActiveTab as any} className="space-y-6">
+                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TemplateCategory)} className="space-y-6">
                     <TabsList className="grid grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50">
                         {CATEGORIES.map(cat => (
                             <TabsTrigger key={cat.value} value={cat.value} className="py-2 text-xs font-bold uppercase tracking-wider">

@@ -160,7 +160,8 @@ export async function sendBirthdayGreetings() {
             ...(profiles || []),
             ...(members || [])
         ].filter(person => {
-            const b = new Date(person.birthday as any)
+            if (!person.birthday) return false
+            const b = new Date(person.birthday)
             return b.getDate() === day && (b.getMonth() + 1) === month
         })
 
