@@ -16,19 +16,7 @@ export default async function LoginPage({
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col items-center justify-center space-y-2">
-                <div className="relative w-24 h-24 mb-2">
-                    <Image
-                        src="/logo.png"
-                        alt="Ekkle Logo"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
-                </div>
-                <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase">Ekkle</h1>
-                <p className="text-sm text-muted-foreground font-medium">Gestão de Células & Liderança</p>
-            </div>
+
 
             <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-card">
                 <CardHeader className="space-y-1 bg-muted/50 border-b border-border">
