@@ -169,3 +169,50 @@ export async function getChurchMembers(churchId: string) {
     }
     return data
 }
+
+export interface GrowthData {
+    month: string
+    members: number
+    visitors: number
+}
+
+export async function getGrowthData(churchId: string): Promise<GrowthData[]> {
+    const supabase = await createClient()
+
+    // Get last 6 months of data
+    const months = []
+    const now = new Date()
+
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const monthName = date.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')
+        const startDate = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]
+        const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]
+
+        // Count members created in this month
+        const { count: membersCount } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('church_id', churchId)
+            .in('member_stage', ['MEMBER', 'LEADER'])
+            .gte('created_at', startDate)
+            .lte('created_at', endDate)
+
+        // Count visitors in this month
+        const { count: visitorsCount } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('church_id', churchId)
+            .in('member_stage', ['VISITOR', 'REGULAR_VISITOR'])
+            .gte('created_at', startDate)
+            .lte('created_at', endDate)
+
+        months.push({
+            month: monthName,
+            members: membersCount || 0,
+            visitors: visitorsCount || 0
+        })
+    }
+
+    return months
+}

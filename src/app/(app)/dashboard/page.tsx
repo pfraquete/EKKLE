@@ -1,4 +1,4 @@
-import { getPastorDashboardData, getAllCellsOverview } from '@/actions/admin'
+import { getPastorDashboardData, getAllCellsOverview, getGrowthData } from '@/actions/admin'
 import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { CellsList } from '@/components/dashboard/cells-list'
+import { GrowthChart } from '@/components/dashboard/growth-chart'
 
 export default async function DashboardPage() {
     const profile = await getProfile()
@@ -25,6 +26,7 @@ export default async function DashboardPage() {
     // Only PASTOR continues here
     const { stats } = await getPastorDashboardData(profile.church_id)
     const cells = await getAllCellsOverview(profile.church_id)
+    const growthData = await getGrowthData(profile.church_id)
 
     return (
         <div className="space-y-6 pb-20">
@@ -83,6 +85,9 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Growth Chart */}
+            <GrowthChart data={growthData} />
 
             {/* Cells List with Search */}
             <CellsList cells={cells} />

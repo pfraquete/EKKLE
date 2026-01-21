@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { checkRateLimit, RateLimitError } from '@/lib/rate-limit'
+import { getProfile } from './auth'
 
 const memberSchema = z.object({
     fullName: z.string().min(3),
@@ -15,6 +17,20 @@ const memberSchema = z.object({
 })
 
 export async function createMember(formData: FormData) {
+    // Rate limiting: max 5 member creations per minute per user
+    const profile = await getProfile()
+    if (profile) {
+        const rateLimitResult = await checkRateLimit({
+            identifier: `create-member:${profile.id}`,
+            max: 5,
+            window: 60000 // 1 minute
+        })
+
+        if (!rateLimitResult.success) {
+            throw new RateLimitError(rateLimitResult.resetAt, rateLimitResult.limit)
+        }
+    }
+
     const supabase = await createClient()
 
     const rawData = {
@@ -28,6 +44,24 @@ export async function createMember(formData: FormData) {
     }
 
     const validatedData = memberSchema.parse(rawData)
+
+    // Check for duplicates before creating
+    const { data: existingMember } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, phone')
+        .eq('church_id', validatedData.churchId)
+        .or(`email.eq.${validatedData.email},phone.eq.${validatedData.phone}`)
+        .limit(1)
+        .single()
+
+    if (existingMember) {
+        if (existingMember.email === validatedData.email && validatedData.email) {
+            throw new Error(`Já existe um membro com o email "${validatedData.email}"`)
+        }
+        if (existingMember.phone === validatedData.phone && validatedData.phone) {
+            throw new Error(`Já existe um membro com o telefone "${validatedData.phone}"`)
+        }
+    }
 
     const { error } = await supabase
         .from('profiles')
