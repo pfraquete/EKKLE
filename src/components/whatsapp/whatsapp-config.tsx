@@ -26,6 +26,11 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
     const [instance, setInstance] = useState<WhatsAppInstance | null>(initialInstance)
     const [loading, setLoading] = useState(false)
     const [checking, setChecking] = useState(false)
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
 
     useEffect(() => {
         let interval: NodeJS.Timeout
@@ -176,7 +181,7 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium text-muted-foreground">Última Verificação</p>
                                     <p className="text-sm">
-                                        {instance.last_ping ? new Date(instance.last_ping).toLocaleString('pt-BR') : 'Nunca verificada'}
+                                        {isMounted && instance.last_ping ? new Date(instance.last_ping).toLocaleString('pt-BR') : 'Nunca verificada'}
                                     </p>
                                 </div>
                             </div>

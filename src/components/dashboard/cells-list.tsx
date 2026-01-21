@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -29,6 +29,11 @@ interface CellsListProps {
 
 export function CellsList({ cells }: CellsListProps) {
     const [searchTerm, setSearchTerm] = useState('')
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
 
     // Filter cells based on search term
     const filteredCells = cells.filter(cell => {
@@ -91,7 +96,7 @@ export function CellsList({ cells }: CellsListProps) {
                                     <div className="hidden sm:block text-right">
                                         <p className="text-sm font-bold text-foreground">{cell.membersCount} membros</p>
                                         <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5">
-                                            {cell.lastMeetingDate ? format(new Date(cell.lastMeetingDate), "dd MMM", { locale: ptBR }) : 'Sem reunião'}
+                                            {isMounted && cell.lastMeetingDate ? format(new Date(cell.lastMeetingDate), "dd MMM", { locale: ptBR }) : 'Sem reunião'}
                                         </p>
                                     </div>
 
