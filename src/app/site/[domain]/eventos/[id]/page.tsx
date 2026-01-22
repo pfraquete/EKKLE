@@ -3,7 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Calendar, MapPin, Clock, ArrowLeft } from 'lucide-react'
+import { Calendar, MapPin, Clock, ArrowLeft, Users, DollarSign } from 'lucide-react'
+import { EventRegistrationButton } from '@/components/events/event-registration-button'
+import { getMyEventRegistration, getEventRegistrationCount } from '@/actions/event-registrations'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -32,6 +34,21 @@ export default async function EventoPage({ params }: PageProps) {
   }
 
   const isUpcoming = new Date(event.start_date) >= new Date()
+
+  // Check if user is authenticated
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Get existing registration if user is logged in
+  let existingRegistration = null
+  if (user) {
+    const result = await getMyEventRegistration(id)
+    existingRegistration = result.registration
+  }
+
+  // Get registration count and calculate capacity
+  const { count: registrationCount } = await getEventRegistrationCount(id)
+  const spotsLeft = event.capacity ? event.capacity - registrationCount : null
+  const isFull = event.capacity ? registrationCount >= event.capacity : false
 
   return (
     <div className="py-12">
@@ -145,31 +162,67 @@ export default async function EventoPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* CTA */}
+            {/* Capacity & Price Info */}
+            {isUpcoming && (
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {event.capacity && (
+                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                    <Users className="w-6 h-6 text-blue-600" />
+                    <div>
+                      <div className="text-sm text-gray-600">Capacidade</div>
+                      <div className="font-semibold text-lg">
+                        {registrationCount} / {event.capacity} inscritos
+                        {spotsLeft !== null && spotsLeft > 0 && (
+                          <span className="text-sm text-green-600 ml-2">
+                            ({spotsLeft} vagas restantes)
+                          </span>
+                        )}
+                        {isFull && (
+                          <span className="text-sm text-red-600 ml-2">
+                            (Lotado)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {event.is_paid && event.price && (
+                  <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
+                    <DollarSign className="w-6 h-6 text-green-600" />
+                    <div>
+                      <div className="text-sm text-gray-600">Investimento</div>
+                      <div className="font-semibold text-lg">
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        }).format(event.price)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Registration CTA */}
             {isUpcoming && (
               <div className="mt-8 p-6 bg-primary/5 rounded-lg border border-primary/20">
                 <h3 className="font-bold text-xl mb-2">Participe deste evento!</h3>
                 <p className="text-gray-600 mb-4">
-                  Entre em contato conosco para mais informações ou para confirmar sua presença.
+                  {!user
+                    ? 'Faça login para se inscrever neste evento.'
+                    : existingRegistration
+                    ? 'Você já está inscrito neste evento.'
+                    : 'Clique no botão abaixo para confirmar sua presença.'
+                  }
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  {church.whatsapp_url && (
-                    <a
-                      href={church.whatsapp_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-                    >
-                      Entrar em Contato
-                    </a>
-                  )}
-                  <Link
-                    href="/membro"
-                    className="bg-white border-2 border-primary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-primary/5 transition-colors"
-                  >
-                    Criar Conta
-                  </Link>
-                </div>
+
+                <EventRegistrationButton
+                  event={event}
+                  existingRegistration={existingRegistration}
+                  isAuthenticated={!!user}
+                  isFull={isFull}
+                  spotsLeft={spotsLeft}
+                />
               </div>
             )}
           </div>
