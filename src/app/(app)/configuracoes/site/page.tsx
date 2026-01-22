@@ -37,7 +37,7 @@ export default async function SiteConfigPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Configurações do Site</h1>
+        <h1 className="text-3xl font-bold text-foreground">Configurações do Site</h1>
         <p className="text-muted-foreground mt-2">
           Configure as informações públicas do site da sua igreja
         </p>
@@ -56,7 +56,7 @@ export default async function SiteConfigPage() {
                 <Palette className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">
+                <h3 className="font-semibold text-lg mb-1 text-foreground">
                   Identidade Visual
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -79,7 +79,7 @@ export default async function SiteConfigPage() {
                 <Layout className="w-6 h-6 text-secondary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">
+                <h3 className="font-semibold text-lg mb-1 text-foreground">
                   Página Inicial
                 </h3>
                 <p className="text-sm text-muted-foreground">
