@@ -25,7 +25,7 @@ export default async function SiteLayout({
       <ThemeProvider settings={brandingSettings} />
       <div className="min-h-screen flex flex-col light bg-white text-gray-900">
         {/* Header */}
-        <SiteHeader church={church} />
+        <SiteHeader church={church} branding={brandingSettings} />
 
         {/* Main Content */}
         <main className="flex-1">{children}</main>

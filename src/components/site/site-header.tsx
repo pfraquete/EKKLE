@@ -11,9 +11,13 @@ type Church = {
     logo_url: string | null
 }
 
-export function SiteHeader({ church }: { church: Church }) {
+import { BrandingSettings } from '@/actions/branding'
+
+export function SiteHeader({ church, branding }: { church: Church, branding?: BrandingSettings }) {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
+
+    const logoUrl = branding?.logo?.url || church.logo_url
 
     const links = [
         { href: '/', label: 'Início' },
@@ -31,11 +35,11 @@ export function SiteHeader({ church }: { church: Church }) {
                 <div className="flex items-center justify-between">
                     {/* Logo and Church Name */}
                     <Link href="/" className="flex items-center gap-3 z-50 relative">
-                        {church.logo_url ? (
+                        {logoUrl ? (
                             <>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                    src={church.logo_url}
+                                    src={logoUrl}
                                     alt={church.name}
                                     className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-contain bg-muted"
                                 />

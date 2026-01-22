@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { headers } from 'next/headers'
+import { getChurch } from '@/lib/get-church'
 
 export async function POST(request: NextRequest) {
   try {
-    // Get church ID from headers (injected by middleware)
-    const headersList = await headers()
-    const churchId = headersList.get('x-church-id')
+    // Get church context
+    const church = await getChurch()
 
-    if (!churchId) {
+    if (!church) {
       return NextResponse.json(
         { error: 'Igreja não identificada' },
         { status: 400 }
       )
     }
+
+    const churchId = church.id
 
     // Parse request body
     const body = await request.json()

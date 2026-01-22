@@ -35,22 +35,36 @@ export async function middleware(request: NextRequest) {
         // It's a tenant subdomain!
         const subdomain = hostname.split('.')[0]
 
+        // Special handling for Auth Routes (Login/Register) on Subdomain
+        // We want to serve the (auth) pages but pass the church context
+        const isAuthRoute =
+            url.pathname.startsWith('/login') ||
+            url.pathname.startsWith('/register') ||
+            url.pathname.startsWith('/cadastro') ||
+            url.pathname.startsWith('/forgot-password') ||
+            url.pathname.startsWith('/reset-password')
+
+        if (isAuthRoute) {
+            // Do NOT rewrite to /site/[domain]
+            // Just let it pass to (auth)/... but inject headers
+            const response = NextResponse.next()
+
+            response.headers.set('x-church-slug', subdomain)
+
+            // Apply session cookies
+            sessionResponse.cookies.getAll().forEach((cookie) => {
+                response.cookies.set(cookie.name, cookie.value, cookie)
+            })
+
+            return response
+        }
+
         // Rewrite to /site/[domain]
         // We preserve the full path (e.g. /eventos)
         url.pathname = `/site/${subdomain}${url.pathname}`
 
         // We can also set a header for easier access
         const response = NextResponse.rewrite(url)
-
-        // Copy cookies from sessionResponse if needed (Supabase auth)
-        // The previous updateSession call might have refreshed tokens.
-        // We should merge that.
-
-        // Complex part: updateSession returns a response. Rewrite also returns a response.
-        // We need to create a rewrite response that *also* has the session cookies.
-
-        // Let's rely on updateSession logic for now, but strictly speaking checking auth 
-        // on public site might not be required for GETs, but is for /membro.
 
         // Add custom header for getChurch
         response.headers.set('x-church-slug', subdomain)

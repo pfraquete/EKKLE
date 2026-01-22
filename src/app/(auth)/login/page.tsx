@@ -4,8 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SubmitButton } from '@/components/buttons/submit-button'
 import Link from 'next/link'
-
-
+import { getChurch } from '@/lib/get-church'
 
 export default async function LoginPage({
     searchParams,
@@ -13,17 +12,36 @@ export default async function LoginPage({
     searchParams: Promise<{ message?: string; error?: string }>
 }) {
     const { message, error } = await searchParams
+    const church = await getChurch()
 
     return (
         <div className="space-y-6">
-
-
             <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-card">
-                <CardHeader className="space-y-1 bg-muted/50 border-b border-border">
-                    <CardTitle className="text-xl font-bold text-foreground">Acesse sua conta</CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                        Entre com seu email e senha para acessar sua célula
-                    </CardDescription>
+                <CardHeader className="space-y-1 bg-muted/50 border-b border-border text-center">
+                    {church ? (
+                        <div className="flex flex-col items-center gap-3 mb-2">
+                            {church.logo_url && (
+                                <img
+                                    src={church.logo_url}
+                                    alt={church.name}
+                                    className="w-16 h-16 object-contain"
+                                />
+                            )}
+                            <CardTitle className="text-xl font-bold text-foreground">
+                                {church.name}
+                            </CardTitle>
+                            <CardDescription className="text-muted-foreground">
+                                Área de Membros
+                            </CardDescription>
+                        </div>
+                    ) : (
+                        <>
+                            <CardTitle className="text-xl font-bold text-foreground">Acesse sua conta</CardTitle>
+                            <CardDescription className="text-muted-foreground">
+                                Entre com seu email e senha para acessar sua célula
+                            </CardDescription>
+                        </>
+                    )}
                 </CardHeader>
                 <CardContent>
                     {message && (
@@ -78,6 +96,12 @@ export default async function LoginPage({
                         </SubmitButton>
                     </form>
                 </CardContent>
+                <div className="p-4 bg-muted/30 text-center text-sm border-t border-border">
+                    Não tem uma conta?{' '}
+                    <Link href="/register" className="text-primary hover:underline font-semibold">
+                        Criar conta
+                    </Link>
+                </div>
             </Card>
         </div>
     )
