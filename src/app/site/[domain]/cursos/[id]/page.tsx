@@ -4,7 +4,7 @@ import { getCourseEnrollment } from '@/actions/courses'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { BookOpen, Video, ArrowLeft, Lock, Clock } from 'lucide-react'
+import { BookOpen, Video, ArrowLeft, Lock, Clock, CalendarClock, BadgeDollarSign, Grid } from 'lucide-react'
 import { EnrollButton } from '@/components/courses/enroll-button'
 
 type PageProps = {
@@ -65,6 +65,11 @@ export default async function CursoPage({ params }: PageProps) {
   const isEnrolled = !!enrollment
 
   const totalDuration = videos?.reduce((acc, video) => acc + (video.duration_seconds || 0), 0) || 0
+  const enrollmentStartDate = course.enrollment_start_date ? new Date(course.enrollment_start_date) : null
+  const enrollmentOpen = !enrollmentStartDate || enrollmentStartDate <= new Date()
+  const priceLabel = course.is_paid
+    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((course.price_cents || 0) / 100)
+    : 'Gratuito'
 
   return (
     <div className="py-12">
@@ -109,6 +114,14 @@ export default async function CursoPage({ params }: PageProps) {
                     <span>
                       {videos?.length || 0} {videos?.length === 1 ? 'vídeo' : 'vídeos'}
                     </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Grid className="w-5 h-5" />
+                    <span>{course.modules_count || 0} módulos</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <BadgeDollarSign className="w-5 h-5" />
+                    <span>{priceLabel}</span>
                   </div>
                   {totalDuration > 0 && (
                     <div className="flex items-center gap-2 text-gray-600">
@@ -177,10 +190,17 @@ export default async function CursoPage({ params }: PageProps) {
                     Faça login ou crie uma conta para acessar o conteúdo completo do curso
                   </p>
                 )}
+                {!enrollmentOpen && enrollmentStartDate && (
+                  <div className="mb-4 p-4 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 text-sm flex items-start gap-2">
+                    <CalendarClock className="w-4 h-4 mt-0.5" />
+                    <span>Inscrições abertas a partir de {enrollmentStartDate.toLocaleDateString('pt-BR')}.</span>
+                  </div>
+                )}
                 <EnrollButton
                   courseId={id}
                   isEnrolled={isEnrolled}
                   isAuthenticated={!!user}
+                  isEnrollmentOpen={enrollmentOpen}
                 />
               </div>
             </div>
