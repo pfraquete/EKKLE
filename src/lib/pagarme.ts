@@ -536,3 +536,265 @@ export async function createEkkleSubscription(params: CreateEkkleSubscriptionPar
 
   return createSubscription(subscription);
 }
+
+// =====================================================
+// RECIPIENTS (RECEBEDORES) - For Marketplace Split
+// =====================================================
+
+export interface PagarmeRecipient {
+  id?: string;
+  name: string;
+  email: string;
+  document: string;
+  type: 'individual' | 'company';
+  description?: string;
+  default_bank_account: {
+    holder_name: string;
+    holder_type: 'individual' | 'company';
+    holder_document: string;
+    bank: string; // Bank code (e.g., '341' for Itaú)
+    branch_number: string;
+    branch_check_digit?: string;
+    account_number: string;
+    account_check_digit: string;
+    type: 'checking' | 'savings';
+  };
+  transfer_settings?: {
+    transfer_enabled: boolean;
+    transfer_interval: 'daily' | 'weekly' | 'monthly';
+    transfer_day?: number;
+  };
+  automatic_anticipation_settings?: {
+    enabled: boolean;
+    type?: 'full' | 'partial';
+    volume_percentage?: number;
+  };
+  metadata?: Record<string, string>;
+}
+
+export interface PagarmeRecipientResponse extends PagarmeRecipient {
+  id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Create a new recipient in Pagar.me
+ * Recipients receive payment splits
+ */
+export async function createRecipient(recipient: PagarmeRecipient): Promise<PagarmeRecipientResponse> {
+  return pagarmeRequest({
+    method: 'POST',
+    path: '/recipients',
+    body: recipient as Record<string, unknown>,
+  });
+}
+
+/**
+ * Get recipient by ID
+ */
+export async function getRecipient(recipientId: string): Promise<PagarmeRecipientResponse> {
+  return pagarmeRequest({
+    method: 'GET',
+    path: `/recipients/${recipientId}`,
+  });
+}
+
+/**
+ * Update recipient
+ * Note: Bank account cannot be changed, only email and name
+ */
+export async function updateRecipient(
+  recipientId: string,
+  recipient: Partial<PagarmeRecipient>
+): Promise<PagarmeRecipientResponse> {
+  return pagarmeRequest({
+    method: 'PUT',
+    path: `/recipients/${recipientId}`,
+    body: recipient as Record<string, unknown>,
+  });
+}
+
+// =====================================================
+// ORDERS WITH SPLIT (PIX and Credit Card only)
+// =====================================================
+
+export interface PagarmeOrderItem {
+  amount: number; // Total amount in cents (quantity * unit_price)
+  description: string;
+  quantity: number;
+  code?: string; // SKU
+}
+
+export interface PagarmeSplitRule {
+  recipient_id: string;
+  amount: number; // Amount in cents
+  type: 'flat'; // Can also be 'percentage'
+  options?: {
+    charge_processing_fee?: boolean;
+    charge_remainder_fee?: boolean;
+    liable?: boolean;
+  };
+}
+
+export interface PagarmeOrder {
+  code?: string; // Order reference
+  items: PagarmeOrderItem[];
+  customer: PagarmeCustomer;
+  payments: Array<{
+    payment_method: 'credit_card' | 'pix';
+    amount?: number; // If not provided, uses order total
+    credit_card?: {
+      card?: PagarmeCard;
+      card_id?: string;
+      installments?: number;
+      statement_descriptor?: string;
+    };
+    pix?: {
+      expires_in?: number; // Seconds until expiration (default: 3600 = 1 hour)
+      additional_information?: Array<{
+        name: string;
+        value: string;
+      }>;
+    };
+    split?: PagarmeSplitRule[];
+  }>;
+  metadata?: Record<string, string>;
+  closed?: boolean;
+}
+
+export interface PagarmeOrderResponse {
+  id: string;
+  code: string;
+  amount: number;
+  currency: string;
+  closed: boolean;
+  items: PagarmeOrderItem[];
+  customer: PagarmeCustomer & { id: string };
+  status: string;
+  created_at: string;
+  updated_at: string;
+  charges?: Array<{
+    id: string;
+    code: string;
+    amount: number;
+    status: string;
+    payment_method: string;
+    paid_at?: string;
+    created_at: string;
+    last_transaction?: {
+      id: string;
+      transaction_type: string;
+      status: string;
+      success: boolean;
+      qr_code?: string; // PIX QR code text
+      qr_code_url?: string; // PIX QR code image URL
+      expires_at?: string;
+    };
+  }>;
+}
+
+/**
+ * Create order with split payment
+ */
+export async function createOrder(order: PagarmeOrder): Promise<PagarmeOrderResponse> {
+  return pagarmeRequest({
+    method: 'POST',
+    path: '/orders',
+    body: order as Record<string, unknown>,
+  });
+}
+
+/**
+ * Get order by ID
+ */
+export async function getOrder(orderId: string): Promise<PagarmeOrderResponse> {
+  return pagarmeRequest({
+    method: 'GET',
+    path: `/orders/${orderId}`,
+  });
+}
+
+// =====================================================
+// HELPERS FOR MARKETPLACE SPLIT
+// =====================================================
+
+/**
+ * Calculate split amounts: 1% platform, 99% church
+ */
+export function calculateSplitAmounts(totalCents: number): {
+  platformFeeCents: number;
+  churchAmountCents: number;
+} {
+  // 1% platform fee, 99% to church
+  const platformFeeCents = Math.floor(totalCents * 0.01);
+  const churchAmountCents = totalCents - platformFeeCents;
+
+  return {
+    platformFeeCents,
+    churchAmountCents,
+  };
+}
+
+/**
+ * Create split rules for Pagar.me order
+ * @param totalCents Total order amount in cents
+ * @param churchRecipientId Church recipient ID from Pagar.me
+ * @param platformRecipientId Platform recipient ID from environment
+ * @returns Array of split rules
+ */
+export function createSplitRules(
+  totalCents: number,
+  churchRecipientId: string,
+  platformRecipientId: string
+): PagarmeSplitRule[] {
+  const { platformFeeCents, churchAmountCents } = calculateSplitAmounts(totalCents);
+
+  return [
+    {
+      recipient_id: churchRecipientId,
+      amount: churchAmountCents,
+      type: 'flat',
+      options: {
+        charge_processing_fee: true, // Church pays Pagar.me processing fee
+        liable: true, // Church is liable for chargebacks
+      },
+    },
+    {
+      recipient_id: platformRecipientId,
+      amount: platformFeeCents,
+      type: 'flat',
+      options: {
+        charge_processing_fee: false,
+        liable: false,
+      },
+    },
+  ];
+}
+
+/**
+ * Get user-friendly status labels in Portuguese
+ */
+export function getOrderStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    pending: 'Aguardando Pagamento',
+    paid: 'Pago',
+    processing: 'Processando',
+    canceled: 'Cancelado',
+    failed: 'Falhou',
+    refunded: 'Reembolsado',
+  };
+  return labels[status] || status;
+}
+
+/**
+ * Get payment method label in Portuguese
+ */
+export function getPaymentMethodLabel(method: string): string {
+  const labels: Record<string, string> = {
+    credit_card: 'Cartão de Crédito',
+    pix: 'PIX',
+  };
+  return labels[method] || method;
+}

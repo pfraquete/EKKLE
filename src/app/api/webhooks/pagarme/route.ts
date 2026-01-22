@@ -144,6 +144,15 @@ export async function POST(request: NextRequest) {
         await handleChargeEvent(eventType, data);
         break;
 
+      // Order events (marketplace)
+      case 'order.created':
+      case 'order.updated':
+      case 'order.paid':
+      case 'order.payment_failed':
+      case 'order.canceled':
+        await handleOrderEvent(eventType, data);
+        break;
+
       default:
         console.log(`Unhandled event type: ${eventType}`);
     }
@@ -410,6 +419,121 @@ async function handleChargeEvent(eventType: string, data: { id?: string | number
   }
 
   console.log(`Invoice ${invoice.id} updated from charge ${chargeId} to status: ${status}`);
+}
+
+async function handleOrderEvent(eventType: string, data: { id?: string | number; status?: string; charges?: Array<{ id?: string | number; status?: string; payment_method?: string; paid_at?: string; last_transaction?: { id?: string | number; qr_code?: string; qr_code_url?: string; expires_at?: string } }> }) {
+  const orderId = data?.id?.toString();
+  const status = data?.status;
+
+  if (!orderId) {
+    console.error('No order ID in event');
+    return;
+  }
+
+  console.log(`Processing order event: ${eventType} for ${orderId}`);
+
+  // Find order by Pagar.me ID
+  const { data: order, error: findError } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('pagarme_order_id', orderId)
+    .single();
+
+  if (findError || !order) {
+    console.error('Order not found:', orderId);
+    return;
+  }
+
+  // Map Pagar.me status to our payment status
+  const paymentStatus =
+    status === 'paid'
+      ? 'paid'
+      : status === 'failed'
+      ? 'failed'
+      : status === 'canceled'
+      ? 'canceled'
+      : 'pending';
+
+  // Map to order status
+  const orderStatus =
+    status === 'paid'
+      ? 'processing'
+      : status === 'canceled'
+      ? 'canceled'
+      : 'pending';
+
+  // Update order
+  const updateData: {
+    payment_status: string;
+    status: string;
+    updated_at: string;
+    paid_at?: string;
+  } = {
+    payment_status: paymentStatus,
+    status: orderStatus,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (status === 'paid') {
+    updateData.paid_at = new Date().toISOString();
+  }
+
+  const { error: updateError } = await supabase
+    .from('orders')
+    .update(updateData)
+    .eq('id', order.id);
+
+  if (updateError) {
+    console.error('Error updating order:', updateError);
+  }
+
+  console.log(`Order ${orderId} updated to payment_status: ${paymentStatus}, status: ${orderStatus}`);
+
+  // Update payment record
+  const charge = data?.charges?.[0];
+  if (charge && charge.id) {
+    const lastTransaction = charge.last_transaction;
+
+    const paymentUpdateData: {
+      status: string;
+      updated_at: string;
+      paid_at?: string;
+      failed_at?: string;
+      canceled_at?: string;
+      pix_qr_code?: string;
+      pix_qr_code_url?: string;
+      pix_expires_at?: string;
+    } = {
+      status: paymentStatus,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (paymentStatus === 'paid') {
+      paymentUpdateData.paid_at = charge.paid_at || new Date().toISOString();
+    } else if (paymentStatus === 'failed') {
+      paymentUpdateData.failed_at = new Date().toISOString();
+    } else if (paymentStatus === 'canceled') {
+      paymentUpdateData.canceled_at = new Date().toISOString();
+    }
+
+    // Update PIX info if available
+    if (lastTransaction?.qr_code) {
+      paymentUpdateData.pix_qr_code = lastTransaction.qr_code;
+      paymentUpdateData.pix_qr_code_url = lastTransaction.qr_code_url;
+      paymentUpdateData.pix_expires_at = lastTransaction.expires_at;
+    }
+
+    const { error: paymentUpdateError } = await supabase
+      .from('order_payments')
+      .update(paymentUpdateData)
+      .eq('pagarme_charge_id', charge.id.toString());
+
+    if (paymentUpdateError) {
+      console.error('Error updating order payment:', paymentUpdateError);
+    } else {
+      console.log(`Order payment updated for charge ${charge.id}`);
+    }
+  }
 }
 
 // Handle GET requests (for webhook verification)
