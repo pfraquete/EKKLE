@@ -33,7 +33,7 @@ export default async function MembersPage() {
         redirect('/dashboard')
     }
 
-    const members = await getChurchMembers(profile.church_id) as ChurchMember[]
+    const members = await getChurchMembers() as ChurchMember[]
 
     const getStageBadge = (stage: string) => {
         switch (stage) {
