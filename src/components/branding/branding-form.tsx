@@ -12,10 +12,9 @@ import {
   getBrandingSettings,
   updateBrandingSettings,
   uploadBrandingFile,
-  getAvailableFonts,
-  getDefaultBrandingSettings,
   type BrandingSettings,
 } from '@/actions/branding'
+import { getAvailableFonts, getDefaultBrandingSettings } from '@/lib/branding-constants'
 
 export function BrandingForm() {
   const router = useRouter()
