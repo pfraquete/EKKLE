@@ -243,3 +243,80 @@ export async function updateCell(cellId: string, formData: FormData) {
         throw error
     }
 }
+
+/**
+ * List all cells for the current church
+ * Helper function for WhatsApp AI Agent
+ */
+export async function listCells() {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('cells')
+        .select(`
+            id,
+            name,
+            status,
+            day_of_week,
+            meeting_time,
+            address,
+            neighborhood,
+            created_at,
+            leader:leader_id(id, full_name, email, phone)
+        `)
+        .eq('church_id', profile.church_id)
+        .order('name')
+
+    if (error) throw error
+    return data || []
+}
+
+/**
+ * Get cell details by ID
+ * Helper function for WhatsApp AI Agent
+ */
+export async function getCellDetails(cellId: string) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('cells')
+        .select(`
+            *,
+            leader:leader_id(id, full_name, email, phone)
+        `)
+        .eq('id', cellId)
+        .eq('church_id', profile.church_id)
+        .single()
+
+    if (error) throw error
+    return data
+}
+
+/**
+ * Delete a cell
+ * Helper function for WhatsApp AI Agent
+ */
+export async function deleteCell(cellId: string) {
+    const profile = await getProfile()
+    if (!profile || profile.role !== 'PASTOR') {
+        throw new Error('Apenas pastores podem deletar células')
+    }
+
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('cells')
+        .delete()
+        .eq('id', cellId)
+        .eq('church_id', profile.church_id)
+
+    if (error) throw error
+
+    revalidatePath('/celulas')
+    revalidatePath('/dashboard')
+    return { success: true }
+}
