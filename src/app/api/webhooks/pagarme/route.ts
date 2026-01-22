@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     let eventData: {
       type?: string;
       id?: string | number;
-      data?: any;
+      data?: unknown;
       status?: string;
       current_cycle?: { end_at?: string };
       charge?: unknown;
