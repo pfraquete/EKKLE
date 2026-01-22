@@ -11,6 +11,10 @@ const courseSchema = z.object({
   thumbnail_url: z.string().url().optional().or(z.literal('')),
   is_published: z.boolean().default(false),
   order_index: z.number().default(0),
+  modules_count: z.number().min(0).default(0),
+  is_paid: z.boolean().default(false),
+  price_cents: z.number().min(0).default(0),
+  enrollment_start_date: z.string().optional().or(z.literal('')),
 })
 
 const videoSchema = z.object({
@@ -36,12 +40,16 @@ export async function adminCreateCourse(data: CourseInput) {
     }
 
     const validated = courseSchema.parse(data)
+    const enrollmentStartDate = validated.enrollment_start_date
+      ? new Date(validated.enrollment_start_date).toISOString()
+      : null
     const supabase = await createClient()
 
     const { data: course, error } = await supabase
       .from('courses')
       .insert({
         ...validated,
+        enrollment_start_date: enrollmentStartDate,
         church_id: profile.church_id,
         created_by: profile.id,
       })
@@ -74,11 +82,17 @@ export async function adminUpdateCourse(courseId: string, data: CourseInput) {
     }
 
     const validated = courseSchema.parse(data)
+    const enrollmentStartDate = validated.enrollment_start_date
+      ? new Date(validated.enrollment_start_date).toISOString()
+      : null
     const supabase = await createClient()
 
     const { error } = await supabase
       .from('courses')
-      .update(validated)
+      .update({
+        ...validated,
+        enrollment_start_date: enrollmentStartDate,
+      })
       .eq('id', courseId)
       .eq('church_id', profile.church_id)
 
@@ -163,6 +177,30 @@ export async function adminGetCourse(courseId: string) {
     return course
   } catch {
     return null
+  }
+}
+
+export async function adminGetCourseEnrollments(courseId: string) {
+  try {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') {
+      throw new Error('Sem permissão')
+    }
+
+    const supabase = await createClient()
+    const { data: enrollments, error } = await supabase
+      .from('course_enrollments')
+      .select('id, enrolled_at, completed_at, progress_percentage, profiles (id, full_name, email)')
+      .eq('course_id', courseId)
+      .eq('church_id', profile.church_id)
+      .order('enrolled_at', { ascending: false })
+
+    if (error) throw new Error('Erro ao buscar inscrições')
+
+    return enrollments || []
+  } catch {
+    return []
   }
 }
 
@@ -294,5 +332,48 @@ export async function adminGetCourseVideos(courseId: string) {
     return videos || []
   } catch {
     return []
+  }
+}
+
+export async function adminUploadCourseVideo(courseId: string, file: File) {
+  try {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') {
+      throw new Error('Sem permissão')
+    }
+
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime']
+    if (!allowedTypes.includes(file.type)) {
+      return { success: false, error: 'Tipo de arquivo inválido. Use MP4, WebM, OGG ou MOV.' }
+    }
+
+    const maxSize = 500 * 1024 * 1024
+    if (file.size > maxSize) {
+      return { success: false, error: 'Arquivo muito grande. Máximo 500MB.' }
+    }
+
+    const supabase = await createClient()
+    const timestamp = Date.now()
+    const extension = file.name.split('.').pop()
+    const filename = `${profile.church_id}/${courseId}/video-${timestamp}.${extension}`
+
+    const { data, error: uploadError } = await supabase.storage
+      .from('course-videos')
+      .upload(filename, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+    if (uploadError) {
+      return { success: false, error: 'Erro ao fazer upload do vídeo' }
+    }
+
+    return { success: true, path: `course-videos/${data.path}` }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }

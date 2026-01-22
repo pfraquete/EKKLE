@@ -8,6 +8,7 @@ import {
     LayoutDashboard,
     Users,
     CalendarCheck2,
+    BookOpen,
 } from 'lucide-react'
 import { Profile } from '@/actions/auth'
 
@@ -46,6 +47,13 @@ export function MobileNav({ profile }: MobileNavProps) {
             label: 'Membros',
             href: '/membros',
             active: pathname.startsWith('/membros'),
+            show: isPastor
+        },
+        {
+            icon: BookOpen,
+            label: 'Cursos',
+            href: '/dashboard/cursos',
+            active: pathname.startsWith('/dashboard/cursos'),
             show: isPastor
         },
     ]

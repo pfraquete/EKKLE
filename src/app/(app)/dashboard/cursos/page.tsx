@@ -37,8 +37,11 @@ export default async function CursosAdminPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course: { id: string; thumbnail_url?: string; title: string; is_published: boolean; description?: string; course_videos: { count?: number } | Array<unknown> }) => {
+          {courses.map((course: { id: string; thumbnail_url?: string; title: string; is_published: boolean; description?: string; modules_count?: number; is_paid?: boolean; price_cents?: number; course_videos: { count?: number } | Array<unknown> }) => {
             const videoCount = Array.isArray(course.course_videos) ? course.course_videos.length : course.course_videos?.count || 0
+            const priceLabel = course.is_paid
+              ? `Pago • ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((course.price_cents || 0) / 100)}`
+              : 'Gratuito'
 
             return (
               <Link key={course.id} href={`/dashboard/cursos/${course.id}`} className="bg-white rounded-lg shadow-md overflow-hidden border hover:shadow-lg transition-shadow">
@@ -53,9 +56,13 @@ export default async function CursosAdminPage() {
                     {course.is_published ? <Eye className="w-5 h-5 text-green-600 flex-shrink-0 ml-2" /> : <EyeOff className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />}
                   </div>
                   {course.description && <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{course.description}</p>}
-                  <div className="flex items-center gap-2 text-sm text-primary">
-                    <Video className="w-4 h-4" />
-                    <span>{videoCount} {videoCount === 1 ? 'vídeo' : 'vídeos'}</span>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-primary">
+                    <div className="flex items-center gap-2">
+                      <Video className="w-4 h-4" />
+                      <span>{videoCount} {videoCount === 1 ? 'vídeo' : 'vídeos'}</span>
+                    </div>
+                    <span className="text-muted-foreground">{course.modules_count || 0} módulos</span>
+                    <span className="text-muted-foreground">{priceLabel}</span>
                   </div>
                 </div>
               </Link>

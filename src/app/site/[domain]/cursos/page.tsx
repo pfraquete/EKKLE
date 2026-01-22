@@ -2,7 +2,7 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
-import { BookOpen, Video } from 'lucide-react'
+import { BookOpen, Video, CalendarClock } from 'lucide-react'
 
 export default async function CursosPage() {
   const church = await getChurch()
@@ -41,6 +41,13 @@ export default async function CursosPage() {
               const videoCount = Array.isArray(course.course_videos)
                 ? course.course_videos.length
                 : course.course_videos?.count || 0
+              const startDate = course.enrollment_start_date ? new Date(course.enrollment_start_date) : null
+              const enrollmentLabel = startDate && startDate > new Date()
+                ? `Inscrições em ${startDate.toLocaleDateString('pt-BR')}`
+                : 'Inscrições abertas'
+              const priceLabel = course.is_paid
+                ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((course.price_cents || 0) / 100)
+                : 'Gratuito'
 
               return (
                 <Link
@@ -67,12 +74,24 @@ export default async function CursosPage() {
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                       {course.description}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-primary">
-                        <Video className="w-4 h-4" />
-                        <span>
-                          {videoCount} {videoCount === 1 ? 'vídeo' : 'vídeos'}
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-primary">
+                        <div className="flex items-center gap-2">
+                          <Video className="w-4 h-4" />
+                          <span>
+                            {videoCount} {videoCount === 1 ? 'vídeo' : 'vídeos'}
+                          </span>
+                        </div>
+                        <span className="text-muted-foreground">
+                          {course.modules_count || 0} módulos
                         </span>
+                        <span className="text-muted-foreground">
+                          {priceLabel}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CalendarClock className="w-4 h-4" />
+                        <span>{enrollmentLabel}</span>
                       </div>
                       <span className="text-primary font-semibold text-sm">
                         Ver curso →
