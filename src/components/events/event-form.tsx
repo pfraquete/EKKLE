@@ -81,6 +81,7 @@ export function EventForm({ initialData }: EventFormProps) {
         location: values.location || null,
         end_time: values.end_time || null,
         image_url: values.image_url || null,
+        recurrence_pattern: null,
       }
 
       if (initialData) {
