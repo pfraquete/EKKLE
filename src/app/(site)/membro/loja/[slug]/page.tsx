@@ -6,11 +6,12 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-export default async function ProductDetailsPage({ params }: { params: { slug: string } }) {
+export default async function ProductDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const profile = await getProfile();
   if (!profile) redirect('/login');
 
-  const product = await getProductBySlug(params.slug);
+  const product = await getProductBySlug(slug);
   if (!product || product.status !== 'active') notFound();
 
   return (

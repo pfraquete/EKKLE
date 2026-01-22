@@ -23,11 +23,12 @@ interface OrderItem {
   total_cents: number;
 }
 
-export default async function OrderDetailsPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const profile = await getProfile();
   if (!profile) redirect('/login');
 
-  const order = await getOrder(params.id);
+  const order = await getOrder(id);
   if (!order) notFound();
 
   const getStatusColor = (status: string) => {
