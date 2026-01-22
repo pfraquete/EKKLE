@@ -60,7 +60,7 @@ export default async function MeusCursosPage() {
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Cursos em Andamento</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {enrollments.map((enrollment: { id: string; progress_percentage: number; courses: { id: string; title: string; description?: string; thumbnail_url?: string; course_videos: { count?: number } | Array<unknown> } }) => {
+            {enrollments.map((enrollment: { id: string; progress_percentage: number; completed_at?: string; courses: { id: string; title: string; description?: string; thumbnail_url?: string; course_videos: { count?: number } | Array<unknown> } }) => {
               const course = enrollment.courses
               const videoCount = Array.isArray(course.course_videos)
                 ? course.course_videos.length
