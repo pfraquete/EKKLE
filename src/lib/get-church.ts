@@ -28,18 +28,26 @@ export async function getChurch(): Promise<Church | null> {
     return null
   }
 
-  // Fetch full church data from database
+  // Fetch church data from database
   const supabase = await createClient()
-  const { data: church } = await supabase
-    .from('churches')
-    .select('*')
-    .eq('id', churchId)
-    .single()
+
+  let query = supabase.from('churches').select('*')
+
+  if (churchId) {
+    query = query.eq('id', churchId)
+  } else if (churchSlug) {
+    query = query.eq('slug', churchSlug)
+  } else {
+    // No ID and no Slug found
+    return null
+  }
+
+  const { data: church } = await query.single()
 
   if (!church) {
-    // Fallback to headers data
+    // Fallback to headers data (only if we have at least slug/id)
     return {
-      id: churchId,
+      id: churchId || '',
       name: churchName || '',
       slug: churchSlug,
       logo_url: null,
