@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { FormError } from '@/components/ui/form-error'
-import { Loader2, Upload, Eye, Palette, Type, Image } from 'lucide-react'
+import { Loader2, Upload, Eye, Palette, Type, Image as ImageIcon } from 'lucide-react'
 import {
   getBrandingSettings,
   updateBrandingSettings,
@@ -134,7 +134,7 @@ export function BrandingForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && <FormError message={error} />}
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+        <div className="bg-green-500/10 border border-green-500/20 text-green-500 px-4 py-3 rounded-lg">
           {success}
         </div>
       )}
@@ -167,7 +167,7 @@ export function BrandingForm() {
                   className="flex-1"
                 />
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Usada em botões principais e destaques
               </p>
             </div>
@@ -191,7 +191,7 @@ export function BrandingForm() {
                   className="flex-1"
                 />
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Usada em elementos complementares
               </p>
             </div>
@@ -215,7 +215,7 @@ export function BrandingForm() {
                   className="flex-1"
                 />
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Usada para chamar atenção
               </p>
             </div>
@@ -307,7 +307,7 @@ export function BrandingForm() {
       {/* Logo & Favicon Section */}
       <Card className="p-6">
         <div className="flex items-center gap-2 mb-6">
-          <Image className="w-5 h-5 text-primary" />
+          <ImageIcon className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-semibold">Logo e Ícones</h2>
         </div>
 
@@ -318,6 +318,7 @@ export function BrandingForm() {
             <div className="border-2 border-dashed rounded-lg p-4 text-center">
               {settings.logo?.url ? (
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={settings.logo.url}
                     alt="Logo"
@@ -339,8 +340,8 @@ export function BrandingForm() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Upload className="w-8 h-8 mx-auto text-gray-400" />
-                  <p className="text-sm text-gray-500">
+                  <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
                     PNG, JPG, SVG ou WebP (máx. 2MB)
                   </p>
                 </div>
@@ -355,7 +356,7 @@ export function BrandingForm() {
               className="cursor-pointer"
             />
             {uploadingLogo && (
-              <p className="text-sm text-gray-500 flex items-center gap-2">
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Enviando...
               </p>
@@ -368,6 +369,7 @@ export function BrandingForm() {
             <div className="border-2 border-dashed rounded-lg p-4 text-center">
               {settings.logo?.favicon_url ? (
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={settings.logo.favicon_url}
                     alt="Favicon"
@@ -389,8 +391,8 @@ export function BrandingForm() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Upload className="w-8 h-8 mx-auto text-gray-400" />
-                  <p className="text-sm text-gray-500">
+                  <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
                     PNG ou ICO (recomendado 32x32px)
                   </p>
                 </div>
@@ -405,7 +407,7 @@ export function BrandingForm() {
               className="cursor-pointer"
             />
             {uploadingFavicon && (
-              <p className="text-sm text-gray-500 flex items-center gap-2">
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Enviando...
               </p>
@@ -428,11 +430,14 @@ export function BrandingForm() {
           }}
         >
           {settings.logo?.url && (
-            <img
-              src={settings.logo.url}
-              alt="Logo"
-              className="h-12 object-contain"
-            />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={settings.logo.url}
+                alt="Logo"
+                className="h-12 object-contain"
+              />
+            </>
           )}
           <h1
             className="text-3xl font-bold"
@@ -443,7 +448,7 @@ export function BrandingForm() {
           >
             Bem-vindo à Nossa Igreja
           </h1>
-          <p className="text-gray-700">
+          <p className="text-foreground">
             Este é um exemplo de como o site da sua igreja ficará com as
             configurações escolhidas.
           </p>

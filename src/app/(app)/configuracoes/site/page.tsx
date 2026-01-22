@@ -26,9 +26,9 @@ export default async function SiteConfigPage() {
   if (!church) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="font-bold text-red-800 mb-2">Erro</h2>
-          <p className="text-red-600">Igreja não encontrada</p>
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6">
+          <h2 className="font-bold text-red-500 mb-2">Erro</h2>
+          <p className="text-red-500">Igreja não encontrada</p>
         </div>
       </div>
     )
