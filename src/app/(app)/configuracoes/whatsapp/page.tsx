@@ -12,7 +12,7 @@ export default async function WhatsAppSettingsPage() {
         redirect('/dashboard')
     }
 
-    const { data: instance } = await getWhatsAppInstance(profile.church_id)
+    const { data: instance } = await getWhatsAppInstance()
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 pb-20">
@@ -23,7 +23,7 @@ export default async function WhatsAppSettingsPage() {
                 </p>
             </div>
 
-            <WhatsAppConfig churchId={profile.church_id} initialInstance={instance} />
+            <WhatsAppConfig initialInstance={instance} />
         </div>
     )
 }

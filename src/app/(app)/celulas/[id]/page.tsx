@@ -23,7 +23,7 @@ export default async function CellDetailsPage({ params }: CellDetailsPageProps) 
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    const data = await getCellDetails(id, profile.church_id)
+    const data = await getCellDetails(id)
     if (!data) redirect('/celulas')
 
     const isAuthorized = profile.role === 'PASTOR'

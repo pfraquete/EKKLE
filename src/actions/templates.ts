@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getProfile } from './auth'
 
 export interface MessageTemplate {
     id: string
@@ -12,7 +13,10 @@ export interface MessageTemplate {
     is_active: boolean
 }
 
-export async function getTemplates(churchId: string) {
+export async function getTemplates() {
+    const profile = await getProfile()
+    if (!profile) return { data: null, error: new Error('Não autenticado') }
+    const churchId = profile.church_id
     const supabase = await createClient()
     const { data, error } = await supabase
         .from('message_templates')
@@ -23,12 +27,16 @@ export async function getTemplates(churchId: string) {
     return { data, error }
 }
 
-export async function upsertTemplate(template: Partial<MessageTemplate> & { church_id: string }) {
+export async function upsertTemplate(template: Partial<MessageTemplate>) {
+    const profile = await getProfile()
+    if (!profile) return { data: null, error: new Error('Não autenticado') }
+    const churchId = profile.church_id
+
     const supabase = await createClient()
 
     const { data, error } = await supabase
         .from('message_templates')
-        .upsert(template)
+        .upsert({ ...template, church_id: churchId })
         .select()
         .single()
 
@@ -37,11 +45,15 @@ export async function upsertTemplate(template: Partial<MessageTemplate> & { chur
 }
 
 export async function deleteTemplate(id: string) {
+    const profile = await getProfile()
+    if (!profile) return { error: new Error('Não autenticado') }
+
     const supabase = await createClient()
     const { error } = await supabase
         .from('message_templates')
         .delete()
         .eq('id', id)
+        .eq('church_id', profile.church_id)
 
     revalidatePath('/configuracoes/whatsapp/templates')
     return { error }

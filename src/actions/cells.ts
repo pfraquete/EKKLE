@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { sendLeaderWelcomeEmail } from '@/lib/email'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { generateSecurePassword } from '@/lib/utils'
+import { getProfile } from './auth'
 
 // Create a service role client for administrative tasks
 const getAdminClient = () => {
@@ -14,7 +15,10 @@ const getAdminClient = () => {
     )
 }
 
-export async function getPotentialLeaders(churchId: string) {
+export async function getPotentialLeaders() {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     // Find users that are not already leading a cell or are marked as potential leaders
@@ -30,11 +34,14 @@ export async function getPotentialLeaders(churchId: string) {
 
 export async function createCell(formData: FormData) {
     try {
+        const profile = await getProfile()
+        if (!profile) throw new Error('Não autenticado')
+        const churchId = profile.church_id
+
         const supabase = await createClient()
         const adminSupabase = getAdminClient()
 
         const name = formData.get('name') as string
-        const churchId = formData.get('churchId') as string
         const leaderEmail = formData.get('leaderEmail') as string
         const leaderName = formData.get('leaderName') as string
 
@@ -154,6 +161,10 @@ export async function createCell(formData: FormData) {
 }
 export async function updateCell(cellId: string, formData: FormData) {
     try {
+        const profile = await getProfile()
+        if (!profile) throw new Error('Não autenticado')
+        const churchId = profile.church_id
+
         const supabase = await createClient()
         const adminSupabase = getAdminClient()
 
@@ -185,6 +196,7 @@ export async function updateCell(cellId: string, formData: FormData) {
                 leader_id: leaderId
             })
             .eq('id', cellId)
+            .eq('church_id', churchId)
 
         if (cellError) throw new Error('Falha ao atualizar célula: ' + cellError.message)
 

@@ -13,23 +13,13 @@ const memberSchema = z.object({
     birthday: z.string().optional(),
     memberStage: z.enum(['VISITOR', 'REGULAR_VISITOR', 'MEMBER', 'GUARDIAN_ANGEL', 'TRAINING_LEADER', 'LEADER', 'PASTOR']),
     cellId: z.string().uuid(),
-    churchId: z.string().uuid()
 })
 
 export async function createMember(formData: FormData) {
     // Rate limiting: max 5 member creations per minute per user
     const profile = await getProfile()
-    if (profile) {
-        const rateLimitResult = await checkRateLimit({
-            identifier: `create-member:${profile.id}`,
-            max: 5,
-            window: 60000 // 1 minute
-        })
-
-        if (!rateLimitResult.success) {
-            throw new RateLimitError(rateLimitResult.resetAt, rateLimitResult.limit)
-        }
-    }
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
 
     const supabase = await createClient()
 
@@ -40,7 +30,6 @@ export async function createMember(formData: FormData) {
         birthday: formData.get('birthday'),
         memberStage: formData.get('memberStage'),
         cellId: formData.get('cellId'),
-        churchId: formData.get('churchId'),
     }
 
     const validatedData = memberSchema.parse(rawData)
@@ -49,7 +38,7 @@ export async function createMember(formData: FormData) {
     const { data: existingMember } = await supabase
         .from('profiles')
         .select('id, full_name, email, phone')
-        .eq('church_id', validatedData.churchId)
+        .eq('church_id', churchId)
         .or(`email.eq.${validatedData.email},phone.eq.${validatedData.phone}`)
         .limit(1)
         .single()
@@ -71,7 +60,7 @@ export async function createMember(formData: FormData) {
             email: validatedData.email || null,
             member_stage: validatedData.memberStage,
             cell_id: validatedData.cellId,
-            church_id: validatedData.churchId,
+            church_id: churchId,
             role: 'MEMBER',
             is_active: true,
             birthday: validatedData.birthday || null
@@ -84,6 +73,9 @@ export async function createMember(formData: FormData) {
 }
 
 export async function updateMember(id: string, formData: FormData) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     const rawData = {
@@ -93,7 +85,6 @@ export async function updateMember(id: string, formData: FormData) {
         birthday: formData.get('birthday'),
         memberStage: formData.get('memberStage'),
         cellId: formData.get('cellId'),
-        churchId: formData.get('churchId'),
     }
 
     const validatedData = memberSchema.parse(rawData)
@@ -109,6 +100,7 @@ export async function updateMember(id: string, formData: FormData) {
             birthday: validatedData.birthday || null
         })
         .eq('id', id)
+        .eq('church_id', churchId)
 
     if (error) throw new Error(error.message)
 
@@ -117,12 +109,16 @@ export async function updateMember(id: string, formData: FormData) {
 }
 
 export async function deleteMember(id: string) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+
     const supabase = await createClient()
 
     const { error } = await supabase
         .from('profiles')
         .update({ is_active: false })
         .eq('id', id)
+        .eq('church_id', profile.church_id)
 
     if (error) throw new Error(error.message)
 

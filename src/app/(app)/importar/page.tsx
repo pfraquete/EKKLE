@@ -11,7 +11,7 @@ export default async function ImportRoute() {
 
     return (
         <div className="p-6 pb-24">
-            <ImportPage churchId={profile.church_id} />
+            <ImportPage />
         </div>
     )
 }

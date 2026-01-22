@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getProfile } from './auth'
 
 export interface DashboardStats {
     totalMembers: number
@@ -38,7 +39,10 @@ interface CellOverviewRow {
     meetings: CellMeetingRow[] | null
 }
 
-export async function getPastorDashboardData(churchId: string) {
+export async function getPastorDashboardData() {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     // 1. Total Members (from both profiles and members table)
@@ -106,7 +110,10 @@ export async function getPastorDashboardData(churchId: string) {
     }
 }
 
-export async function getAllCellsOverview(churchId: string): Promise<CellOverview[]> {
+export async function getAllCellsOverview(): Promise<CellOverview[]> {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     const { data: cells, error } = await supabase
@@ -158,7 +165,10 @@ export async function getAllCellsOverview(churchId: string): Promise<CellOvervie
     })
 }
 
-export async function getChurchMembers(churchId: string) {
+export async function getChurchMembers() {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     const { data, error } = await supabase
@@ -184,7 +194,10 @@ export interface GrowthData {
     visitors: number
 }
 
-export async function getGrowthData(churchId: string): Promise<GrowthData[]> {
+export async function getGrowthData(): Promise<GrowthData[]> {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     // Get last 6 months of data
@@ -251,7 +264,10 @@ export interface EventData {
     event_type: 'SERVICE' | 'EVENT' | 'COMMUNITY' | 'OTHER'
 }
 
-export async function getEvents(churchId: string): Promise<EventData[]> {
+export async function getEvents(): Promise<EventData[]> {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     const { data, error } = await supabase
@@ -268,7 +284,10 @@ export async function getEvents(churchId: string): Promise<EventData[]> {
     return (data || []) as EventData[]
 }
 
-export async function createEvent(churchId: string, event: Omit<EventData, 'id'>) {
+export async function createEvent(event: Omit<EventData, 'id'>) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     const { data, error } = await supabase
@@ -285,7 +304,10 @@ export async function createEvent(churchId: string, event: Omit<EventData, 'id'>
     return data
 }
 
-export async function importMembers(churchId: string, members: Record<string, unknown>[]) {
+export async function importMembers(members: Record<string, unknown>[]) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     // 1. Get existing cells to map names to IDs
@@ -300,6 +322,15 @@ export async function importMembers(churchId: string, members: Record<string, un
         success: 0,
         errors: 0
     }
+
+    // Fetch existing members to avoid duplicates
+    const { data: currentMembers } = await supabase
+        .from('members')
+        .select('email, phone')
+        .eq('church_id', churchId)
+
+    const existingEmails = new Set(currentMembers?.map(m => m.email?.toLowerCase()).filter(Boolean))
+    const existingPhones = new Set(currentMembers?.map(m => m.phone).filter(Boolean))
 
     // Process in batches of 50 to avoid timeouts/limits
     const batchSize = 50
@@ -344,15 +375,26 @@ export async function importMembers(churchId: string, members: Record<string, un
                 const fullNameField = (member.full_name || member.Nome || member.nome || 'Membro Importado') as string
                 const phoneField = (member.phone || member.telefone || member.Telefone || '') as string | number
 
+                const email = (member.email as string)?.toLowerCase() || null
+                const phone = String(phoneField)
+
+                // Skip if duplicate email or phone (if present)
+                if (email && existingEmails.has(email)) continue
+                if (phone && existingPhones.has(phone)) continue
+
                 toInsert.push({
                     full_name: fullNameField,
-                    email: (member.email as string) || null,
-                    phone: String(phoneField),
+                    email: email,
+                    phone: phone,
                     cell_id: cellId,
                     church_id: churchId,
                     member_stage: finalStage,
                     is_active: true
                 })
+
+                // Add to local sets to handle duplicates WITHIN the CSV
+                if (email) existingEmails.add(email)
+                if (phone) existingPhones.add(phone)
             } catch (e) {
                 console.error('Error processing member in batch:', e)
                 results.errors++

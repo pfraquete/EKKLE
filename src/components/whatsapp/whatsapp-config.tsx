@@ -18,11 +18,10 @@ interface WhatsAppInstance {
 }
 
 interface WhatsAppConfigProps {
-    churchId: string
     initialInstance: WhatsAppInstance | null
 }
 
-export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProps) {
+export function WhatsAppConfig({ initialInstance }: WhatsAppConfigProps) {
     const [instance, setInstance] = useState<WhatsAppInstance | null>(initialInstance)
     const [loading, setLoading] = useState(false)
     const [checking, setChecking] = useState(false)
@@ -37,7 +36,7 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
 
         if (instance?.status === 'CONNECTING' || instance?.status === 'DISCONNECTED') {
             interval = setInterval(async () => {
-                const status = await checkWhatsAppStatus(churchId, instance.instance_name)
+                const status = await checkWhatsAppStatus(instance.instance_name)
                 if (status === 'CONNECTED') {
                     setInstance((prev) => prev ? ({ ...prev, status: 'CONNECTED' }) : null)
                     toast.success('WhatsApp conectado com sucesso!')
@@ -47,12 +46,12 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
         }
 
         return () => clearInterval(interval)
-    }, [instance?.status, churchId, instance?.instance_name])
+    }, [instance?.status, instance?.instance_name])
 
     const handleSetup = async () => {
         setLoading(true)
         try {
-            await setupWhatsApp(churchId)
+            await setupWhatsApp()
             window.location.reload()
         } catch (err) {
             console.error('Setup WhatsApp error:', err)
@@ -67,7 +66,7 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
         if (!confirm('Tem certeza que deseja desconectar o WhatsApp?')) return
         setLoading(true)
         try {
-            await disconnectWhatsApp(churchId, instance.instance_name)
+            await disconnectWhatsApp(instance.instance_name)
             setInstance(null)
             toast.success('WhatsApp desconectado')
         } catch (err) {
@@ -82,7 +81,7 @@ export function WhatsAppConfig({ churchId, initialInstance }: WhatsAppConfigProp
         if (!instance) return
         setChecking(true)
         try {
-            const status = await checkWhatsAppStatus(churchId, instance.instance_name)
+            const status = await checkWhatsAppStatus(instance.instance_name)
             setInstance((prev) => prev ? ({ ...prev, status }) : null)
             if (status === 'CONNECTED') toast.success('WhatsApp está conectado')
             else toast.info('WhatsApp ainda não está conectado')

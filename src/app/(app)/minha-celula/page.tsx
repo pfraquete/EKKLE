@@ -26,7 +26,7 @@ export default async function MinhaCelulaPage() {
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    const data = await getMyCellData(profile.id)
+    const data = await getMyCellData()
 
     if (!data) {
         return (

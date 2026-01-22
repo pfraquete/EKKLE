@@ -3,8 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { EvolutionService } from '@/lib/evolution'
 import { revalidatePath } from 'next/cache'
+import { getProfile } from './auth'
 
-export async function getWhatsAppInstance(churchId: string) {
+export async function getWhatsAppInstance() {
+    const profile = await getProfile()
+    if (!profile) return { data: null, error: new Error('Não autenticado') }
+    const churchId = profile.church_id
     const supabase = await createClient()
     const { data, error } = await supabase
         .from('whatsapp_instances')
@@ -15,11 +19,14 @@ export async function getWhatsAppInstance(churchId: string) {
     return { data, error }
 }
 
-export async function setupWhatsApp(churchId: string) {
+export async function setupWhatsApp() {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     // 1. Check if instance already exists in DB
-    let { data: instance } = await getWhatsAppInstance(churchId)
+    let { data: instance } = await getWhatsAppInstance()
 
     if (!instance) {
         const instanceName = `ekkle_church_${churchId.split('-')[0]}`
@@ -61,7 +68,10 @@ export async function setupWhatsApp(churchId: string) {
     return { success: true }
 }
 
-export async function disconnectWhatsApp(churchId: string, instanceName: string) {
+export async function disconnectWhatsApp(instanceName: string) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     try {
@@ -82,7 +92,10 @@ export async function disconnectWhatsApp(churchId: string, instanceName: string)
     return { success: true }
 }
 
-export async function checkWhatsAppStatus(churchId: string, instanceName: string) {
+export async function checkWhatsAppStatus(instanceName: string) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     try {

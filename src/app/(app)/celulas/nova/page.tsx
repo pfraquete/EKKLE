@@ -7,6 +7,6 @@ export default async function NovaCelulaPage() {
     if (!profile || profile.role !== 'PASTOR') redirect('/dashboard')
 
     return (
-        <NovaCelulaForm churchId={profile.church_id} />
+        <NovaCelulaForm />
     )
 }

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getProfile } from './auth'
 
 export interface MyCellData {
     cell: {
@@ -96,7 +97,10 @@ interface AttendanceRow {
     context_id: string
 }
 
-export async function getMyCellData(profileId: string): Promise<MyCellData | null> {
+export async function getMyCellData(): Promise<MyCellData | null> {
+    const profile = await getProfile()
+    if (!profile) return null
+    const profileId = profile.id
     const supabase = await createClient()
 
     // Find the cell where this user is the leader
@@ -239,7 +243,10 @@ export async function getMyCellData(profileId: string): Promise<MyCellData | nul
     }
 }
 
-export async function getCellDetails(cellId: string, churchId: string): Promise<CellDetails | null> {
+export async function getCellDetails(cellId: string): Promise<CellDetails | null> {
+    const profile = await getProfile()
+    if (!profile) return null
+    const churchId = profile.church_id
     const supabase = await createClient()
 
     const { data: cell, error: cellError } = await supabase

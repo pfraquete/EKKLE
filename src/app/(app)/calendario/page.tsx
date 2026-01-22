@@ -11,7 +11,7 @@ export default async function CalendarPage() {
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    const events = await getEvents(profile.church_id)
+    const events = await getEvents()
 
     return (
         <div className="p-6 pb-24 space-y-6">

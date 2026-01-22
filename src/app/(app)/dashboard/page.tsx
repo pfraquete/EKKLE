@@ -34,11 +34,11 @@ export default async function DashboardPage() {
     }
 
     // Only PASTOR continues here
-    const { stats } = await getPastorDashboardData(profile.church_id)
-    const cells = await getAllCellsOverview(profile.church_id)
-    const growthData = await getGrowthData(profile.church_id)
-    const events = await getEvents(profile.church_id)
-    const { data: whatsapp } = await getWhatsAppInstance(profile.church_id)
+    const { stats } = await getPastorDashboardData()
+    const cells = await getAllCellsOverview()
+    const growthData = await getGrowthData()
+    const events = await getEvents()
+    const { data: whatsapp } = await getWhatsAppInstance()
 
     const upcomingEvents = events
         .filter(e => new Date(e.start_date) >= new Date())

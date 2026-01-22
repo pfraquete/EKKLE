@@ -9,11 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, ChevronLeft, Home, Mail, User } from 'lucide-react'
 
-interface NovaCelulaFormProps {
-    churchId: string
-}
-
-export function NovaCelulaForm({ churchId }: NovaCelulaFormProps) {
+export function NovaCelulaForm() {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -23,7 +19,6 @@ export function NovaCelulaForm({ churchId }: NovaCelulaFormProps) {
 
         try {
             const formData = new FormData(e.currentTarget)
-            formData.append('churchId', churchId)
             await createCell(formData)
             router.push('/dashboard')
             router.refresh()

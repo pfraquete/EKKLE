@@ -25,7 +25,7 @@ function validateSignature(signature: string | null, payload: string): boolean {
 
   // A assinatura pode vir com prefixo sha256= ou não
   const cleanSignature = signature.replace('sha256=', '');
-  
+
   try {
     return crypto.timingSafeEqual(
       Buffer.from(cleanSignature),
@@ -99,32 +99,46 @@ export async function POST(request: NextRequest) {
     const eventType = eventData.type || 'unknown';
     console.log(`Received Pagar.me webhook: ${eventType}`);
 
-    // Save webhook event to database
-    await supabase.from('webhook_events').insert({
-      event_type: eventType,
-      pagarme_event_id: eventData.id?.toString(),
-      payload: eventData,
-      processed: false,
-    });
+    // Check if event was already processed
+    const { data: existingEvent } = await supabase
+      .from('webhook_events')
+      .select('processed')
+      .eq('pagarme_event_id', eventData.id?.toString())
+      .single();
+
+    if (existingEvent?.processed) {
+      console.log(`Event ${eventData.id} already processed. Skipping.`);
+      return NextResponse.json({ received: true, already_processed: true });
+    }
+
+    // Save webhook event to database if not exists
+    if (!existingEvent) {
+      await supabase.from('webhook_events').insert({
+        event_type: eventType,
+        pagarme_event_id: eventData.id?.toString(),
+        payload: eventData,
+        processed: false,
+      });
+    }
 
     // Validate signature in production
     if (process.env.NODE_ENV === 'production' && PAGARME_WEBHOOK_SECRET) {
       if (!validateSignature(signature, payload)) {
         console.error('Invalid webhook signature');
-        
+
         // Update event with error
         await supabase
           .from('webhook_events')
           .update({ error: 'Invalid signature' })
           .eq('pagarme_event_id', eventData.id?.toString());
-          
+
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
       }
     }
 
     // Process event based on type
     const data = eventData.data ?? eventData;
-    
+
     switch (eventType) {
       // Subscription events
       case 'subscription.created':
@@ -457,18 +471,18 @@ async function handleOrderEvent(eventType: string, data: { id?: string | number;
     status === 'paid'
       ? 'paid'
       : status === 'failed'
-      ? 'failed'
-      : status === 'canceled'
-      ? 'canceled'
-      : 'pending';
+        ? 'failed'
+        : status === 'canceled'
+          ? 'canceled'
+          : 'pending';
 
   // Map to order status
   const orderStatus =
     status === 'paid'
       ? 'processing'
       : status === 'canceled'
-      ? 'canceled'
-      : 'pending';
+        ? 'canceled'
+        : 'pending';
 
   // Update order
   const updateData: {
@@ -546,7 +560,7 @@ async function handleOrderEvent(eventType: string, data: { id?: string | number;
 
 // Handle GET requests (for webhook verification)
 export async function GET() {
-  return NextResponse.json({ 
+  return NextResponse.json({
     status: 'Webhook endpoint active',
     endpoint: '/api/webhooks/pagarme',
     version: 'v5'

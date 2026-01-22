@@ -2,15 +2,21 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getProfile } from './auth'
 
 export async function startMeeting(cellId: string) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
+
     const supabase = await createClient()
 
-    // Get church_id from the cell
+    // Get the cell and verify it belongs to the church
     const { data: cell, error: cellError } = await supabase
         .from('cells')
-        .select('church_id')
+        .select('id, church_id')
         .eq('id', cellId)
+        .eq('church_id', churchId)
         .single()
 
     if (cellError || !cell) {
@@ -39,6 +45,10 @@ export async function startMeeting(cellId: string) {
 }
 
 export async function getMeetingData(meetingId: string) {
+    const profile = await getProfile()
+    if (!profile) return null
+    const churchId = profile.church_id
+
     const supabase = await createClient()
 
     const { data: meeting, error } = await supabase
@@ -58,6 +68,7 @@ export async function getMeetingData(meetingId: string) {
       attendance(*)
     `)
         .eq('id', meetingId)
+        .eq('church_id', churchId)
         .single()
 
     if (error) return null
@@ -66,7 +77,6 @@ export async function getMeetingData(meetingId: string) {
 
 export interface FullMeetingReportInput {
     cellId: string
-    churchId: string
     date: string
     hasIcebreaker: boolean
     hasWorship: boolean
@@ -87,16 +97,18 @@ export interface FullMeetingReportInput {
 }
 
 export async function createFullMeetingReport(data: FullMeetingReportInput) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
+
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Não autenticado')
 
     // 1. Create meeting
     const { data: meeting, error: meetingError } = await supabase
         .from('cell_meetings')
         .insert({
             cell_id: data.cellId,
-            church_id: data.churchId,
+            church_id: churchId,
             date: data.date,
             status: 'COMPLETED',
             closed_at: new Date().toISOString()
@@ -111,7 +123,7 @@ export async function createFullMeetingReport(data: FullMeetingReportInput) {
         .from('cell_reports')
         .insert({
             meeting_id: meeting.id,
-            church_id: data.churchId,
+            church_id: churchId,
             has_icebreaker: data.hasIcebreaker,
             has_worship: data.hasWorship,
             has_word: data.hasWord,
@@ -120,20 +132,20 @@ export async function createFullMeetingReport(data: FullMeetingReportInput) {
             visitors_count: data.visitorsCount,
             decisions_count: data.decisionsCount,
             observations: data.observations || null,
-            submitted_by: user.id
+            submitted_by: profile.id
         })
 
     if (reportError) throw new Error(reportError.message)
 
     // 3. Register member attendance
     const memberRecords = data.memberAttendance.map((m) => ({
-        church_id: data.churchId,
+        church_id: churchId,
         context_type: 'CELL_MEETING',
         context_id: meeting.id,
         context_date: data.date,
         profile_id: m.profileId,
         status: m.present ? 'PRESENT' : 'ABSENT',
-        checked_in_by: user.id
+        checked_in_by: profile.id
     }))
 
     if (memberRecords.length > 0) {
@@ -149,19 +161,20 @@ export async function createFullMeetingReport(data: FullMeetingReportInput) {
                 .from('profiles')
                 .update({ last_attendance: data.date })
                 .in('id', presentProfileIds)
+                .eq('church_id', churchId)
         }
     }
 
     // 4. Register visitors
     const visitorRecords = data.visitorsArray.map((v) => ({
-        church_id: data.churchId,
+        church_id: churchId,
         context_type: 'CELL_MEETING',
         context_id: meeting.id,
         context_date: data.date,
         visitor_name: v.name,
         visitor_phone: v.phone || null,
         status: 'PRESENT',
-        checked_in_by: user.id
+        checked_in_by: profile.id
     }))
 
     if (visitorRecords.length > 0) {

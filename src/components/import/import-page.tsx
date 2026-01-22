@@ -13,7 +13,7 @@ import * as XLSX from 'xlsx'
 import { importMembers } from '@/actions/admin'
 import { toast } from 'sonner'
 
-export default function ImportPage({ churchId }: { churchId: string }) {
+export default function ImportPage() {
     // const router = useRouter()
     const [file, setFile] = useState<File | null>(null)
     const [loading, setLoading] = useState(false)
@@ -49,7 +49,7 @@ export default function ImportPage({ churchId }: { churchId: string }) {
                 const worksheet = workbook.Sheets[sheetName]
                 const jsonData = XLSX.utils.sheet_to_json(worksheet) as Record<string, unknown>[]
 
-                const result = await importMembers(churchId, jsonData)
+                const result = await importMembers(jsonData)
                 setStats(result)
                 toast.success('Importação concluída!')
             }

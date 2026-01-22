@@ -12,7 +12,7 @@ export default async function CellsPage() {
     const profile = await getProfile()
     if (!profile || profile.role !== 'PASTOR') redirect('/dashboard')
 
-    const cells = await getAllCellsOverview(profile.church_id)
+    const cells = await getAllCellsOverview()
 
     return (
         <div className="space-y-6 pb-20">
