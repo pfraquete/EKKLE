@@ -1,6 +1,8 @@
 import { getProfile } from '@/actions/auth'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { Palette, ArrowRight } from 'lucide-react'
 import { ChurchSiteConfigForm } from '@/components/config/church-site-config-form'
 
 export default async function SiteConfigPage() {
@@ -40,6 +42,30 @@ export default async function SiteConfigPage() {
           Configure as informações públicas do site da sua igreja
         </p>
       </div>
+
+      {/* Branding Quick Link */}
+      <Link
+        href="/configuracoes/site/branding"
+        className="block bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6 hover:shadow-md transition-shadow"
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-primary/10 rounded-lg">
+              <Palette className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-1">
+                Identidade Visual
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Configure as cores, fontes, logo e outros elementos visuais do
+                site da sua igreja
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+        </div>
+      </Link>
 
       <ChurchSiteConfigForm church={church} />
     </div>
