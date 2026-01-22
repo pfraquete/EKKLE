@@ -68,7 +68,7 @@ export function CoursePlayer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const progressUpdateInterval = useRef<NodeJS.Timeout>()
+  const progressUpdateInterval = useRef<NodeJS.Timeout | undefined>(undefined)
 
   // Create progress map
   const progressMap = new Map(videoProgress.map((p) => [p.video_id, p]))

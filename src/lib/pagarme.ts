@@ -11,7 +11,7 @@ const PAGARME_SECRET_KEY = process.env.PAGARME_SECRET_KEY || '';
 interface PagarmeRequestOptions {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
-  body?: Record<string, unknown>;
+  body?: unknown;
 }
 
 async function pagarmeRequest<T>(options: PagarmeRequestOptions): Promise<T> {
@@ -587,7 +587,7 @@ export async function createRecipient(recipient: PagarmeRecipient): Promise<Paga
   return pagarmeRequest({
     method: 'POST',
     path: '/recipients',
-    body: recipient as Record<string, unknown>,
+    body: recipient,
   });
 }
 
@@ -702,7 +702,7 @@ export async function createOrder(order: PagarmeOrder): Promise<PagarmeOrderResp
   return pagarmeRequest({
     method: 'POST',
     path: '/orders',
-    body: order as Record<string, unknown>,
+    body: order,
   });
 }
 

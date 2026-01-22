@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 import { adminUpdateCourse, adminDeleteCourse, adminCreateVideo, adminUpdateVideo, adminDeleteVideo } from '@/actions/courses-admin'
 
-type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null; is_published: boolean }
+type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null; is_published: boolean; order_index: number }
 type Video = { id: string; title: string; description: string | null; video_url: string; duration_seconds: number; order_index: number; is_published: boolean }
 
 export function CourseDetailView({ course, videos, canDelete }: { course: Course; videos: Video[]; canDelete: boolean }) {
@@ -18,7 +18,11 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
   const [videoData, setVideoData] = useState({ title: '', description: '', video_url: '', duration_seconds: 0, order_index: videos.length, is_published: false })
 
   const handleUpdateCourse = async () => {
-    const result = await adminUpdateCourse(course.id, courseData)
+    const result = await adminUpdateCourse(course.id, {
+      ...courseData,
+      description: courseData.description || undefined,
+      thumbnail_url: courseData.thumbnail_url || undefined,
+    })
     if (result.success) { setEditMode(false); router.refresh() }
     else alert(result.error)
   }
@@ -118,7 +122,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
                 <p className="text-sm text-gray-600">{video.duration_seconds}s</p>
               </div>
               {video.is_published ? <Eye className="w-5 h-5 text-green-600" /> : <EyeOff className="w-5 h-5 text-gray-400" />}
-              <button onClick={() => { setEditingVideo(video); setVideoData(video); setVideoForm(true) }} className="p-2 hover:bg-gray-100 rounded"><Edit className="w-4 h-4" /></button>
+              <button onClick={() => { setEditingVideo(video); setVideoData({ ...video, description: video.description || '' }); setVideoForm(true) }} className="p-2 hover:bg-gray-100 rounded"><Edit className="w-4 h-4" /></button>
               {canDelete && <button onClick={() => handleDeleteVideo(video.id)} className="p-2 hover:bg-red-50 text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>}
             </div>
           ))}

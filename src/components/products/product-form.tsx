@@ -75,8 +75,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       const data = {
         name: formData.name,
-        description: formData.description || null,
-        short_description: formData.short_description || null,
+        description: formData.description || undefined,
+        short_description: formData.short_description || undefined,
         category_id: formData.category_id || null,
         price_cents: priceCents,
         compare_at_price_cents: compareAtPriceCents,
@@ -164,11 +164,12 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="category_id">Categoria</Label>
-            <Select
+            <select
               id="category_id"
               value={formData.category_id}
               onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
               disabled={loading}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Sem categoria</option>
               {categories.map((category) => (
@@ -176,7 +177,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                   {category.name}
                 </option>
               ))}
-            </Select>
+            </select>
           </div>
         </div>
       </Card>
@@ -306,16 +307,17 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select
+            <select
               id="status"
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               disabled={loading}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="draft">Rascunho (não visível na loja)</option>
               <option value="active">Ativo (visível na loja)</option>
               <option value="inactive">Inativo (não visível)</option>
-            </Select>
+            </select>
           </div>
 
           <div className="flex items-center space-x-2">

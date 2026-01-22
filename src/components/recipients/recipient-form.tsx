@@ -191,16 +191,17 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="transfer_interval">Intervalo de Transferência *</Label>
-            <Select
+            <select
               id="transfer_interval"
               value={formData.transfer_interval}
               onChange={(e) => setFormData({ ...formData, transfer_interval: e.target.value })}
               disabled={loading}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="daily">Diária</option>
               <option value="weekly">Semanal</option>
               <option value="monthly">Mensal</option>
-            </Select>
+            </select>
           </div>
         </div>
       </div>
@@ -213,12 +214,13 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="bank_code">Banco *</Label>
-              <Select
+              <select
                 id="bank_code"
                 required
                 value={formData.bank_code}
                 onChange={(e) => setFormData({ ...formData, bank_code: e.target.value })}
                 disabled={loading}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Selecione o banco</option>
                 {BANKS.map((bank) => (
@@ -226,21 +228,22 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
                     {bank.code} - {bank.name}
                   </option>
                 ))}
-              </Select>
+              </select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="account_type">Tipo de Conta *</Label>
-              <Select
+              <select
                 id="account_type"
                 required
                 value={formData.account_type}
                 onChange={(e) => setFormData({ ...formData, account_type: e.target.value })}
                 disabled={loading}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="checking">Corrente</option>
                 <option value="savings">Poupança</option>
-              </Select>
+              </select>
             </div>
 
             <div className="space-y-2">
