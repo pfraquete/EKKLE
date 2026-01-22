@@ -16,6 +16,17 @@ const serviceSchema = z.object({
   zoom_meeting_id: z.string().optional(),
   zoom_password: z.string().optional(),
   is_published: z.boolean().default(false),
+  // Programming fields
+  preacher_id: z.string().uuid().optional().nullable(),
+  preacher_name: z.string().optional().nullable(),
+  opening_id: z.string().uuid().optional().nullable(),
+  offerings_id: z.string().uuid().optional().nullable(),
+  praise_team: z.string().optional().nullable(),
+  media_team: z.string().optional().nullable(),
+  welcome_team: z.string().optional().nullable(),
+  cleaning_team: z.string().optional().nullable(),
+  cafeteria_team: z.string().optional().nullable(),
+  communion_team: z.string().optional().nullable(),
 })
 
 type ServiceInput = z.infer<typeof serviceSchema>
@@ -197,7 +208,7 @@ export async function getService(serviceId: string) {
 
     const { data: service, error } = await supabase
       .from('services')
-      .select('*')
+      .select('*, preacher:profiles!preacher_id(full_name), opening:profiles!opening_id(full_name), offerings:profiles!offerings_id(full_name)')
       .eq('id', serviceId)
       .eq('church_id', profile.church_id)
       .single()

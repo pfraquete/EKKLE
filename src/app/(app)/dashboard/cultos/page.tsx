@@ -62,7 +62,7 @@ export default async function CultosAdminPage() {
 
                 <div className="flex items-center gap-2">
                   <Link href={`/dashboard/cultos/${service.id}`} className="flex-1 text-center bg-primary/10 text-primary px-4 py-2 rounded-lg font-semibold hover:bg-primary/20 transition-colors text-sm">
-                    Editar
+                    Ver detalhes
                   </Link>
                   <ServiceActions serviceId={service.id} canDelete={profile.role === 'PASTOR'} />
                 </div>

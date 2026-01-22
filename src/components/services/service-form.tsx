@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createService, updateService } from '@/actions/services'
-import { Loader2, ArrowLeft } from 'lucide-react'
+import { Loader2, ArrowLeft, Users, CalendarDays, ClipboardList } from 'lucide-react'
 import Link from 'next/link'
+import { getChurchMembers } from '@/actions/auth'
 
 type Service = {
   id: string
@@ -18,6 +19,22 @@ type Service = {
   zoom_meeting_id: string | null
   zoom_password: string | null
   is_published: boolean
+  preacher_id?: string | null
+  preacher_name?: string | null
+  opening_id?: string | null
+  offerings_id?: string | null
+  praise_team?: string | null
+  media_team?: string | null
+  welcome_team?: string | null
+  cleaning_team?: string | null
+  cafeteria_team?: string | null
+  communion_team?: string | null
+}
+
+type Member = {
+  id: string
+  full_name: string
+  role: string
 }
 
 export function ServiceForm({ service }: { service?: Service }) {
@@ -35,7 +52,26 @@ export function ServiceForm({ service }: { service?: Service }) {
     zoom_meeting_id: service?.zoom_meeting_id || '',
     zoom_password: service?.zoom_password || '',
     is_published: service?.is_published || false,
+    preacher_id: service?.preacher_id || '',
+    preacher_name: service?.preacher_name || '',
+    opening_id: service?.opening_id || '',
+    offerings_id: service?.offerings_id || '',
+    praise_team: service?.praise_team || '',
+    media_team: service?.media_team || '',
+    welcome_team: service?.welcome_team || '',
+    cleaning_team: service?.cleaning_team || '',
+    cafeteria_team: service?.cafeteria_team || '',
+    communion_team: service?.communion_team || '',
   })
+  const [members, setMembers] = useState<Member[]>([])
+
+  useEffect(() => {
+    async function loadMembers() {
+      const data = await getChurchMembers()
+      setMembers(data)
+    }
+    loadMembers()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -130,6 +166,146 @@ export function ServiceForm({ service }: { service?: Service }) {
         <div className="flex items-center gap-3">
           <input id="is_published" type="checkbox" checked={formData.is_published} onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })} className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary" />
           <label htmlFor="is_published" className="text-sm font-semibold">Publicar culto no site público</label>
+        </div>
+      </div>
+
+      {/* Programação do Culto */}
+      <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+        <div className="flex items-center gap-2 border-b pb-4">
+          <ClipboardList className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-bold">Programação e Escala</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <h3 className="font-bold text-sm text-primary uppercase tracking-wider">Palavra e Altar</h3>
+
+            <div>
+              <label htmlFor="preacher_id" className="block text-sm font-semibold mb-2">Pregador (Membro)</label>
+              <select
+                id="preacher_id"
+                value={formData.preacher_id}
+                onChange={(e) => setFormData({ ...formData, preacher_id: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="">Selecione um membro...</option>
+                {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="preacher_name" className="block text-sm font-semibold mb-2">Pregador (Convidado Externo)</label>
+              <input
+                id="preacher_name"
+                type="text"
+                value={formData.preacher_name}
+                onChange={(e) => setFormData({ ...formData, preacher_name: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Nome do pregador convidado"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="opening_id" className="block text-sm font-semibold mb-2">Abertura</label>
+                <select
+                  id="opening_id"
+                  value={formData.opening_id}
+                  onChange={(e) => setFormData({ ...formData, opening_id: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Selecione...</option>
+                  {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="offerings_id" className="block text-sm font-semibold mb-2">Ofertas</label>
+                <select
+                  id="offerings_id"
+                  value={formData.offerings_id}
+                  onChange={(e) => setFormData({ ...formData, offerings_id: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Selecione...</option>
+                  {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-bold text-sm text-primary uppercase tracking-wider">Equipes e Apoio</h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="praise_team" className="block text-sm font-semibold mb-2">Louvor</label>
+                <input
+                  id="praise_team"
+                  type="text"
+                  value={formData.praise_team}
+                  onChange={(e) => setFormData({ ...formData, praise_team: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="Equipe ou nomes"
+                />
+              </div>
+              <div>
+                <label htmlFor="praise_team" className="block text-sm font-semibold mb-2">Mídias</label>
+                <input
+                  id="media_team"
+                  type="text"
+                  value={formData.media_team}
+                  onChange={(e) => setFormData({ ...formData, media_team: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="Proj., Live, Som"
+                />
+              </div>
+              <div>
+                <label htmlFor="welcome_team" className="block text-sm font-semibold mb-2">Boas-vindas</label>
+                <input
+                  id="welcome_team"
+                  type="text"
+                  value={formData.welcome_team}
+                  onChange={(e) => setFormData({ ...formData, welcome_team: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="Equipe de recepção"
+                />
+              </div>
+              <div>
+                <label htmlFor="communion_team" className="block text-sm font-semibold mb-2">Santa Ceia</label>
+                <input
+                  id="communion_team"
+                  type="text"
+                  value={formData.communion_team}
+                  onChange={(e) => setFormData({ ...formData, communion_team: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="Responsáveis pela ceia"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="md:col-span-1">
+                <label htmlFor="cleaning_team" className="block text-sm font-semibold mb-2">Limpeza</label>
+                <input
+                  id="cleaning_team"
+                  type="text"
+                  value={formData.cleaning_team}
+                  onChange={(e) => setFormData({ ...formData, cleaning_team: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label htmlFor="cafeteria_team" className="block text-sm font-semibold mb-2">Cantina</label>
+                <input
+                  id="cafeteria_team"
+                  type="text"
+                  value={formData.cafeteria_team}
+                  onChange={(e) => setFormData({ ...formData, cafeteria_team: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

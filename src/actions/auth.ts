@@ -151,3 +151,24 @@ export async function updateProfile(formData: FormData) {
 
     return { success: true }
 }
+
+export async function getChurchMembers() {
+    try {
+        const profile = await getProfile()
+        if (!profile) return []
+
+        const supabase = await createClient()
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, full_name, role')
+            .eq('church_id', profile.church_id)
+            .eq('is_active', true)
+            .order('full_name')
+
+        if (error) throw error
+        return data || []
+    } catch (error) {
+        console.error('Error getting church members:', error)
+        return []
+    }
+}
