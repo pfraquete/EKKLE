@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import type { Profile } from '@/actions/auth';
 import { createCheckoutOrder } from '@/actions/orders';
 import { useCart } from '@/context/cart-context';
 import { Card } from '@/components/ui/card';
@@ -21,12 +22,7 @@ import {
 } from 'lucide-react';
 
 interface CheckoutFormProps {
-  profile: {
-    id: string;
-    full_name?: string;
-    email?: string;
-    phone?: string;
-  };
+  profile: Pick<Profile, 'id' | 'full_name' | 'email' | 'phone'>;
 }
 
 export function CheckoutForm({ profile }: CheckoutFormProps) {
