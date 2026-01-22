@@ -51,7 +51,7 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
     // ========================================
     // 1. Get or Create Conversation
     // ========================================
-    let conversation = await getOrCreateConversation(pastorId, churchId, phoneNumber);
+    const conversation = await getOrCreateConversation(pastorId, churchId, phoneNumber);
 
     // ========================================
     // 2. Check for Pending Confirmations
