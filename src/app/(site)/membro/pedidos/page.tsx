@@ -7,6 +7,16 @@ import { Badge } from '@/components/ui/badge';
 import { Package, ShoppingBag, ChevronRight } from 'lucide-react';
 import { getOrderStatusLabel, getPaymentMethodLabel } from '@/lib/pagarme';
 
+interface Order {
+  id: string;
+  order_number: string;
+  status: string;
+  payment_status: string;
+  payment_method: string;
+  total_cents: number;
+  created_at: string;
+}
+
 export default async function OrdersListPage() {
   const profile = await getProfile();
   if (!profile) redirect('/login');
@@ -65,7 +75,7 @@ export default async function OrdersListPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {orders.map((order: any) => (
+            {orders.map((order: Order) => (
               <Link key={order.id} href={`/membro/pedidos/${order.id}`}>
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between">

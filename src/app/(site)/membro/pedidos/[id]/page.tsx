@@ -7,8 +7,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Package,
-  ChevronRight,
   CheckCircle,
   Clock,
   XCircle,
@@ -16,6 +14,14 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { getOrderStatusLabel, getPaymentMethodLabel } from '@/lib/pagarme';
+
+interface OrderItem {
+  id: string;
+  product_name: string;
+  quantity: number;
+  unit_price_cents: number;
+  total_cents: number;
+}
 
 export default async function OrderDetailsPage({ params }: { params: { id: string } }) {
   const profile = await getProfile();
@@ -233,7 +239,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
           <div>
             <h3 className="font-semibold mb-3">Itens do Pedido</h3>
             <div className="space-y-3">
-              {order.items?.map((item: any) => (
+              {order.items?.map((item: OrderItem) => (
                 <div key={item.id} className="flex items-center justify-between py-3 border-b last:border-0">
                   <div>
                     <p className="font-medium">{item.product_name}</p>

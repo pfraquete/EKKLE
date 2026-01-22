@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Plus, Package, AlertCircle, Settings } from 'lucide-react';
 import { ProductCard } from '@/components/products/product-card';
 

@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormError } from '@/components/ui/form-error';
-import { Badge } from '@/components/ui/badge';
 import {
   Loader2,
   CreditCard,
