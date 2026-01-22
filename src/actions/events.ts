@@ -3,211 +3,143 @@
 import { createClient } from '@/lib/supabase/server'
 import { getProfile } from './auth'
 import { revalidatePath } from 'next/cache'
-import { z } from 'zod'
 
-const eventSchema = z.object({
-  title: z.string().min(1, 'Título é obrigatório'),
-  description: z.string().optional(),
-  start_date: z.string().min(1, 'Data de início é obrigatória'),
-  end_date: z.string().optional(),
-  location: z.string().optional(),
-  image_url: z.string().url().optional().or(z.literal('')),
-  is_published: z.boolean().default(false),
-})
+export type EventCategory = 'EVENT' | 'COURSE' | 'PRAYER_CAMPAIGN' | 'SERVICE' | 'COMMUNITY' | 'OTHER'
 
-type EventInput = z.infer<typeof eventSchema>
+export interface EventData {
+  id: string
+  title: string
+  description: string | null
+  location: string | null
+  start_date: string
+  end_time: string | null
+  category: EventCategory
+  image_url: string | null
 
-export async function createEvent(data: EventInput) {
-  try {
-    const profile = await getProfile()
-    if (!profile) {
-      throw new Error('Não autenticado')
-    }
-
-    if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') {
-      throw new Error('Sem permissão para criar eventos')
-    }
-
-    const validated = eventSchema.parse(data)
-
-    const supabase = await createClient()
-
-    const { data: event, error } = await supabase
-      .from('events')
-      .insert({
-        ...validated,
-        church_id: profile.church_id,
-        created_by: profile.id,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      throw new Error('Erro ao criar evento')
-    }
-
-    revalidatePath('/dashboard/eventos')
-    revalidatePath('/', 'layout') // Revalidate public pages
-
-    return { success: true, event }
-  } catch (error: unknown) {
-    console.error('Error creating event:', error)
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message }
-    }
-    if (error instanceof Error) {
-      return { success: false, error: error.message }
-    }
-    return { success: false, error: 'Erro desconhecido' }
-  }
-}
-
-export async function updateEvent(eventId: string, data: EventInput) {
-  try {
-    const profile = await getProfile()
-    if (!profile) {
-      throw new Error('Não autenticado')
-    }
-
-    if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') {
-      throw new Error('Sem permissão para editar eventos')
-    }
-
-    const validated = eventSchema.parse(data)
-
-    const supabase = await createClient()
-
-    // Verify event belongs to church
-    const { data: existingEvent } = await supabase
-      .from('events')
-      .select('id')
-      .eq('id', eventId)
-      .eq('church_id', profile.church_id)
-      .single()
-
-    if (!existingEvent) {
-      throw new Error('Evento não encontrado')
-    }
-
-    const { error } = await supabase
-      .from('events')
-      .update(validated)
-      .eq('id', eventId)
-
-    if (error) {
-      throw new Error('Erro ao atualizar evento')
-    }
-
-    revalidatePath('/dashboard/eventos')
-    revalidatePath(`/dashboard/eventos/${eventId}`)
-    revalidatePath('/', 'layout')
-
-    return { success: true }
-  } catch (error: unknown) {
-    console.error('Error updating event:', error)
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message }
-    }
-    if (error instanceof Error) {
-      return { success: false, error: error.message }
-    }
-    return { success: false, error: 'Erro desconhecido' }
-  }
-}
-
-export async function deleteEvent(eventId: string) {
-  try {
-    const profile = await getProfile()
-    if (!profile) {
-      throw new Error('Não autenticado')
-    }
-
-    if (profile.role !== 'PASTOR') {
-      throw new Error('Apenas pastores podem excluir eventos')
-    }
-
-    const supabase = await createClient()
-
-    // Verify event belongs to church
-    const { data: existingEvent } = await supabase
-      .from('events')
-      .select('id')
-      .eq('id', eventId)
-      .eq('church_id', profile.church_id)
-      .single()
-
-    if (!existingEvent) {
-      throw new Error('Evento não encontrado')
-    }
-
-    const { error } = await supabase.from('events').delete().eq('id', eventId)
-
-    if (error) {
-      throw new Error('Erro ao excluir evento')
-    }
-
-    revalidatePath('/dashboard/eventos')
-    revalidatePath('/', 'layout')
-
-    return { success: true }
-  } catch (error: unknown) {
-    console.error('Error deleting event:', error)
-    if (error instanceof Error) {
-      return { success: false, error: error.message }
-    }
-    return { success: false, error: 'Erro desconhecido' }
-  }
+  // Advanced options
+  requires_registration: boolean
+  is_paid: boolean
+  price: number | null
+  capacity: number | null
+  is_online: boolean
+  online_url: string | null
+  registration_link: string | null
+  recurrence_pattern: string | null
 }
 
 export async function getEvents() {
-  try {
-    const profile = await getProfile()
-    if (!profile) {
-      throw new Error('Não autenticado')
-    }
+  const profile = await getProfile()
+  if (!profile) throw new Error('Not authenticated')
+  const churchId = profile.church_id
 
-    const supabase = await createClient()
+  const supabase = await createClient()
 
-    const { data: events, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('church_id', profile.church_id)
-      .order('start_date', { ascending: false })
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('church_id', churchId)
+    .order('start_date', { ascending: true })
 
-    if (error) {
-      throw new Error('Erro ao buscar eventos')
-    }
-
-    return events || []
-  } catch (error) {
-    console.error('Error getting events:', error)
+  if (error) {
+    console.error('Error fetching events:', error)
     return []
   }
+
+  return (data || []) as EventData[]
 }
 
-export async function getEvent(eventId: string) {
-  try {
-    const profile = await getProfile()
-    if (!profile) {
-      throw new Error('Não autenticado')
-    }
+export async function getEvent(id: string) {
+  const profile = await getProfile()
+  if (!profile) throw new Error('Not authenticated')
+  const churchId = profile.church_id
 
-    const supabase = await createClient()
+  const supabase = await createClient()
 
-    const { data: event, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', eventId)
-      .eq('church_id', profile.church_id)
-      .single()
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', id)
+    .eq('church_id', churchId)
+    .single()
 
-    if (error) {
-      throw new Error('Erro ao buscar evento')
-    }
+  if (error) return null
 
-    return event
-  } catch (error) {
-    console.error('Error getting event:', error)
-    return null
+  return data as EventData
+}
+
+export async function createEvent(event: Omit<EventData, 'id'>) {
+  const profile = await getProfile()
+  if (!profile) throw new Error('Not authenticated')
+  const churchId = profile.church_id
+
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('events')
+    .insert({
+      ...event,
+      church_id: churchId,
+      // Map legacy event_type if needed, or just rely on category
+      event_type: ['SERVICE', 'COMMUNITY', 'OTHER'].includes(event.category) ? event.category : 'EVENT'
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error creating event:', error)
+    throw new Error('Failed to create event')
   }
+
+  revalidatePath('/dashboard/eventos')
+  return { success: true, data }
+}
+
+export async function updateEvent(id: string, event: Partial<Omit<EventData, 'id'>>) {
+  const profile = await getProfile()
+  if (!profile) throw new Error('Not authenticated')
+  const churchId = profile.church_id
+
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('events')
+    .update({
+      ...event,
+      // Map legacy event_type if needed
+      event_type: event.category && ['SERVICE', 'COMMUNITY', 'OTHER'].includes(event.category) ? event.category : undefined
+    })
+    .eq('id', id)
+    .eq('church_id', churchId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating event:', error)
+    throw new Error('Failed to update event')
+  }
+
+  revalidatePath('/dashboard/eventos')
+  return { success: true, data }
+}
+
+export async function deleteEvent(id: string) {
+  const profile = await getProfile()
+  if (!profile) throw new Error('Not authenticated')
+  const churchId = profile.church_id
+
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', id)
+    .eq('church_id', churchId)
+
+  if (error) {
+    console.error('Error deleting event:', error)
+    throw new Error('Failed to delete event')
+  }
+
+  revalidatePath('/dashboard/eventos')
+  return { success: true }
 }

@@ -62,6 +62,13 @@ export function Sidebar({ profile }: SidebarProps) {
             show: isPastor
         },
         {
+            label: 'Eventos',
+            icon: CalendarCheck2,
+            href: '/dashboard/eventos',
+            active: pathname.startsWith('/dashboard/eventos'),
+            show: isPastor
+        },
+        {
             label: 'Configurações',
             icon: Settings,
             href: '/configuracoes',
