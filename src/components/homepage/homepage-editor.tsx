@@ -8,15 +8,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { FormError } from '@/components/ui/form-error'
-import { Loader2, Upload, Image as ImageIcon, ArrowUp, ArrowDown, Eye, EyeOff, Sparkles } from 'lucide-react'
+import { Loader2, Upload, ArrowUp, ArrowDown, Eye, EyeOff, Sparkles } from 'lucide-react'
 import {
   getHomepageSettings,
   updateHomepageSettings,
   uploadHeroBackground,
-  getDefaultHomepageSettings,
-  getAvailableSections,
   type HomepageSettings,
 } from '@/actions/homepage'
+import { getDefaultHomepageSettings, getAvailableSections } from '@/lib/branding-constants'
 
 export function HomepageEditor() {
   const router = useRouter()
@@ -124,7 +123,7 @@ export function HomepageEditor() {
 
     // Find section with order - 1
     const targetSection = Object.entries(settings.sections).find(
-      ([_, s]) => s?.order === currentOrder - 1
+      ([, s]) => s?.order === currentOrder - 1
     )
 
     if (targetSection) {
@@ -162,7 +161,7 @@ export function HomepageEditor() {
 
     // Find section with order + 1
     const targetSection = Object.entries(settings.sections).find(
-      ([_, s]) => s?.order === currentOrder + 1
+      ([, s]) => s?.order === currentOrder + 1
     )
 
     if (targetSection) {
@@ -295,7 +294,10 @@ export function HomepageEditor() {
                       ...settings,
                       hero: {
                         ...settings.hero!,
-                        cta: { ...settings.hero?.cta!, text: e.target.value },
+                        cta: {
+                          text: e.target.value,
+                          link: settings.hero?.cta?.link || '',
+                        },
                       },
                     })
                   }
@@ -313,7 +315,10 @@ export function HomepageEditor() {
                       ...settings,
                       hero: {
                         ...settings.hero!,
-                        cta: { ...settings.hero?.cta!, link: e.target.value },
+                        cta: {
+                          text: settings.hero?.cta?.text || '',
+                          link: e.target.value,
+                        },
                       },
                     })
                   }

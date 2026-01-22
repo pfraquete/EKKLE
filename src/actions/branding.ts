@@ -172,6 +172,3 @@ export async function uploadBrandingFile(
     return { success: false, error: 'Erro ao fazer upload do arquivo' }
   }
 }
-
-// Re-export constants from lib (not server actions)
-export { getAvailableFonts, getDefaultBrandingSettings } from '@/lib/branding-constants'

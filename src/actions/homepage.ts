@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getProfile } from './auth'
 import { revalidatePath } from 'next/cache'
-import { getDefaultHomepageSettings, getAvailableSections } from '@/lib/branding-constants'
+import { getDefaultHomepageSettings } from '@/lib/branding-constants'
 
 // =====================================================
 // TYPES
@@ -178,6 +178,3 @@ export async function uploadHeroBackground(file: File): Promise<{ success: boole
     return { success: false, error: 'Erro ao fazer upload da imagem' }
   }
 }
-
-// Re-export constants from lib (not server actions)
-export { getDefaultHomepageSettings, getAvailableSections } from '@/lib/branding-constants'
