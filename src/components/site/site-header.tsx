@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
@@ -33,11 +32,14 @@ export function SiteHeader({ church }: { church: Church }) {
                     {/* Logo and Church Name */}
                     <Link href="/" className="flex items-center gap-3 z-50 relative">
                         {church.logo_url ? (
-                            <img
-                                src={church.logo_url}
-                                alt={church.name}
-                                className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-contain bg-muted"
-                            />
+                            <>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={church.logo_url}
+                                    alt={church.name}
+                                    className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-contain bg-muted"
+                                />
+                            </>
                         ) : (
                             <div className="w-10 h-10 md:w-12 md:h-12 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-xl">
                                 {church.name[0]}

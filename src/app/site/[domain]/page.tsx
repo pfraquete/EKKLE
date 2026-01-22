@@ -217,7 +217,7 @@ export default async function Homepage() {
 
     // Determine section order
     const sections = Object.entries(settings.sections || {})
-        .filter(([_, config]) => config.enabled)
+        .filter(([, config]) => config.enabled)
         .sort((a, b) => a[1].order - b[1].order)
         .map(([key]) => key)
 
@@ -255,7 +255,7 @@ export default async function Homepage() {
                         </h1>
 
                         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-                            {settings.hero?.subtitle || calculateDefaultSubtitle(church.name)}
+                            {settings.hero?.subtitle || calculateDefaultSubtitle()}
                         </p>
 
                         {settings.hero?.cta && (
@@ -277,6 +277,6 @@ export default async function Homepage() {
     )
 }
 
-function calculateDefaultSubtitle(churchName: string) {
+function calculateDefaultSubtitle() {
     return "Somos uma comunidade de fé, esperança e amor."
 }

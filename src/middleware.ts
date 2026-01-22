@@ -18,12 +18,6 @@ export async function middleware(request: NextRequest) {
     // Get hostname (e.g. 'verbo.ekkle.com.br' or 'localhost:3000')
     const hostname = request.headers.get('host') || ''
 
-    // Define allowed domains (including localhost)
-    const currentHost =
-        process.env.NODE_ENV === 'production' && process.env.VERCEL === '1'
-            ? hostname.replace(`.ekkle.com.br`, '') // Adjust for Vercel/Prod domain
-            : hostname.replace(`.localhost:3000`, '')
-
     // 1. App Subdomain (app.ekkle.com.br) -> Serve App (Dashboard)
     // Since we don't have a separate (app) folder, we assume /dashboard is in the root app.
     // If user accesses app.ekkle.com.br, they should see the landing page OR login?

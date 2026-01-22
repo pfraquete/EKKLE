@@ -1,7 +1,6 @@
 import { getChurch } from '@/lib/get-church'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Instagram, Youtube, MessageCircle } from 'lucide-react'
 import { ThemeProvider } from '@/components/branding/theme-provider'
 import { BrandingSettings } from '@/actions/branding'

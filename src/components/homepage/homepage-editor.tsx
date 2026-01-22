@@ -332,6 +332,7 @@ export function HomepageEditor() {
               <div className="border-2 border-dashed rounded-lg p-4 text-center">
                 {settings.hero?.backgroundUrl ? (
                   <div className="space-y-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={settings.hero.backgroundUrl}
                       alt="Hero Background"
