@@ -40,7 +40,10 @@ export function ThemeProvider({ settings, children }: ThemeProviderProps) {
       {/* Custom Theme CSS */}
       <style dangerouslySetInnerHTML={{ __html: themeCSS }} />
 
-      {children}
+      {/* Theme Class Wrapper */}
+      <div className={settings.theme?.mode ? `theme-${settings.theme.mode}` : ''}>
+        {children}
+      </div>
     </>
   )
 }

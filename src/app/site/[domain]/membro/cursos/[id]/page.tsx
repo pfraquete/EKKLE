@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { CoursePlayer } from '@/components/courses/course-player'
 import { enrollInCourse, getCourseEnrollment, getAllVideoProgress } from '@/actions/courses'
+import { getProfile } from '@/actions/auth'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -119,6 +120,10 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
     }
   }
 
+  // Get profile for comments
+  const profile = await getProfile()
+  if (!profile) redirect('/login')
+
   return (
     <div className="max-w-7xl mx-auto">
       <Link
@@ -135,6 +140,7 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
         currentVideo={currentVideo}
         enrollment={enrollment}
         videoProgress={videoProgress}
+        profile={profile}
       />
     </div>
   )

@@ -48,9 +48,14 @@ export async function middleware(request: NextRequest) {
         if (isBypassRoute) {
             // Do NOT rewrite to /site/[domain]
             // Just let it pass but inject headers for tenant context
-            const response = NextResponse.next()
+            const requestHeaders = new Headers(request.headers)
+            requestHeaders.set('x-church-slug', subdomain)
 
-            response.headers.set('x-church-slug', subdomain)
+            const response = NextResponse.next({
+                request: {
+                    headers: requestHeaders,
+                },
+            })
 
             // Apply session cookies
             sessionResponse.cookies.getAll().forEach((cookie) => {
@@ -60,15 +65,18 @@ export async function middleware(request: NextRequest) {
             return response
         }
 
-        // Rewrite to /site/[domain]
+        // Rewrite to /site/${subdomain}${url.pathname}
         // We preserve the full path (e.g. /eventos)
         url.pathname = `/site/${subdomain}${url.pathname}`
 
-        // We can also set a header for easier access
-        const response = NextResponse.rewrite(url)
+        const requestHeaders = new Headers(request.headers)
+        requestHeaders.set('x-church-slug', subdomain)
 
-        // Add custom header for getChurch
-        response.headers.set('x-church-slug', subdomain)
+        const response = NextResponse.rewrite(url, {
+            request: {
+                headers: requestHeaders,
+            },
+        })
 
         // Apply session cookies
         sessionResponse.cookies.getAll().forEach((cookie) => {

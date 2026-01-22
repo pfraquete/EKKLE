@@ -10,6 +10,7 @@ import { BrandingSettings } from '@/actions/branding'
 export function generateThemeCSS(settings: BrandingSettings): string {
   const colors = settings.colors || {}
   const fonts = settings.fonts || {}
+  const theme = settings.theme || {}
 
   // Convert hex to RGB for Tailwind opacity utilities
   const hexToRgb = (hex: string): string => {
@@ -19,19 +20,55 @@ export function generateThemeCSS(settings: BrandingSettings): string {
       : '0 0 0'
   }
 
+  const getRadius = (r?: string) => {
+    switch (r) {
+      case 'none': return '0'
+      case 'sm': return '4px'
+      case 'md': return '8px'
+      case 'lg': return '12px'
+      case 'full': return '9999px'
+      default: return '12px'
+    }
+  }
+
   const css = `
     :root {
       /* Colors */
-      --color-primary: ${colors.primary || '#4F46E5'};
-      --color-primary-rgb: ${hexToRgb(colors.primary || '#4F46E5')};
-      --color-secondary: ${colors.secondary || '#10B981'};
-      --color-secondary-rgb: ${hexToRgb(colors.secondary || '#10B981')};
-      --color-accent: ${colors.accent || '#F59E0B'};
-      --color-accent-rgb: ${hexToRgb(colors.accent || '#F59E0B')};
+      --color-primary: ${colors.primary || '#e11d48'};
+      --color-primary-rgb: ${hexToRgb(colors.primary || '#e11d48')};
+      --color-secondary: ${colors.secondary || '#111827'};
+      --color-secondary-rgb: ${hexToRgb(colors.secondary || '#111827')};
+      --color-accent: ${colors.accent || '#f43f5e'};
+      --color-accent-rgb: ${hexToRgb(colors.accent || '#f43f5e')};
 
       /* Fonts */
-      --font-heading: ${fonts.heading || 'Inter'}, sans-serif;
-      --font-body: ${fonts.body || 'Inter'}, sans-serif;
+      --font-heading: "${fonts.heading || 'Inter'}", sans-serif;
+      --font-body: "${fonts.body || 'Inter'}", sans-serif;
+
+      /* Theme Tokens */
+      --radius-custom: ${getRadius(theme.borderRadius)};
+    }
+
+    /* Theme Modes Overlay (Applied via class on a wrapper) */
+    .theme-dark {
+      --background: 240 10% 3.9%;
+      --foreground: 0 0% 98%;
+      --card: 240 10% 6%;
+      --border: 240 3.7% 15.9%;
+    }
+
+    .theme-glass {
+      --background: 0 0% 100%;
+      --foreground: 240 10% 3.9%;
+    }
+
+    /* Base Component Overrides */
+    .btn-custom, button:not([class*="bg-transparent"]) {
+      border-radius: var(--radius-custom) !important;
+    }
+
+    .card-custom, [class*="rounded-"] {
+      border-radius: var(--radius-custom) !important;
     }
 
     /* Apply custom colors to Tailwind utilities */
@@ -43,25 +80,17 @@ export function generateThemeCSS(settings: BrandingSettings): string {
     .text-secondary { color: var(--color-secondary); }
     .border-secondary { border-color: var(--color-secondary); }
 
-    .bg-accent { background-color: var(--color-accent); }
-    .text-accent { color: var(--color-accent); }
-    .border-accent { border-color: var(--color-accent); }
-
     /* Apply opacity variants */
     .bg-primary\/10 { background-color: rgba(var(--color-primary-rgb), 0.1); }
     .bg-primary\/20 { background-color: rgba(var(--color-primary-rgb), 0.2); }
     .bg-primary\/50 { background-color: rgba(var(--color-primary-rgb), 0.5); }
 
-    .text-primary\/70 { color: rgba(var(--color-primary-rgb), 0.7); }
-    .text-primary\/80 { color: rgba(var(--color-primary-rgb), 0.8); }
-    .text-primary\/90 { color: rgba(var(--color-primary-rgb), 0.9); }
-
     /* Apply fonts */
     h1, h2, h3, h4, h5, h6 {
-      font-family: var(--font-heading);
+      font-family: var(--font-heading) !important;
     }
 
-    body {
+    body, p, span, a, li {
       font-family: var(--font-body);
     }
   `

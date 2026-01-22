@@ -4,6 +4,13 @@ import { useState, useRef, useEffect } from 'react'
 import { Play, CheckCircle, Clock } from 'lucide-react'
 import { updateVideoProgress } from '@/actions/courses'
 import { useChurchNavigation } from '@/hooks/use-church-navigation'
+import { CommentSection } from '@/components/courses/comment-section'
+
+type Profile = {
+  id: string
+  role: string
+  full_name: string
+}
 
 type Course = {
   id: string
@@ -40,6 +47,7 @@ type CoursePlayerProps = {
   currentVideo: Video
   enrollment: Enrollment
   videoProgress: VideoProgress[]
+  profile: Profile
 }
 
 function formatDuration(seconds: number): string {
@@ -62,6 +70,7 @@ export function CoursePlayer({
   currentVideo,
   enrollment,
   videoProgress,
+  profile,
 }: CoursePlayerProps) {
   const { push } = useChurchNavigation()
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -211,6 +220,13 @@ export function CoursePlayer({
             <p className="text-gray-600 whitespace-pre-wrap">{course.description}</p>
           )}
         </div>
+
+        {/* Interaction Area */}
+        <CommentSection
+          videoId={currentVideo.id}
+          userId={profile.id}
+          userRole={profile.role}
+        />
       </div>
 
       {/* Video List Sidebar */}
@@ -239,19 +255,17 @@ export function CoursePlayer({
                 <button
                   key={video.id}
                   onClick={() => handleVideoSelect(video)}
-                  className={`w-full text-left p-4 border-b hover:bg-gray-50 transition-colors ${
-                    isActive ? 'bg-primary/5 border-l-4 border-l-primary' : ''
-                  }`}
+                  className={`w-full text-left p-4 border-b hover:bg-gray-50 transition-colors ${isActive ? 'bg-primary/5 border-l-4 border-l-primary' : ''
+                    }`}
                 >
                   <div className="flex items-start gap-3">
                     <div
-                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                        isCompleted
-                          ? 'bg-green-100 text-green-700'
-                          : isActive
+                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCompleted
+                        ? 'bg-green-100 text-green-700'
+                        : isActive
                           ? 'bg-primary text-white'
                           : 'bg-gray-100 text-gray-600'
-                      }`}
+                        }`}
                     >
                       {isCompleted ? (
                         <CheckCircle className="w-5 h-5" />
@@ -261,9 +275,8 @@ export function CoursePlayer({
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3
-                        className={`font-semibold text-sm mb-1 line-clamp-2 ${
-                          isActive ? 'text-primary' : ''
-                        }`}
+                        className={`font-semibold text-sm mb-1 line-clamp-2 ${isActive ? 'text-primary' : ''
+                          }`}
                       >
                         {video.title}
                       </h3>

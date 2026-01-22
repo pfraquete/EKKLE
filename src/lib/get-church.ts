@@ -45,19 +45,7 @@ export async function getChurch(): Promise<Church | null> {
   const { data: church } = await query.single()
 
   if (!church) {
-    // Fallback to headers data (only if we have at least slug/id)
-    return {
-      id: churchId || '',
-      name: churchName || '',
-      slug: churchSlug || '',
-      logo_url: null,
-      description: null,
-      address: null,
-      instagram_url: null,
-      whatsapp_url: null,
-      youtube_channel_url: null,
-      website_settings: {},
-    }
+    return null
   }
 
   return church

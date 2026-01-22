@@ -30,7 +30,14 @@ export function SiteHeader({ church, branding }: { church: Church, branding?: Br
     const isActive = (path: string) => pathname === path
 
     return (
-        <header className="border-b bg-background sticky top-0 z-50">
+        <header
+            className={cn(
+                "sticky top-0 z-50 transition-all duration-300",
+                branding?.theme?.navStyle === 'blur' ? "bg-background/70 backdrop-blur-lg border-b border-border" :
+                    branding?.theme?.navStyle === 'transparent' ? "bg-transparent border-none absolute w-full" :
+                        "bg-background border-b border-border"
+            )}
+        >
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
                     {/* Logo and Church Name */}
@@ -41,7 +48,8 @@ export function SiteHeader({ church, branding }: { church: Church, branding?: Br
                                 <img
                                     src={logoUrl}
                                     alt={church.name}
-                                    className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-contain bg-muted"
+                                    className="w-10 h-10 md:w-12 md:h-12 object-contain bg-muted"
+                                    style={{ borderRadius: 'var(--radius-custom)' }}
                                 />
                             </>
                         ) : (

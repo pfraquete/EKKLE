@@ -39,9 +39,9 @@ export function getAvailableFonts() {
 export function getDefaultBrandingSettings(): BrandingSettings {
   return {
     colors: {
-      primary: '#4F46E5', // Indigo-600
-      secondary: '#10B981', // Green-500
-      accent: '#F59E0B', // Amber-500
+      primary: '#e11d48', // Rose-600
+      secondary: '#111827', // Gray-900
+      accent: '#f43f5e', // Rose-500
     },
     fonts: {
       heading: 'Inter',
@@ -51,6 +51,36 @@ export function getDefaultBrandingSettings(): BrandingSettings {
       url: undefined,
       favicon_url: undefined,
     },
+    theme: {
+      mode: 'light',
+      borderRadius: 'lg',
+      navStyle: 'blur',
+    }
+  }
+}
+
+/**
+ * Get available theme options
+ */
+export function getAvailableThemeOptions() {
+  return {
+    modes: [
+      { value: 'light', label: 'Claro' },
+      { value: 'dark', label: 'Escuro' },
+      { value: 'glass', label: 'Glassmorphism' },
+    ],
+    radius: [
+      { value: 'none', label: 'Reto' },
+      { value: 'sm', label: 'Suave (SM)' },
+      { value: 'md', label: 'Médio (MD)' },
+      { value: 'lg', label: 'Arredondado (LG)' },
+      { value: 'full', label: 'Cápsula' },
+    ],
+    navStyles: [
+      { value: 'transparent', label: 'Transparente' },
+      { value: 'solid', label: 'Sólido' },
+      { value: 'blur', label: 'Efeito Translúcido' },
+    ]
   }
 }
 

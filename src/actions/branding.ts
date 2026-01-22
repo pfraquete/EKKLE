@@ -22,6 +22,12 @@ export interface BrandingSettings {
     url?: string
     favicon_url?: string
   }
+  theme?: {
+    mode?: 'light' | 'dark' | 'glass'
+    primaryColor?: string
+    borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+    navStyle?: 'transparent' | 'solid' | 'blur'
+  }
 }
 
 // =====================================================
