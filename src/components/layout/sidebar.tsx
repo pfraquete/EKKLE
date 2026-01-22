@@ -8,7 +8,8 @@ import {
     Home,
     Settings,
     LogOut,
-    CalendarCheck2
+    CalendarCheck2,
+    ShoppingBag
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -51,6 +52,13 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: Users,
             href: '/membros',
             active: pathname.startsWith('/membros'),
+            show: isPastor
+        },
+        {
+            label: 'Loja',
+            icon: ShoppingBag,
+            href: '/dashboard/loja',
+            active: pathname.startsWith('/dashboard/loja'),
             show: isPastor
         },
         {
