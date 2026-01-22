@@ -43,7 +43,17 @@ export async function middleware(request: NextRequest) {
             url.pathname.startsWith('/cadastro') ||
             url.pathname.startsWith('/forgot-password') ||
             url.pathname.startsWith('/reset-password') ||
-            url.pathname.startsWith('/api')
+            url.pathname.startsWith('/api') ||
+            url.pathname.startsWith('/dashboard') ||
+            url.pathname.startsWith('/minha-celula') ||
+            url.pathname.startsWith('/celulas') ||
+            url.pathname.startsWith('/eventos') ||
+            url.pathname.startsWith('/membros') ||
+            url.pathname.startsWith('/financeiro') ||
+            url.pathname.startsWith('/presenca-cultos') ||
+            url.pathname.startsWith('/importar') ||
+            url.pathname.startsWith('/calendario') ||
+            url.pathname.startsWith('/configuracoes')
 
         if (isBypassRoute) {
             // Do NOT rewrite to /site/[domain]
