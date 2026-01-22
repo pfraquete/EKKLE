@@ -82,10 +82,10 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
 
       {/* Basic Information */}
       <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-        <h2 className="text-xl font-bold">Informações Básicas</h2>
+        <h2 className="text-xl font-bold text-gray-900">Informações Básicas</h2>
 
         <div>
-          <label htmlFor="name" className="block text-sm font-semibold mb-2">
+          <label htmlFor="name" className="block text-sm font-semibold mb-2 text-gray-900">
             Nome da Igreja *
           </label>
           <input
@@ -100,7 +100,7 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
         </div>
 
         <div>
-          <label htmlFor="slug" className="block text-sm font-semibold mb-2">
+          <label htmlFor="slug" className="block text-sm font-semibold mb-2 text-gray-900">
             Slug do Site *
           </label>
           <input
@@ -116,7 +116,7 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
             pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
           />
           <p className="text-sm text-gray-600 mt-2">
-            Seu site será: <strong className="text-primary">{siteUrl}</strong>
+            Seu site será: <strong className="text-blue-600">{siteUrl}</strong>
           </p>
           <p className="text-xs text-gray-500 mt-1">
             Use apenas letras minúsculas, números e hífens
@@ -124,7 +124,7 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-semibold mb-2">
+          <label htmlFor="description" className="block text-sm font-semibold mb-2 text-gray-900">
             Descrição
           </label>
           <textarea
@@ -140,7 +140,7 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-sm font-semibold mb-2">
+          <label htmlFor="address" className="block text-sm font-semibold mb-2 text-gray-900">
             Endereço
           </label>
           <input
@@ -154,7 +154,7 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
         </div>
 
         <div>
-          <label htmlFor="logo_url" className="block text-sm font-semibold mb-2">
+          <label htmlFor="logo_url" className="block text-sm font-semibold mb-2 text-gray-900">
             URL do Logo
           </label>
           <input
@@ -173,10 +173,10 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
 
       {/* Social Media */}
       <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-        <h2 className="text-xl font-bold">Redes Sociais</h2>
+        <h2 className="text-xl font-bold text-gray-900">Redes Sociais</h2>
 
         <div>
-          <label htmlFor="instagram_url" className="block text-sm font-semibold mb-2">
+          <label htmlFor="instagram_url" className="block text-sm font-semibold mb-2 text-gray-900">
             Instagram
           </label>
           <input
@@ -192,7 +192,7 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
         </div>
 
         <div>
-          <label htmlFor="whatsapp_url" className="block text-sm font-semibold mb-2">
+          <label htmlFor="whatsapp_url" className="block text-sm font-semibold mb-2 text-gray-900">
             WhatsApp
           </label>
           <input
@@ -210,7 +210,7 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
         <div>
           <label
             htmlFor="youtube_channel_url"
-            className="block text-sm font-semibold mb-2"
+            className="block text-sm font-semibold mb-2 text-gray-900"
           >
             Canal do YouTube
           </label>
