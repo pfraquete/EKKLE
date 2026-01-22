@@ -327,7 +327,7 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading && <Loader2 className="w-5 h-5 animate-spin" />}
             {loading ? 'Salvando...' : 'Salvar Configurações'}

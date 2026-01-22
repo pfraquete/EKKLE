@@ -23,7 +23,7 @@ export default async function SiteLayout({
   return (
     <>
       <ThemeProvider settings={brandingSettings} />
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col light bg-white text-gray-900">
         {/* Header */}
         <SiteHeader church={church} />
 
