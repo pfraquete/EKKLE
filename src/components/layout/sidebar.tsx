@@ -11,7 +11,9 @@ import {
     CalendarCheck2,
     ShoppingBag,
     BookOpen,
-    Wallet
+    Wallet,
+    MessageSquare,
+    Globe
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -78,18 +80,25 @@ export function Sidebar({ profile }: SidebarProps) {
             show: isPastor
         },
         {
-            label: 'Financeiro',
-            icon: Wallet,
-            href: '/dashboard/financeiro',
-            active: pathname.startsWith('/dashboard/financeiro'),
+            label: 'Comunicações',
+            icon: MessageSquare,
+            href: '/dashboard/comunicacoes',
+            active: pathname.startsWith('/dashboard/comunicacoes'),
+            show: isPastor
+        },
+        {
+            label: 'Minha Igreja',
+            icon: Globe,
+            href: '/configuracoes',
+            active: pathname === '/configuracoes' || pathname.startsWith('/configuracoes/site'),
             show: isPastor
         },
         {
             label: 'Configurações',
             icon: Settings,
-            href: '/configuracoes',
-            active: pathname === '/configuracoes',
-            show: true
+            href: '/configuracoes/whatsapp',
+            active: pathname === '/configuracoes/whatsapp',
+            show: !isPastor // Leaders/Others see a simpler config if needed
         },
     ]
 
