@@ -92,7 +92,7 @@ export default async function SiteConfigPage() {
         </Link>
       </div>
 
-      <ChurchSiteConfigForm church={church} />
+      <ChurchSiteConfigForm key={church.updated_at || church.id} church={church} />
     </div>
   )
 }

@@ -23,6 +23,7 @@ const checkoutSchema = z.object({
       z.object({
         product_id: z.string().uuid(),
         quantity: z.number().int().min(1),
+        metadata: z.record(z.any()).optional(),
       })
     )
     .min(1, 'Adicione pelo menos um item ao carrinho'),
@@ -174,12 +175,12 @@ export async function createCheckoutOrder(input: CheckoutInput) {
         phones:
           cleanPhone.length >= 10
             ? {
-                mobile_phone: {
-                  country_code: '55',
-                  area_code: cleanPhone.substring(0, 2),
-                  number: cleanPhone.substring(2),
-                },
-              }
+              mobile_phone: {
+                country_code: '55',
+                area_code: cleanPhone.substring(0, 2),
+                number: cleanPhone.substring(2),
+              },
+            }
             : undefined,
       },
       payments: [
@@ -188,37 +189,39 @@ export async function createCheckoutOrder(input: CheckoutInput) {
           split: splitRules,
           ...(validated.payment_method === 'credit_card' && validated.card
             ? {
-                credit_card: {
-                  card: {
-                    number: validated.card.number.replace(/\s/g, ''),
-                    holder_name: validated.card.holderName,
-                    exp_month: validated.card.expMonth,
-                    exp_year: validated.card.expYear,
-                    cvv: validated.card.cvv,
-                    billing_address: {
-                      line_1: validated.card.billingAddress.line1,
-                      zip_code: validated.card.billingAddress.zipCode.replace(/\D/g, ''),
-                      city: validated.card.billingAddress.city,
-                      state: validated.card.billingAddress.state,
-                      country: 'BR',
-                    },
-                  } as PagarmeCard,
-                  installments: 1,
-                },
-              }
+              credit_card: {
+                card: {
+                  number: validated.card.number.replace(/\s/g, ''),
+                  holder_name: validated.card.holderName,
+                  exp_month: validated.card.expMonth,
+                  exp_year: validated.card.expYear,
+                  cvv: validated.card.cvv,
+                  billing_address: {
+                    line_1: validated.card.billingAddress.line1,
+                    zip_code: validated.card.billingAddress.zipCode.replace(/\D/g, ''),
+                    city: validated.card.billingAddress.city,
+                    state: validated.card.billingAddress.state,
+                    country: 'BR',
+                  },
+                } as PagarmeCard,
+                installments: 1,
+              },
+            }
             : {}),
           ...(validated.payment_method === 'pix'
             ? {
-                pix: {
-                  expires_in: 3600, // 1 hour
-                },
-              }
+              pix: {
+                expires_in: 3600, // 1 hour
+              },
+            }
             : {}),
         },
       ],
       metadata: {
         church_id: profile.church_id,
         customer_id: profile.id,
+        // Consolidate course_id from items if present
+        course_id: validated.items.find(i => i.metadata?.course_id)?.metadata?.course_id,
       },
       closed: true,
     };
@@ -244,6 +247,7 @@ export async function createCheckoutOrder(input: CheckoutInput) {
         payment_method: validated.payment_method,
         payment_status: pagarmeResponse.status === 'paid' ? 'paid' : 'pending',
         status: pagarmeResponse.status === 'paid' ? 'processing' : 'pending',
+        metadata: pagarmeOrder.metadata,
       })
       .select()
       .single();

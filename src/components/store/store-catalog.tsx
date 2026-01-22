@@ -57,6 +57,7 @@ export function StoreCatalog({ products, categories }: StoreCatalogProps) {
       price_cents: product.price_cents,
       image_url: imageUrl,
       stock_quantity: product.track_inventory ? product.stock_quantity : undefined,
+      metadata: (product as any).metadata,
     });
   };
 

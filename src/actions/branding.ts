@@ -91,11 +91,24 @@ export async function updateBrandingSettings(settings: BrandingSettings) {
 
     const supabase = await createClient()
 
+    // Get current website_settings to avoid overwriting homepage/other configs
+    const { data: church } = await supabase
+      .from('churches')
+      .select('website_settings')
+      .eq('id', profile.church_id)
+      .single()
+
+    const currentSettings = (church?.website_settings || {}) as Record<string, any>
+    const updatedSettings = {
+      ...currentSettings,
+      ...settings,
+    }
+
     // Update website_settings JSONB field
     const { error: updateError } = await supabase
       .from('churches')
       .update({
-        website_settings: settings,
+        website_settings: updatedSettings,
         // Also update logo_url for backward compatibility
         logo_url: settings.logo?.url || null,
         updated_at: new Date().toISOString(),

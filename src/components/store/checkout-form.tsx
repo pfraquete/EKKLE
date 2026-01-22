@@ -74,24 +74,25 @@ export function CheckoutForm({ profile }: CheckoutFormProps) {
         items: items.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
+          metadata: item.metadata,
         })),
         customer: customerData,
         payment_method: paymentMethod,
         card:
           paymentMethod === 'credit_card'
             ? {
-                number: cardData.number,
-                holderName: cardData.holderName,
-                expMonth: parseInt(cardData.expMonth),
-                expYear: parseInt(cardData.expYear),
-                cvv: cardData.cvv,
-                billingAddress: {
-                  line1: cardData.line1,
-                  zipCode: cardData.zipCode,
-                  city: cardData.city,
-                  state: cardData.state,
-                },
-              }
+              number: cardData.number,
+              holderName: cardData.holderName,
+              expMonth: parseInt(cardData.expMonth),
+              expYear: parseInt(cardData.expYear),
+              cvv: cardData.cvv,
+              billingAddress: {
+                line1: cardData.line1,
+                zipCode: cardData.zipCode,
+                city: cardData.city,
+                state: cardData.state,
+              },
+            }
             : undefined,
       });
 
@@ -220,11 +221,10 @@ export function CheckoutForm({ profile }: CheckoutFormProps) {
             <button
               type="button"
               onClick={() => setPaymentMethod('pix')}
-              className={`p-4 border-2 rounded-lg transition-all ${
-                paymentMethod === 'pix'
+              className={`p-4 border-2 rounded-lg transition-all ${paymentMethod === 'pix'
                   ? 'border-primary bg-primary/5'
                   : 'border-gray-200 hover:border-gray-300'
-              }`}
+                }`}
               disabled={loading}
             >
               <QrCode className="w-8 h-8 mx-auto mb-2" />
@@ -235,11 +235,10 @@ export function CheckoutForm({ profile }: CheckoutFormProps) {
             <button
               type="button"
               onClick={() => setPaymentMethod('credit_card')}
-              className={`p-4 border-2 rounded-lg transition-all ${
-                paymentMethod === 'credit_card'
+              className={`p-4 border-2 rounded-lg transition-all ${paymentMethod === 'credit_card'
                   ? 'border-primary bg-primary/5'
                   : 'border-gray-200 hover:border-gray-300'
-              }`}
+                }`}
               disabled={loading}
             >
               <CreditCard className="w-8 h-8 mx-auto mb-2" />

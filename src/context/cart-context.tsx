@@ -9,6 +9,7 @@ export interface CartItem {
   quantity: number;
   image_url?: string;
   stock_quantity?: number;
+  metadata?: Record<string, any>;
 }
 
 interface CartContextType {

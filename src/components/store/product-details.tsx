@@ -55,6 +55,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         price_cents: product.price_cents,
         image_url: displayImages[selectedImage].url || undefined,
         stock_quantity: product.track_inventory ? product.stock_quantity : undefined,
+        metadata: (product as any).metadata,
       });
     }
 
@@ -102,11 +103,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               <button
                 key={idx}
                 onClick={() => setSelectedImage(idx)}
-                className={`relative aspect-square bg-gray-100 rounded border-2 transition-all ${
-                  selectedImage === idx
+                className={`relative aspect-square bg-gray-100 rounded border-2 transition-all ${selectedImage === idx
                     ? 'border-primary'
                     : 'border-transparent hover:border-gray-300'
-                }`}
+                  }`}
               >
                 {image.url ? (
                   <Image
@@ -154,7 +154,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   {Math.round(
                     ((product.compare_at_price_cents - product.price_cents) /
                       product.compare_at_price_cents) *
-                      100
+                    100
                   )}
                   % OFF
                 </Badge>
