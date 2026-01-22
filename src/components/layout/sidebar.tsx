@@ -10,7 +10,8 @@ import {
     LogOut,
     CalendarCheck2,
     ShoppingBag,
-    BookOpen
+    BookOpen,
+    Wallet
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -74,6 +75,13 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: BookOpen,
             href: '/dashboard/cursos',
             active: pathname.startsWith('/dashboard/cursos'),
+            show: isPastor
+        },
+        {
+            label: 'Financeiro',
+            icon: Wallet,
+            href: '/dashboard/financeiro',
+            active: pathname.startsWith('/dashboard/financeiro'),
             show: isPastor
         },
         {
