@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Instagram, Youtube, MessageCircle } from 'lucide-react'
+import { ThemeProvider } from '@/components/branding/theme-provider'
+import { BrandingSettings } from '@/actions/branding'
 
 export default async function SiteLayout({
   children,
@@ -15,8 +17,13 @@ export default async function SiteLayout({
     redirect('/dashboard')
   }
 
+  // Parse branding settings from website_settings JSONB
+  const brandingSettings = (church.website_settings || {}) as BrandingSettings
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
+      <ThemeProvider settings={brandingSettings} />
+      <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-4">
@@ -184,5 +191,6 @@ export default async function SiteLayout({
         </div>
       </footer>
     </div>
+    </>
   )
 }
