@@ -14,11 +14,42 @@ const RESERVED_SUBDOMAINS = ['www', 'admin', 'api', 'app', 'dashboard', 'auth', 
  */
 export function extractSubdomain(hostname: string): string | null {
     // Remove port if present
-    const host = hostname.split(':')[0]
+    const host = hostname.split(':')[0].toLowerCase()
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    let rootDomain: string | null = null
+
+    if (appUrl) {
+        try {
+            rootDomain = new URL(appUrl).hostname.toLowerCase()
+        } catch {
+            rootDomain = null
+        }
+    }
 
     // Development environment (localhost)
     if (host === 'localhost' || host === '127.0.0.1') {
         return null
+    }
+
+    if (rootDomain) {
+        if (host === rootDomain) {
+            return null
+        }
+
+        if (host.endsWith(`.${rootDomain}`)) {
+            const subdomain = host.slice(0, -(rootDomain.length + 1))
+            if (!subdomain) {
+                return null
+            }
+
+            const normalizedSubdomain = subdomain.split('.')[0]
+            if (RESERVED_SUBDOMAINS.includes(normalizedSubdomain.toLowerCase())) {
+                return null
+            }
+
+            return normalizedSubdomain.toLowerCase()
+        }
     }
 
     // Split hostname into parts
