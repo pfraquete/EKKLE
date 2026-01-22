@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getProfile } from './auth'
 
 export type CourseEnrollment = {
   id: string
@@ -25,30 +26,16 @@ export type VideoProgress = {
  */
 export async function enrollInCourse(courseId: string) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    const profile = await getProfile()
+    if (!profile) {
       throw new Error('Não autenticado')
     }
-
-    // Get user profile to get church_id
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('church_id')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile) {
-      throw new Error('Perfil não encontrado')
-    }
+    const supabase = await createClient()
 
     // Check if course exists and is published
     const { data: course } = await supabase
       .from('courses')
-      .select('id, enrollment_start_date')
+      .select('id, enrollment_start_date, is_paid')
       .eq('id', courseId)
       .eq('church_id', profile.church_id)
       .eq('is_published', true)
@@ -65,12 +52,28 @@ export async function enrollInCourse(courseId: string) {
       }
     }
 
+    // Check if payment is required and verified
+    if (course.is_paid) {
+      const { data: order } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('customer_id', profile.id)
+        .eq('payment_status', 'paid')
+        // We match by course_id in metadata
+        .filter('metadata->>course_id', 'eq', courseId)
+        .maybeSingle()
+
+      if (!order) {
+        throw new Error('Pagamento não verificado para este curso')
+      }
+    }
+
     // Check if already enrolled
     const { data: existingEnrollment } = await supabase
       .from('course_enrollments')
       .select('id')
       .eq('course_id', courseId)
-      .eq('profile_id', user.id)
+      .eq('profile_id', profile.id)
       .single()
 
     if (existingEnrollment) {
@@ -82,7 +85,7 @@ export async function enrollInCourse(courseId: string) {
       .from('course_enrollments')
       .insert({
         course_id: courseId,
-        profile_id: user.id,
+        profile_id: profile.id,
         church_id: profile.church_id,
         progress_percentage: 0,
       })
@@ -113,11 +116,9 @@ export async function enrollInCourse(courseId: string) {
 export async function getCourseEnrollment(courseId: string) {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const profile = await getProfile()
 
-    if (!user) {
+    if (!profile) {
       return null
     }
 
@@ -125,7 +126,7 @@ export async function getCourseEnrollment(courseId: string) {
       .from('course_enrollments')
       .select('*')
       .eq('course_id', courseId)
-      .eq('profile_id', user.id)
+      .eq('profile_id', profile.id)
       .single()
 
     return enrollment
@@ -146,11 +147,9 @@ export async function updateVideoProgress(input: {
 }) {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const profile = await getProfile()
 
-    if (!user) {
+    if (!profile) {
       throw new Error('Não autenticado')
     }
 
@@ -161,7 +160,7 @@ export async function updateVideoProgress(input: {
       .from('course_enrollments')
       .select('id, course_id')
       .eq('id', enrollmentId)
-      .eq('profile_id', user.id)
+      .eq('profile_id', profile.id)
       .single()
 
     if (!enrollment) {

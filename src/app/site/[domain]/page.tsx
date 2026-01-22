@@ -75,6 +75,8 @@ export default async function Homepage() {
                                                     alt={event.title}
                                                     fill
                                                     className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                    loading="lazy"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -161,6 +163,8 @@ export default async function Homepage() {
                                                     alt={course.title}
                                                     fill
                                                     className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                    loading="lazy"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-secondary/5">
@@ -249,6 +253,8 @@ export default async function Homepage() {
                                 fill
                                 className="object-cover"
                                 priority
+                                sizes="100vw"
+                                quality={90}
                             />
                         ) : (
                             <div className="w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100" />

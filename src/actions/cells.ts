@@ -48,25 +48,39 @@ export async function createCell(formData: FormData) {
         let leaderId: string | null = null
         let generatedPassword: string | null = null
 
-        // 1. Check if profile already exists
-        const { data: existingProfile } = await adminSupabase
+        // 1. Check if profile already exists IN THIS CHURCH
+        const { data: existingProfile } = await supabase
             .from('profiles')
-            .select('id')
+            .select('id, church_id')
             .eq('email', leaderEmail)
-            .single()
+            .eq('church_id', churchId)
+            .maybeSingle()
 
         if (existingProfile) {
             leaderId = existingProfile.id
         } else {
-            // 2. Check if user exists in AUTH but not in PROFILES
+            // 2. Check if user exists in AUTH and then check their PROFILE church_id
+            // We use adminSupabase ONLY for the auth check, but we still respect tenant privacy
             const { data: userData, error: listError } = await adminSupabase.auth.admin.listUsers()
             if (listError) {
                 console.error('Error listing auth users:', listError)
-                throw new Error('Falha ao buscar usuários: ' + listError.message)
+                throw new Error('Falha ao buscar usuários')
             }
+
             const authUser = userData.users.find(user => user.email === leaderEmail)
 
             if (authUser) {
+                // If user exists in Auth, check if they belong to THIS church's profiles
+                const { data: otherChurchProfile } = await adminSupabase
+                    .from('profiles')
+                    .select('church_id')
+                    .eq('id', authUser.id)
+                    .single()
+
+                if (otherChurchProfile && otherChurchProfile.church_id !== churchId) {
+                    throw new Error('Este email já está em uso em outra organização')
+                }
+
                 leaderId = authUser.id
             } else {
                 // 3. Generate secure random password
@@ -80,23 +94,23 @@ export async function createCell(formData: FormData) {
                     user_metadata: {
                         full_name: leaderName,
                         role: 'LEADER',
-                        church_id: churchId // The trigger uses ->> 'church_id'
+                        church_id: churchId
                     }
                 })
 
                 if (createError) {
                     console.error('Error creating leader user:', createError)
-                    throw new Error('Falha ao criar usuário líder: ' + createError.message)
+                    throw new Error('Falha ao criar usuário líder')
                 }
                 leaderId = newUser.user.id
             }
 
-            // Ensure profile exists (it might be missing if trigger failed or user was orphaned)
+            // Ensure profile exists and is linked to correct church
             const { data: checkProfile } = await adminSupabase
                 .from('profiles')
-                .select('id')
+                .select('id, church_id')
                 .eq('id', leaderId)
-                .single()
+                .maybeSingle()
 
             if (!checkProfile) {
                 await adminSupabase.from('profiles').insert({
@@ -106,6 +120,9 @@ export async function createCell(formData: FormData) {
                     role: 'LEADER',
                     church_id: churchId
                 })
+            } else if (checkProfile.church_id !== churchId) {
+                // Security check should have caught this above, but double check here
+                throw new Error('Não é possível adicionar um usuário de outra organização')
             }
 
             // Wait a bit for consistency

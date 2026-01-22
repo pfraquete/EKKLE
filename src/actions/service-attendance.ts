@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getProfile } from './auth'
 
 const serviceAttendanceSchema = z.object({
     churchId: z.string().uuid(),
@@ -41,11 +42,11 @@ export interface ServiceAttendanceData {
 
 export async function createServiceAttendance(input: ServiceAttendanceInput) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
 
-    if (!user) throw new Error('Não autenticado')
-
-    const { churchId, date, memberAttendance, visitors } = serviceAttendanceSchema.parse(input)
+    const { date, memberAttendance, visitors } = serviceAttendanceSchema.parse(input)
+    const churchId = profile.church_id
 
     const { error: deleteError } = await supabase
         .from('attendance')
@@ -63,7 +64,7 @@ export async function createServiceAttendance(input: ServiceAttendanceInput) {
         context_date: date,
         profile_id: member.profileId,
         status: member.present ? 'PRESENT' as const : 'ABSENT' as const,
-        checked_in_by: user.id
+        checked_in_by: profile.id
     }))
 
     const visitorRecords = visitors.map(visitor => ({
@@ -74,7 +75,7 @@ export async function createServiceAttendance(input: ServiceAttendanceInput) {
         visitor_name: visitor.name,
         visitor_phone: visitor.phone || null,
         status: 'PRESENT' as const,
-        checked_in_by: user.id
+        checked_in_by: profile.id
     }))
 
     const records = [...attendanceRecords, ...visitorRecords]
@@ -91,12 +92,12 @@ export async function createServiceAttendance(input: ServiceAttendanceInput) {
 }
 
 export async function getServiceAttendanceByDate(input: z.infer<typeof serviceAttendanceQuerySchema>): Promise<ServiceAttendanceData> {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) throw new Error('Não autenticado')
-
-    const { churchId, date } = serviceAttendanceQuerySchema.parse(input)
+    const { date } = serviceAttendanceQuerySchema.parse(input)
+    const churchId = profile.church_id
 
     const [{ data: members, error: membersError }, { data: attendance, error: attendanceError }] = await Promise.all([
         supabase
@@ -119,19 +120,19 @@ export async function getServiceAttendanceByDate(input: z.infer<typeof serviceAt
     const attendanceByProfileId: Record<string, boolean> = {}
     const visitors: ServiceAttendanceData['visitors'] = []
 
-    ;(attendance || []).forEach(entry => {
-        if (entry.profile_id) {
-            attendanceByProfileId[entry.profile_id] = entry.status === 'PRESENT'
-            return
-        }
+        ; (attendance || []).forEach((entry: any) => {
+            if (entry.profile_id) {
+                attendanceByProfileId[entry.profile_id] = entry.status === 'PRESENT'
+                return
+            }
 
-        if (entry.visitor_name) {
-            visitors.push({
-                name: entry.visitor_name,
-                phone: entry.visitor_phone || null
-            })
-        }
-    })
+            if (entry.visitor_name) {
+                visitors.push({
+                    name: entry.visitor_name,
+                    phone: entry.visitor_phone || null
+                })
+            }
+        })
 
     return {
         date,
