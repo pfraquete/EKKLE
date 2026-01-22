@@ -20,7 +20,7 @@ export type Church = {
  */
 export async function getChurch(): Promise<Church | null> {
   const headersList = await headers()
-  let churchId = headersList.get('x-church-id')
+  const churchId = headersList.get('x-church-id')
   let churchSlug = headersList.get('x-church-slug')
   const churchName = headersList.get('x-church-name')
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
     MessageSquare,
     Send,
@@ -39,16 +39,16 @@ export function CommentSection({ videoId, userId, userRole }: CommentSectionProp
 
     const isPastor = userRole === 'PASTOR'
 
-    useEffect(() => {
-        loadComments()
-    }, [videoId])
-
-    const loadComments = async () => {
+    const loadComments = useCallback(async () => {
         setLoading(true)
         const data = await getLessonComments(videoId)
         setComments(data)
         setLoading(false)
-    }
+    }, [videoId])
+
+    useEffect(() => {
+        loadComments()
+    }, [loadComments])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
