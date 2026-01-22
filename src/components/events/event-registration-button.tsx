@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { useChurchNavigation } from '@/hooks/use-church-navigation'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,14 +37,14 @@ export function EventRegistrationButton({
   isFull,
   spotsLeft,
 }: EventRegistrationButtonProps) {
-  const router = useRouter()
+  const { push, router } = useChurchNavigation()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
 
   const handleRegister = async () => {
     if (!isAuthenticated) {
-      router.push(`/login?redirect=/eventos/${event.id}`)
+      push(`/login?redirect=/eventos/${event.id}`)
       return
     }
 
@@ -65,7 +65,7 @@ export function EventRegistrationButton({
 
       // If payment is required, redirect to checkout
       if (result.requiresPayment) {
-        router.push(`/eventos/${event.id}/checkout`)
+        push(`/eventos/${event.id}/checkout`)
         return
       }
 
@@ -249,7 +249,7 @@ export function EventRegistrationButton({
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => router.push('/membro/eventos')}
+                onClick={() => push('/membro/eventos')}
                 className="w-full sm:w-auto"
               >
                 Ver Meus Eventos

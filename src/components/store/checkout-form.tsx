@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { Profile } from '@/actions/auth';
 import { createCheckoutOrder } from '@/actions/orders';
 import { useCart } from '@/context/cart-context';
+import { useChurchNavigation } from '@/hooks/use-church-navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,7 @@ interface CheckoutFormProps {
 }
 
 export function CheckoutForm({ profile }: CheckoutFormProps) {
-  const router = useRouter();
+  const { push } = useChurchNavigation();
   const { items, totalCents, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -59,7 +59,7 @@ export function CheckoutForm({ profile }: CheckoutFormProps) {
         <p className="text-muted-foreground mb-6">
           Adicione produtos ao carrinho antes de finalizar a compra
         </p>
-        <Button onClick={() => router.push('/membro/loja')}>Ir para a Loja</Button>
+        <Button onClick={() => push('/membro/loja')}>Ir para a Loja</Button>
       </Card>
     );
   }
@@ -103,7 +103,7 @@ export function CheckoutForm({ profile }: CheckoutFormProps) {
 
       // Success - clear cart and redirect
       clearCart();
-      router.push(`/membro/pedidos/${result.order.id}`);
+      push(`/membro/pedidos/${result.order.id}`);
     } catch (err) {
       console.error('Checkout error:', err);
       setError('Erro ao processar checkout');

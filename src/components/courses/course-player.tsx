@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Play, CheckCircle, Clock } from 'lucide-react'
 import { updateVideoProgress } from '@/actions/courses'
+import { useChurchNavigation } from '@/hooks/use-church-navigation'
 
 type Course = {
   id: string
@@ -63,7 +63,7 @@ export function CoursePlayer({
   enrollment,
   videoProgress,
 }: CoursePlayerProps) {
-  const router = useRouter()
+  const { push } = useChurchNavigation()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -148,7 +148,7 @@ export function CoursePlayer({
   }, [isPlaying, currentTime, duration, currentVideo.id, enrollment.id])
 
   const handleVideoSelect = (video: Video) => {
-    router.push(`/membro/cursos/${course.id}?video=${video.id}`)
+    push(`/membro/cursos/${course.id}?video=${video.id}`)
   }
 
   return (
