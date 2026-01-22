@@ -9,9 +9,10 @@ type EnrollButtonProps = {
   courseId: string
   isEnrolled: boolean
   isAuthenticated: boolean
+  isEnrollmentOpen?: boolean
 }
 
-export function EnrollButton({ courseId, isEnrolled, isAuthenticated }: EnrollButtonProps) {
+export function EnrollButton({ courseId, isEnrolled, isAuthenticated, isEnrollmentOpen = true }: EnrollButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -19,6 +20,11 @@ export function EnrollButton({ courseId, isEnrolled, isAuthenticated }: EnrollBu
   const handleEnroll = async () => {
     if (!isAuthenticated) {
       router.push('/login')
+      return
+    }
+
+    if (!isEnrollmentOpen) {
+      setError('As inscrições ainda não estão abertas.')
       return
     }
 
@@ -50,7 +56,7 @@ export function EnrollButton({ courseId, isEnrolled, isAuthenticated }: EnrollBu
     <div>
       <button
         onClick={handleEnroll}
-        disabled={loading}
+        disabled={loading || !isEnrollmentOpen}
         className="w-full bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {loading && <Loader2 className="w-5 h-5 animate-spin" />}
