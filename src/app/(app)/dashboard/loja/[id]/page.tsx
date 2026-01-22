@@ -6,12 +6,13 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-export default async function EditProductPage({ params }: { params: { id: string } }) {
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const profile = await getProfile();
   if (!profile) redirect('/login');
   if (profile.role !== 'PASTOR') redirect('/dashboard');
 
-  const product = await getProduct(params.id);
+  const { id } = await params;
+  const product = await getProduct(id);
   if (!product) notFound();
 
   const categories = await getProductCategories();
