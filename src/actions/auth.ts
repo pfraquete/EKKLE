@@ -25,11 +25,16 @@ export async function getProfile(): Promise<Profile | null> {
 
     if (!user) return null
 
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single()
+
+    if (error) {
+        console.error('Error fetching profile:', error)
+        return null
+    }
 
     return profile
 }
