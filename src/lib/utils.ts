@@ -18,19 +18,34 @@ export function generateSecurePassword(length: number = 12): string {
 
   const allChars = uppercase + lowercase + numbers + special
 
+  // Use crypto for secure random values
+  const getRandomChar = (source: string) => {
+    const values = new Uint32Array(1)
+    crypto.getRandomValues(values)
+    return source[values[0] % source.length]
+  }
+
   // Ensure at least one character from each category
-  const password = [
-    uppercase[Math.floor(Math.random() * uppercase.length)],
-    lowercase[Math.floor(Math.random() * lowercase.length)],
-    numbers[Math.floor(Math.random() * numbers.length)],
-    special[Math.floor(Math.random() * special.length)]
+  const passwordChars = [
+    getRandomChar(uppercase),
+    getRandomChar(lowercase),
+    getRandomChar(numbers),
+    getRandomChar(special)
   ]
 
   // Fill the rest randomly
-  for (let i = password.length; i < length; i++) {
-    password.push(allChars[Math.floor(Math.random() * allChars.length)])
+  while (passwordChars.length < length) {
+    passwordChars.push(getRandomChar(allChars))
   }
 
-  // Shuffle the password
-  return password.sort(() => Math.random() - 0.5).join('')
+  // Shuffle securely
+  const shuffled = []
+  while (passwordChars.length > 0) {
+    const values = new Uint32Array(1)
+    crypto.getRandomValues(values)
+    const index = values[0] % passwordChars.length
+    shuffled.push(passwordChars.splice(index, 1)[0])
+  }
+
+  return shuffled.join('')
 }
