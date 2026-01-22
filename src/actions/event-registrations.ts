@@ -1,457 +1,426 @@
 'use server'
 
-import { Resend } from 'resend'
-import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { createClient } from '@/lib/supabase/server'
+import { getProfile } from '@/actions/auth'
+import {
+  sendCancellationConfirmation,
+  sendRegistrationConfirmation,
+  sendWaitlistPromotion,
+} from '@/actions/event-notifications'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const fromEmail = process.env.FROM_EMAIL || 'Ekkle <eventos@resend.dev>'
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
+const ACTIVE_COUNT_STATUSES = ['CONFIRMED', 'PENDING', 'ATTENDED']
 
-/**
- * Send registration confirmation email
- */
-export async function sendRegistrationConfirmation(registrationId: string) {
-    try {
-        const supabase = await createClient()
-
-        // Get registration with event and profile data
-        const { data: registration, error } = await supabase
-            .from('event_registrations')
-            .select(`
-                *,
-                event:events(*),
-                profile:profiles(full_name, email),
-                church:churches(name)
-            `)
-            .eq('id', registrationId)
-            .single()
-
-        if (error || !registration) {
-            console.error('Error fetching registration:', error)
-            return { success: false, error: 'Registration not found' }
-        }
-
-        const event = registration.event
-        const profile = registration.profile
-        const church = registration.church
-
-        // Format date and time
-        const eventDate = format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-        const eventTime = format(new Date(event.start_date), 'HH:mm', { locale: ptBR })
-
-        // Determine location
-        const location = event.is_online
-            ? `Online: ${event.online_url || 'Link será enviado'}`
-            : event.location || 'Local não especificado'
-
-        // Build email content based on registration status
-        let statusMessage = ''
-        let actionButton = ''
-
-        if (registration.status === 'WAITLIST') {
-            statusMessage = `
-                <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0;">
-                    <p style="margin: 0; color: #92400e; font-weight: bold;">⏳ Você está na lista de espera</p>
-                    <p style="margin: 8px 0 0 0; color: #92400e;">
-                        O evento está com lotação máxima. Você será notificado por email se uma vaga abrir.
-                    </p>
-                </div>
-            `
-        } else if (registration.payment_required && registration.payment_status === 'PENDING') {
-            statusMessage = `
-                <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin: 20px 0;">
-                    <p style="margin: 0; color: #991b1b; font-weight: bold;">⚠️ Pagamento Pendente</p>
-                    <p style="margin: 8px 0 0 0; color: #991b1b;">
-                        Sua inscrição será confirmada após o pagamento de R$ ${((registration.payment_amount_cents || 0) / 100).toFixed(2)}.
-                    </p>
-                </div>
-            `
-            actionButton = `
-                <a href="${appUrl}/site/${event.church_id}/eventos/${event.id}/checkout"
-                   style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
-                    Realizar Pagamento
-                </a>
-            `
-        } else {
-            statusMessage = `
-                <div style="background-color: #d1fae5; border-left: 4px solid #10b981; padding: 16px; margin: 20px 0;">
-                    <p style="margin: 0; color: #065f46; font-weight: bold;">✓ Inscrição Confirmada!</p>
-                    <p style="margin: 8px 0 0 0; color: #065f46;">
-                        Sua presença está garantida no evento.
-                    </p>
-                </div>
-            `
-            actionButton = `
-                <a href="${appUrl}/site/${event.church_id}/membro/eventos"
-                   style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
-                    Ver Meus Eventos
-                </a>
-            `
-        }
-
-        // Guest information
-        const guestInfo = registration.guest_count > 0
-            ? `<p style="margin: 5px 0 0 0;"><strong>Convidados:</strong> ${registration.guest_count} pessoa(s)</p>`
-            : ''
-
-        const { error: emailError } = await resend.emails.send({
-            from: fromEmail,
-            to: profile.email,
-            subject: `Inscrição no Evento: ${event.title}`,
-            html: `
-                <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%);">
-                        <h1 style="color: white; margin: 0;">${church.name}</h1>
-                        <p style="color: #fecdd3; margin: 5px 0 0 0;">Sistema de Eventos</p>
-                    </div>
-
-                    <div style="padding: 30px;">
-                        <h2 style="color: #e11d48; margin-top: 0;">Inscrição Recebida!</h2>
-                        <p>Olá, <strong>${profile.full_name}</strong>!</p>
-                        <p>Recebemos sua inscrição para o evento:</p>
-
-                        <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                            <h3 style="margin-top: 0; color: #1f2937;">${event.title}</h3>
-                            ${event.description ? `<p style="color: #6b7280;">${event.description}</p>` : ''}
-                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 15px 0;" />
-                            <p style="margin: 5px 0;"><strong>📅 Data:</strong> ${eventDate}</p>
-                            <p style="margin: 5px 0;"><strong>🕐 Horário:</strong> ${eventTime}</p>
-                            <p style="margin: 5px 0;"><strong>📍 Local:</strong> ${location}</p>
-                            ${guestInfo}
-                        </div>
-
-                        ${statusMessage}
-
-                        ${actionButton}
-
-                        <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
-                            Se você deseja cancelar sua inscrição, acesse sua área de membros.
-                        </p>
-                    </div>
-
-                    <div style="text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${church.name}</p>
-                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">
-                            Powered by <a href="https://ekkle.com.br" style="color: #e11d48; text-decoration: none;">Ekkle</a>
-                        </p>
-                    </div>
-                </div>
-            `,
-        })
-
-        if (emailError) {
-            console.error('Error sending registration confirmation:', emailError)
-            return { success: false, error: emailError }
-        }
-
-        return { success: true }
-    } catch (error) {
-        console.error('Error in sendRegistrationConfirmation:', error)
-        return { success: false, error }
-    }
+function toCents(value: number | null) {
+  if (value === null || Number.isNaN(value)) return null
+  return Math.round(value * 100)
 }
 
-/**
- * Send cancellation confirmation email
- */
-export async function sendCancellationConfirmation(registrationId: string) {
-    try {
-        const supabase = await createClient()
+async function getActiveRegistrationCount(eventId: string) {
+  const supabase = await createClient()
+  const { count } = await supabase
+    .from('event_registrations')
+    .select('id', { count: 'exact', head: true })
+    .eq('event_id', eventId)
+    .in('status', ACTIVE_COUNT_STATUSES)
 
-        const { data: registration, error } = await supabase
-            .from('event_registrations')
-            .select(`
-                *,
-                event:events(*),
-                profile:profiles(full_name, email),
-                church:churches(name)
-            `)
-            .eq('id', registrationId)
-            .single()
-
-        if (error || !registration) {
-            return { success: false, error: 'Registration not found' }
-        }
-
-        const event = registration.event
-        const profile = registration.profile
-        const church = registration.church
-
-        const eventDate = format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-
-        // Refund information
-        let refundInfo = ''
-        if (registration.payment_status === 'REFUNDED') {
-            refundInfo = `
-                <div style="background-color: #d1fae5; border-left: 4px solid #10b981; padding: 16px; margin: 20px 0;">
-                    <p style="margin: 0; color: #065f46; font-weight: bold;">💰 Reembolso Processado</p>
-                    <p style="margin: 8px 0 0 0; color: #065f46;">
-                        O valor de R$ ${((registration.payment_amount_cents || 0) / 100).toFixed(2)} será estornado na sua conta em até 7 dias úteis.
-                    </p>
-                </div>
-            `
-        }
-
-        const { error: emailError } = await resend.emails.send({
-            from: fromEmail,
-            to: profile.email,
-            subject: `Cancelamento de Inscrição: ${event.title}`,
-            html: `
-                <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%);">
-                        <h1 style="color: white; margin: 0;">${church.name}</h1>
-                        <p style="color: #fecdd3; margin: 5px 0 0 0;">Sistema de Eventos</p>
-                    </div>
-
-                    <div style="padding: 30px;">
-                        <h2 style="color: #dc2626; margin-top: 0;">Inscrição Cancelada</h2>
-                        <p>Olá, <strong>${profile.full_name}</strong>!</p>
-                        <p>Sua inscrição no evento <strong>${event.title}</strong> foi cancelada conforme solicitado.</p>
-
-                        <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                            <p style="margin: 5px 0;"><strong>📅 Data do Evento:</strong> ${eventDate}</p>
-                            ${registration.cancellation_reason ? `<p style="margin: 15px 0 5px 0;"><strong>Motivo:</strong> ${registration.cancellation_reason}</p>` : ''}
-                        </div>
-
-                        ${refundInfo}
-
-                        <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
-                            Sentiremos sua falta! Esperamos vê-lo(a) em nossos próximos eventos.
-                        </p>
-
-                        <a href="${appUrl}/site/${event.church_id}/eventos"
-                           style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
-                            Ver Próximos Eventos
-                        </a>
-                    </div>
-
-                    <div style="text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${church.name}</p>
-                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">
-                            Powered by <a href="https://ekkle.com.br" style="color: #e11d48; text-decoration: none;">Ekkle</a>
-                        </p>
-                    </div>
-                </div>
-            `,
-        })
-
-        if (emailError) {
-            console.error('Error sending cancellation confirmation:', emailError)
-            return { success: false, error: emailError }
-        }
-
-        return { success: true }
-    } catch (error) {
-        console.error('Error in sendCancellationConfirmation:', error)
-        return { success: false, error }
-    }
+  return count ?? 0
 }
 
-/**
- * Send waitlist promotion email
- */
-export async function sendWaitlistPromotion(registrationId: string) {
-    try {
-        const supabase = await createClient()
+export async function getMyEventRegistration(eventId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-        const { data: registration, error } = await supabase
-            .from('event_registrations')
-            .select(`
-                *,
-                event:events(*),
-                profile:profiles(full_name, email),
-                church:churches(name)
-            `)
-            .eq('id', registrationId)
-            .single()
+  if (!user) {
+    return { registration: null }
+  }
 
-        if (error || !registration) {
-            return { success: false, error: 'Registration not found' }
-        }
+  const { data: registration } = await supabase
+    .from('event_registrations')
+    .select('*')
+    .eq('event_id', eventId)
+    .eq('profile_id', user.id)
+    .single()
 
-        const event = registration.event
-        const profile = registration.profile
-        const church = registration.church
-
-        const eventDate = format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-        const eventTime = format(new Date(event.start_date), 'HH:mm', { locale: ptBR })
-
-        const location = event.is_online
-            ? `Online: ${event.online_url || 'Link será enviado'}`
-            : event.location || 'Local não especificado'
-
-        // Payment action if required
-        let paymentSection = ''
-        if (registration.payment_required && registration.payment_status === 'PENDING') {
-            paymentSection = `
-                <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin: 20px 0;">
-                    <p style="margin: 0; color: #991b1b; font-weight: bold;">⚠️ Ação Necessária</p>
-                    <p style="margin: 8px 0 0 0; color: #991b1b;">
-                        Complete o pagamento de R$ ${((registration.payment_amount_cents || 0) / 100).toFixed(2)} nas próximas 48 horas para garantir sua vaga.
-                    </p>
-                </div>
-                <a href="${appUrl}/site/${event.church_id}/eventos/${event.id}/checkout"
-                   style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
-                    Realizar Pagamento
-                </a>
-            `
-        } else {
-            paymentSection = `
-                <div style="background-color: #d1fae5; border-left: 4px solid #10b981; padding: 16px; margin: 20px 0;">
-                    <p style="margin: 0; color: #065f46; font-weight: bold;">✓ Vaga Confirmada!</p>
-                    <p style="margin: 8px 0 0 0; color: #065f46;">
-                        Sua presença está garantida no evento. Aguardamos você!
-                    </p>
-                </div>
-            `
-        }
-
-        const { error: emailError } = await resend.emails.send({
-            from: fromEmail,
-            to: profile.email,
-            subject: `🎉 Vaga Disponível: ${event.title}`,
-            html: `
-                <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                        <h1 style="color: white; margin: 0;">🎉 Boa Notícia!</h1>
-                        <p style="color: #d1fae5; margin: 5px 0 0 0;">Uma vaga abriu para você</p>
-                    </div>
-
-                    <div style="padding: 30px;">
-                        <h2 style="color: #059669; margin-top: 0;">Você saiu da lista de espera!</h2>
-                        <p>Olá, <strong>${profile.full_name}</strong>!</p>
-                        <p>Temos uma ótima notícia! Uma vaga abriu no evento <strong>${event.title}</strong> e sua inscrição foi confirmada.</p>
-
-                        <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                            <h3 style="margin-top: 0; color: #1f2937;">${event.title}</h3>
-                            ${event.description ? `<p style="color: #6b7280;">${event.description}</p>` : ''}
-                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 15px 0;" />
-                            <p style="margin: 5px 0;"><strong>📅 Data:</strong> ${eventDate}</p>
-                            <p style="margin: 5px 0;"><strong>🕐 Horário:</strong> ${eventTime}</p>
-                            <p style="margin: 5px 0;"><strong>📍 Local:</strong> ${location}</p>
-                        </div>
-
-                        ${paymentSection}
-
-                        <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
-                            Não perca essa oportunidade! Aguardamos você.
-                        </p>
-                    </div>
-
-                    <div style="text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${church.name}</p>
-                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">
-                            Powered by <a href="https://ekkle.com.br" style="color: #e11d48; text-decoration: none;">Ekkle</a>
-                        </p>
-                    </div>
-                </div>
-            `,
-        })
-
-        if (emailError) {
-            console.error('Error sending waitlist promotion:', emailError)
-            return { success: false, error: emailError }
-        }
-
-        return { success: true }
-    } catch (error) {
-        console.error('Error in sendWaitlistPromotion:', error)
-        return { success: false, error }
-    }
+  return { registration }
 }
 
-/**
- * Send event reminder to all confirmed registrants
- */
-export async function sendEventReminder(eventId: string) {
-    try {
-        const supabase = await createClient()
+export async function getEventRegistrationCount(eventId: string) {
+  const count = await getActiveRegistrationCount(eventId)
 
-        // Get event
-        const { data: event, error: eventError } = await supabase
-            .from('events')
-            .select('*, church:churches(name)')
-            .eq('id', eventId)
-            .single()
+  return { count }
+}
 
-        if (eventError || !event) {
-            return { success: false, error: 'Event not found' }
-        }
+export async function registerForEvent(eventId: string, guestCount = 0, guestNames: string[] = []) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-        // Get all confirmed registrations
-        const { data: registrations, error: regError } = await supabase
-            .from('event_registrations')
-            .select(`
-                *,
-                profile:profiles(full_name, email)
-            `)
-            .eq('event_id', eventId)
-            .eq('status', 'CONFIRMED')
+  if (!user) {
+    return { success: false, error: 'Você precisa estar logado para se inscrever.' }
+  }
 
-        if (regError || !registrations || registrations.length === 0) {
-            return { success: false, error: 'No confirmed registrations' }
-        }
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id, title, start_date, capacity, is_paid, price, church_id, is_published')
+    .eq('id', eventId)
+    .single()
 
-        const eventDate = format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-        const eventTime = format(new Date(event.start_date), 'HH:mm', { locale: ptBR })
+  if (eventError || !event) {
+    return { success: false, error: 'Evento não encontrado.' }
+  }
 
-        const location = event.is_online
-            ? `<strong>Link para o evento:</strong> <a href="${event.online_url}" style="color: #e11d48;">${event.online_url}</a>`
-            : `<strong>Local:</strong> ${event.location}`
+  if (!event.is_published) {
+    return { success: false, error: 'Evento indisponível para inscrição.' }
+  }
 
-        let sentCount = 0
+  const eventDate = new Date(event.start_date)
+  if (eventDate < new Date()) {
+    return { success: false, error: 'As inscrições para este evento foram encerradas.' }
+  }
 
-        // Send reminder to each registrant
-        for (const registration of registrations) {
-            const profile = registration.profile
+  const { data: existingRegistration } = await supabase
+    .from('event_registrations')
+    .select('*')
+    .eq('event_id', eventId)
+    .eq('profile_id', user.id)
+    .single()
 
-            const { error: emailError } = await resend.emails.send({
-                from: fromEmail,
-                to: profile.email,
-                subject: `⏰ Lembrete: ${event.title} é amanhã!`,
-                html: `
-                    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%);">
-                            <h1 style="color: white; margin: 0;">⏰ Lembrete de Evento</h1>
-                        </div>
+  if (existingRegistration && existingRegistration.status !== 'CANCELLED') {
+    return { success: false, error: 'Você já está inscrito neste evento.' }
+  }
 
-                        <div style="padding: 30px;">
-                            <h2 style="color: #e11d48; margin-top: 0;">Não esqueça!</h2>
-                            <p>Olá, <strong>${profile.full_name}</strong>!</p>
-                            <p>Este é um lembrete de que o evento <strong>${event.title}</strong> acontecerá em breve.</p>
+  const activeCount = await getActiveRegistrationCount(eventId)
+  const isFull = event.capacity ? activeCount >= event.capacity : false
+  const status = isFull ? 'WAITLIST' : 'CONFIRMED'
 
-                            <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                                <h3 style="margin-top: 0; color: #1f2937;">${event.title}</h3>
-                                <p style="margin: 5px 0;"><strong>📅 Data:</strong> ${eventDate}</p>
-                                <p style="margin: 5px 0;"><strong>🕐 Horário:</strong> ${eventTime}</p>
-                                <p style="margin: 5px 0;">${location}</p>
-                            </div>
+  const paymentAmountCents = toCents(event.is_paid ? event.price : null)
+  const paymentRequired = Boolean(event.is_paid)
+  const paymentStatus = paymentRequired && !isFull ? 'PENDING' : null
 
-                            <p style="margin-top: 20px;">Aguardamos você!</p>
+  const payload = {
+    event_id: eventId,
+    profile_id: user.id,
+    church_id: event.church_id,
+    status,
+    guest_count: guestCount,
+    guest_names: guestNames,
+    registered_at: new Date().toISOString(),
+    cancelled_at: null,
+    cancellation_reason: null,
+    payment_required: paymentRequired,
+    payment_amount_cents: paymentAmountCents,
+    payment_status: paymentStatus,
+  }
 
-                            <a href="${appUrl}/site/${event.church_id}/membro/eventos"
-                               style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
-                                Ver Meus Eventos
-                            </a>
-                        </div>
+  let registration
+  if (existingRegistration) {
+    const { data, error } = await supabase
+      .from('event_registrations')
+      .update(payload)
+      .eq('id', existingRegistration.id)
+      .select()
+      .single()
 
-                        <div style="text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                            <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${event.church.name}</p>
-                        </div>
-                    </div>
-                `,
-            })
-
-            if (!emailError) {
-                sentCount++
-            }
-        }
-
-        return { success: true, sent: sentCount, total: registrations.length }
-    } catch (error) {
-        console.error('Error in sendEventReminder:', error)
-        return { success: false, error }
+    if (error) {
+      console.error('Error updating registration:', error)
+      return { success: false, error: 'Erro ao atualizar sua inscrição.' }
     }
+
+    registration = data
+  } else {
+    const { data, error } = await supabase
+      .from('event_registrations')
+      .insert(payload)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error creating registration:', error)
+      return { success: false, error: 'Erro ao realizar inscrição.' }
+    }
+
+    registration = data
+  }
+
+  await sendRegistrationConfirmation(registration.id)
+
+  revalidatePath(`/eventos/${eventId}`)
+  revalidatePath('/membro/eventos')
+
+  return {
+    success: true,
+    status,
+    requiresPayment: paymentRequired && status !== 'WAITLIST',
+    message: status === 'WAITLIST'
+      ? 'Você entrou na lista de espera. Avisaremos se uma vaga abrir.'
+      : 'Sua inscrição foi confirmada.'
+  }
+}
+
+export async function cancelEventRegistration(registrationId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: 'Você precisa estar logado para cancelar.' }
+  }
+
+  const { data: registration, error } = await supabase
+    .from('event_registrations')
+    .select(`
+      *,
+      event:events(id, title, start_date, church_id)
+    `)
+    .eq('id', registrationId)
+    .eq('profile_id', user.id)
+    .single()
+
+  if (error || !registration) {
+    return { success: false, error: 'Inscrição não encontrada.' }
+  }
+
+  if (registration.status === 'CANCELLED') {
+    return { success: true, message: 'Inscrição já estava cancelada.' }
+  }
+
+  const eventStart = new Date(registration.event.start_date)
+  const now = new Date()
+  const diffMs = eventStart.getTime() - now.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  if (diffDays < 3) {
+    return { success: false, error: 'Cancelamentos não são permitidos com menos de 3 dias do evento.' }
+  }
+
+  let refundMessage = ''
+  let paymentStatus = registration.payment_status
+
+  if (registration.payment_status === 'PAID') {
+    if (diffDays >= 7) {
+      refundMessage = 'Você receberá reembolso integral.'
+      paymentStatus = 'REFUNDED'
+    } else if (diffDays >= 3) {
+      refundMessage = 'Você receberá reembolso parcial (50%).'
+      paymentStatus = 'REFUNDED'
+    }
+  }
+
+  const { error: updateError } = await supabase
+    .from('event_registrations')
+    .update({
+      status: 'CANCELLED',
+      cancelled_at: new Date().toISOString(),
+      cancellation_reason: 'Cancelamento solicitado pelo usuário',
+      payment_status: paymentStatus,
+      refunded_at: paymentStatus === 'REFUNDED' ? new Date().toISOString() : null,
+    })
+    .eq('id', registrationId)
+
+  if (updateError) {
+    console.error('Error cancelling registration:', updateError)
+    return { success: false, error: 'Erro ao cancelar inscrição.' }
+  }
+
+  await sendCancellationConfirmation(registrationId)
+  await processWaitlistPromotion(registration.event.id)
+
+  revalidatePath(`/eventos/${registration.event.id}`)
+  revalidatePath('/membro/eventos')
+
+  return {
+    success: true,
+    message: refundMessage || 'Sua inscrição foi cancelada com sucesso.'
+  }
+}
+
+export async function getMyEventRegistrations() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { upcoming: [], past: [] }
+  }
+
+  const { data: registrations, error } = await supabase
+    .from('event_registrations')
+    .select(`
+      *,
+      event:events(*)
+    `)
+    .eq('profile_id', user.id)
+    .order('registered_at', { ascending: false })
+
+  if (error || !registrations) {
+    console.error('Error fetching registrations:', error)
+    return { upcoming: [], past: [] }
+  }
+
+  const now = new Date()
+  const upcoming = registrations.filter((registration: any) => new Date(registration.event.start_date) >= now)
+  const past = registrations.filter((registration: any) => new Date(registration.event.start_date) < now)
+
+  return { upcoming, past }
+}
+
+export async function getEventRegistrants(eventId: string) {
+  const profile = await getProfile()
+
+  if (!profile || (profile.role !== 'PASTOR' && profile.role !== 'LEADER')) {
+    return { registrants: [], stats: { total: 0, confirmed: 0, waitlist: 0, attended: 0, revenue: 0 } }
+  }
+
+  const supabase = await createClient()
+  const { data: registrations, error } = await supabase
+    .from('event_registrations')
+    .select(`
+      *,
+      profile:profiles(full_name, email, phone)
+    `)
+    .eq('event_id', eventId)
+    .eq('church_id', profile.church_id)
+    .order('registered_at', { ascending: true })
+
+  if (error || !registrations) {
+    console.error('Error fetching registrants:', error)
+    return { registrants: [], stats: { total: 0, confirmed: 0, waitlist: 0, attended: 0, revenue: 0 } }
+  }
+
+  const stats = registrations.reduce(
+    (acc: any, reg: any) => {
+      acc.total += 1
+      if (reg.status === 'CONFIRMED') acc.confirmed += 1
+      if (reg.status === 'WAITLIST') acc.waitlist += 1
+      if (reg.status === 'ATTENDED') acc.attended += 1
+      if (reg.payment_status === 'PAID' && reg.payment_amount_cents) {
+        acc.revenue += reg.payment_amount_cents
+      }
+      return acc
+    },
+    { total: 0, confirmed: 0, waitlist: 0, attended: 0, revenue: 0 }
+  )
+
+  return { registrants: registrations, stats }
+}
+
+export async function checkInAttendee(registrationId: string) {
+  const profile = await getProfile()
+
+  if (!profile || (profile.role !== 'PASTOR' && profile.role !== 'LEADER')) {
+    return { success: false, error: 'Acesso não autorizado.' }
+  }
+
+  const supabase = await createClient()
+  const { data: registration, error } = await supabase
+    .from('event_registrations')
+    .update({
+      checked_in: true,
+      checked_in_at: new Date().toISOString(),
+      checked_in_by: profile.id,
+      status: 'ATTENDED',
+    })
+    .eq('id', registrationId)
+    .select('event_id')
+    .single()
+
+  if (error || !registration) {
+    console.error('Error checking in attendee:', error)
+    return { success: false, error: 'Erro ao registrar presença.' }
+  }
+
+  revalidatePath(`/dashboard/eventos/${registration.event_id}/inscricoes`)
+
+  return { success: true }
+}
+
+export async function processWaitlistPromotion(eventId: string) {
+  const supabase = await createClient()
+
+  const { data: event } = await supabase
+    .from('events')
+    .select('id, capacity')
+    .eq('id', eventId)
+    .single()
+
+  if (!event) {
+    return { success: false, error: 'Evento não encontrado.' }
+  }
+
+  const activeCount = await getActiveRegistrationCount(eventId)
+  const hasCapacity = event.capacity ? activeCount < event.capacity : true
+
+  if (!hasCapacity) {
+    return { success: true, promoted: false }
+  }
+
+  const { data: waitlistRegistration } = await supabase
+    .from('event_registrations')
+    .select('*')
+    .eq('event_id', eventId)
+    .eq('status', 'WAITLIST')
+    .order('registered_at', { ascending: true })
+    .limit(1)
+    .single()
+
+  if (!waitlistRegistration) {
+    return { success: true, promoted: false }
+  }
+
+  const paymentStatus = waitlistRegistration.payment_required ? 'PENDING' : null
+
+  const { error: updateError } = await supabase
+    .from('event_registrations')
+    .update({
+      status: 'CONFIRMED',
+      payment_status: paymentStatus,
+    })
+    .eq('id', waitlistRegistration.id)
+
+  if (updateError) {
+    console.error('Error promoting waitlist registration:', updateError)
+    return { success: false, error: 'Erro ao promover inscrição.' }
+  }
+
+  await sendWaitlistPromotion(waitlistRegistration.id)
+
+  revalidatePath(`/eventos/${eventId}`)
+  revalidatePath(`/dashboard/eventos/${eventId}/inscricoes`)
+
+  return { success: true, promoted: true }
+}
+
+export async function exportRegistrantsToCsv(eventId: string) {
+  const profile = await getProfile()
+
+  if (!profile || profile.role !== 'PASTOR') {
+    return { success: false, error: 'Acesso não autorizado.' }
+  }
+
+  const { registrants } = await getEventRegistrants(eventId)
+
+  if (!registrants.length) {
+    return { success: false }
+  }
+
+  const header = ['Nome', 'Email', 'Telefone', 'Status', 'Data de inscrição', 'Pagamento', 'Convidados']
+
+  const rows = registrants.map((reg: any) => {
+    const payment = reg.payment_status || '-'
+    const guests = reg.guest_count ? String(reg.guest_count) : '0'
+    return [
+      reg.profile?.full_name ?? '-',
+      reg.profile?.email ?? '-',
+      reg.profile?.phone ?? '-',
+      reg.status,
+      format(new Date(reg.registered_at), 'dd/MM/yyyy'),
+      payment,
+      guests,
+    ]
+  })
+
+  const csvContent = [header, ...rows]
+    .map(row => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+
+  return { success: true, csv: csvContent }
 }
