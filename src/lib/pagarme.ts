@@ -788,13 +788,3 @@ export function getOrderStatusLabel(status: string): string {
   return labels[status] || status;
 }
 
-/**
- * Get payment method label in Portuguese
- */
-export function getPaymentMethodLabel(method: string): string {
-  const labels: Record<string, string> = {
-    credit_card: 'Cartão de Crédito',
-    pix: 'PIX',
-  };
-  return labels[method] || method;
-}
