@@ -93,7 +93,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Send notification to church admin
+    // Send notification to church pastors
+    const { data: pastors } = await supabase
+      .from('profiles')
+      .select('email, full_name')
+      .eq('church_id', churchId)
+      .eq('role', 'PASTOR')
+      .eq('is_active', true)
+
+    if (pastors && pastors.length > 0) {
+      const { sendNewRegistrationNotification } = await import('@/lib/email')
+
+      // Send notifications (non-blocking)
+      pastors.forEach(pastor => {
+        if (pastor.email) {
+          sendNewRegistrationNotification(pastor.email, pastor.full_name, {
+            fullName,
+            email,
+            phone,
+            message
+          }).catch(e => console.error('Silent notification error:', e))
+        }
+      })
+    }
 
     return NextResponse.json({ success: true, data })
   } catch (error) {
