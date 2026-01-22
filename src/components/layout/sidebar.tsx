@@ -13,7 +13,8 @@ import {
     BookOpen,
     Wallet,
     MessageSquare,
-    Globe
+    Globe,
+    Video
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -57,6 +58,13 @@ export function Sidebar({ profile }: SidebarProps) {
             href: '/membros',
             active: pathname.startsWith('/membros'),
             show: isPastor
+        },
+        {
+            label: 'Cultos',
+            icon: Video,
+            href: '/dashboard/cultos',
+            active: pathname.startsWith('/dashboard/cultos'),
+            show: isPastor || profile.role === 'LEADER'
         },
         {
             label: 'Loja',
