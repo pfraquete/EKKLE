@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       case 'invoice.paid':
       case 'invoice.payment_failed':
       case 'invoice.canceled':
-        await handleInvoiceEvent(eventType, data as { id?: string | number; subscription?: { id?: string | number }; status?: string; charge?: { last_transaction?: { boleto_url?: string; boleto_barcode?: string; qr_code?: string; qr_code_url?: string } } });
+        await handleInvoiceEvent(eventType, data as { id?: string | number; subscription?: { id?: string | number }; status?: string; amount?: number; due_at?: string; charge?: { id?: string | number; payment_method?: string; last_transaction?: { boleto_url?: string; boleto_barcode?: string; qr_code?: string; qr_code_url?: string } } });
         break;
 
       // Charge events
@@ -244,7 +244,7 @@ async function handleSubscriptionEvent(eventType: string, data: { id?: string | 
   console.log(`Subscription ${subscriptionId} updated to status: ${status}`);
 }
 
-async function handleInvoiceEvent(eventType: string, data: { id?: string | number; subscription?: { id?: string | number }; status?: string; charge?: { last_transaction?: { boleto_url?: string; boleto_barcode?: string; qr_code?: string; qr_code_url?: string } } }) {
+async function handleInvoiceEvent(eventType: string, data: { id?: string | number; subscription?: { id?: string | number }; status?: string; amount?: number; due_at?: string; charge?: { id?: string | number; payment_method?: string; last_transaction?: { boleto_url?: string; boleto_barcode?: string; qr_code?: string; qr_code_url?: string } } }) {
   const invoiceId = data?.id?.toString();
   const subscriptionId = data?.subscription?.id?.toString();
   const status = mapInvoiceStatus(data?.status || '');
