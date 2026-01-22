@@ -24,7 +24,7 @@ export async function getChurch(): Promise<Church | null> {
   const churchSlug = headersList.get('x-church-slug')
   const churchName = headersList.get('x-church-name')
 
-  if (!churchId || !churchSlug) {
+  if (!churchId && !churchSlug) {
     return null
   }
 
