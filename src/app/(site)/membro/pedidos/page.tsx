@@ -15,6 +15,7 @@ interface Order {
   payment_method: string;
   total_cents: number;
   created_at: string;
+  items?: Array<{ id: string }>;
 }
 
 export default async function OrdersListPage() {
