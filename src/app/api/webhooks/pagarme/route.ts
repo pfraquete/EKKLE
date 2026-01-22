@@ -79,7 +79,15 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('x-hub-signature');
 
     // Parse event data
-    let eventData: { type?: string; id?: string | number; status?: string; current_cycle?: { end_at?: string }; charge?: unknown; subscription?: { id?: string | number } };
+    let eventData: {
+      type?: string;
+      id?: string | number;
+      status?: string;
+      current_cycle?: { end_at?: string };
+      charge?: unknown;
+      subscription?: { id?: string | number };
+      data?: unknown;
+    };
     try {
       eventData = JSON.parse(payload);
     } catch {
@@ -115,14 +123,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Process event based on type
-    const data = eventData.data;
+    const data = eventData.data ?? eventData;
     
     switch (eventType) {
       // Subscription events
       case 'subscription.created':
       case 'subscription.updated':
       case 'subscription.canceled':
-        await handleSubscriptionEvent(eventType, data);
+        await handleSubscriptionEvent(eventType, data as { id?: string | number; status?: string; current_cycle?: { end_at?: string } });
         break;
 
       // Invoice events
@@ -131,7 +139,7 @@ export async function POST(request: NextRequest) {
       case 'invoice.paid':
       case 'invoice.payment_failed':
       case 'invoice.canceled':
-        await handleInvoiceEvent(eventType, data);
+        await handleInvoiceEvent(eventType, data as { id?: string | number; subscription?: { id?: string | number }; status?: string; charge?: { last_transaction?: { boleto_url?: string; boleto_barcode?: string; qr_code?: string; qr_code_url?: string } } });
         break;
 
       // Charge events
@@ -141,7 +149,7 @@ export async function POST(request: NextRequest) {
       case 'charge.payment_failed':
       case 'charge.refunded':
       case 'charge.pending':
-        await handleChargeEvent(eventType, data);
+        await handleChargeEvent(eventType, data as { id?: string | number; status?: string; last_transaction?: { boleto_url?: string; boleto_barcode?: string; qr_code?: string; qr_code_url?: string } });
         break;
 
       // Order events (marketplace)
@@ -150,7 +158,7 @@ export async function POST(request: NextRequest) {
       case 'order.paid':
       case 'order.payment_failed':
       case 'order.canceled':
-        await handleOrderEvent(eventType, data);
+        await handleOrderEvent(eventType, data as { id?: string | number; status?: string; charges?: Array<{ id?: string | number; status?: string; payment_method?: string; paid_at?: string; last_transaction?: { id?: string | number; qr_code?: string; qr_code_url?: string; expires_at?: string } }> });
         break;
 
       default:
