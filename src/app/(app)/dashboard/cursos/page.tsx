@@ -2,6 +2,7 @@ import { getProfile } from '@/actions/auth'
 import { adminGetCourses } from '@/actions/courses-admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Plus, BookOpen, Video, Eye, EyeOff } from 'lucide-react'
 
 export default async function CursosAdminPage() {
@@ -43,7 +44,7 @@ export default async function CursosAdminPage() {
               <Link key={course.id} href={`/dashboard/cursos/${course.id}`} className="bg-white rounded-lg shadow-md overflow-hidden border hover:shadow-lg transition-shadow">
                 {course.thumbnail_url && (
                   <div className="relative h-48 w-full bg-gray-100">
-                    <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
+                    <Image src={course.thumbnail_url} alt={course.title} fill className="object-cover" unoptimized />
                   </div>
                 )}
                 <div className="p-6">

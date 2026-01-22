@@ -2,6 +2,7 @@ import { getProfile } from '@/actions/auth'
 import { getEvents } from '@/actions/events'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Plus, Calendar, MapPin, Eye, EyeOff } from 'lucide-react'
 import { EventActions } from '@/components/events/event-actions'
 
@@ -60,10 +61,12 @@ export default async function EventosAdminPage() {
               >
                 {event.image_url && (
                   <div className="relative h-48 w-full bg-gray-100">
-                    <img
+                    <Image
                       src={event.image_url}
                       alt={event.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   </div>
                 )}
