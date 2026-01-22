@@ -21,5 +21,5 @@ export default async function EditarEventoPage({ params }: PageProps) {
     notFound()
   }
 
-  return <EventForm event={event} />
+  return <EventForm initialData={event} />
 }
