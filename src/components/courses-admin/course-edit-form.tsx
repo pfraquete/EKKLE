@@ -114,7 +114,7 @@ export function CourseEditForm() {
       </div>
 
       <div className="flex gap-4">
-        <button type="submit" disabled={loading} className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2">
+        <button type="submit" disabled={loading} className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2">
           {loading && <Loader2 className="w-5 h-5 animate-spin" />}
           {loading ? 'Criando...' : 'Criar Curso'}
         </button>

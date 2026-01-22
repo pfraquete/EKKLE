@@ -145,7 +145,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
             <label className="text-sm font-semibold">Publicado</label>
           </div>
           <div className="flex gap-2">
-            <button onClick={handleUpdateCourse} className="bg-primary text-white px-6 py-2 rounded-lg">Salvar</button>
+            <button onClick={handleUpdateCourse} className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-bold">Salvar</button>
             <button onClick={() => setEditMode(false)} className="px-6 py-2 border rounded-lg">Cancelar</button>
           </div>
         </div>
@@ -167,7 +167,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">Vídeos ({videos.length})</h2>
-          <button onClick={() => { setVideoForm(true); setEditingVideo(null); setVideoData({ title: '', description: '', video_url: '', duration_seconds: 0, order_index: videos.length, is_published: false }) }} className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2">
+          <button onClick={() => { setVideoForm(true); setEditingVideo(null); setVideoData({ title: '', description: '', video_url: '', duration_seconds: 0, order_index: videos.length, is_published: false }) }} className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 font-bold">
             <Plus className="w-5 h-5" />
             Adicionar Vídeo
           </button>
@@ -214,7 +214,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
               <label className="text-sm font-semibold">Publicar vídeo</label>
             </div>
             <div className="flex gap-2">
-              <button onClick={handleSaveVideo} className="bg-primary text-white px-6 py-2 rounded-lg">Salvar Vídeo</button>
+              <button onClick={handleSaveVideo} className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-bold">Salvar Vídeo</button>
               <button onClick={() => { setVideoForm(false); setEditingVideo(null) }} className="px-6 py-2 border rounded-lg">Cancelar</button>
             </div>
           </div>

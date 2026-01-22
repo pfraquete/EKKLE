@@ -263,7 +263,7 @@ export function CoursePlayer({
                       className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCompleted
                         ? 'bg-green-100 text-green-700'
                         : isActive
-                          ? 'bg-primary text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-gray-100 text-gray-600'
                         }`}
                     >

@@ -115,7 +115,7 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                                 <User className="h-10 w-10 text-muted-foreground/50" />
                             )}
                         </div>
-                        <button type="button" className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-105 transition-transform">
+                        <button type="button" className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-105 transition-transform">
                             <Camera className="h-4 w-4" />
                         </button>
                     </div>

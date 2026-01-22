@@ -75,7 +75,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                                         <Loader2 className="h-8 w-8 text-white animate-spin" />
                                     </div>
                                 )}
-                                <AvatarFallback className="bg-primary text-white text-3xl font-black">
+                                <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-black">
                                     {profile.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'}
                                 </AvatarFallback>
                             </Avatar>

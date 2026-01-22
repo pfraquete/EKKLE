@@ -180,7 +180,7 @@ export function BulkMessagingForm() {
                                     <div className="flex items-center gap-3">
                                         <div className={cn(
                                             "h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold",
-                                            selectedIds.has(target.id) ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                                            selectedIds.has(target.id) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                                         )}>
                                             {target.full_name.charAt(0)}
                                         </div>
@@ -256,16 +256,16 @@ export function BulkMessagingForm() {
                 </Card>
 
                 {sending && (
-                    <Card className="border-none shadow-xl bg-primary text-white overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+                    <Card className="border-none shadow-xl bg-primary text-primary-foreground overflow-hidden animate-in fade-in slide-in-from-bottom-4">
                         <CardContent className="p-6">
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-sm font-bold">
                                     <span>Status do Disparo</span>
                                     <span>{Math.round((progress.current / progress.total) * 100)}%</span>
                                 </div>
-                                <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
+                                <div className="h-2 w-full bg-primary-foreground/20 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-white transition-all duration-500"
+                                        className="h-full bg-primary-foreground transition-all duration-500"
                                         style={{ width: `${(progress.current / progress.total) * 100}%` }}
                                     />
                                 </div>

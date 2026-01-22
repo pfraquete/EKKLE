@@ -136,7 +136,7 @@ export function VisualEditor() {
                                             className={cn(
                                                 "px-3 py-2 text-xs font-medium rounded-lg border transition-all",
                                                 branding.theme?.mode === mode.value
-                                                    ? "bg-primary text-white border-primary"
+                                                    ? "bg-primary text-primary-foreground border-primary"
                                                     : "bg-white text-gray-600 border-gray-200 hover:border-primary"
                                             )}
                                         >
@@ -199,7 +199,7 @@ export function VisualEditor() {
                                             className={cn(
                                                 "px-2 py-1.5 rounded-md border transition-all",
                                                 branding.theme?.borderRadius === r.value
-                                                    ? "bg-primary text-white border-primary"
+                                                    ? "bg-primary text-primary-foreground border-primary"
                                                     : "bg-white text-gray-600 border-gray-200"
                                             )}
                                         >
@@ -352,7 +352,7 @@ export function VisualEditor() {
                                 </p>
                                 <div className="pt-6">
                                     <button
-                                        className="px-8 py-3 font-bold text-white transition-transform hover:scale-105"
+                                        className="px-8 py-3 font-bold text-primary-foreground transition-transform hover:scale-105"
                                         style={{
                                             backgroundColor: branding.colors?.primary,
                                             borderRadius: branding.theme?.borderRadius === 'none' ? '0' : branding.theme?.borderRadius === 'sm' ? '4px' : branding.theme?.borderRadius === 'md' ? '8px' : branding.theme?.borderRadius === 'lg' ? '12px' : '9999px'

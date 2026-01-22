@@ -123,7 +123,7 @@ export default async function CursosPage() {
           </p>
           <Link
             href="/membro"
-            className="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+            className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
           >
             Criar Conta Grátis
           </Link>

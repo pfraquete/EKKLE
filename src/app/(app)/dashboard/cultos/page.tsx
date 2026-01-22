@@ -19,7 +19,7 @@ export default async function CultosAdminPage() {
           <h1 className="text-3xl font-bold">Gerenciar Cultos</h1>
           <p className="text-muted-foreground mt-2">Crie e gerencie os cultos da sua igreja</p>
         </div>
-        <Link href="/dashboard/cultos/novo" className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2">
+        <Link href="/dashboard/cultos/novo" className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-black uppercase tracking-tighter hover:bg-primary/90 transition-colors flex items-center gap-2">
           <Plus className="w-5 h-5" />
           Novo Culto
         </Link>
@@ -30,7 +30,7 @@ export default async function CultosAdminPage() {
           <Video className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-xl font-semibold mb-2">Nenhum culto cadastrado</h3>
           <p className="text-muted-foreground mb-6">Comece criando seu primeiro culto</p>
-          <Link href="/dashboard/cultos/novo" className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+          <Link href="/dashboard/cultos/novo" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors">
             <Plus className="w-5 h-5" />
             Criar Primeiro Culto
           </Link>

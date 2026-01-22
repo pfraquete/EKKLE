@@ -45,7 +45,7 @@ export function EnrollButton({ courseId, isEnrolled, isAuthenticated, isEnrollme
     return (
       <button
         onClick={() => push(`/membro/cursos/${courseId}`)}
-        className="w-full bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+        className="w-full bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
       >
         Continuar Curso
       </button>
@@ -57,7 +57,7 @@ export function EnrollButton({ courseId, isEnrolled, isAuthenticated, isEnrollme
       <button
         onClick={handleEnroll}
         disabled={loading || !isEnrollmentOpen}
-        className="w-full bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {loading && <Loader2 className="w-5 h-5 animate-spin" />}
         {loading ? 'Inscrevendo...' : isAuthenticated ? 'Inscrever-se no Curso' : 'Criar Conta'}

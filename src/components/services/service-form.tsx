@@ -310,7 +310,7 @@ export function ServiceForm({ service }: { service?: Service }) {
       </div>
 
       <div className="flex items-center gap-4">
-        <button type="submit" disabled={loading} className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+        <button type="submit" disabled={loading} className="bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-black uppercase tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-xl shadow-primary/20">
           {loading && <Loader2 className="w-5 h-5 animate-spin" />}
           {loading ? 'Salvando...' : service ? 'Atualizar Culto' : 'Criar Culto'}
         </button>

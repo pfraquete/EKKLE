@@ -184,7 +184,7 @@ export function AttendanceForm({ members, cellId }: Props) {
                             <span className={`flex-1 text-left text-sm font-bold ${attendance[member.id] ? 'text-white' : 'text-zinc-600 italic line-through'}`}>
                                 {member.fullName}
                             </span>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${attendance[member.id] ? 'bg-primary text-white shadow-md' : 'bg-zinc-800 text-zinc-600'}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${attendance[member.id] ? 'bg-primary text-primary-foreground shadow-md' : 'bg-zinc-800 text-zinc-600'}`}>
                                 {attendance[member.id] ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
                             </div>
                         </button>
@@ -274,7 +274,7 @@ export function AttendanceForm({ members, cellId }: Props) {
                             `}
                         >
                             <div className={`w-5 h-5 rounded flex items-center justify-center border ${checklist[item.id as keyof typeof checklist] ? 'bg-primary border-primary' : 'border-zinc-700'}`}>
-                                {checklist[item.id as keyof typeof checklist] && <Check className="h-3 w-3 text-white" />}
+                                {checklist[item.id as keyof typeof checklist] && <Check className="h-3 w-3 text-primary-foreground" />}
                             </div>
                             {item.label}
                         </button>
