@@ -41,7 +41,7 @@ export default async function DashboardPage() {
     const { data: whatsapp } = await getWhatsAppInstance(profile.church_id)
 
     const upcomingEvents = events
-        .filter(e => new Date(e.start_time) >= new Date())
+        .filter(e => new Date(e.start_date) >= new Date())
         .slice(0, 3)
 
     return (
@@ -140,14 +140,14 @@ export default async function DashboardPage() {
                                 {upcomingEvents.length > 0 ? upcomingEvents.map(event => (
                                     <div key={event.id} className="flex gap-4">
                                         <div className="w-10 h-10 bg-muted rounded-xl flex flex-col items-center justify-center flex-shrink-0">
-                                            <span className="text-[10px] font-black uppercase leading-none">{format(new Date(event.start_time), 'MMM', { locale: ptBR })}</span>
-                                            <span className="text-md font-black leading-none">{format(new Date(event.start_time), 'dd')}</span>
+                                            <span className="text-[10px] font-black uppercase leading-none">{format(new Date(event.start_date), 'MMM', { locale: ptBR })}</span>
+                                            <span className="text-md font-black leading-none">{format(new Date(event.start_date), 'dd')}</span>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-bold truncate">{event.title}</p>
                                             <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                                                 <Calendar className="h-3 w-3" />
-                                                {format(new Date(event.start_time), "EEEE 'às' HH:mm", { locale: ptBR })}
+                                                {format(new Date(event.start_date), "EEEE 'às' HH:mm", { locale: ptBR })}
                                             </p>
                                         </div>
                                     </div>

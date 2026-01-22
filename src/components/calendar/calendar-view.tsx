@@ -57,7 +57,7 @@ export function CalendarView({ initialEvents }: CalendarViewProps) {
                 </div>
                 <div className="grid grid-cols-7 border-l border-t">
                     {days.map((day) => {
-                        const dayEvents = events.filter(e => isSameDay(new Date(e.start_time), day))
+                        const dayEvents = events.filter(e => isSameDay(new Date(e.start_date), day))
                         return (
                             <div
                                 key={day.toString()}
@@ -84,7 +84,7 @@ export function CalendarView({ initialEvents }: CalendarViewProps) {
                                                         "bg-amber-100 text-amber-700 border-l-2 border-amber-500"
                                             )}
                                         >
-                                            {format(new Date(event.start_time), 'HH:mm')} • {event.title}
+                                            {format(new Date(event.start_date), 'HH:mm')} • {event.title}
                                         </div>
                                     ))}
                                 </div>

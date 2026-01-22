@@ -246,7 +246,7 @@ export interface EventData {
     title: string
     description: string | null
     location: string | null
-    start_time: string
+    start_date: string
     end_time: string | null
     event_type: 'SERVICE' | 'EVENT' | 'COMMUNITY' | 'OTHER'
 }
@@ -258,7 +258,7 @@ export async function getEvents(churchId: string): Promise<EventData[]> {
         .from('events')
         .select('*')
         .eq('church_id', churchId)
-        .order('start_time', { ascending: true })
+        .order('start_date', { ascending: true })
 
     if (error) {
         console.error('[getEvents] Error fetching events:', error)
