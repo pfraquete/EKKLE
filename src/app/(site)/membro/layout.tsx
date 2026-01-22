@@ -2,8 +2,10 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen, User, LogOut } from 'lucide-react'
+import { BookOpen, User, LogOut, ShoppingBag, Package } from 'lucide-react'
 import Image from 'next/image'
+import { CartProvider } from '@/context/cart-context'
+import { CartButton } from '@/components/store/cart-button'
 
 export default async function MembroLayout({
   children,
@@ -34,7 +36,8 @@ export default async function MembroLayout({
     .single()
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <CartProvider>
+      <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-4">
@@ -59,6 +62,7 @@ export default async function MembroLayout({
 
             {/* User Menu */}
             <div className="flex items-center gap-4">
+              <CartButton />
               <span className="text-sm text-gray-600 hidden sm:block">
                 {profile?.full_name || user.email}
               </span>
@@ -92,6 +96,20 @@ export default async function MembroLayout({
               <BookOpen className="w-5 h-5" />
               <span>Meus Cursos</span>
             </Link>
+            <Link
+              href="/membro/loja"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              <span>Loja Virtual</span>
+            </Link>
+            <Link
+              href="/membro/pedidos"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
+            >
+              <Package className="w-5 h-5" />
+              <span>Meus Pedidos</span>
+            </Link>
             <form action="/api/auth/signout" method="POST">
               <button
                 type="submit"
@@ -108,5 +126,6 @@ export default async function MembroLayout({
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
+    </CartProvider>
   )
 }
