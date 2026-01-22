@@ -2,8 +2,7 @@ import { getProfile } from '@/actions/auth';
 import { getProducts, getProductCategories } from '@/actions/products';
 import { redirect } from 'next/navigation';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ShoppingBag, Package, Filter } from 'lucide-react';
+import { ShoppingBag, Package } from 'lucide-react';
 import { StoreCatalog } from '@/components/store/store-catalog';
 
 export default async function MemberStorePage() {

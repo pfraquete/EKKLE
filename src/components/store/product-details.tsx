@@ -38,7 +38,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [justAdded, setJustAdded] = useState(false);
 
-  const primaryImage = product.images?.find((img) => img.is_primary);
   const images = product.images || [];
   const displayImages = images.length > 0 ? images : [{ url: '', alt_text: product.name, is_primary: true }];
 
