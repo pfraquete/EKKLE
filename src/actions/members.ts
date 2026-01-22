@@ -221,3 +221,41 @@ export async function getChurchMembers() {
         return { success: false, error: 'Erro ao buscar membros' }
     }
 }
+
+/**
+ * List members with optional filters
+ * Helper function for WhatsApp AI Agent
+ */
+export async function listMembers(cellId?: string, search?: string) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const supabase = await createClient()
+
+    let query = supabase
+        .from('profiles')
+        .select(`
+            id,
+            full_name,
+            phone,
+            email,
+            member_stage,
+            role,
+            birthday,
+            cell:cell_id(id, name)
+        `)
+        .eq('church_id', profile.church_id)
+        .eq('is_active', true)
+
+    if (cellId) {
+        query = query.eq('cell_id', cellId)
+    }
+
+    if (search) {
+        query = query.ilike('full_name', `%${search}%`)
+    }
+
+    const { data, error } = await query.order('full_name')
+
+    if (error) throw error
+    return data || []
+}
