@@ -59,21 +59,27 @@ export default async function CourseEnrollmentsPage({ params }: PageProps) {
                 </td>
               </tr>
             ) : (
-              enrollments.map((enrollment) => (
-                <tr key={enrollment.id} className="border-t">
-                  <td className="px-4 py-3 font-medium">{enrollment.profiles?.full_name || 'Sem nome'}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{enrollment.profiles?.email || '-'}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {new Date(enrollment.enrolled_at).toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="px-4 py-3">
-                    {enrollment.progress_percentage}%
-                  </td>
-                  <td className="px-4 py-3">
-                    {enrollment.completed_at ? 'Concluído' : 'Em andamento'}
-                  </td>
-                </tr>
-              ))
+              enrollments.map((enrollment) => {
+                const enrollmentProfile = Array.isArray(enrollment.profiles)
+                  ? enrollment.profiles[0]
+                  : enrollment.profiles;
+
+                return (
+                  <tr key={enrollment.id} className="border-t">
+                    <td className="px-4 py-3 font-medium">{enrollmentProfile?.full_name || 'Sem nome'}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{enrollmentProfile?.email || '-'}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {new Date(enrollment.enrolled_at).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="px-4 py-3">
+                      {enrollment.progress_percentage}%
+                    </td>
+                    <td className="px-4 py-3">
+                      {enrollment.completed_at ? 'Concluído' : 'Em andamento'}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
