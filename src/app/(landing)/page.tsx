@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import {
@@ -108,10 +109,14 @@ function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-lg flex items-center justify-center shadow-lg shadow-[#66A5AD]/20">
-              <span className="text-white font-bold">E</span>
-            </div>
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="Ekkle Logo"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
             <span className="text-xl font-bold text-white">Ekkle</span>
           </Link>
 
@@ -1111,10 +1116,14 @@ function Footer() {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Logo & Description */}
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold">E</span>
-              </div>
+            <Link href="/" className="flex items-center gap-3 mb-4">
+              <Image
+                src="/logo.png"
+                alt="Ekkle Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
               <span className="text-xl font-bold text-white">Ekkle</span>
             </Link>
             <p className="text-zinc-400 mb-6 max-w-md">
