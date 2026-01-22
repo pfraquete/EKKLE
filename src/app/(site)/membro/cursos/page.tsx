@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { BookOpen, Play, CheckCircle, Clock } from 'lucide-react'
+import { BookOpen, Play, CheckCircle } from 'lucide-react'
 
 export default async function MeusCursosPage() {
   const church = await getChurch()
@@ -39,7 +39,7 @@ export default async function MeusCursosPage() {
     .order('enrolled_at', { ascending: false })
 
   // Get available courses (not enrolled)
-  const enrolledCourseIds = enrollments?.map((e: any) => e.course_id) || []
+  const enrolledCourseIds = enrollments?.map((e: { course_id: string }) => e.course_id) || []
   const { data: availableCourses } = await supabase
     .from('courses')
     .select(`
@@ -60,7 +60,7 @@ export default async function MeusCursosPage() {
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Cursos em Andamento</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {enrollments.map((enrollment: any) => {
+            {enrollments.map((enrollment: { id: string; progress_percentage: number; courses: { id: string; title: string; description?: string; thumbnail_url?: string; course_videos: { count?: number } | Array<unknown> } }) => {
               const course = enrollment.courses
               const videoCount = Array.isArray(course.course_videos)
                 ? course.course_videos.length
@@ -134,7 +134,7 @@ export default async function MeusCursosPage() {
         <div>
           <h2 className="text-2xl font-bold mb-6">Cursos Disponíveis</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availableCourses.map((course: any) => {
+            {availableCourses.map((course: { id: string; title: string; description?: string; thumbnail_url?: string; course_videos: { count?: number } | Array<unknown> }) => {
               const videoCount = Array.isArray(course.course_videos)
                 ? course.course_videos.length
                 : course.course_videos?.count || 0

@@ -38,7 +38,6 @@ export default async function CultosAdminPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service) => {
-            const isUpcoming = new Date(service.service_date) >= new Date()
             const typeBadge = {
               PRESENCIAL: { label: 'Presencial', class: 'bg-purple-100 text-purple-800' },
               ONLINE: { label: 'Online', class: 'bg-red-100 text-red-800' },

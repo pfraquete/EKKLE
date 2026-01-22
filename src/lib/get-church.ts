@@ -11,7 +11,7 @@ export type Church = {
   instagram_url: string | null
   whatsapp_url: string | null
   youtube_channel_url: string | null
-  website_settings: Record<string, any>
+  website_settings: Record<string, unknown>
 }
 
 /**

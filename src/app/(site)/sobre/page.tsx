@@ -1,7 +1,7 @@
 import { getChurch } from '@/lib/get-church'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Phone, Mail, Instagram, Youtube, MessageCircle } from 'lucide-react'
+import { MapPin, Mail, Instagram, Youtube, MessageCircle } from 'lucide-react'
 
 export default async function SobrePage() {
   const church = await getChurch()

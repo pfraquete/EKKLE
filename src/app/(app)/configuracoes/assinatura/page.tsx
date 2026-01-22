@@ -79,7 +79,7 @@ export default function AssinaturaPage() {
       } else {
         alert(result.error || 'Erro ao cancelar assinatura');
       }
-    } catch (error) {
+    } catch {
       alert('Erro ao cancelar assinatura');
     } finally {
       setCanceling(false);
@@ -248,8 +248,6 @@ export default function AssinaturaPage() {
             {plans
               .filter((plan) => plan.id !== subscription?.plan_id)
               .map((plan) => {
-                const isAnnual = plan.interval === 'year';
-
                 return (
                   <Card key={plan.id}>
                     <CardHeader>

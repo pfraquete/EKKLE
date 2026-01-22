@@ -92,7 +92,7 @@ export function ServiceForm({ service }: { service?: Service }) {
           </div>
           <div>
             <label htmlFor="type" className="block text-sm font-semibold mb-2">Tipo *</label>
-            <select id="type" required value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as any })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            <select id="type" required value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as 'PRESENCIAL' | 'ONLINE' | 'HIBRIDO' })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
               <option value="PRESENCIAL">Presencial</option>
               <option value="ONLINE">Online</option>
               <option value="HIBRIDO">Híbrido</option>
