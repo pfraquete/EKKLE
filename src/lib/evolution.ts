@@ -10,6 +10,12 @@ if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) {
     console.warn('Evolution API environment variables are missing.');
 }
 
+const checkConfig = () => {
+    if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) {
+        throw new Error('Configuração da Evolution API ausente no servidor (.env)');
+    }
+}
+
 export type ConnectionState = 'open' | 'connecting' | 'close' | 'refused';
 
 export interface EvolutionInstance {
@@ -37,6 +43,7 @@ export interface EvolutionStateResponse {
 
 export class EvolutionService {
     private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+        checkConfig();
         const url = `${EVOLUTION_API_URL}${endpoint}`;
         const headers = {
             'Content-Type': 'application/json',

@@ -51,11 +51,15 @@ export function WhatsAppConfig({ initialInstance }: WhatsAppConfigProps) {
     const handleSetup = async () => {
         setLoading(true)
         try {
-            await setupWhatsApp()
+            const result = await setupWhatsApp()
+            if (result && !result.success) {
+                toast.error(result.error || 'Erro ao configurar WhatsApp')
+                return
+            }
             window.location.reload()
-        } catch (err) {
+        } catch (err: any) {
             console.error('Setup WhatsApp error:', err)
-            toast.error('Erro ao configurar WhatsApp')
+            toast.error(err.message || 'Erro ao configurar WhatsApp')
         } finally {
             setLoading(false)
         }

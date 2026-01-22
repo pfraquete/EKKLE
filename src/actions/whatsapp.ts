@@ -56,12 +56,19 @@ export async function setupWhatsApp() {
     // 4. Get QR Code
     try {
         const { base64 } = await EvolutionService.getQrCode(instance!.instance_name)
+
+        // Ensure base64 has the data:image prefix if missing
+        const qrCodeData = base64.startsWith('data:image')
+            ? base64
+            : `data:image/png;base64,${base64}`
+
         await supabase
             .from('whatsapp_instances')
-            .update({ qr_code: base64, status: 'CONNECTING' })
+            .update({ qr_code: qrCodeData, status: 'CONNECTING' })
             .eq('church_id', churchId)
-    } catch (e) {
+    } catch (e: any) {
         console.error('Error fetching QR code:', e)
+        return { success: false, error: e.message || 'Erro ao obter o QR Code da Evolution API' }
     }
 
     revalidatePath('/configuracoes/whatsapp')
