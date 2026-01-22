@@ -3,7 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { checkRateLimit, RateLimitError } from '@/lib/rate-limit'
 import { getProfile } from './auth'
 
 const memberSchema = z.object({
