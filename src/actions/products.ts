@@ -402,7 +402,11 @@ export async function deleteProductImage(imageId: string) {
       .eq('id', imageId)
       .single();
 
-    if (!image || (image.products as { church_id: string }).church_id !== profile.church_id) {
+    const productChurchId = Array.isArray(image.products)
+      ? image.products[0]?.church_id
+      : image.products?.church_id;
+
+    if (!image || !productChurchId || productChurchId !== profile.church_id) {
       return { success: false, error: 'Imagem não encontrada' };
     }
 
@@ -439,7 +443,11 @@ export async function setPrimaryImage(imageId: string) {
       .eq('id', imageId)
       .single();
 
-    if (!image || (image.products as { church_id: string }).church_id !== profile.church_id) {
+    const productChurchId = Array.isArray(image.products)
+      ? image.products[0]?.church_id
+      : image.products?.church_id;
+
+    if (!image || !productChurchId || productChurchId !== profile.church_id) {
       return { success: false, error: 'Imagem não encontrada' };
     }
 

@@ -15,6 +15,10 @@ import {
 } from 'lucide-react';
 import { getOrderStatusLabel, getPaymentMethodLabel } from '@/lib/pagarme';
 
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
+
 interface OrderItem {
   id: string;
   product_name: string;
@@ -23,11 +27,12 @@ interface OrderItem {
   total_cents: number;
 }
 
-export default async function OrderDetailsPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailsPage({ params }: PageProps) {
+  const { id } = await params;
   const profile = await getProfile();
   if (!profile) redirect('/login');
 
-  const order = await getOrder(params.id);
+  const order = await getOrder(id);
   if (!order) notFound();
 
   const getStatusColor = (status: string) => {
