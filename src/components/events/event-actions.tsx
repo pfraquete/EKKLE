@@ -19,12 +19,12 @@ export function EventActions({ eventId, canDelete }: EventActionsProps) {
 
   const handleDelete = async () => {
     setLoading(true)
-    const result = await deleteEvent(eventId)
-
-    if (result.success) {
+    try {
+      await deleteEvent(eventId)
       router.refresh()
-    } else {
-      alert(result.error)
+    } catch (error) {
+      console.error(error)
+      alert('Erro ao excluir evento')
       setLoading(false)
     }
   }
