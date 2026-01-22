@@ -200,3 +200,24 @@ export async function getMemberDetails(id: string) {
 
     return { member, attendance: attendance || [] }
 }
+
+export async function getChurchMembers() {
+    try {
+        const profile = await getProfile()
+        if (!profile) throw new Error('Não autenticado')
+        const churchId = profile.church_id
+
+        const supabase = await createClient()
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .eq('church_id', churchId)
+            .order('full_name', { ascending: true })
+
+        if (error) throw error
+        return { success: true, data }
+    } catch (error) {
+        console.error('Error fetching church members:', error)
+        return { success: false, error: 'Erro ao buscar membros' }
+    }
+}
