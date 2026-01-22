@@ -48,7 +48,7 @@ export async function enrollInCourse(courseId: string) {
     // Check if course exists and is published
     const { data: course } = await supabase
       .from('courses')
-      .select('id')
+      .select('id, enrollment_start_date')
       .eq('id', courseId)
       .eq('church_id', profile.church_id)
       .eq('is_published', true)
@@ -56,6 +56,13 @@ export async function enrollInCourse(courseId: string) {
 
     if (!course) {
       throw new Error('Curso não encontrado')
+    }
+
+    if (course.enrollment_start_date) {
+      const startDate = new Date(course.enrollment_start_date)
+      if (startDate > new Date()) {
+        throw new Error('As inscrições ainda não estão abertas para este curso')
+      }
     }
 
     // Check if already enrolled

@@ -16,6 +16,10 @@ export function CourseEditForm() {
     thumbnail_url: '',
     order_index: 0,
     is_published: false,
+    modules_count: 0,
+    is_paid: false,
+    price: '',
+    enrollment_start_date: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,7 +27,16 @@ export function CourseEditForm() {
     setLoading(true)
     setError('')
 
-    const result = await adminCreateCourse(formData)
+    const parsedPrice = formData.is_paid
+      ? Math.round(Number(formData.price.replace(',', '.')) * 100)
+      : 0
+
+    const { price, ...coursePayload } = formData
+
+    const result = await adminCreateCourse({
+      ...coursePayload,
+      price_cents: Number.isNaN(parsedPrice) ? 0 : parsedPrice,
+    })
 
     if (result.success) {
       router.push(`/dashboard/cursos/${result.course?.id}`)
@@ -55,6 +68,46 @@ export function CourseEditForm() {
         <div>
           <label className="block text-sm font-semibold mb-2">URL da Thumbnail</label>
           <input type="url" value={formData.thumbnail_url} onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary" placeholder="https://..." />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold mb-2">Quantidade de módulos</label>
+            <input
+              type="number"
+              min={0}
+              value={formData.modules_count}
+              onChange={(e) => setFormData({ ...formData, modules_count: Number(e.target.value) })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+              placeholder="0"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-2">Data de início das inscrições</label>
+            <input
+              type="date"
+              value={formData.enrollment_start_date}
+              onChange={(e) => setFormData({ ...formData, enrollment_start_date: e.target.value })}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
+        <div className="border rounded-lg p-4 space-y-4">
+          <div className="flex items-center gap-3">
+            <input type="checkbox" checked={formData.is_paid} onChange={(e) => setFormData({ ...formData, is_paid: e.target.checked })} className="w-4 h-4 text-primary border-gray-300 rounded" />
+            <label className="text-sm font-semibold">Curso pago</label>
+          </div>
+          {formData.is_paid && (
+            <div>
+              <label className="block text-sm font-semibold mb-2">Preço (R$)</label>
+              <input
+                type="text"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                placeholder="Ex: 49,90"
+              />
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <input type="checkbox" checked={formData.is_published} onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })} className="w-4 h-4 text-primary border-gray-300 rounded" />

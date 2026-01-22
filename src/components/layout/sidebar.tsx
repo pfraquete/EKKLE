@@ -9,7 +9,8 @@ import {
     Settings,
     LogOut,
     CalendarCheck2,
-    ShoppingBag
+    ShoppingBag,
+    BookOpen
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -66,6 +67,13 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: CalendarCheck2,
             href: '/dashboard/eventos',
             active: pathname.startsWith('/dashboard/eventos'),
+            show: isPastor
+        },
+        {
+            label: 'Cursos',
+            icon: BookOpen,
+            href: '/dashboard/cursos',
+            active: pathname.startsWith('/dashboard/cursos'),
             show: isPastor
         },
         {
