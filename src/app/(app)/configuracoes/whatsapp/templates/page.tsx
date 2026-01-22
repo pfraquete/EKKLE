@@ -15,7 +15,7 @@ export default async function WhatsAppTemplatesPage() {
         redirect('/dashboard')
     }
 
-    const { data: templates } = await getTemplates(profile.church_id)
+    const { data: templates } = await getTemplates()
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 pb-20">
@@ -33,7 +33,7 @@ export default async function WhatsAppTemplatesPage() {
                 </div>
             </div>
 
-            <TemplateEditor churchId={profile.church_id} initialTemplates={templates || []} />
+            <TemplateEditor initialTemplates={templates || []} />
         </div>
     )
 }

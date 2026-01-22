@@ -13,7 +13,7 @@ export default async function MembrosPage() {
     if (!profile || !profile.cell_id) redirect('/login')
 
     const members = await getMembers(profile.cell_id)
-    const cellData = await getMyCellData(profile.id)
+    const cellData = await getMyCellData()
     const cellName = cellData?.cell?.name || 'Minha Célula'
 
     return (

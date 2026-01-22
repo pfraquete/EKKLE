@@ -15,10 +15,10 @@ export default async function EditCellPage({ params }: EditCellPageProps) {
     const profile = await getProfile()
     if (!profile || profile.role !== 'PASTOR') redirect('/dashboard')
 
-    const data = await getCellDetails(id, profile.church_id)
+    const data = await getCellDetails(id)
     if (!data) redirect('/celulas')
 
-    const potentialLeaders = await getPotentialLeaders(profile.church_id)
+    const potentialLeaders = await getPotentialLeaders()
 
     const cellForForm = {
         id: data.cell.id,

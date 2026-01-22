@@ -126,12 +126,15 @@ export async function deleteMember(id: string) {
 }
 
 export async function getMembers(cellId: string) {
+    const profile = await getProfile()
+    if (!profile) return []
     const supabase = await createClient()
 
     const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('cell_id', cellId)
+        .eq('church_id', profile.church_id)
         .eq('is_active', true)
         .order('full_name')
 
@@ -140,6 +143,10 @@ export async function getMembers(cellId: string) {
 }
 
 export async function getMemberDetails(id: string) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    const churchId = profile.church_id
+
     const supabase = await createClient()
 
     // 1. Get profile/member info
@@ -153,6 +160,7 @@ export async function getMemberDetails(id: string) {
             )
         `)
         .eq('id', id)
+        .eq('church_id', churchId)
         .single()
 
     if (memberError) {
@@ -167,6 +175,7 @@ export async function getMemberDetails(id: string) {
                 )
             `)
             .eq('id', id)
+            .eq('church_id', churchId)
             .single()
 
         if (mError) throw mError

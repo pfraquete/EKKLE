@@ -35,10 +35,9 @@ interface Member {
 interface Props {
     members: Member[]
     cellId: string
-    churchId: string
 }
 
-export function AttendanceForm({ members, cellId, churchId }: Props) {
+export function AttendanceForm({ members, cellId }: Props) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -87,7 +86,6 @@ export function AttendanceForm({ members, cellId, churchId }: Props) {
         try {
             const payload = {
                 cellId,
-                churchId,
                 date,
                 hasIcebreaker: checklist.icebreaker,
                 hasWorship: checklist.worship,

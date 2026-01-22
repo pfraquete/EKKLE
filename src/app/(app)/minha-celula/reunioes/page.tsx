@@ -12,7 +12,7 @@ export default async function ReunioesPage() {
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    const data = await getMyCellData(profile.id)
+    const data = await getMyCellData()
     if (!data) redirect('/minha-celula')
 
     const { recentMeetings } = data

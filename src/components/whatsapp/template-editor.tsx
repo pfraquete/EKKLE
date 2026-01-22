@@ -9,11 +9,6 @@ import { upsertTemplate, MessageTemplate } from '@/actions/templates'
 import { toast } from 'sonner'
 import { Loader2, Save, Info } from 'lucide-react'
 
-interface TemplateEditorProps {
-    churchId: string
-    initialTemplates: MessageTemplate[]
-}
-
 type TemplateCategory = 'BIRTHDAY' | 'REMINDER' | 'WELCOME' | 'CUSTOM'
 
 const CATEGORIES: { value: TemplateCategory; label: string }[] = [
@@ -23,7 +18,7 @@ const CATEGORIES: { value: TemplateCategory; label: string }[] = [
     { value: 'CUSTOM', label: 'Personalizado' },
 ]
 
-export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorProps) {
+export function TemplateEditor({ initialTemplates }: { initialTemplates: MessageTemplate[] }) {
     const [templates, setTemplates] = useState<Partial<MessageTemplate>[]>(initialTemplates)
     const [activeTab, setActiveTab] = useState<TemplateCategory>(
         (initialTemplates[0]?.category as TemplateCategory) || 'BIRTHDAY'
@@ -32,7 +27,6 @@ export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorPro
 
     const getCurrentTemplate = (category: TemplateCategory) => {
         return templates.find(t => t.category === category) || {
-            church_id: churchId,
             category: category,
             name: `Template de ${category}`,
             content: '',
@@ -50,8 +44,7 @@ export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorPro
         setLoading(true)
         try {
             const { data, error: upsertError } = await upsertTemplate({
-                ...template,
-                church_id: churchId
+                ...template
             } as MessageTemplate)
             if (upsertError) throw upsertError
 
@@ -84,7 +77,7 @@ export function TemplateEditor({ churchId, initialTemplates }: TemplateEditorPro
                 next[index] = { ...next[index], content }
                 return next
             }
-            return [...prev, { church_id: churchId, category: category, content, is_active: true, name: `Template de ${category}` }]
+            return [...prev, { category: category, content, is_active: true, name: `Template de ${category}` }]
         })
     }
 

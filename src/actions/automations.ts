@@ -5,11 +5,22 @@ import { EvolutionService } from '@/lib/evolution'
 import { getWhatsAppInstance } from './whatsapp'
 import { format, subDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { getProfile } from './auth'
 
 export async function checkLateReports() {
+    const profile = await getProfile()
+    if (!profile) return { success: false, reminded: 0, error: 'Não autenticado' }
+    const churchId = profile.church_id
+
     const supabase = await createClient()
 
-    // 1. Find meetings started yesterday or before that have no reports
+    // 1. Get WhatsApp instance for the church
+    const { data: whatsapp } = await getWhatsAppInstance()
+    if (!whatsapp || whatsapp.status !== 'CONNECTED') {
+        return { success: false, reminded: 0, error: 'WhatsApp não conectado' }
+    }
+
+    // 2. Find meetings started yesterday or before that have no reports
     const yesterday = subDays(new Date(), 1)
     const yesterdayStr = yesterday.toISOString().split('T')[0]
 
@@ -26,8 +37,9 @@ export async function checkLateReports() {
         )
       )
     `)
-        .eq('status', 'IN_PROGRESS') // Or check if not present in cell_reports
+        .eq('status', 'IN_PROGRESS')
         .lte('date', yesterdayStr)
+        .eq('church_id', churchId) // Redundant with RLS but good for clarity
 
     if (error || !lateMeetings) {
         console.error('[checkLateReports] Error fetching late meetings:', error)
@@ -45,18 +57,13 @@ export async function checkLateReports() {
             .single()
 
         if (!report && meeting.cell?.leader?.phone) {
-            // 2. Send WhatsApp ping
-            const { data: whatsapp } = await getWhatsAppInstance(meeting.cell.church_id)
+            try {
+                const message = `🚨 *Lembrete de Relatório: ${meeting.cell.name}*\n\nOlá, ${meeting.cell.leader.full_name}! 👋\n\nNotamos que a reunião do dia *${format(new Date(meeting.date), "dd/MM", { locale: ptBR })}* ainda está sem relatório.\n\nPor favor, reserve 1 minutinho para preencher os dados no Ekkle. Isso ajuda muito o acompanhamento da igreja! 🙏❤️`
 
-            if (whatsapp?.status === 'CONNECTED') {
-                try {
-                    const message = `🚨 *Lembrete de Relatório: ${meeting.cell.name}*\n\nOlá, ${meeting.cell.leader.full_name}! 👋\n\nNotamos que a reunião do dia *${format(new Date(meeting.date), "dd/MM", { locale: ptBR })}* ainda está sem relatório.\n\nPor favor, reserve 1 minutinho para preencher os dados no Ekkle. Isso ajuda muito o acompanhamento da igreja! 🙏❤️`
-
-                    await EvolutionService.sendText(whatsapp.instance_name, meeting.cell.leader.phone, message)
-                    remindedCount++
-                } catch (err) {
-                    console.error(`Failed to send late report reminder to ${meeting.cell.leader.phone}:`, err)
-                }
+                await EvolutionService.sendText(whatsapp.instance_name, meeting.cell.leader.phone, message)
+                remindedCount++
+            } catch (err) {
+                console.error(`Failed to send late report reminder to ${meeting.cell.leader.phone}:`, err)
             }
         }
     }
