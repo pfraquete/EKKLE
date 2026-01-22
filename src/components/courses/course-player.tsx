@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Play, CheckCircle, Clock, Loader2 } from 'lucide-react'
+import { Play, CheckCircle, Clock } from 'lucide-react'
 import { updateVideoProgress } from '@/actions/courses'
 
 type Course = {
@@ -84,7 +84,7 @@ export function CoursePlayer({
     if (videoRef.current && currentProgress) {
       videoRef.current.currentTime = currentProgress.watched_seconds
     }
-  }, [currentVideo.id])
+  }, [currentVideo.id, currentProgress])
 
   // Setup progress tracking
   useEffect(() => {

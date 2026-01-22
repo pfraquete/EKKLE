@@ -183,8 +183,12 @@ export default function CheckoutPage() {
       } else {
         router.push('/configuracoes/assinatura?success=true');
       }
-    } catch (err: any) {
-      setError(err.message || 'Erro ao processar pagamento');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || 'Erro ao processar pagamento');
+      } else {
+        setError('Erro ao processar pagamento');
+      }
     } finally {
       setSubmitting(false);
     }

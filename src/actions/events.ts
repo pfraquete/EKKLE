@@ -50,12 +50,15 @@ export async function createEvent(data: EventInput) {
     revalidatePath('/', 'layout') // Revalidate public pages
 
     return { success: true, event }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating event:', error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -100,12 +103,15 @@ export async function updateEvent(eventId: string, data: EventInput) {
     revalidatePath('/', 'layout')
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating event:', error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -144,9 +150,12 @@ export async function deleteEvent(eventId: string) {
     revalidatePath('/', 'layout')
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting event:', error)
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 

@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('x-hub-signature');
 
     // Parse event data
-    let eventData: any;
+    let eventData: { type?: string; id?: string | number; status?: string; current_cycle?: { end_at?: string }; charge?: unknown; subscription?: { id?: string | number } };
     try {
       eventData = JSON.parse(payload);
     } catch {
@@ -155,24 +155,26 @@ export async function POST(request: NextRequest) {
       .eq('pagarme_event_id', eventData.id?.toString());
 
     return NextResponse.json({ received: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Webhook error:', error);
+
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // Log error
     await supabase.from('webhook_events').insert({
       event_type: 'error',
-      payload: { error: error.message },
+      payload: { error: errorMessage },
       processed: false,
-      error: error.message,
+      error: errorMessage,
     });
 
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }
 
-async function handleSubscriptionEvent(eventType: string, data: any) {
+async function handleSubscriptionEvent(eventType: string, data: { id?: string | number; status?: string; current_cycle?: { end_at?: string } }) {
   const subscriptionId = data?.id?.toString();
-  const status = mapSubscriptionStatus(data?.status);
+  const status = mapSubscriptionStatus(data?.status || '');
 
   if (!subscriptionId) {
     console.error('No subscription ID in event');
@@ -194,7 +196,12 @@ async function handleSubscriptionEvent(eventType: string, data: any) {
   }
 
   // Update subscription status
-  const updateData: any = {
+  const updateData: {
+    status: string;
+    updated_at: string;
+    current_period_end?: string;
+    canceled_at?: string;
+  } = {
     status,
     updated_at: new Date().toISOString(),
   };
@@ -220,10 +227,10 @@ async function handleSubscriptionEvent(eventType: string, data: any) {
   console.log(`Subscription ${subscriptionId} updated to status: ${status}`);
 }
 
-async function handleInvoiceEvent(eventType: string, data: any) {
+async function handleInvoiceEvent(eventType: string, data: { id?: string | number; subscription?: { id?: string | number }; status?: string; charge?: { last_transaction?: { boleto_url?: string; boleto_barcode?: string; qr_code?: string; qr_code_url?: string } } }) {
   const invoiceId = data?.id?.toString();
   const subscriptionId = data?.subscription?.id?.toString();
-  const status = mapInvoiceStatus(data?.status);
+  const status = mapInvoiceStatus(data?.status || '');
 
   if (!invoiceId) {
     console.error('No invoice ID in event');
@@ -281,7 +288,15 @@ async function handleInvoiceEvent(eventType: string, data: any) {
 
   if (invoice) {
     // Update invoice status
-    const updateData: any = {
+    const updateData: {
+      status: string;
+      updated_at: string;
+      paid_at?: string;
+      boleto_url?: string;
+      boleto_barcode?: string;
+      pix_qr_code?: string;
+      pix_qr_code_url?: string;
+    } = {
       status,
       updated_at: new Date().toISOString(),
     };
@@ -293,12 +308,12 @@ async function handleInvoiceEvent(eventType: string, data: any) {
     // Update boleto/pix info if available
     const charge = data?.charge;
     const lastTransaction = charge?.last_transaction;
-    
+
     if (lastTransaction?.boleto_url) {
       updateData.boleto_url = lastTransaction.boleto_url;
       updateData.boleto_barcode = lastTransaction.boleto_barcode;
     }
-    
+
     if (lastTransaction?.qr_code) {
       updateData.pix_qr_code = lastTransaction.qr_code;
       updateData.pix_qr_code_url = lastTransaction.qr_code_url;
@@ -325,9 +340,9 @@ async function handleInvoiceEvent(eventType: string, data: any) {
   }
 }
 
-async function handleChargeEvent(eventType: string, data: any) {
+async function handleChargeEvent(eventType: string, data: { id?: string | number; status?: string; last_transaction?: { boleto_url?: string; boleto_barcode?: string; qr_code?: string; qr_code_url?: string } }) {
   const chargeId = data?.id?.toString();
-  const status = mapChargeStatus(data?.status);
+  const status = mapChargeStatus(data?.status || '');
 
   if (!chargeId) {
     console.error('No charge ID in event');
@@ -349,7 +364,15 @@ async function handleChargeEvent(eventType: string, data: any) {
   }
 
   // Update invoice status
-  const updateData: any = {
+  const updateData: {
+    status: string;
+    updated_at: string;
+    paid_at?: string;
+    boleto_url?: string;
+    boleto_barcode?: string;
+    pix_qr_code?: string;
+    pix_qr_code_url?: string;
+  } = {
     status,
     updated_at: new Date().toISOString(),
   };

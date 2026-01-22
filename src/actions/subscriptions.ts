@@ -8,7 +8,6 @@ import {
   cancelSubscription as cancelPagarmeSubscription,
   getSubscription as getPagarmeSubscription,
   getSubscriptionInvoices as getPagarmeInvoices,
-  formatCurrency,
   PagarmeError,
 } from '@/lib/pagarme';
 
@@ -232,7 +231,7 @@ export async function createChurchSubscription(input: CreateSubscriptionInput) {
         .from('subscription_plans')
         .update({ pagarme_plan_id: pagarmePlanId })
         .eq('id', plan.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating Pagar.me plan:', error);
       return { success: false, error: 'Erro ao criar plano no gateway de pagamento' };
     }
@@ -310,24 +309,24 @@ export async function createChurchSubscription(input: CreateSubscriptionInput) {
       boleto_url: boletoUrl,
       boleto_barcode: boletoBarcode,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating subscription:', error);
-    
+
     // Parse Pagar.me error
     let errorMessage = 'Erro ao processar pagamento';
     if (error instanceof PagarmeError) {
       if (error.data?.errors) {
         const errors = error.data.errors;
         if (Array.isArray(errors) && errors.length > 0) {
-          errorMessage = errors.map((e: any) => e.message || e.description).join(', ');
+          errorMessage = errors.map((e: { message?: string; description?: string }) => e.message || e.description || '').join(', ');
         }
       } else if (error.data?.message) {
         errorMessage = error.data.message;
       }
-    } else if (error.message) {
+    } else if (error instanceof Error && error.message) {
       errorMessage = error.message;
     }
-    
+
     return { success: false, error: errorMessage };
   }
 }
@@ -371,7 +370,11 @@ export async function cancelChurchSubscription(cancelImmediately: boolean = fals
     }
 
     // Update in database
-    const updateData: any = {
+    const updateData: {
+      canceled_at: string;
+      status?: string;
+      cancel_at_period_end?: boolean;
+    } = {
       canceled_at: new Date().toISOString(),
     };
 
@@ -395,7 +398,7 @@ export async function cancelChurchSubscription(cancelImmediately: boolean = fals
     revalidatePath('/dashboard');
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error canceling subscription:', error);
     return { success: false, error: 'Erro ao cancelar assinatura' };
   }
@@ -449,9 +452,12 @@ export async function syncSubscriptionStatus() {
     const newStatus = mapPagarmeStatus(pagarmeSubscription.status);
 
     const supabase = await createClient();
-    
-    const updateData: any = { status: newStatus };
-    
+
+    const updateData: {
+      status: string;
+      current_period_end?: string;
+    } = { status: newStatus };
+
     if (pagarmeSubscription.current_cycle?.end_at) {
       updateData.current_period_end = pagarmeSubscription.current_cycle.end_at;
     }

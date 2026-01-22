@@ -36,7 +36,7 @@ export default async function CursosAdminPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course: any) => {
+          {courses.map((course: { id: string; thumbnail_url?: string; title: string; is_published: boolean; description?: string; course_videos: { count?: number } | Array<unknown> }) => {
             const videoCount = Array.isArray(course.course_videos) ? course.course_videos.length : course.course_videos?.count || 0
 
             return (

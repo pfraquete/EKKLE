@@ -53,12 +53,15 @@ export async function createService(data: ServiceInput) {
     revalidatePath('/', 'layout')
 
     return { success: true, service }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating service:', error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -102,12 +105,15 @@ export async function updateService(serviceId: string, data: ServiceInput) {
     revalidatePath('/', 'layout')
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating service:', error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -145,9 +151,12 @@ export async function deleteService(serviceId: string) {
     revalidatePath('/', 'layout')
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting service:', error)
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 

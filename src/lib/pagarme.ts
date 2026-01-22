@@ -11,7 +11,7 @@ const PAGARME_SECRET_KEY = process.env.PAGARME_SECRET_KEY || '';
 interface PagarmeRequestOptions {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
-  body?: any;
+  body?: Record<string, unknown>;
 }
 
 async function pagarmeRequest<T>(options: PagarmeRequestOptions): Promise<T> {
@@ -45,9 +45,9 @@ async function pagarmeRequest<T>(options: PagarmeRequestOptions): Promise<T> {
 }
 
 export class PagarmeError extends Error {
-  public data: any;
+  public data: { errors?: Array<{ message?: string; description?: string }>; message?: string };
 
-  constructor(message: string, data: any) {
+  constructor(message: string, data: { errors?: Array<{ message?: string; description?: string }>; message?: string }) {
     super(message);
     this.name = 'PagarmeError';
     this.data = data;
@@ -143,7 +143,7 @@ export interface PagarmeSubscriptionResponse {
   start_at: string;
   plan: PagarmePlan;
   customer: PagarmeCustomer;
-  card?: any;
+  card?: { id: string; last_four_digits?: string; brand?: string };
   current_cycle?: {
     id: string;
     start_at: string;

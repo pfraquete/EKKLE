@@ -91,9 +91,12 @@ export async function enrollInCourse(courseId: string) {
     revalidatePath(`/cursos/${courseId}`)
 
     return { success: true, enrollment: data }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error enrolling in course:', error)
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -182,9 +185,12 @@ export async function updateVideoProgress(input: {
     await updateCourseProgress(enrollmentId)
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating video progress:', error)
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -223,7 +229,10 @@ async function updateCourseProgress(enrollmentId: string) {
   const progressPercentage = Math.round((completedCount / totalVideos) * 100)
 
   // Update enrollment progress
-  const updateData: any = {
+  const updateData: {
+    progress_percentage: number
+    completed_at?: string
+  } = {
     progress_percentage: progressPercentage,
   }
 
@@ -255,7 +264,7 @@ export async function getVideoProgress(enrollmentId: string, videoId: string) {
       .single()
 
     return progress
-  } catch (error) {
+  } catch {
     return null
   }
 }

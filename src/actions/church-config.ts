@@ -74,11 +74,14 @@ export async function updateChurchConfig(data: ChurchConfigInput) {
     revalidatePath('/', 'layout') // Revalidate all public pages
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating church config:', error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }

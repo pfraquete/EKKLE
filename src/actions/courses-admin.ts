@@ -54,11 +54,14 @@ export async function adminCreateCourse(data: CourseInput) {
     revalidatePath('/', 'layout')
 
     return { success: true, course }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -86,11 +89,14 @@ export async function adminUpdateCourse(courseId: string, data: CourseInput) {
     revalidatePath('/', 'layout')
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -113,8 +119,11 @@ export async function adminDeleteCourse(courseId: string) {
     revalidatePath('/', 'layout')
 
     return { success: true }
-  } catch (error: any) {
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -132,7 +141,7 @@ export async function adminGetCourses() {
 
     if (error) throw new Error('Erro ao buscar cursos')
     return courses || []
-  } catch (error) {
+  } catch {
     return []
   }
 }
@@ -152,7 +161,7 @@ export async function adminGetCourse(courseId: string) {
 
     if (error) throw new Error('Erro ao buscar curso')
     return course
-  } catch (error) {
+  } catch {
     return null
   }
 }
@@ -196,11 +205,14 @@ export async function adminCreateVideo(courseId: string, data: VideoInput) {
     revalidatePath('/', 'layout')
 
     return { success: true, video }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -227,11 +239,14 @@ export async function adminUpdateVideo(videoId: string, data: VideoInput) {
     revalidatePath('/', 'layout')
 
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message }
     }
-    return { success: false, error: error.message }
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -254,8 +269,11 @@ export async function adminDeleteVideo(videoId: string) {
     revalidatePath('/', 'layout')
 
     return { success: true }
-  } catch (error: any) {
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    return { success: false, error: 'Erro desconhecido' }
   }
 }
 
@@ -274,7 +292,7 @@ export async function adminGetCourseVideos(courseId: string) {
 
     if (error) throw new Error('Erro ao buscar vídeos')
     return videos || []
-  } catch (error) {
+  } catch {
     return []
   }
 }
