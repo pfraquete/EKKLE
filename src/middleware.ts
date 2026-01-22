@@ -35,18 +35,19 @@ export async function middleware(request: NextRequest) {
         // It's a tenant subdomain!
         const subdomain = hostname.split('.')[0]
 
-        // Special handling for Auth Routes (Login/Register) on Subdomain
-        // We want to serve the (auth) pages but pass the church context
-        const isAuthRoute =
+        // Special handling for Auth and API Routes on Subdomain
+        // We want to serve the (auth) pages and standard API routes without rewriting to /site/[domain]
+        const isBypassRoute =
             url.pathname.startsWith('/login') ||
             url.pathname.startsWith('/register') ||
             url.pathname.startsWith('/cadastro') ||
             url.pathname.startsWith('/forgot-password') ||
-            url.pathname.startsWith('/reset-password')
+            url.pathname.startsWith('/reset-password') ||
+            url.pathname.startsWith('/api')
 
-        if (isAuthRoute) {
+        if (isBypassRoute) {
             // Do NOT rewrite to /site/[domain]
-            // Just let it pass to (auth)/... but inject headers
+            // Just let it pass but inject headers for tenant context
             const response = NextResponse.next()
 
             response.headers.set('x-church-slug', subdomain)
