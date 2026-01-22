@@ -49,7 +49,7 @@ export async function getChurch(): Promise<Church | null> {
     return {
       id: churchId || '',
       name: churchName || '',
-      slug: churchSlug,
+      slug: churchSlug || '',
       logo_url: null,
       description: null,
       address: null,
