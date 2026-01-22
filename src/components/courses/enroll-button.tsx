@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { enrollInCourse } from '@/actions/courses'
+import { useChurchNavigation } from '@/hooks/use-church-navigation'
 import { Loader2 } from 'lucide-react'
 
 type EnrollButtonProps = {
@@ -13,13 +13,13 @@ type EnrollButtonProps = {
 }
 
 export function EnrollButton({ courseId, isEnrolled, isAuthenticated, isEnrollmentOpen = true }: EnrollButtonProps) {
-  const router = useRouter()
+  const { push } = useChurchNavigation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleEnroll = async () => {
     if (!isAuthenticated) {
-      router.push('/login')
+      push('/login')
       return
     }
 
@@ -34,7 +34,7 @@ export function EnrollButton({ courseId, isEnrolled, isAuthenticated, isEnrollme
     const result = await enrollInCourse(courseId)
 
     if (result.success) {
-      router.push(`/membro/cursos/${courseId}`)
+      push(`/membro/cursos/${courseId}`)
     } else {
       setError(result.error || 'Erro ao inscrever no curso')
       setLoading(false)
@@ -44,7 +44,7 @@ export function EnrollButton({ courseId, isEnrolled, isAuthenticated, isEnrollme
   if (isEnrolled) {
     return (
       <button
-        onClick={() => router.push(`/membro/cursos/${courseId}`)}
+        onClick={() => push(`/membro/cursos/${courseId}`)}
         className="w-full bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
       >
         Continuar Curso

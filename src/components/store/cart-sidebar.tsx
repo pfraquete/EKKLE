@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
+import { useChurchNavigation } from '@/hooks/use-church-navigation';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -12,14 +12,14 @@ interface CartSidebarProps {
 }
 
 export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
-  const router = useRouter();
+  const { push } = useChurchNavigation();
   const { items, removeItem, updateQuantity, totalItems, totalCents } = useCart();
 
   if (!isOpen) return null;
 
   const handleCheckout = () => {
     onClose();
-    router.push('/membro/loja/checkout');
+    push('/membro/loja/checkout');
   };
 
   return (
