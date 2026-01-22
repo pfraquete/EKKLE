@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SubmitButton } from '@/components/buttons/submit-button'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getChurch } from '@/lib/get-church'
 
 export default async function LoginPage({
@@ -21,10 +22,12 @@ export default async function LoginPage({
                     {church ? (
                         <div className="flex flex-col items-center gap-3 mb-2">
                             {church.logo_url && (
-                                <img
+                                <Image
                                     src={church.logo_url}
                                     alt={church.name}
-                                    className="w-16 h-16 object-contain"
+                                    width={64}
+                                    height={64}
+                                    className="object-contain"
                                 />
                             )}
                             <CardTitle className="text-xl font-bold text-foreground">
