@@ -6,7 +6,6 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { EvolutionService } from '@/lib/evolution'
 import { getWhatsAppInstance } from './whatsapp'
-import { getProfile } from './auth'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
