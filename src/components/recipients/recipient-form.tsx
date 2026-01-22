@@ -6,7 +6,6 @@ import { createChurchRecipient, updateChurchRecipient } from '@/actions/recipien
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import { FormError } from '@/components/ui/form-error';
 import { Loader2 } from 'lucide-react';
 
