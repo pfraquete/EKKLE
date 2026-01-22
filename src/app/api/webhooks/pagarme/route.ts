@@ -79,7 +79,15 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('x-hub-signature');
 
     // Parse event data
-    let eventData: { type?: string; id?: string | number; status?: string; current_cycle?: { end_at?: string }; charge?: unknown; subscription?: { id?: string | number } };
+    let eventData: {
+      type?: string;
+      id?: string | number;
+      data?: any;
+      status?: string;
+      current_cycle?: { end_at?: string };
+      charge?: unknown;
+      subscription?: { id?: string | number }
+    };
     try {
       eventData = JSON.parse(payload);
     } catch {
