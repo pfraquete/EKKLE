@@ -153,6 +153,10 @@ CREATE POLICY "Users can view their own church" ON churches
         id IN (SELECT church_id FROM profiles WHERE id = auth.uid())
     );
 
+-- Profiles: Users can view their own profile (prevents circular dependency)
+CREATE POLICY "Users can view their own profile" ON profiles
+    FOR SELECT USING (id = auth.uid());
+
 -- Profiles: Users can view profiles from their church
 CREATE POLICY "Users can view profiles from their church" ON profiles
     FOR SELECT USING (
