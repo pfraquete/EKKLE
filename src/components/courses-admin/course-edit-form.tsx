@@ -31,10 +31,8 @@ export function CourseEditForm() {
       ? Math.round(Number(formData.price.replace(',', '.')) * 100)
       : 0
 
-    const { price, ...coursePayload } = formData
-
     const result = await adminCreateCourse({
-      ...coursePayload,
+      ...formData,
       price_cents: Number.isNaN(parsedPrice) ? 0 : parsedPrice,
     })
 
