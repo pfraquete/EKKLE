@@ -62,6 +62,7 @@ export async function updateSession(request: NextRequest) {
     const isAuthRoute = authRoutes.some(route =>
         pathname.startsWith(route)
     )
+    const isApiRoute = pathname.startsWith('/api')
 
     // Public website routes don't require authentication
     if (isPublicWebsite && church) {
@@ -83,7 +84,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Não logado tentando acessar área protegida
-    if (!user && !isAuthRoute && !isPublicWebsite) {
+    if (!user && !isAuthRoute && !isPublicWebsite && !isApiRoute) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         const redirectResponse = NextResponse.redirect(url)
