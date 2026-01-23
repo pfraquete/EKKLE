@@ -15,8 +15,17 @@ export const memberSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  memberStage: z.enum(['VISITOR', 'REGULAR_VISITOR', 'MEMBER', 'LEADER'], {
-    required_error: 'Selecione um estágio'
+  memberStage: z.enum([
+    'VISITOR',
+    'REGULAR_VISITOR',
+    'MEMBER',
+    'GUARDIAN_ANGEL',
+    'TRAINING_LEADER',
+    'LEADER',
+    'PASTOR'
+  ], {
+    required_error: 'Selecione um estágio',
+    invalid_type_error: 'Estágio inválido'
   }),
 
   birthday: z.string()

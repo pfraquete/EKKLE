@@ -26,15 +26,17 @@ function validateSignature(signature: string | null, payload: string): boolean {
   // A assinatura pode vir com prefixo sha256= ou não
   const cleanSignature = signature.replace('sha256=', '');
 
-  try {
-    return crypto.timingSafeEqual(
-      Buffer.from(cleanSignature),
-      Buffer.from(expectedSignature)
-    );
-  } catch {
-    // Se os buffers tiverem tamanhos diferentes
-    return cleanSignature === expectedSignature;
+  // Validar tamanho ANTES de chamar timingSafeEqual para evitar timing attacks
+  if (cleanSignature.length !== expectedSignature.length) {
+    console.log('Signature length mismatch');
+    return false;
   }
+
+  // Comparação timing-safe (sem possibilidade de exceção, já que os tamanhos são iguais)
+  return crypto.timingSafeEqual(
+    Buffer.from(cleanSignature, 'hex'),
+    Buffer.from(expectedSignature, 'hex')
+  );
 }
 
 // Map Pagar.me v5 status to our status

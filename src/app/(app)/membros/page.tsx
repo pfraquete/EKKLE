@@ -37,11 +37,22 @@ export default async function MembersPage() {
 
     const getStageBadge = (stage: string) => {
         switch (stage) {
-            case 'VISITOR': return <Badge variant="outline" className="text-blue-300 border-blue-500/30 bg-blue-500/10">Visitante</Badge>
-            case 'REGULAR_VISITOR': return <Badge variant="outline" className="text-amber-300 border-amber-500/30 bg-amber-500/10">Frequenta</Badge>
-            case 'MEMBER': return <Badge variant="outline" className="text-emerald-300 border-emerald-500/30 bg-emerald-500/10">Membro</Badge>
-            case 'LEADER': return <Badge variant="outline" className="text-primary border-primary/30 bg-primary/10">Líder</Badge>
-            default: return null
+            case 'VISITOR':
+                return <Badge variant="outline" className="text-blue-300 border-blue-500/30 bg-blue-500/10">Visitante</Badge>
+            case 'REGULAR_VISITOR':
+                return <Badge variant="outline" className="text-amber-300 border-amber-500/30 bg-amber-500/10">Frequenta</Badge>
+            case 'MEMBER':
+                return <Badge variant="outline" className="text-emerald-300 border-emerald-500/30 bg-emerald-500/10">Membro</Badge>
+            case 'GUARDIAN_ANGEL':
+                return <Badge variant="outline" className="text-purple-300 border-purple-500/30 bg-purple-500/10">Anjo da Guarda</Badge>
+            case 'TRAINING_LEADER':
+                return <Badge variant="outline" className="text-indigo-300 border-indigo-500/30 bg-indigo-500/10">Líder em Treinamento</Badge>
+            case 'LEADER':
+                return <Badge variant="outline" className="text-primary border-primary/30 bg-primary/10">Líder</Badge>
+            case 'PASTOR':
+                return <Badge variant="outline" className="text-yellow-300 border-yellow-500/30 bg-yellow-500/10">Pastor</Badge>
+            default:
+                return null
         }
     }
 
