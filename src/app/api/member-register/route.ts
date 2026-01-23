@@ -98,10 +98,11 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // 2. Create profile in profiles table
+      // 2. Create/update profile in profiles table
+      // Using upsert because Supabase trigger might auto-create profile
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert({
+        .upsert({
           id: authUser.user.id,
           church_id: churchId,
           full_name: fullName.trim(),
@@ -111,6 +112,8 @@ export async function POST(request: NextRequest) {
           role: 'MEMBER',
           cell_id: null,
           is_active: true,
+        }, {
+          onConflict: 'id'
         })
 
       if (profileError) {
