@@ -153,7 +153,7 @@ export async function getMyCellData(): Promise<MyCellData | null> {
 
     // Process members and absences
     const members = (membersResponse.data || []) as CellMemberRow[]
-    const meetings = (meetingsResponse.data || []) as CellMeetingRow[]
+    const meetings = ((meetingsResponse.data || []) as unknown) as CellMeetingRow[]
     const activeMeeting = (activeMeetingResponse.data || null) as { id: string; date: string } | null
 
     const memberIds = members.map(member => member.id)
@@ -290,7 +290,7 @@ export async function getCellDetails(cellId: string): Promise<CellDetails | null
     ])
 
     const members = (membersResponse.data || []) as CellMemberRow[]
-    const meetings = (meetingsResponse.data || []) as CellMeetingRow[]
+    const meetings = ((meetingsResponse.data || []) as unknown) as CellMeetingRow[]
 
     const totals = meetings.reduce(
         (acc, meeting) => {
@@ -325,11 +325,14 @@ export async function getCellDetails(cellId: string): Promise<CellDetails | null
             dayOfWeek: cell.day_of_week,
             meetingTime: cell.meeting_time,
             leader: cell.leader
-                ? {
-                    id: (cell.leader as unknown as { id: string }).id,
-                    fullName: (cell.leader as unknown as { full_name: string }).full_name,
-                    photoUrl: (cell.leader as unknown as { photo_url: string | null }).photo_url
-                }
+                ? (() => {
+                    const leader = Array.isArray(cell.leader) ? cell.leader[0] : cell.leader;
+                    return {
+                        id: leader?.id || '',
+                        fullName: leader?.full_name || '',
+                        photoUrl: leader?.photo_url || null
+                    };
+                })()
                 : null
         },
         stats: {
