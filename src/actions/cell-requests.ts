@@ -196,8 +196,11 @@ export async function approveCellRequest(requestId: string) {
         return { success: false, error: 'Esta solicitação já foi processada' }
     }
 
+    // Handle Supabase array format
+    const cell = Array.isArray(request.cell) ? request.cell[0] : request.cell
+
     // Verify permission: must be cell leader or pastor
-    const isLeader = request.cell.leader_id === profile.id
+    const isLeader = cell.leader_id === profile.id
     const isPastor = profile.role === 'PASTOR' && profile.church_id === request.church_id
 
     if (!isLeader && !isPastor) {
@@ -297,8 +300,11 @@ export async function rejectCellRequest(requestId: string, reason?: string) {
         return { success: false, error: 'Esta solicitação já foi processada' }
     }
 
+    // Handle Supabase array format
+    const cell = Array.isArray(request.cell) ? request.cell[0] : request.cell
+
     // Verify permission: must be cell leader or pastor
-    const isLeader = request.cell.leader_id === profile.id
+    const isLeader = cell.leader_id === profile.id
     const isPastor = profile.role === 'PASTOR' && profile.church_id === request.church_id
 
     if (!isLeader && !isPastor) {
