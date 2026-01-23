@@ -95,10 +95,10 @@ export function Sidebar({ profile }: SidebarProps) {
             show: isPastor
         },
         {
-            label: 'Minha Igreja',
-            icon: Globe,
+            label: 'Configurações',
+            icon: Settings,
             href: '/configuracoes',
-            active: pathname === '/configuracoes' || pathname.startsWith('/configuracoes/site'),
+            active: pathname.startsWith('/configuracoes'),
             show: isPastor
         },
         {
@@ -106,7 +106,7 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: Settings,
             href: '/configuracoes/whatsapp',
             active: pathname === '/configuracoes/whatsapp',
-            show: !isPastor // Leaders/Others see a simpler config if needed
+            show: !isPastor
         },
     ]
 

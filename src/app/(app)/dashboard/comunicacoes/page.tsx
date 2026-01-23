@@ -27,12 +27,18 @@ export default async function ComunicacoesPage() {
             </div>
 
             <Tabs defaultValue="bulk" className="space-y-6">
-                <TabsList className="bg-muted/50 p-1 rounded-2xl">
-                    <TabsTrigger value="bulk" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-2">
+                <TabsList className="bg-white/5 p-1 rounded-2xl border border-white/10 h-12">
+                    <TabsTrigger
+                        value="bulk"
+                        className="rounded-xl px-6 py-2 h-full text-gray-400 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-lg transition-all font-bold gap-2"
+                    >
                         <Share2 className="h-4 w-4" />
                         Disparo em Massa
                     </TabsTrigger>
-                    <TabsTrigger value="config" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-2">
+                    <TabsTrigger
+                        value="config"
+                        className="rounded-xl px-6 py-2 h-full text-gray-400 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-lg transition-all font-bold gap-2"
+                    >
                         <Settings className="h-4 w-4" />
                         Conexão WhatsApp
                     </TabsTrigger>

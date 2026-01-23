@@ -94,10 +94,10 @@ export function ServiceForm({ service }: { service?: Service }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard/cultos" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <Link href="/dashboard/cultos" className="p-2 hover:bg-muted rounded-lg transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-3xl font-bold">{service ? 'Editar Culto' : 'Novo Culto'}</h1>
+        <h1 className="text-3xl font-black">{service ? 'Editar Culto' : 'Novo Culto'}</h1>
       </div>
 
       {error && (
@@ -106,29 +106,29 @@ export function ServiceForm({ service }: { service?: Service }) {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+      <div className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-6">
         <div>
           <label htmlFor="title" className="block text-sm font-semibold mb-2">Título do Culto *</label>
-          <input id="title" type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Culto de Domingo" />
+          <input id="title" type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Culto de Domingo" />
         </div>
 
         <div>
           <label htmlFor="description" className="block text-sm font-semibold mb-2">Descrição</label>
-          <textarea id="description" rows={4} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none" placeholder="Descreva o culto..." />
+          <textarea id="description" rows={4} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none outline-none transition-all" placeholder="Descreva o culto..." />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label htmlFor="service_date" className="block text-sm font-semibold mb-2">Data *</label>
-            <input id="service_date" type="date" required value={formData.service_date} onChange={(e) => setFormData({ ...formData, service_date: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
+            <input id="service_date" type="date" required value={formData.service_date} onChange={(e) => setFormData({ ...formData, service_date: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" />
           </div>
           <div>
             <label htmlFor="service_time" className="block text-sm font-semibold mb-2">Horário *</label>
-            <input id="service_time" type="time" required value={formData.service_time} onChange={(e) => setFormData({ ...formData, service_time: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
+            <input id="service_time" type="time" required value={formData.service_time} onChange={(e) => setFormData({ ...formData, service_time: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" />
           </div>
           <div>
             <label htmlFor="type" className="block text-sm font-semibold mb-2">Tipo *</label>
-            <select id="type" required value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as 'PRESENCIAL' | 'ONLINE' | 'HIBRIDO' })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            <select id="type" required value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as 'PRESENCIAL' | 'ONLINE' | 'HIBRIDO' })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all">
               <option value="PRESENCIAL">Presencial</option>
               <option value="ONLINE">Online</option>
               <option value="HIBRIDO">Híbrido</option>
@@ -139,7 +139,7 @@ export function ServiceForm({ service }: { service?: Service }) {
         {formData.type !== 'ONLINE' && (
           <div>
             <label htmlFor="location" className="block text-sm font-semibold mb-2">Local</label>
-            <input id="location" type="text" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Endereço do culto" />
+            <input id="location" type="text" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Endereço do culto" />
           </div>
         )}
 
@@ -147,17 +147,17 @@ export function ServiceForm({ service }: { service?: Service }) {
           <>
             <div>
               <label htmlFor="youtube_url" className="block text-sm font-semibold mb-2">URL do YouTube</label>
-              <input id="youtube_url" type="url" value={formData.youtube_url} onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="https://youtube.com/watch?v=..." />
+              <input id="youtube_url" type="url" value={formData.youtube_url} onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="https://youtube.com/watch?v=..." />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="zoom_meeting_id" className="block text-sm font-semibold mb-2">Zoom Meeting ID</label>
-                <input id="zoom_meeting_id" type="text" value={formData.zoom_meeting_id} onChange={(e) => setFormData({ ...formData, zoom_meeting_id: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="123 456 7890" />
+                <input id="zoom_meeting_id" type="text" value={formData.zoom_meeting_id} onChange={(e) => setFormData({ ...formData, zoom_meeting_id: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="123 456 7890" />
               </div>
               <div>
                 <label htmlFor="zoom_password" className="block text-sm font-semibold mb-2">Zoom Password</label>
-                <input id="zoom_password" type="text" value={formData.zoom_password} onChange={(e) => setFormData({ ...formData, zoom_password: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="senha123" />
+                <input id="zoom_password" type="text" value={formData.zoom_password} onChange={(e) => setFormData({ ...formData, zoom_password: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="senha123" />
               </div>
             </div>
           </>
@@ -170,7 +170,7 @@ export function ServiceForm({ service }: { service?: Service }) {
       </div>
 
       {/* Programação do Culto */}
-      <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+      <div className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-6">
         <div className="flex items-center gap-2 border-b pb-4">
           <ClipboardList className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-bold">Programação e Escala</h2>
@@ -186,7 +186,7 @@ export function ServiceForm({ service }: { service?: Service }) {
                 id="preacher_id"
                 value={formData.preacher_id}
                 onChange={(e) => setFormData({ ...formData, preacher_id: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               >
                 <option value="">Selecione um membro...</option>
                 {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
@@ -200,7 +200,7 @@ export function ServiceForm({ service }: { service?: Service }) {
                 type="text"
                 value={formData.preacher_name}
                 onChange={(e) => setFormData({ ...formData, preacher_name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder="Nome do pregador convidado"
               />
             </div>
@@ -212,7 +212,7 @@ export function ServiceForm({ service }: { service?: Service }) {
                   id="opening_id"
                   value={formData.opening_id}
                   onChange={(e) => setFormData({ ...formData, opening_id: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 >
                   <option value="">Selecione...</option>
                   {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
@@ -224,7 +224,7 @@ export function ServiceForm({ service }: { service?: Service }) {
                   id="offerings_id"
                   value={formData.offerings_id}
                   onChange={(e) => setFormData({ ...formData, offerings_id: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 >
                   <option value="">Selecione...</option>
                   {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
@@ -244,18 +244,18 @@ export function ServiceForm({ service }: { service?: Service }) {
                   type="text"
                   value={formData.praise_team}
                   onChange={(e) => setFormData({ ...formData, praise_team: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm outline-none transition-all"
                   placeholder="Equipe ou nomes"
                 />
               </div>
               <div>
-                <label htmlFor="praise_team" className="block text-sm font-semibold mb-2">Mídias</label>
+                <label htmlFor="media_team" className="block text-sm font-semibold mb-2">Mídias</label>
                 <input
                   id="media_team"
                   type="text"
                   value={formData.media_team}
                   onChange={(e) => setFormData({ ...formData, media_team: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm outline-none transition-all"
                   placeholder="Proj., Live, Som"
                 />
               </div>
@@ -266,7 +266,7 @@ export function ServiceForm({ service }: { service?: Service }) {
                   type="text"
                   value={formData.welcome_team}
                   onChange={(e) => setFormData({ ...formData, welcome_team: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm outline-none transition-all"
                   placeholder="Equipe de recepção"
                 />
               </div>
@@ -277,7 +277,7 @@ export function ServiceForm({ service }: { service?: Service }) {
                   type="text"
                   value={formData.communion_team}
                   onChange={(e) => setFormData({ ...formData, communion_team: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm outline-none transition-all"
                   placeholder="Responsáveis pela ceia"
                 />
               </div>
@@ -291,7 +291,7 @@ export function ServiceForm({ service }: { service?: Service }) {
                   type="text"
                   value={formData.cleaning_team}
                   onChange={(e) => setFormData({ ...formData, cleaning_team: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm outline-none transition-all"
                 />
               </div>
               <div className="md:col-span-1">
@@ -301,7 +301,7 @@ export function ServiceForm({ service }: { service?: Service }) {
                   type="text"
                   value={formData.cafeteria_team}
                   onChange={(e) => setFormData({ ...formData, cafeteria_team: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm outline-none transition-all"
                 />
               </div>
             </div>
@@ -314,7 +314,7 @@ export function ServiceForm({ service }: { service?: Service }) {
           {loading && <Loader2 className="w-5 h-5 animate-spin" />}
           {loading ? 'Salvando...' : service ? 'Atualizar Culto' : 'Criar Culto'}
         </button>
-        <Link href="/dashboard/cultos" className="px-6 py-3 border rounded-lg font-semibold hover:bg-gray-50 transition-colors">Cancelar</Link>
+        <Link href="/dashboard/cultos" className="px-6 py-3 border border-border rounded-xl font-bold hover:bg-muted transition-colors">Cancelar</Link>
       </div>
     </form>
   )

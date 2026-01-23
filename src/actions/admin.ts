@@ -45,56 +45,63 @@ export async function getPastorDashboardData() {
     const churchId = profile.church_id
     const supabase = await createClient()
 
-    // 1. Total Members (from both profiles and members table)
-    const { count: profilesCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('church_id', churchId)
-        .eq('is_active', true)
+    // 1 & 2. Execute counts in parallel
+    const [profilesCountRes, congregationCountRes, cellsCountRes] = await Promise.all([
+        supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('church_id', churchId)
+            .eq('is_active', true),
+        supabase
+            .from('members')
+            .select('*', { count: 'exact', head: true })
+            .eq('church_id', churchId)
+            .eq('is_active', true),
+        supabase
+            .from('cells')
+            .select('*', { count: 'exact', head: true })
+            .eq('church_id', churchId)
+    ])
 
-    const { count: congregationCount } = await supabase
-        .from('members')
-        .select('*', { count: 'exact', head: true })
-        .eq('church_id', churchId)
-        .eq('is_active', true)
+    const totalMembers = (profilesCountRes.count || 0) + (congregationCountRes.count || 0)
+    const cellsCount = cellsCountRes.count || 0
 
-    const totalMembers = (profilesCount || 0) + (congregationCount || 0)
-
-    // 2. Total Cells
-    const { count: cellsCount } = await supabase
-        .from('cells')
-        .select('*', { count: 'exact', head: true })
-        .eq('church_id', churchId)
-
-    // 3. Cells with recent reports (last 7 days)
+    // 3. Cells with recent reports and Overall Attendance (can also be parallelized)
     const lastWeek = new Date()
     lastWeek.setDate(lastWeek.getDate() - 7)
-
-    const { data: recentReports } = await supabase
-        .from('cell_reports')
-        .select('meeting_id')
-        .eq('church_id', churchId)
-        .gte('created_at', lastWeek.toISOString())
-
-    const reportedMeetingIds = recentReports?.map((report: CellReportRow) => report.meeting_id) || []
-
-    const { data: recentMeetings } = await supabase
-        .from('cell_meetings')
-        .select('cell_id')
-        .in('id', reportedMeetingIds)
-
-    const distinctReportingCells = new Set(recentMeetings?.map((meeting: { cell_id: string }) => meeting.cell_id) || [])
-    const cellsWithoutReports = (cellsCount || 0) - distinctReportingCells.size
-
-    // 4. Overall Attendance (Last 4 weeks)
     const lastMonth = new Date()
     lastMonth.setDate(lastMonth.getDate() - 30)
 
-    const { data: attendanceData } = await supabase
-        .from('attendance')
-        .select('status')
-        .eq('church_id', churchId)
-        .gte('context_date', lastMonth.toISOString().split('T')[0])
+    const [recentReportsRes, attendanceDataRes] = await Promise.all([
+        supabase
+            .from('cell_reports')
+            .select('meeting_id')
+            .eq('church_id', churchId)
+            .gte('created_at', lastWeek.toISOString()),
+        supabase
+            .from('attendance')
+            .select('status')
+            .eq('church_id', churchId)
+            .gte('context_date', lastMonth.toISOString().split('T')[0])
+    ])
+
+    const recentReports = recentReportsRes.data
+    const attendanceData = attendanceDataRes.data
+
+    const reportedMeetingIds = recentReports?.map((report: CellReportRow) => report.meeting_id) || []
+
+    let distinctReportingCellsSize = 0
+    if (reportedMeetingIds.length > 0) {
+        const { data: recentMeetings } = await supabase
+            .from('cell_meetings')
+            .select('cell_id')
+            .in('id', reportedMeetingIds)
+
+        const distinctReportingCells = new Set(recentMeetings?.map((meeting: { cell_id: string }) => meeting.cell_id) || [])
+        distinctReportingCellsSize = distinctReportingCells.size
+    }
+
+    const cellsWithoutReports = cellsCount - distinctReportingCellsSize
 
     const totalPossible = attendanceData?.length || 0
     const totalPresent = attendanceData?.filter((attendance: { status: string }) => attendance.status === 'PRESENT').length || 0
@@ -103,7 +110,7 @@ export async function getPastorDashboardData() {
     return {
         stats: {
             totalMembers: totalMembers,
-            totalCells: cellsCount || 0,
+            totalCells: cellsCount,
             overallAttendance,
             cellsWithoutReports: Math.max(0, cellsWithoutReports)
         }
@@ -200,57 +207,60 @@ export async function getGrowthData(): Promise<GrowthData[]> {
     const churchId = profile.church_id
     const supabase = await createClient()
 
-    // Get last 6 months of data
-    const months = []
     const now = new Date()
+    const monthIndices = [5, 4, 3, 2, 1, 0]
 
-    for (let i = 5; i >= 0; i--) {
+    const monthDataPromises = monthIndices.map(async (i) => {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
         const monthName = date.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')
         const startDate = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]
         const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]
 
-        // Count members created in this month (Profiles + Members table)
-        const { count: profilesMemberCount } = await supabase
-            .from('profiles')
-            .select('*', { count: 'exact', head: true })
-            .eq('church_id', churchId)
-            .in('member_stage', ['MEMBER', 'LEADER'])
-            .gte('created_at', startDate)
-            .lte('created_at', endDate)
+        // Count members and visitors in parallel for each month
+        const [
+            profilesMemberCount,
+            congregationMemberCount,
+            profilesVisitorCount,
+            congregationVisitorCount
+        ] = await Promise.all([
+            supabase
+                .from('profiles')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .in('member_stage', ['MEMBER', 'LEADER'])
+                .gte('created_at', startDate)
+                .lte('created_at', endDate),
+            supabase
+                .from('members')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .in('member_stage', ['MEMBER', 'LEADER'])
+                .gte('created_at', startDate)
+                .lte('created_at', endDate),
+            supabase
+                .from('profiles')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .in('member_stage', ['VISITOR', 'REGULAR_VISITOR'])
+                .gte('created_at', startDate)
+                .lte('created_at', endDate),
+            supabase
+                .from('members')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .in('member_stage', ['VISITOR', 'REGULAR_VISITOR'])
+                .gte('created_at', startDate)
+                .lte('created_at', endDate)
+        ])
 
-        const { count: congregationMemberCount } = await supabase
-            .from('members')
-            .select('*', { count: 'exact', head: true })
-            .eq('church_id', churchId)
-            .in('member_stage', ['MEMBER', 'LEADER'])
-            .gte('created_at', startDate)
-            .lte('created_at', endDate)
-
-        // Count visitors in this month
-        const { count: profilesVisitorCount } = await supabase
-            .from('profiles')
-            .select('*', { count: 'exact', head: true })
-            .eq('church_id', churchId)
-            .in('member_stage', ['VISITOR', 'REGULAR_VISITOR'])
-            .gte('created_at', startDate)
-            .lte('created_at', endDate)
-
-        const { count: congregationVisitorCount } = await supabase
-            .from('members')
-            .select('*', { count: 'exact', head: true })
-            .eq('church_id', churchId)
-            .in('member_stage', ['VISITOR', 'REGULAR_VISITOR'])
-            .gte('created_at', startDate)
-            .lte('created_at', endDate)
-
-        months.push({
+        return {
             month: monthName,
-            members: (profilesMemberCount || 0) + (congregationMemberCount || 0),
-            visitors: (profilesVisitorCount || 0) + (congregationVisitorCount || 0)
-        })
-    }
+            members: (profilesMemberCount.count || 0) + (congregationMemberCount.count || 0),
+            visitors: (profilesVisitorCount.count || 0) + (congregationVisitorCount.count || 0)
+        }
+    })
 
+    const months = await Promise.all(monthDataPromises)
     return months
 }
 

@@ -53,12 +53,14 @@ export async function setupWhatsApp() {
         await EvolutionService.createInstance(instanceName)
         console.log('Instance created successfully')
     } catch (e: any) {
-        // If error is 400 (already exists), continue anyway
-        if (e.message?.includes('400')) {
-            console.log('Instance already exists (400), continuing...')
+        // Only ignore if the error specifically says "already exists"
+        // 400 can be other things (invalid name, missing token, etc)
+        const errorMessage = e.message?.toLowerCase() || '';
+        if (errorMessage.includes('already exists') || errorMessage.includes('já existe')) {
+            console.log('Instance already exists (from error message), continuing...')
         } else {
             console.error('Error creating instance:', e)
-            return { success: false, error: `Erro ao criar instância: ${e.message}` }
+            throw e; // Re-throw real errors so we don't try to fetch QR for a non-existent instance
         }
     }
 
@@ -123,14 +125,39 @@ export async function setupWhatsApp() {
 
     // 6. Update DB with QR code
     if (qrCodeData) {
-        await supabase
+        console.log('[setupWhatsApp] Atualizando banco com QR code...')
+        const { data: updatedInstance, error: updateError } = await supabase
             .from('whatsapp_instances')
             .update({ qr_code: qrCodeData, status: 'CONNECTING' })
             .eq('church_id', churchId)
+            .select()
+            .single()
+        
+        if (updateError) {
+            console.error('[setupWhatsApp] Erro ao atualizar banco:', updateError)
+        } else {
+            console.log('[setupWhatsApp] Banco atualizado com sucesso')
+            instance = updatedInstance || instance
+        }
     }
 
+    console.log('[setupWhatsApp] Retornando instância:', {
+        instance_name: instance.instance_name,
+        status: instance.status,
+        has_qr_code: !!instance.qr_code,
+        qr_code_length: instance.qr_code?.length || 0
+    })
+
     revalidatePath('/configuracoes/whatsapp')
-    return { success: true }
+    return { 
+        success: true,
+        instance: {
+            instance_name: instance.instance_name,
+            status: instance.status,
+            qr_code: instance.qr_code,
+            last_ping: instance.last_ping
+        }
+    }
 }
 
 export async function disconnectWhatsApp(instanceName: string) {

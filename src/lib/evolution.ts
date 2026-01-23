@@ -54,8 +54,15 @@ export class EvolutionService {
         const response = await fetch(url, { ...options, headers });
 
         if (!response.ok) {
-            const error = (await response.json().catch(() => ({ message: 'Unknown error' }))) as { message?: string };
-            throw new Error(error.message || `Evolution API error: ${response.status}`);
+            const errorBody = await response.json().catch(() => ({ message: 'Unknown error', response: 'No JSON body' }));
+            console.error('[Evolution API Error]', { endpoint, status: response.status, body: errorBody });
+
+            // Construct a more useful error message
+            const message = errorBody.message ||
+                (errorBody.error ? JSON.stringify(errorBody.error) : null) ||
+                `Evolution API error: ${response.status}`;
+
+            throw new Error(message);
         }
 
         return response.json() as Promise<T>;
@@ -65,12 +72,32 @@ export class EvolutionService {
      * Create a new WhatsApp instance
      */
     static async createInstance(instanceName: string): Promise<EvolutionResponse> {
+        const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/evolution`;
+        
         return this.request<EvolutionResponse>('/instance/create', {
             method: 'POST',
             body: JSON.stringify({
                 instanceName,
-                token: Math.random().toString(36).substring(7),
-                qrcode: true,
+                integration: 'WHATSAPP-BAILEYS',
+                webhook: {
+                    url: webhookUrl,
+                    byEvents: true,
+                    base64: true,
+                    events: [
+                        'MESSAGES_UPSERT',
+                        'CONNECTION_UPDATE',
+                        'QRCODE_UPDATED',
+                    ],
+                },
+                websocket: {
+                    enabled: false,
+                },
+                rabbitmq: {
+                    enabled: false,
+                },
+                chatwoot: {
+                    enabled: false,
+                },
             }),
         });
     }
