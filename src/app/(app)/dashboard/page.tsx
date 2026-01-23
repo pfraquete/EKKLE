@@ -33,10 +33,10 @@ export default async function DashboardPage() {
         redirect('/minha-celula')
     }
 
-    // If role is MEMBER, they should NOT be here
+    // If role is MEMBER, they should NOT be in the admin dashboard
     if (profile.role === 'MEMBER') {
-        // Redirect to the public site or a restricted profile page
-        redirect('/')
+        // Redirect to their profile/member page on the public site
+        redirect('/membro')
     }
 
     // Only PASTOR continues here
