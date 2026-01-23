@@ -84,6 +84,26 @@ export class EvolutionService {
     }
 
     /**
+     * Get instance details
+     */
+    static async getInstance(instanceName: string): Promise<EvolutionInstance | null> {
+        try {
+            return await this.request<EvolutionInstance>(`/instance/fetchInstances/${instanceName}?instanceName=${instanceName}`);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /**
+     * Restart an instance
+     */
+    static async restartInstance(instanceName: string): Promise<void> {
+        await this.request(`/instance/restart/${instanceName}`, {
+            method: 'PUT',
+        });
+    }
+
+    /**
      * Get connection state
      */
     static async getConnectionState(instanceName: string): Promise<ConnectionState> {

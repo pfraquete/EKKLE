@@ -27,7 +27,7 @@ export async function generateZoomAccessToken(serviceId: string): Promise<{
     return { success: false, error: 'Failed to generate access token' }
   }
 
-  return { success: true, token: data }
+  return { success: true, token: data as string }
 }
 
 /**
@@ -58,11 +58,14 @@ export async function getZoomCredentials(serviceId: string, token: string): Prom
     return { success: false, error: 'Invalid or expired access link' }
   }
 
+  // Type assertion for RPC return value
+  const credentials = data as { zoom_meeting_id: string; zoom_password: string | null }
+
   return {
     success: true,
     credentials: {
-      zoom_meeting_id: data.zoom_meeting_id,
-      zoom_password: data.zoom_password
+      zoom_meeting_id: credentials.zoom_meeting_id,
+      zoom_password: credentials.zoom_password
     }
   }
 }
