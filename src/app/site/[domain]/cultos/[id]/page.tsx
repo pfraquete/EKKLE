@@ -2,10 +2,13 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, Clock, MapPin, ArrowLeft, Video, Copy } from 'lucide-react'
+import { Calendar, Clock, MapPin, ArrowLeft, Video } from 'lucide-react'
+import { ZoomCredentialsDisplay } from '@/components/zoom/zoom-credentials-display'
+import { RequestZoomAccessButton } from '@/components/zoom/request-zoom-access-button'
 
 type PageProps = {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ token?: string }>
 }
 
 function extractYouTubeVideoId(url: string): string | null {
@@ -24,8 +27,9 @@ function extractYouTubeVideoId(url: string): string | null {
   return null
 }
 
-export default async function CultoPage({ params }: PageProps) {
+export default async function CultoPage({ params, searchParams }: PageProps) {
   const { id } = await params
+  const { token } = await searchParams
   const church = await getChurch()
   const supabase = await createClient()
 
@@ -164,7 +168,7 @@ export default async function CultoPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Zoom Access */}
+            {/* Zoom Access - Protected by Token */}
             {service.zoom_meeting_id && isUpcoming && (
               <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-start gap-3 mb-4">
@@ -172,63 +176,21 @@ export default async function CultoPage({ params }: PageProps) {
                   <div>
                     <h3 className="font-bold text-xl mb-2">Assistir via Zoom</h3>
                     <p className="text-gray-600 mb-4">
-                      Participe do culto ao vivo através do Zoom
+                      Para segurança dos participantes, as credenciais do Zoom são protegidas.
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-sm font-semibold text-gray-600 mb-1">
-                      ID da Reunião
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-white px-3 py-2 rounded border text-lg font-mono">
-                        {service.zoom_meeting_id}
-                      </code>
-                      <button
-                        onClick={() =>
-                          navigator.clipboard.writeText(service.zoom_meeting_id)
-                        }
-                        className="p-2 hover:bg-white rounded transition-colors"
-                      >
-                        <Copy className="w-5 h-5" />
-                      </button>
-                    </div>
+                {token ? (
+                  <ZoomCredentialsDisplay serviceId={service.id} token={token} />
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-700">
+                      Clique no botão abaixo para gerar um link temporário de acesso (válido por 48h).
+                    </p>
+                    <RequestZoomAccessButton serviceId={service.id} />
                   </div>
-
-                  {service.zoom_password && (
-                    <div>
-                      <div className="text-sm font-semibold text-gray-600 mb-1">
-                        Senha
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <code className="flex-1 bg-white px-3 py-2 rounded border text-lg font-mono">
-                          {service.zoom_password}
-                        </code>
-                        <button
-                          onClick={() =>
-                            navigator.clipboard.writeText(service.zoom_password)
-                          }
-                          className="p-2 hover:bg-white rounded transition-colors"
-                        >
-                          <Copy className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <a
-                    href={`https://zoom.us/j/${service.zoom_meeting_id}${
-                      service.zoom_password ? `?pwd=${service.zoom_password}` : ''
-                    }`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
-                  >
-                    Entrar no Zoom
-                  </a>
-                </div>
+                )}
               </div>
             )}
 
