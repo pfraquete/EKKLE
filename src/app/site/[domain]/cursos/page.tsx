@@ -122,7 +122,7 @@ export default async function CursosPage() {
             da nossa comunidade.
           </p>
           <Link
-            href="/membro"
+            href="/registro"
             className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
           >
             Criar Conta Grátis

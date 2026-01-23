@@ -149,7 +149,7 @@ export default async function SobrePage() {
                 Faça parte da nossa comunidade e cresça conosco em fé
               </p>
               <Link
-                href="/membro"
+                href="/registro"
                 className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
               >
                 Criar Conta

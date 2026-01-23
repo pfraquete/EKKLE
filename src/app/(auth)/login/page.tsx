@@ -101,7 +101,7 @@ export default async function LoginPage({
                 </CardContent>
                 <div className="p-4 bg-muted/30 text-center text-sm border-t border-border">
                     Não tem uma conta?{' '}
-                    <Link href="/register" className="text-primary hover:underline font-semibold">
+                    <Link href="/registro" className="text-primary hover:underline font-semibold">
                         Criar conta
                     </Link>
                 </div>
