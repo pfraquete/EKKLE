@@ -81,6 +81,13 @@ export async function middleware(request: NextRequest) {
         const requestHeaders = new Headers(request.headers)
         requestHeaders.set('x-church-slug', subdomain)
 
+        // Copy headers from sessionResponse (tenant context) to be available in server components
+        sessionResponse.headers.forEach((value, key) => {
+            if (key.startsWith('x-church-')) {
+                requestHeaders.set(key, value)
+            }
+        })
+
         const response = NextResponse.rewrite(url, {
             request: {
                 headers: requestHeaders,
