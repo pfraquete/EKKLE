@@ -97,7 +97,12 @@ export async function getCellRequests() {
         return []
     }
 
-    return requests
+    // Transform arrays to single objects
+    return requests.map(request => ({
+        ...request,
+        profile: Array.isArray(request.profile) ? request.profile[0] : request.profile,
+        cell: Array.isArray(request.cell) ? request.cell[0] : request.cell
+    }))
 }
 
 // Leader: Approve Request
