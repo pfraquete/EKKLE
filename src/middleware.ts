@@ -47,7 +47,6 @@ export async function middleware(request: NextRequest) {
             url.pathname.startsWith('/dashboard') ||
             url.pathname.startsWith('/minha-celula') ||
             url.pathname.startsWith('/celulas') ||
-            url.pathname.startsWith('/eventos') ||
             url.pathname.startsWith('/membros') ||
             url.pathname.startsWith('/financeiro') ||
             url.pathname.startsWith('/presenca-cultos') ||

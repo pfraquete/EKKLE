@@ -79,6 +79,10 @@ export async function registerForEvent(eventId: string, guestCount = 0, guestNam
     return { success: false, error: 'As inscrições para este evento foram encerradas.' }
   }
 
+  if (event.is_paid) {
+    return { success: false, error: 'Pagamento obrigatório. Complete o pagamento para confirmar a inscrição.' }
+  }
+
   const { data: existingRegistration } = await supabase
     .from('event_registrations')
     .select('*')
