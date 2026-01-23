@@ -342,7 +342,8 @@ export async function createCheckoutOrder(input: CheckoutInput) {
     console.error('Error creating checkout order:', error);
 
     if (orderId) {
-      await createClient()
+      const supabase = await createClient();
+      await supabase
         .from('orders')
         .update({ status: 'canceled', payment_status: 'failed' })
         .eq('id', orderId);
