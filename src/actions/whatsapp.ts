@@ -53,12 +53,14 @@ export async function setupWhatsApp() {
         await EvolutionService.createInstance(instanceName)
         console.log('Instance created successfully')
     } catch (e: any) {
-        // If error is 400 (already exists), continue anyway
-        if (e.message?.includes('400')) {
-            console.log('Instance already exists (400), continuing...')
+        // Only ignore if the error specifically says "already exists"
+        // 400 can be other things (invalid name, missing token, etc)
+        const errorMessage = e.message?.toLowerCase() || '';
+        if (errorMessage.includes('already exists') || errorMessage.includes('já existe')) {
+            console.log('Instance already exists (from error message), continuing...')
         } else {
             console.error('Error creating instance:', e)
-            return { success: false, error: `Erro ao criar instância: ${e.message}` }
+            throw e; // Re-throw real errors so we don't try to fetch QR for a non-existent instance
         }
     }
 

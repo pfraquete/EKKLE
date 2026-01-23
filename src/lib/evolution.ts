@@ -54,8 +54,15 @@ export class EvolutionService {
         const response = await fetch(url, { ...options, headers });
 
         if (!response.ok) {
-            const error = (await response.json().catch(() => ({ message: 'Unknown error' }))) as { message?: string };
-            throw new Error(error.message || `Evolution API error: ${response.status}`);
+            const errorBody = await response.json().catch(() => ({ message: 'Unknown error', response: 'No JSON body' }));
+            console.error('[Evolution API Error]', { endpoint, status: response.status, body: errorBody });
+
+            // Construct a more useful error message
+            const message = errorBody.message ||
+                (errorBody.error ? JSON.stringify(errorBody.error) : null) ||
+                `Evolution API error: ${response.status}`;
+
+            throw new Error(message);
         }
 
         return response.json() as Promise<T>;

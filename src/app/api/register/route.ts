@@ -1,34 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getChurch } from '@/lib/get-church'
+import slugify from 'slugify'
 
 export async function POST(request: NextRequest) {
   try {
-    // Get church context
-    const church = await getChurch()
-
-    if (!church) {
-      return NextResponse.json(
-        { error: 'Igreja não identificada' },
-        { status: 400 }
-      )
-    }
-
-    const churchId = church.id
-
-    // Parse request body
-    const body = await request.json()
-    const { fullName, email, phone, message } = body
-
-    // Validate required fields
-    if (!fullName || !email) {
-      return NextResponse.json(
-        { error: 'Nome e email são obrigatórios' },
-        { status: 400 }
-      )
-    }
-
-    // Create Supabase client with service role (bypasses RLS)
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -40,88 +15,121 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // Check if email already registered
-    const { data: existingRegistration } = await supabase
-      .from('pending_registrations')
-      .select('id')
-      .eq('church_id', churchId)
-      .eq('email', email)
-      .eq('status', 'PENDING')
-      .single()
+    // Parse request body
+    const body = await request.json()
+    const { churchName, fullName, email, password, phone } = body
 
-    if (existingRegistration) {
+    // 1. Basic Validation
+    if (!churchName || !fullName || !email || !password || !phone) {
       return NextResponse.json(
-        { error: 'Já existe uma solicitação pendente com este email' },
+        { error: 'Todos os campos são obrigatórios' },
         { status: 400 }
       )
     }
 
-    // Check if email already exists in profiles
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('church_id', churchId)
-      .eq('email', email)
-      .single()
-
-    if (existingProfile) {
+    if (password.length < 6) {
       return NextResponse.json(
-        { error: 'Este email já está cadastrado' },
+        { error: 'A senha deve ter pelo menos 6 caracteres' },
         { status: 400 }
       )
     }
 
-    // Insert pending registration
-    const { data, error } = await supabase
-      .from('pending_registrations')
+    // 2. Slug Generation & Uniqueness
+    let slug = slugify(churchName, { lower: true, strict: true })
+    const randomSuffix = Math.floor(Math.random() * 1000)
+
+    // Check if slug exists
+    const { data: existingChurch } = await supabase
+      .from('churches')
+      .select('id')
+      .eq('slug', slug)
+      .single()
+
+    // If slug exists, append random number (simple collision handling)
+    if (existingChurch) {
+      slug = `${slug}-${randomSuffix}`
+    }
+
+    // 3. Create Auth User
+    // We use admin.createUser to skip email confirmation if desired, or handle it manually.
+    // For now, auto-confirm for immediate access (SaaS style).
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: fullName }
+    })
+
+    if (authError || !authUser.user) {
+      console.error('Auth create error:', authError)
+      return NextResponse.json(
+        { error: authError?.message || 'Erro ao criar usuário de autenticação' },
+        { status: 400 }
+      )
+    }
+
+    const userId = authUser.user.id
+
+    // 4. Create Church
+    const { data: newChurch, error: churchError } = await supabase
+      .from('churches')
       .insert({
-        church_id: churchId,
-        full_name: fullName,
-        email,
-        phone,
-        message,
-        status: 'PENDING',
+        name: churchName,
+        slug: slug,
+        website_settings: {} // Initialize empty settings
       })
       .select()
       .single()
 
-    if (error) {
-      console.error('Error creating registration:', error)
+    if (churchError || !newChurch) {
+      // Rollback user creation if church fails (manual compensation since no distributed transaction)
+      await supabase.auth.admin.deleteUser(userId)
+      console.error('Church create error:', churchError)
       return NextResponse.json(
-        { error: 'Erro ao criar solicitação' },
+        { error: 'Erro ao criar estrutura da igreja' },
         { status: 500 }
       )
     }
 
-    // Send notification to church pastors
-    const { data: pastors } = await supabase
+    // 5. Create Profile (PASTOR)
+    // Note: Trigger might create a profile automatically on auth.users insert depending on setup.
+    // We explicitly insert/upsert to ensure correct role and church_id.
+
+    // First, check if profile was auto-created by a trigger (common pattern in Supabase starter kits)
+    // If so, update it. If not, insert it.
+
+    // Let's try upsert to cover both cases. Be careful not to overwrite other fields if auto-created.
+    const { error: profileError } = await supabase
       .from('profiles')
-      .select('email, full_name')
-      .eq('church_id', churchId)
-      .eq('role', 'PASTOR')
-      .eq('is_active', true)
-
-    if (pastors && pastors.length > 0) {
-      const { sendNewRegistrationNotification } = await import('@/lib/email')
-
-      // Send notifications (non-blocking)
-      pastors.forEach(pastor => {
-        if (pastor.email) {
-          sendNewRegistrationNotification(pastor.email, pastor.full_name, {
-            fullName,
-            email,
-            phone,
-            message
-          }).catch(e => console.error('Silent notification error:', e))
-        }
+      .upsert({
+        id: userId,
+        church_id: newChurch.id,
+        full_name: fullName,
+        email: email,
+        phone: phone,
+        role: 'PASTOR',
+        member_stage: 'LEADER', // Pastors are leaders
+        is_active: true,
+        // updated_at: new Date().toISOString() // handled by db
       })
+
+    if (profileError) {
+      console.error('Profile create error:', profileError)
+      // Severe error: User and Church created, but profile failed. 
+      // Manual cleanup might be needed or user is in inconsistent state.
+      // For this MVP step, we log and return error.
+      return NextResponse.json(
+        { error: 'Erro ao configurar perfil de administrador' },
+        { status: 500 }
+      )
     }
 
-    return NextResponse.json({ success: true, data })
+    return NextResponse.json({ success: true, churchSlug: slug })
+
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json(
-      { error: 'Erro ao processar solicitação' },
+      { error: 'Erro interno ao processar cadastro' },
       { status: 500 }
     )
   }
