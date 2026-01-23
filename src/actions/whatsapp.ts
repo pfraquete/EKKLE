@@ -125,14 +125,26 @@ export async function setupWhatsApp() {
 
     // 6. Update DB with QR code
     if (qrCodeData) {
-        await supabase
+        const { data: updatedInstance } = await supabase
             .from('whatsapp_instances')
             .update({ qr_code: qrCodeData, status: 'CONNECTING' })
             .eq('church_id', churchId)
+            .select()
+            .single()
+        
+        instance = updatedInstance || instance
     }
 
     revalidatePath('/configuracoes/whatsapp')
-    return { success: true }
+    return { 
+        success: true,
+        instance: {
+            instance_name: instance.instance_name,
+            status: instance.status,
+            qr_code: instance.qr_code,
+            last_ping: instance.last_ping
+        }
+    }
 }
 
 export async function disconnectWhatsApp(instanceName: string) {

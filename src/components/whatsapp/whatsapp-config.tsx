@@ -8,7 +8,6 @@ import { MessageSquare, RefreshCw, LogOut, CheckCircle2, Loader2, Settings2 } fr
 import { setupWhatsApp, disconnectWhatsApp, checkWhatsAppStatus } from '@/actions/whatsapp'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import Image from 'next/image'
 
 interface WhatsAppInstance {
     instance_name: string
@@ -56,7 +55,11 @@ export function WhatsAppConfig({ initialInstance }: WhatsAppConfigProps) {
                 toast.error(result.error || 'Erro ao configurar WhatsApp')
                 return
             }
-            window.location.reload()
+            // Atualizar estado local ao invés de reload
+            if (result && result.instance) {
+                setInstance(result.instance)
+                toast.success('QR Code gerado! Escaneie para conectar.')
+            }
         } catch (err: any) {
             console.error('Setup WhatsApp error:', err)
             toast.error(err.message || 'Erro ao configurar WhatsApp')
@@ -155,12 +158,11 @@ export function WhatsAppConfig({ initialInstance }: WhatsAppConfigProps) {
 
                             {instance.status !== 'CONNECTED' && instance.qr_code && (
                                 <div className="flex flex-col items-center space-y-4 p-6 bg-muted/30 rounded-2xl border-2 border-dashed border-muted">
-                                    <div className="bg-white p-4 rounded-xl shadow-inner relative w-64 h-64">
-                                        <Image
+                                    <div className="bg-white p-4 rounded-xl shadow-inner">
+                                        <img
                                             src={instance.qr_code}
                                             alt="WhatsApp QR Code"
-                                            fill
-                                            className="object-contain"
+                                            className="w-64 h-64 object-contain"
                                         />
                                     </div>
                                     <div className="text-center space-y-2">
