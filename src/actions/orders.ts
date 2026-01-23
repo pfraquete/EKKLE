@@ -59,6 +59,7 @@ type CheckoutInput = z.infer<typeof checkoutSchema>;
 // =====================================================
 
 export async function createCheckoutOrder(input: CheckoutInput) {
+  let orderId: string | null = null;
   try {
     const profile = await getProfile();
     if (!profile) {
@@ -226,11 +227,7 @@ export async function createCheckoutOrder(input: CheckoutInput) {
       closed: true,
     };
 
-    console.log('Creating order in Pagar.me...');
-    const pagarmeResponse = await createPagarmeOrder(pagarmeOrder);
-    console.log('Pagar.me order created:', pagarmeResponse.id);
-
-    // ===== 7. CREATE ORDER IN DATABASE =====
+    // ===== 7. CREATE ORDER IN DATABASE (PRE-PAYMENT) =====
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -240,23 +237,24 @@ export async function createCheckoutOrder(input: CheckoutInput) {
         customer_email: validated.customer.email,
         customer_phone: validated.customer.phone,
         customer_document: cleanDocument,
-        pagarme_order_id: pagarmeResponse.id,
-        pagarme_customer_id: pagarmeResponse.customer.id,
+        pagarme_order_id: null,
+        pagarme_customer_id: null,
         subtotal_cents: subtotalCents,
         total_cents: totalCents,
         payment_method: validated.payment_method,
-        payment_status: pagarmeResponse.status === 'paid' ? 'paid' : 'pending',
-        status: pagarmeResponse.status === 'paid' ? 'processing' : 'pending',
+        payment_status: 'pending',
+        status: 'pending',
         metadata: pagarmeOrder.metadata,
       })
       .select()
       .single();
 
-    if (orderError) {
+    if (orderError || !order) {
       console.error('Error creating order in database:', orderError);
       return { success: false, error: 'Erro ao criar pedido' };
     }
 
+    orderId = order.id;
     console.log('Order created in database:', order.id);
 
     // ===== 8. CREATE ORDER ITEMS =====
@@ -269,9 +267,37 @@ export async function createCheckoutOrder(input: CheckoutInput) {
 
     if (itemsError) {
       console.error('Error creating order items:', itemsError);
+      await supabase
+        .from('orders')
+        .update({ status: 'canceled', payment_status: 'failed' })
+        .eq('id', order.id);
+      return { success: false, error: 'Erro ao criar itens do pedido' };
     }
 
-    // ===== 9. CREATE PAYMENT RECORD =====
+    // ===== 9. CREATE ORDER IN PAGAR.ME =====
+    console.log('Creating order in Pagar.me...');
+    const pagarmeResponse = await createPagarmeOrder(pagarmeOrder);
+    console.log('Pagar.me order created:', pagarmeResponse.id);
+
+    const updateOrderStatus = pagarmeResponse.status === 'paid' ? 'processing' : 'pending';
+    const updatePaymentStatus = pagarmeResponse.status === 'paid' ? 'paid' : 'pending';
+
+    const { error: updateOrderError } = await supabase
+      .from('orders')
+      .update({
+        pagarme_order_id: pagarmeResponse.id,
+        pagarme_customer_id: pagarmeResponse.customer.id,
+        payment_status: updatePaymentStatus,
+        status: updateOrderStatus,
+      })
+      .eq('id', order.id);
+
+    if (updateOrderError) {
+      console.error('Error updating order with Pagar.me data:', updateOrderError);
+      return { success: false, error: 'Erro ao atualizar pedido com pagamento' };
+    }
+
+    // ===== 10. CREATE PAYMENT RECORD =====
     const charge = pagarmeResponse.charges?.[0];
     const lastTransaction = charge?.last_transaction;
 
@@ -293,9 +319,14 @@ export async function createCheckoutOrder(input: CheckoutInput) {
 
     if (paymentError) {
       console.error('Error creating payment record:', paymentError);
+      await supabase
+        .from('orders')
+        .update({ status: 'canceled', payment_status: 'failed' })
+        .eq('id', order.id);
+      return { success: false, error: 'Erro ao registrar pagamento do pedido' };
     }
 
-    // ===== 10. REVALIDATE PATHS =====
+    // ===== 11. REVALIDATE PATHS =====
     revalidatePath('/membro/loja');
     revalidatePath('/membro/pedidos');
 
@@ -309,6 +340,14 @@ export async function createCheckoutOrder(input: CheckoutInput) {
     };
   } catch (error) {
     console.error('Error creating checkout order:', error);
+
+    if (orderId) {
+      const supabase = await createClient();
+      await supabase
+        .from('orders')
+        .update({ status: 'canceled', payment_status: 'failed' })
+        .eq('id', orderId);
+    }
 
     if (error instanceof z.ZodError) {
       return { success: false, error: error.errors[0].message };

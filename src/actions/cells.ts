@@ -36,6 +36,7 @@ export async function createCell(formData: FormData) {
     try {
         const profile = await getProfile()
         if (!profile) throw new Error('Não autenticado')
+        if (profile.role !== 'PASTOR') throw new Error('Acesso não autorizado')
         const churchId = profile.church_id
 
         const supabase = await createClient()
