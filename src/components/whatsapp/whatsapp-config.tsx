@@ -50,18 +50,28 @@ export function WhatsAppConfig({ initialInstance }: WhatsAppConfigProps) {
     const handleSetup = async () => {
         setLoading(true)
         try {
+            console.log('[WhatsAppConfig] Iniciando setup...')
             const result = await setupWhatsApp()
+            console.log('[WhatsAppConfig] Resultado do setup:', result)
+            
             if (result && !result.success) {
+                console.error('[WhatsAppConfig] Setup falhou:', result.error)
                 toast.error(result.error || 'Erro ao configurar WhatsApp')
                 return
             }
+            
             // Atualizar estado local ao invés de reload
             if (result && result.instance) {
+                console.log('[WhatsAppConfig] Atualizando estado com instância:', result.instance)
+                console.log('[WhatsAppConfig] QR Code presente?', !!result.instance.qr_code)
                 setInstance(result.instance)
                 toast.success('QR Code gerado! Escaneie para conectar.')
+            } else {
+                console.warn('[WhatsAppConfig] Resultado não contém instância')
+                toast.error('Erro: resposta sem dados da instância')
             }
         } catch (err: any) {
-            console.error('Setup WhatsApp error:', err)
+            console.error('[WhatsAppConfig] Erro no setup:', err)
             toast.error(err.message || 'Erro ao configurar WhatsApp')
         } finally {
             setLoading(false)

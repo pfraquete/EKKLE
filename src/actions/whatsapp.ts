@@ -125,15 +125,28 @@ export async function setupWhatsApp() {
 
     // 6. Update DB with QR code
     if (qrCodeData) {
-        const { data: updatedInstance } = await supabase
+        console.log('[setupWhatsApp] Atualizando banco com QR code...')
+        const { data: updatedInstance, error: updateError } = await supabase
             .from('whatsapp_instances')
             .update({ qr_code: qrCodeData, status: 'CONNECTING' })
             .eq('church_id', churchId)
             .select()
             .single()
         
-        instance = updatedInstance || instance
+        if (updateError) {
+            console.error('[setupWhatsApp] Erro ao atualizar banco:', updateError)
+        } else {
+            console.log('[setupWhatsApp] Banco atualizado com sucesso')
+            instance = updatedInstance || instance
+        }
     }
+
+    console.log('[setupWhatsApp] Retornando instância:', {
+        instance_name: instance.instance_name,
+        status: instance.status,
+        has_qr_code: !!instance.qr_code,
+        qr_code_length: instance.qr_code?.length || 0
+    })
 
     revalidatePath('/configuracoes/whatsapp')
     return { 
