@@ -46,18 +46,18 @@ export default function RegisterPage() {
 
     if (success) {
         return (
-            <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-white/95 backdrop-blur-xl max-w-md w-full mx-auto">
+            <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-card/95 backdrop-blur-xl max-w-md w-full mx-auto">
                 <CardContent className="pt-10 pb-10 text-center space-y-6">
-                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-inner">
-                        <CheckCircle className="w-8 h-8 text-green-600" />
+                    <div className="mx-auto w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center shadow-inner">
+                        <CheckCircle className="w-8 h-8 text-emerald-500" />
                     </div>
                     <div className="space-y-2">
-                        <h2 className="text-2xl font-bold text-gray-900">Igreja Criada com Sucesso!</h2>
-                        <p className="text-gray-600">
+                        <h2 className="text-2xl font-bold text-foreground">Igreja Criada com Sucesso!</h2>
+                        <p className="text-muted-foreground">
                             Sua conta de pastor e a estrutura da igreja foram configuradas.
                         </p>
                     </div>
-                    <Button asChild className="w-full h-11 bg-primary hover:bg-primary/90 rounded-xl shadow-lg shadow-primary/20">
+                    <Button asChild className="w-full h-11 bg-primary hover:bg-primary/90 rounded-xl shadow-lg shadow-primary/20 transition-all">
                         <Link href="/login">Acessar Painel</Link>
                     </Button>
                 </CardContent>
@@ -67,21 +67,21 @@ export default function RegisterPage() {
 
     return (
         <div className="w-full max-w-md mx-auto">
-            <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-white/95 backdrop-blur-xl">
-                <CardHeader className="space-y-1 bg-gray-50/50 border-b border-gray-100 p-6">
+            <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-card/95 backdrop-blur-xl">
+                <CardHeader className="space-y-1 bg-muted/30 border-b border-border p-6 text-center">
                     <div className="flex items-center gap-2 mb-4">
-                        <Link href="/login" className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1 transition-colors">
+                        <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors font-medium">
                             <ArrowLeft className="w-4 h-4" /> Voltar
                         </Link>
                     </div>
-                    <CardTitle className="text-2xl font-bold text-gray-900 tracking-tight">Criar Nova Igreja</CardTitle>
-                    <CardDescription className="text-gray-500">
+                    <CardTitle className="text-2xl font-black text-foreground tracking-tight uppercase">Criar Nova Igreja</CardTitle>
+                    <CardDescription className="text-muted-foreground font-medium">
                         Configure sua igreja e crie sua conta administrativa
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                     {error && (
-                        <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2">
+                        <div className="mb-6 p-4 bg-red-500/10 text-red-400 text-sm rounded-xl border border-red-500/20 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
                             {error}
                         </div>
@@ -89,7 +89,7 @@ export default function RegisterPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-2">
-                            <Label htmlFor="churchName" className="flex items-center gap-2 text-gray-700">
+                            <Label htmlFor="churchName" className="flex items-center gap-2 text-foreground/80 font-bold text-xs uppercase tracking-wider">
                                 <Building2 className="w-4 h-4 text-primary" /> Nome da Igreja
                             </Label>
                             <Input
@@ -97,12 +97,12 @@ export default function RegisterPage() {
                                 name="churchName"
                                 required
                                 placeholder="Ex: Igreja Ekkle Central"
-                                className="h-11 rounded-xl"
+                                className="h-11 rounded-xl bg-background/50 border-border focus:ring-primary/20"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="fullName" className="flex items-center gap-2 text-gray-700">
+                            <Label htmlFor="fullName" className="flex items-center gap-2 text-foreground/80 font-bold text-xs uppercase tracking-wider">
                                 <User className="w-4 h-4 text-primary" /> Seu Nome Completo
                             </Label>
                             <Input
@@ -110,13 +110,13 @@ export default function RegisterPage() {
                                 name="fullName"
                                 required
                                 placeholder="Ex: Pastor João Silva"
-                                className="h-11 rounded-xl"
+                                className="h-11 rounded-xl bg-background/50 border-border focus:ring-primary/20"
                             />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="flex items-center gap-2 text-gray-700">
+                                <Label htmlFor="email" className="flex items-center gap-2 text-foreground/80 font-bold text-xs uppercase tracking-wider">
                                     <Mail className="w-4 h-4 text-primary" /> Email
                                 </Label>
                                 <Input
@@ -125,11 +125,11 @@ export default function RegisterPage() {
                                     type="email"
                                     required
                                     placeholder="seu@email.com"
-                                    className="h-11 rounded-xl"
+                                    className="h-11 rounded-xl bg-background/50 border-border focus:ring-primary/20"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="phone" className="flex items-center gap-2 text-gray-700">
+                                <Label htmlFor="phone" className="flex items-center gap-2 text-foreground/80 font-bold text-xs uppercase tracking-wider">
                                     <Phone className="w-4 h-4 text-primary" /> Celular
                                 </Label>
                                 <Input
@@ -138,13 +138,13 @@ export default function RegisterPage() {
                                     type="tel"
                                     required
                                     placeholder="(00) 00000-0000"
-                                    className="h-11 rounded-xl"
+                                    className="h-11 rounded-xl bg-background/50 border-border focus:ring-primary/20"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="flex items-center gap-2 text-gray-700">
+                            <Label htmlFor="password" className="flex items-center gap-2 text-foreground/80 font-bold text-xs uppercase tracking-wider">
                                 <Lock className="w-4 h-4 text-primary" /> Senha
                             </Label>
                             <Input
@@ -154,15 +154,15 @@ export default function RegisterPage() {
                                 required
                                 placeholder="Crie uma senha segura"
                                 minLength={6}
-                                className="h-11 rounded-xl"
+                                className="h-11 rounded-xl bg-background/50 border-border focus:ring-primary/20"
                             />
                         </div>
 
-                        <Button type="submit" className="w-full h-12 text-base font-semibold rounded-xl mt-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]" disabled={loading}>
+                        <Button type="submit" className="w-full h-12 text-base font-black uppercase tracking-widest rounded-xl mt-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99]" disabled={loading}>
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                    Configurando Igreja...
+                                    Configurando...
                                 </>
                             ) : (
                                 'Criar Minha Igreja'
