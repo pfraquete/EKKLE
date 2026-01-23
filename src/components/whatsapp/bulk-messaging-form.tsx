@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -36,11 +36,8 @@ export function BulkMessagingForm() {
     // Progress state
     const [progress, setProgress] = useState({ current: 0, total: 0, sent: 0, failed: 0 })
 
-    useEffect(() => {
-        loadTargets()
-    }, [roleFilter, stageFilter])
 
-    const loadTargets = async () => {
+    const loadTargets = useCallback(async () => {
         setLoading(true)
         const result = await getMessagingTargets({
             role: roleFilter || undefined,
@@ -51,7 +48,11 @@ export function BulkMessagingForm() {
             setTargets(result.data)
         }
         setLoading(false)
-    }
+    }, [roleFilter, stageFilter, search])
+
+    useEffect(() => {
+        loadTargets()
+    }, [loadTargets])
 
     const toggleSelectAll = () => {
         if (selectedIds.size === targets.length) {

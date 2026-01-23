@@ -101,7 +101,7 @@ export async function updateMember(id: string, formData: FormData) {
     }
 
     if (profile.role === 'PASTOR' && validatedData.role) {
-        // @ts-ignore - Dynamic update object
+        // @ts-expect-error - Dynamic update object
         updates.role = validatedData.role
     }
 
