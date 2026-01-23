@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getChurch } from '@/lib/get-church'
+import { generateTempPassword } from '@/lib/auth-utils'
+import { sendWelcomeEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,6 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const churchId = church.id
+    const churchName = church.name
 
     // Parse request body
     const body = await request.json()
@@ -24,6 +27,23 @@ export async function POST(request: NextRequest) {
     if (!fullName || !email) {
       return NextResponse.json(
         { error: 'Nome e email são obrigatórios' },
+        { status: 400 }
+      )
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Email inválido' },
+        { status: 400 }
+      )
+    }
+
+    // Validate name length
+    if (fullName.trim().length < 2) {
+      return NextResponse.json(
+        { error: 'Nome deve ter pelo menos 2 caracteres' },
         { status: 400 }
       )
     }
@@ -40,23 +60,7 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // Check if email already registered
-    const { data: existingRegistration } = await supabase
-      .from('pending_registrations')
-      .select('id')
-      .eq('church_id', churchId)
-      .eq('email', email)
-      .eq('status', 'PENDING')
-      .single()
-
-    if (existingRegistration) {
-      return NextResponse.json(
-        { error: 'Já existe uma solicitação pendente com este email' },
-        { status: 400 }
-      )
-    }
-
-    // Check if email already exists in profiles
+    // Check if email already exists in profiles (member already registered)
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
@@ -66,58 +70,90 @@ export async function POST(request: NextRequest) {
 
     if (existingProfile) {
       return NextResponse.json(
-        { error: 'Este email já está cadastrado' },
+        { error: 'Este email já está cadastrado. Se esqueceu sua senha, use a opção "Esqueci minha senha" no login.' },
         { status: 400 }
       )
     }
 
-    // Insert pending registration
-    const { data, error } = await supabase
-      .from('pending_registrations')
-      .insert({
-        church_id: churchId,
-        full_name: fullName,
-        email,
-        phone,
-        message,
-        status: 'PENDING',
-      })
-      .select()
-      .single()
+    // Generate temporary password
+    const tempPassword = generateTempPassword()
 
-    if (error) {
-      console.error('Error creating registration:', error)
+    // 1. Create user in Supabase Auth
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password: tempPassword,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        full_name: fullName,
+        church_id: churchId,
+      },
+    })
+
+    if (authError || !authUser.user) {
+      console.error('Error creating auth user:', authError)
       return NextResponse.json(
-        { error: 'Erro ao criar solicitação' },
+        { error: 'Erro ao criar conta de usuário. Verifique se o email é válido.' },
         { status: 500 }
       )
     }
 
-    // Send notification to church pastors
-    const { data: pastors } = await supabase
-      .from('profiles')
-      .select('email, full_name')
-      .eq('church_id', churchId)
-      .eq('role', 'PASTOR')
-      .eq('is_active', true)
+    try {
+      // 2. Create profile in profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authUser.user.id,
+          church_id: churchId,
+          full_name: fullName.trim(),
+          email,
+          phone: phone || null,
+          member_stage: 'VISITOR',
+          role: 'MEMBER',
+          cell_id: null,
+          is_active: true,
+        })
 
-    if (pastors && pastors.length > 0) {
-      const { sendNewRegistrationNotification } = await import('@/lib/email')
+      if (profileError) {
+        console.error('Error creating profile:', profileError)
+        // Rollback: delete auth user
+        await supabase.auth.admin.deleteUser(authUser.user.id)
+        return NextResponse.json(
+          { error: 'Erro ao criar perfil de membro' },
+          { status: 500 }
+        )
+      }
 
-      // Send notifications (non-blocking)
-      pastors.forEach(pastor => {
-        if (pastor.email) {
-          sendNewRegistrationNotification(pastor.email, pastor.full_name, {
-            fullName,
-            email,
-            phone,
-            message
-          }).catch(e => console.error('Silent notification error:', e))
-        }
+      // 3. Send welcome email with credentials
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
+      const loginUrl = `${appUrl}/login`
+
+      const emailResult = await sendWelcomeEmail({
+        to: email,
+        name: fullName,
+        tempPassword,
+        churchName,
+        loginUrl,
       })
-    }
 
-    return NextResponse.json({ success: true, data })
+      if (!emailResult.success) {
+        console.error('Error sending welcome email:', emailResult.error)
+        // Don't rollback user creation if email fails
+        // Just log the error and continue
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Cadastro concluído com sucesso! Verifique seu email para acessar sua conta.',
+      })
+    } catch (error) {
+      console.error('Error in registration process:', error)
+      // Rollback: delete auth user
+      await supabase.auth.admin.deleteUser(authUser.user.id)
+      return NextResponse.json(
+        { error: 'Erro ao processar cadastro' },
+        { status: 500 }
+      )
+    }
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json(

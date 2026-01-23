@@ -64,17 +64,24 @@ export default function RegistroPage() {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold mb-4">Solicitação Enviada!</h2>
+          <h2 className="text-2xl font-bold mb-4">Cadastro Concluído!</h2>
           <p className="text-gray-600 mb-6">
-            Sua solicitação de cadastro foi enviada com sucesso. Entraremos em contato
-            em breve para aprovar seu acesso.
+            Seu cadastro foi realizado com sucesso! Verifique seu e-mail para acessar suas credenciais e fazer login na área de membros.
           </p>
-          <Link
-            href="/"
-            className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
-          >
-            Voltar para o Início
-          </Link>
+          <div className="space-y-3">
+            <Link
+              href="/login"
+              className="block w-full bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
+            >
+              Fazer Login
+            </Link>
+            <Link
+              href="/"
+              className="block w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors"
+            >
+              Voltar para o Início
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -94,7 +101,7 @@ export default function RegistroPage() {
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold mb-2">Criar Conta</h1>
           <p className="text-gray-600 mb-6">
-            Preencha o formulário abaixo para solicitar acesso à área de membros
+            Preencha o formulário abaixo para criar sua conta e acessar a área de membros
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -170,7 +177,7 @@ export default function RegistroPage() {
               className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-              {loading ? 'Enviando...' : 'Enviar Solicitação'}
+              {loading ? 'Criando conta...' : 'Criar Conta'}
             </button>
           </form>
 
