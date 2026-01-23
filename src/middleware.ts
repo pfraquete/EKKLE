@@ -87,9 +87,12 @@ export async function middleware(request: NextRequest) {
             },
         })
 
-        // Apply session cookies
+        // Apply cookies AND headers from sessionResponse (important for tenant context)
         sessionResponse.cookies.getAll().forEach((cookie) => {
             response.cookies.set(cookie.name, cookie.value, cookie)
+        })
+        sessionResponse.headers.forEach((value, key) => {
+            response.headers.set(key, value)
         })
 
         return response
