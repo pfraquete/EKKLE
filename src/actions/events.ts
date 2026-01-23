@@ -70,6 +70,9 @@ export async function getEvent(id: string) {
 export async function createEvent(event: Omit<EventData, 'id'>) {
   const profile = await getProfile()
   if (!profile) throw new Error('Not authenticated')
+  if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') {
+    throw new Error('Acesso não autorizado')
+  }
   const churchId = profile.church_id
 
   const supabase = await createClient()
@@ -97,6 +100,9 @@ export async function createEvent(event: Omit<EventData, 'id'>) {
 export async function updateEvent(id: string, event: Partial<Omit<EventData, 'id'>>) {
   const profile = await getProfile()
   if (!profile) throw new Error('Not authenticated')
+  if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') {
+    throw new Error('Acesso não autorizado')
+  }
   const churchId = profile.church_id
 
   const supabase = await createClient()
@@ -125,6 +131,9 @@ export async function updateEvent(id: string, event: Partial<Omit<EventData, 'id
 export async function deleteEvent(id: string) {
   const profile = await getProfile()
   if (!profile) throw new Error('Not authenticated')
+  if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') {
+    throw new Error('Acesso não autorizado')
+  }
   const churchId = profile.church_id
 
   const supabase = await createClient()

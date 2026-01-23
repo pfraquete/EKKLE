@@ -77,6 +77,11 @@ function mapChargeStatus(pagarmeStatus: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!PAGARME_WEBHOOK_SECRET) {
+      console.error('Missing PAGARME_WEBHOOK_SECRET');
+      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+    }
+
     const payload = await request.text();
     const signature = request.headers.get('x-hub-signature');
 
@@ -123,19 +128,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Validate signature in production
-    if (process.env.NODE_ENV === 'production' && PAGARME_WEBHOOK_SECRET) {
-      if (!validateSignature(signature, payload)) {
-        console.error('Invalid webhook signature');
+    if (!validateSignature(signature, payload)) {
+      console.error('Invalid webhook signature');
 
-        // Update event with error
-        await supabase
-          .from('webhook_events')
-          .update({ error: 'Invalid signature' })
-          .eq('pagarme_event_id', eventData.id?.toString());
+      // Update event with error
+      await supabase
+        .from('webhook_events')
+        .update({ error: 'Invalid signature' })
+        .eq('pagarme_event_id', eventData.id?.toString());
 
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-      }
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     // Process event based on type
