@@ -26,7 +26,7 @@ export function MobileNav({ profile }: MobileNavProps) {
             label: 'Dash',
             href: '/dashboard',
             active: pathname === '/dashboard',
-            show: true
+            show: isPastor
         },
         {
             icon: Home,

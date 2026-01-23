@@ -33,6 +33,12 @@ export default async function DashboardPage() {
         redirect('/minha-celula')
     }
 
+    // If role is MEMBER, they should NOT be here
+    if (profile.role === 'MEMBER') {
+        // Redirect to the public site or a restricted profile page
+        redirect('/')
+    }
+
     // Only PASTOR continues here
     const [
         { stats },

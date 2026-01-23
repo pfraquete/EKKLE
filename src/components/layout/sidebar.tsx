@@ -36,7 +36,7 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: LayoutDashboard,
             href: '/dashboard',
             active: pathname === '/dashboard',
-            show: true
+            show: isPastor
         },
         {
             label: 'Minha Célula',
@@ -100,14 +100,7 @@ export function Sidebar({ profile }: SidebarProps) {
             href: '/configuracoes',
             active: pathname.startsWith('/configuracoes'),
             show: isPastor
-        },
-        {
-            label: 'Configurações',
-            icon: Settings,
-            href: '/configuracoes/whatsapp',
-            active: pathname === '/configuracoes/whatsapp',
-            show: !isPastor
-        },
+        }
     ]
 
     return (
