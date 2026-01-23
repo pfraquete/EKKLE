@@ -28,17 +28,36 @@ export async function setupWhatsApp() {
     // 1. Check if instance already exists in DB
     let { data: instance } = await getWhatsAppInstance()
 
-    if (!instance) {
-        const instanceName = `ekkle_church_${churchId.split('-')[0]}`
+    const instanceName = `ekkle_church_${churchId.split('-')[0]}`
 
-        // 2. Create in Evolution API
+    // 2. Check if instance exists in Evolution API
+    const existingInstance = await EvolutionService.getInstance(instanceName)
+
+    if (existingInstance) {
+        console.log('Instance already exists in Evolution API, deleting and recreating...')
         try {
-            await EvolutionService.createInstance(instanceName)
+            await EvolutionService.logoutInstance(instanceName)
+            await EvolutionService.deleteInstance(instanceName)
+            // Wait a bit before recreating
+            await new Promise(resolve => setTimeout(resolve, 2000))
         } catch (e) {
-            console.warn('Instance might already exist in API:', e)
+            console.warn('Error deleting existing instance:', e)
         }
+    }
 
-        // 3. Save in DB
+    // 3. Create instance in Evolution API
+    try {
+        await EvolutionService.createInstance(instanceName)
+        console.log('Instance created successfully')
+        // Wait for instance to be ready
+        await new Promise(resolve => setTimeout(resolve, 3000))
+    } catch (e: any) {
+        console.error('Error creating instance:', e)
+        return { success: false, error: `Erro ao criar instância: ${e.message}` }
+    }
+
+    // 4. Save or update in DB
+    if (!instance) {
         const { data: newInstance, error: dbError } = await supabase
             .from('whatsapp_instances')
             .insert({
@@ -51,24 +70,52 @@ export async function setupWhatsApp() {
 
         if (dbError) throw dbError
         instance = newInstance
+    } else {
+        // Update existing instance
+        await supabase
+            .from('whatsapp_instances')
+            .update({ status: 'CONNECTING', qr_code: null })
+            .eq('church_id', churchId)
     }
 
-    // 4. Get QR Code
-    try {
-        const { base64 } = await EvolutionService.getQrCode(instance!.instance_name)
+    // 5. Get QR Code with retry logic
+    let retries = 0
+    const maxRetries = 3
+    let qrCodeData: string | null = null
 
-        // Ensure base64 has the data:image prefix if missing
-        const qrCodeData = base64.startsWith('data:image')
-            ? base64
-            : `data:image/png;base64,${base64}`
+    while (retries < maxRetries && !qrCodeData) {
+        try {
+            console.log(`Attempting to get QR code (attempt ${retries + 1}/${maxRetries})...`)
+            const { base64 } = await EvolutionService.getQrCode(instanceName)
 
+            // Ensure base64 has the data:image prefix if missing
+            qrCodeData = base64.startsWith('data:image')
+                ? base64
+                : `data:image/png;base64,${base64}`
+
+            console.log('QR code retrieved successfully')
+        } catch (e: any) {
+            retries++
+            console.error(`Error fetching QR code (attempt ${retries}/${maxRetries}):`, e.message)
+
+            if (retries < maxRetries) {
+                // Wait before retrying (exponential backoff)
+                await new Promise(resolve => setTimeout(resolve, 2000 * retries))
+            } else {
+                return {
+                    success: false,
+                    error: 'Não foi possível obter o QR Code. Por favor, tente novamente em alguns instantes.'
+                }
+            }
+        }
+    }
+
+    // 6. Update DB with QR code
+    if (qrCodeData) {
         await supabase
             .from('whatsapp_instances')
             .update({ qr_code: qrCodeData, status: 'CONNECTING' })
             .eq('church_id', churchId)
-    } catch (e: any) {
-        console.error('Error fetching QR code:', e)
-        return { success: false, error: e.message || 'Erro ao obter o QR Code da Evolution API' }
     }
 
     revalidatePath('/configuracoes/whatsapp')
