@@ -90,8 +90,18 @@ export async function registerForEvent(eventId: string, guestCount = 0, guestNam
     return { success: false, error: 'Você já está inscrito neste evento.' }
   }
 
-  const activeCount = await getActiveRegistrationCount(eventId)
-  const isFull = event.capacity ? activeCount >= event.capacity : false
+  // Usar função com lock para prevenir race conditions
+  const { data: activeCount, error: countError } = await supabase
+    .rpc('get_active_registration_count_locked', {
+      p_event_id: eventId
+    })
+
+  if (countError) {
+    console.error('Error getting registration count:', countError)
+    return { success: false, error: 'Erro ao verificar vagas disponíveis.' }
+  }
+
+  const isFull = event.capacity ? (activeCount as number) >= event.capacity : false
   const status = isFull ? 'WAITLIST' : 'CONFIRMED'
 
   const paymentAmountCents = toCents(event.is_paid ? event.price : null)
@@ -114,33 +124,64 @@ export async function registerForEvent(eventId: string, guestCount = 0, guestNam
   }
 
   let registration
-  if (existingRegistration) {
-    const { data, error } = await supabase
-      .from('event_registrations')
-      .update(payload)
-      .eq('id', existingRegistration.id)
-      .select()
-      .single()
+  try {
+    if (existingRegistration) {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .update(payload)
+        .eq('id', existingRegistration.id)
+        .select()
+        .single()
 
-    if (error) {
-      console.error('Error updating registration:', error)
-      return { success: false, error: 'Erro ao atualizar sua inscrição.' }
+      if (error) {
+        // Verificar se é erro de capacidade do trigger
+        if (error.code === 'P0001' || error.message.includes('full capacity')) {
+          return {
+            success: false,
+            error: 'Evento lotado! Você foi adicionado à lista de espera.',
+            waitlisted: true
+          }
+        }
+        throw error
+      }
+
+      registration = data
+    } else {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .insert(payload)
+        .select()
+        .single()
+
+      if (error) {
+        // Verificar se é erro de capacidade do trigger
+        if (error.code === 'P0001' || error.message.includes('full capacity')) {
+          // Tentar novamente com status WAITLIST
+          payload.status = 'WAITLIST'
+          payload.payment_status = null
+
+          const { data: retryData, error: retryError } = await supabase
+            .from('event_registrations')
+            .insert(payload)
+            .select()
+            .single()
+
+          if (retryError) {
+            console.error('Error creating waitlist registration:', retryError)
+            return { success: false, error: 'Erro ao adicionar à lista de espera.' }
+          }
+
+          registration = retryData
+        } else {
+          throw error
+        }
+      } else {
+        registration = data
+      }
     }
-
-    registration = data
-  } else {
-    const { data, error } = await supabase
-      .from('event_registrations')
-      .insert(payload)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error creating registration:', error)
-      return { success: false, error: 'Erro ao realizar inscrição.' }
-    }
-
-    registration = data
+  } catch (error) {
+    console.error('Error creating registration:', error)
+    return { success: false, error: 'Erro ao realizar inscrição.' }
   }
 
   await sendRegistrationConfirmation(registration.id)
@@ -346,8 +387,18 @@ export async function processWaitlistPromotion(eventId: string) {
     return { success: false, error: 'Evento não encontrado.' }
   }
 
-  const activeCount = await getActiveRegistrationCount(eventId)
-  const hasCapacity = event.capacity ? activeCount < event.capacity : true
+  // Usar função com lock para prevenir race conditions
+  const { data: activeCount, error: countError } = await supabase
+    .rpc('get_active_registration_count_locked', {
+      p_event_id: eventId
+    })
+
+  if (countError) {
+    console.error('Error getting registration count:', countError)
+    return { success: false, error: 'Erro ao verificar vagas.' }
+  }
+
+  const hasCapacity = event.capacity ? (activeCount as number) < event.capacity : true
 
   if (!hasCapacity) {
     return { success: true, promoted: false }
@@ -368,6 +419,7 @@ export async function processWaitlistPromotion(eventId: string) {
 
   const paymentStatus = waitlistRegistration.payment_required ? 'PENDING' : null
 
+  // Database trigger irá validar capacidade
   const { error: updateError } = await supabase
     .from('event_registrations')
     .update({
@@ -378,6 +430,12 @@ export async function processWaitlistPromotion(eventId: string) {
 
   if (updateError) {
     console.error('Error promoting waitlist registration:', updateError)
+
+    // Se erro de capacidade, significa race condition ocorreu, tentar novamente
+    if (updateError.code === 'P0001' || updateError.message.includes('full capacity')) {
+      return { success: true, promoted: false }
+    }
+
     return { success: false, error: 'Erro ao promover inscrição.' }
   }
 
