@@ -28,7 +28,10 @@ export async function getAvailableCells(churchId: string) {
         return []
     }
 
-    return cells
+    return cells.map(cell => ({
+        ...cell,
+        leader: Array.isArray(cell.leader) ? cell.leader[0] : cell.leader
+    }))
 }
 
 // User: Request to join a cell
