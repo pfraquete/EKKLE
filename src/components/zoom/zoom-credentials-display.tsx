@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getZoomCredentials } from '@/actions/zoom-access'
 import { Copy, Loader2, CheckCircle2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   serviceId: string
@@ -44,17 +45,17 @@ export function ZoomCredentialsDisplay({ serviceId, token }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-        <span className="ml-2 text-sm text-gray-600">Carregando credenciais...</span>
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <span className="ml-2 text-sm text-muted-foreground">Carregando credenciais...</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-800 text-sm font-semibold">{error}</p>
-        <p className="text-red-600 text-xs mt-2">
+      <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+        <p className="text-sm font-semibold text-destructive">{error}</p>
+        <p className="mt-2 text-xs text-destructive/80">
           O link pode ter expirado (válido por 48h). Solicite um novo link de acesso.
         </p>
       </div>
@@ -63,71 +64,70 @@ export function ZoomCredentialsDisplay({ serviceId, token }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-        <p className="text-green-800 text-sm font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" />
+      <div className="rounded-lg border border-primary/30 bg-primary/10 p-3">
+        <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <CheckCircle2 className="h-4 w-4 text-primary" />
           Link de acesso válido
         </p>
       </div>
 
       <div>
-        <label className="text-sm font-semibold text-gray-700 mb-1 block">
-          ID da Reunião
-        </label>
+        <label className="mb-1 block text-sm font-semibold text-foreground">ID da Reunião</label>
         <div className="flex items-center gap-2">
-          <code className="flex-1 bg-white px-3 py-2 rounded border border-gray-200 text-lg font-mono">
+          <code className="flex-1 rounded border border-border bg-muted px-3 py-2 text-lg font-mono text-foreground">
             {credentials.zoom_meeting_id}
           </code>
-          <button
+          <Button
             onClick={() => handleCopy(credentials.zoom_meeting_id, 'meeting_id')}
-            className="p-2 hover:bg-gray-100 rounded transition-colors border border-gray-200"
+            size="icon"
+            variant="outline"
             title="Copiar ID"
           >
             {copiedField === 'meeting_id' ? (
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <CheckCircle2 className="h-5 w-5 text-primary" />
             ) : (
-              <Copy className="w-5 h-5 text-gray-600" />
+              <Copy className="h-5 w-5 text-muted-foreground" />
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
       {credentials.zoom_password && (
         <div>
-          <label className="text-sm font-semibold text-gray-700 mb-1 block">
-            Senha
-          </label>
+          <label className="mb-1 block text-sm font-semibold text-foreground">Senha</label>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-white px-3 py-2 rounded border border-gray-200 text-lg font-mono">
+            <code className="flex-1 rounded border border-border bg-muted px-3 py-2 text-lg font-mono text-foreground">
               {credentials.zoom_password}
             </code>
-            <button
+            <Button
               onClick={() => handleCopy(credentials.zoom_password, 'password')}
-              className="p-2 hover:bg-gray-100 rounded transition-colors border border-gray-200"
+              size="icon"
+              variant="outline"
               title="Copiar senha"
             >
               {copiedField === 'password' ? (
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                <CheckCircle2 className="h-5 w-5 text-primary" />
               ) : (
-                <Copy className="w-5 h-5 text-gray-600" />
+                <Copy className="h-5 w-5 text-muted-foreground" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
-      <a
-        href={`https://zoom.us/j/${credentials.zoom_meeting_id}${
-          credentials.zoom_password ? `?pwd=${credentials.zoom_password}` : ''
-        }`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
-      >
-        Entrar no Zoom
-      </a>
+      <Button asChild className="w-full">
+        <a
+          href={`https://zoom.us/j/${credentials.zoom_meeting_id}${
+            credentials.zoom_password ? `?pwd=${credentials.zoom_password}` : ''
+          }`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Entrar no Zoom
+        </a>
+      </Button>
 
-      <p className="text-xs text-gray-500 text-center mt-2">
+      <p className="mt-2 text-center text-xs text-muted-foreground">
         Este link de acesso expira em 48 horas
       </p>
     </div>
