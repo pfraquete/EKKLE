@@ -1,7 +1,7 @@
 /**
  * OpenAI Service
  *
- * Handles communication with OpenAI API for GPT-4o.
+ * Handles communication with OpenAI API for GPT-4o-mini.
  * Used for conversational intelligence in the WhatsApp AI Agent.
  *
  * Features:
@@ -9,12 +9,16 @@
  * - Function calling support
  * - Extract function calls from responses
  * - Extract text responses
+ * - Automatic retries with exponential backoff
+ * - Request timeout protection
  *
  * @see https://platform.openai.com/docs/api-reference/chat
  */
 
+import { fetchWithRetry } from './retry';
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
 if (!OPENAI_API_KEY) {
   console.warn('⚠️ OpenAI API key is missing. WhatsApp AI Agent will not work.');
@@ -89,7 +93,7 @@ export class OpenAIService {
       model: OPENAI_MODEL,
       messages: options.messages,
       temperature: options.temperature ?? 0.7,
-      max_tokens: options.max_tokens ?? 1000,
+      max_tokens: options.max_tokens ?? 500, // Reduzido de 1000 para 500 para economizar
     };
 
     // Add function calling if functions are provided
@@ -99,14 +103,27 @@ export class OpenAIService {
     }
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+      const response = await fetchWithRetry(
+        url,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify(requestBody),
         },
-        body: JSON.stringify(requestBody),
-      });
+        {
+          maxRetries: 3,
+          initialDelayMs: 2000,
+          timeoutMs: 60000, // 60s timeout for OpenAI (can be slow)
+          onRetry: (attempt, error) => {
+            console.warn(
+              `[OpenAI] Retry attempt ${attempt}/3 due to: ${error.message}`
+            );
+          },
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({
@@ -118,6 +135,17 @@ export class OpenAIService {
       }
 
       const data = await response.json();
+
+      // Log usage for cost tracking
+      if (data.usage) {
+        console.log('[OpenAI] Usage:', {
+          model: OPENAI_MODEL,
+          prompt_tokens: data.usage.prompt_tokens,
+          completion_tokens: data.usage.completion_tokens,
+          total_tokens: data.usage.total_tokens,
+        });
+      }
+
       return data;
     } catch (error) {
       console.error('Error calling OpenAI API:', error);

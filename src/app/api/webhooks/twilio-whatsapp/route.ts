@@ -19,7 +19,8 @@ import { OpenAIService } from '@/lib/openai';
 import { processIncomingMessage } from '@/lib/ai-agent/message-processor';
 import {
   getWelcomeMessage,
-} from '@/lib/ai-agent/system-prompt';
+} from '@/lib/ai-agent/system-prompt-optimized'; // Using optimized prompt
+import { whatsappRateLimiter } from '@/lib/rate-limiter';
 
 // Service role client for webhook processing
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -106,7 +107,31 @@ Em caso de dúvidas, entre em contato com o suporte.`
     console.log('[Twilio Webhook] Found pastor:', profile.full_name, profile.id);
 
     // ========================================
-    // 5. Check if First Time User
+    // 5. Rate Limiting Check
+    // ========================================
+    const allowed = await whatsappRateLimiter.checkLimit(profile.id);
+
+    if (!allowed) {
+      const remaining = whatsappRateLimiter.getRemaining(profile.id);
+      console.warn(
+        `[Twilio Webhook] Rate limit exceeded for pastor ${profile.id}`
+      );
+
+      // Send rate limit message
+      await TwilioService.sendWhatsAppMessage(
+        from,
+        `⚠️ *Limite de mensagens atingido*
+
+Você pode enviar até 10 mensagens por minuto.
+
+Por favor, aguarde alguns segundos antes de enviar mais mensagens.`
+      );
+
+      return NextResponse.json({ status: 'rate_limited' }, { status: 429 });
+    }
+
+    // ========================================
+    // 6. Check if First Time User
     // ========================================
     const { data: conversation } = await supabase
       .from('whatsapp_agent_conversations')
@@ -145,7 +170,7 @@ Em caso de dúvidas, entre em contato com o suporte.`
     }
 
     // ========================================
-    // 7. Process Message Through AI Agent
+    // 8. Process Message Through AI Agent
     // ========================================
     // Run async without blocking response to Twilio
     // Twilio expects quick response (< 15 seconds)
@@ -160,7 +185,7 @@ Em caso de dúvidas, entre em contato com o suporte.`
     });
 
     // ========================================
-    // 8. Return Success Response
+    // 9. Return Success Response
     // ========================================
     return NextResponse.json({ status: 'processing' });
   } catch (error) {
