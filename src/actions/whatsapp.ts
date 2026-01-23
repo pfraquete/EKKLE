@@ -28,7 +28,7 @@ export async function setupWhatsApp() {
     // 1. Check if instance already exists in DB
     let { data: instance } = await getWhatsAppInstance()
 
-    const instanceName = `ekkle_church_${churchId.split('-')[0]}`
+    let instanceName = `ekkle_church_${churchId.split('-')[0]}`
 
     // 2. Force cleanup - delete instance regardless of state (ignore errors)
     console.log('Force cleanup: attempting to delete any existing instance...')
@@ -48,21 +48,39 @@ export async function setupWhatsApp() {
     // Wait for cleanup to complete
     await new Promise(resolve => setTimeout(resolve, 2000))
 
-    // 3. Create new instance (ignore 400 error if instance somehow still exists)
-    try {
-        await EvolutionService.createInstance(instanceName)
-        console.log('Instance created successfully')
-    } catch (e: any) {
-        // Only ignore if the error specifically says "already exists"
-        // 400 can be other things (invalid name, missing token, etc)
-        const errorMessage = e.message?.toLowerCase() || '';
-        if (errorMessage.includes('already exists') || errorMessage.includes('já existe')) {
-            console.log('Instance already exists (from error message), continuing...')
-        } else {
-            console.error('Error creating instance:', e)
-            throw e; // Re-throw real errors so we don't try to fetch QR for a non-existent instance
+    // 3. Create new instance (with retry if name is in use)
+    let createSuccess = false
+    let attempt = 0
+    let finalInstanceName = instanceName
+    
+    while (!createSuccess && attempt < 3) {
+        try {
+            finalInstanceName = attempt === 0 ? instanceName : `${instanceName}_${attempt}`
+            await EvolutionService.createInstance(finalInstanceName)
+            console.log(`Instance created successfully: ${finalInstanceName}`)
+            createSuccess = true
+        } catch (e: any) {
+            const errorMessage = e.message?.toLowerCase() || ''
+            
+            // Check if error is "name already in use" (403 Forbidden)
+            if (errorMessage.includes('already in use') || errorMessage.includes('forbidden')) {
+                console.log(`Instance name ${finalInstanceName} is already in use, trying with suffix...`)
+                attempt++
+                if (attempt >= 3) {
+                    throw new Error('Failed to create instance after 3 attempts. Please contact support to clean up orphaned instances.')
+                }
+            } else if (errorMessage.includes('already exists') || errorMessage.includes('já existe')) {
+                console.log('Instance already exists (from error message), continuing...')
+                createSuccess = true
+            } else {
+                console.error('Error creating instance:', e)
+                throw e
+            }
         }
     }
+    
+    // Update instanceName to the one that worked
+    instanceName = finalInstanceName
 
     // Wait for instance to be ready
     await new Promise(resolve => setTimeout(resolve, 3000))
