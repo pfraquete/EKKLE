@@ -8,11 +8,14 @@
  * - Send WhatsApp messages to pastors
  * - Validate webhook signatures for security
  * - Format phone numbers for WhatsApp
+ * - Automatic retries with exponential backoff
+ * - Request timeout protection
  *
  * @see https://www.twilio.com/docs/whatsapp
  */
 
 import crypto from 'crypto';
+import { fetchWithRetry } from './retry';
 
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
@@ -85,16 +88,29 @@ export class TwilioService {
       });
 
       try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: `Basic ${Buffer.from(
-              `${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`
-            ).toString('base64')}`,
+        const response = await fetchWithRetry(
+          url,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              Authorization: `Basic ${Buffer.from(
+                `${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`
+              ).toString('base64')}`,
+            },
+            body: body.toString(),
           },
-          body: body.toString(),
-        });
+          {
+            maxRetries: 3,
+            initialDelayMs: 1000,
+            timeoutMs: 30000, // 30s timeout for Twilio
+            onRetry: (attempt, error) => {
+              console.warn(
+                `[Twilio] Retry attempt ${attempt}/3 due to: ${error.message}`
+              );
+            },
+          }
+        );
 
         if (!response.ok) {
           const error = await response.json().catch(() => ({

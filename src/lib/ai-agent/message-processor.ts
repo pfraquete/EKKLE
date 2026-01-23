@@ -7,7 +7,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { OpenAIService, ChatMessage } from '@/lib/openai';
-import { SYSTEM_PROMPT, getOnboardingPrompt } from './system-prompt';
+import { SYSTEM_PROMPT, getOnboardingPrompt } from './system-prompt-optimized'; // Using optimized prompt
 import { getAvailableFunctions } from './function-definitions';
 import { executeFunctionCall } from './function-executor';
 import { TwilioService } from '@/lib/twilio';
