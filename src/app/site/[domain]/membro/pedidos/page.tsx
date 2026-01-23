@@ -46,90 +46,109 @@ export default async function OrdersListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="max-w-5xl mx-auto space-y-12 animate-in fade-in duration-700">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 mb-2">
+      <div>
+        <div className="flex items-center gap-4 mb-2">
+          <div className="p-3 bg-primary/10 rounded-2xl">
             <Package className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold">Meus Pedidos</h1>
           </div>
-          <p className="text-muted-foreground">Acompanhe seus pedidos realizados na loja</p>
+          <div>
+            <h1 className="text-4xl font-black text-foreground tracking-tight">Meus Pedidos</h1>
+            <p className="text-muted-foreground font-medium">Acompanhe suas aquisições e itens na nossa loja</p>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="space-y-6">
         {orders.length === 0 ? (
-          <Card className="p-12 text-center">
-            <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Nenhum pedido encontrado</h3>
-            <p className="text-muted-foreground mb-6">
-              Você ainda não realizou nenhuma compra na loja
+          <div className="py-24 text-center bg-card border border-dashed border-border rounded-[3rem]">
+            <ShoppingBag className="w-20 h-20 mx-auto text-muted-foreground/10 mb-6" />
+            <h3 className="text-2xl font-black text-foreground mb-2">Nenhum pedido ainda</h3>
+            <p className="text-muted-foreground mb-10 max-w-sm mx-auto font-medium">
+              Você ainda não realizou nenhuma compra em nossa loja virtual.
             </p>
             <Link
               href="/membro/loja"
-              className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-6 py-3 font-semibold hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-10 py-4 font-black uppercase tracking-widest text-xs hover:scale-105 transition-all duration-300 shadow-xl shadow-primary/20"
             >
-              Ir para a Loja
+              Explorar Loja
             </Link>
-          </Card>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-6">
             {orders.map((order: Order) => (
-              <Link key={order.id} href={`/membro/pedidos/${order.id}`}>
-                <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-start justify-between">
+              <Link key={order.id} href={`/membro/pedidos/${order.id}`} className="group">
+                <div className="bg-card border border-border/50 p-8 rounded-[2rem] group-hover:shadow-2xl group-hover:border-primary/20 transition-all duration-500 relative overflow-hidden">
+                  <div className="flex items-start justify-between relative z-10">
                     {/* Order Info */}
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-lg">Pedido {order.order_number}</h3>
-                        <Badge className={getStatusColor(order.status)}>
-                          {getOrderStatusLabel(order.status)}
-                        </Badge>
-                        <Badge className={getPaymentStatusColor(order.payment_status)}>
-                          {order.payment_status === 'paid'
-                            ? 'Pago'
-                            : order.payment_status === 'pending'
-                            ? 'Aguardando Pagamento'
-                            : order.payment_status === 'failed'
-                            ? 'Pagamento Falhou'
-                            : order.payment_status}
-                        </Badge>
+                      <div className="flex flex-wrap items-center gap-3 mb-6">
+                        <h3 className="font-black text-xl text-foreground">Pedido #{order.order_number}</h3>
+                        <div className="flex gap-2">
+                          <Badge className={`${getStatusColor(order.status)} border-none font-black uppercase tracking-[0.05em] text-[10px] px-3 py-1 rounded-full`}>
+                            {getOrderStatusLabel(order.status)}
+                          </Badge>
+                          <Badge className={`${getPaymentStatusColor(order.payment_status)} border-none font-black uppercase tracking-[0.05em] text-[10px] px-3 py-1 rounded-full`}>
+                            {order.payment_status === 'paid'
+                              ? 'Pago'
+                              : order.payment_status === 'pending'
+                                ? 'Aguardando'
+                                : order.payment_status === 'failed'
+                                  ? 'Falhou'
+                                  : order.payment_status}
+                          </Badge>
+                        </div>
                       </div>
 
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {new Date(order.created_at).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: 'long',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                        {' • '}
-                        {getPaymentMethodLabel(order.payment_method)}
-                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
+                            <ChevronRight className="w-3.5 h-3.5 text-primary" />
+                            {new Date(order.created_at).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                            {' às '}
+                            {new Date(order.created_at).toLocaleTimeString('pt-BR', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
+                            <ChevronRight className="w-3.5 h-3.5 text-primary" />
+                            {getPaymentMethodLabel(order.payment_method)}
+                          </p>
+                          <div className="text-xs font-black uppercase tracking-widest text-primary pt-2">
+                            {order.items?.length === 1
+                              ? '1 item no pacote'
+                              : `${order.items?.length || 0} itens no pacote`}
+                          </div>
+                        </div>
 
-                      {/* Items Preview */}
-                      <div className="text-sm text-muted-foreground">
-                        {order.items?.length === 1
-                          ? '1 item'
-                          : `${order.items?.length || 0} itens`}
+                        <div className="md:text-right">
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Total Investido</p>
+                          <p className="text-3xl font-black text-foreground">
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            }).format(order.total_cents / 100)}
+                          </p>
+                        </div>
                       </div>
-
-                      {/* Total */}
-                      <p className="text-xl font-bold text-primary mt-3">
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                        }).format(order.total_cents / 100)}
-                      </p>
                     </div>
 
                     {/* Arrow */}
-                    <ChevronRight className="w-6 h-6 text-muted-foreground" />
+                    <div className="w-12 h-12 bg-muted/50 rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 ml-6 self-center">
+                      <ChevronRight className="w-6 h-6" />
+                    </div>
                   </div>
-                </Card>
+
+                  {/* Decorative Gradient */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
+                </div>
               </Link>
             ))}
           </div>

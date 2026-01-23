@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, BookOpen } from 'lucide-react'
 import { CoursePlayer } from '@/components/courses/course-player'
 import { enrollInCourse, getCourseEnrollment, getAllVideoProgress } from '@/actions/courses'
 import { getProfile } from '@/actions/auth'
@@ -53,13 +53,14 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
     const result = await enrollInCourse(courseId)
     if (!result.success) {
       return (
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <h2 className="text-xl font-bold text-red-800 mb-2">Erro ao Acessar Curso</h2>
-            <p className="text-red-600">{result.error}</p>
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="bg-card border border-destructive/20 rounded-[2rem] p-12 text-center overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-destructive/5 rounded-full blur-3xl" />
+            <h2 className="text-2xl font-black text-foreground mb-4 italic">Ops! Algo deu errado.</h2>
+            <p className="text-muted-foreground font-medium mb-8">{result.error}</p>
             <Link
               href="/membro/cursos"
-              className="mt-4 inline-block text-primary hover:underline"
+              className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-8 py-4 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/10 transition-all hover:scale-105"
             >
               Voltar para Meus Cursos
             </Link>
@@ -81,17 +82,21 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
 
   if (!videos || videos.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
         <Link
           href="/membro/cursos"
-          className="inline-flex items-center gap-2 text-primary hover:underline mb-6"
+          className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-full bg-card border border-border/50 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+            <ArrowLeft className="w-4 h-4" />
+          </div>
           Voltar para Meus Cursos
         </Link>
-        <div className="bg-gray-50 border rounded-lg p-12 text-center">
-          <h2 className="text-2xl font-bold mb-2">{course.title}</h2>
-          <p className="text-gray-600">Este curso ainda não possui vídeos disponíveis.</p>
+
+        <div className="bg-card border border-border/40 rounded-[3rem] p-20 text-center">
+          <BookOpen className="w-20 h-20 mx-auto mb-6 text-muted-foreground/10" />
+          <h2 className="text-3xl font-black text-foreground mb-4 tracking-tighter italic">{course.title}</h2>
+          <p className="text-muted-foreground font-medium">Este curso ainda não possui aulas liberadas para visualização.</p>
         </div>
       </div>
     )
@@ -125,14 +130,23 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
   if (!profile) redirect('/login')
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <Link
-        href="/membro/cursos"
-        className="inline-flex items-center gap-2 text-primary hover:underline mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Voltar para Meus Cursos
-      </Link>
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+      <div className="flex items-center justify-between">
+        <Link
+          href="/membro/cursos"
+          className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
+        >
+          <div className="w-8 h-8 rounded-full bg-card border border-border/50 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+            <ArrowLeft className="w-4 h-4" />
+          </div>
+          Voltar para Meus Cursos
+        </Link>
+
+        <div className="hidden md:flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Ambiente de Aprendizado</span>
+        </div>
+      </div>
 
       <CoursePlayer
         course={course}

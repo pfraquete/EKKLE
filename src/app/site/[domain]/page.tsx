@@ -43,66 +43,72 @@ export default async function Homepage() {
         switch (key) {
             case 'events':
                 return events && events.length > 0 ? (
-                    <section key="events" className="py-20 md:py-28 bg-white">
-                        <div className="container mx-auto px-4">
-                            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-                                <div>
-                                    <h2 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">
+                    <section key="events" className="py-24 md:py-32 bg-background relative overflow-hidden">
+                        <div className="container mx-auto px-6">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-1 bg-primary rounded-full" />
+                                        <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Agenda</span>
+                                    </div>
+                                    <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter">
                                         Próximos Eventos
                                     </h2>
-                                    <p className="text-lg text-gray-500 max-w-lg">
-                                        Participe das nossas atividades e fortaleça sua comunhão.
+                                    <p className="text-xl text-muted-foreground max-w-lg font-medium">
+                                        Participe das nossas atividades e fortaleça sua comunhão em comunidade.
                                     </p>
                                 </div>
                                 <Link href="/eventos">
-                                    <Button variant="outline" className="rounded-full px-6 font-semibold border-gray-200 hover:bg-gray-50 hover:text-primary gap-2 h-12">
-                                        Ver Todos <ArrowRight className="w-4 h-4" />
+                                    <Button variant="outline" className="rounded-full px-8 font-black border-border hover:bg-primary hover:text-primary-foreground gap-3 h-14 uppercase tracking-widest text-xs transition-all duration-500">
+                                        Ver Programação <ArrowRight className="w-4 h-4" />
                                     </Button>
                                 </Link>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                                 {events.map((event) => (
                                     <Link
                                         href={`/eventos/${event.id}`}
                                         key={event.id}
-                                        className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                                        className="group bg-card rounded-[2.5rem] overflow-hidden border border-border/40 shadow-2xl hover:shadow-primary/5 hover:border-primary/20 hover:-translate-y-2 transition-all duration-500"
                                     >
-                                        <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                                        <div className="relative aspect-[16/11] overflow-hidden bg-muted">
                                             {event.image_url ? (
                                                 <Image
                                                     src={event.image_url}
                                                     alt={event.title}
                                                     fill
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                    className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                     loading="lazy"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                                    <Calendar className="w-12 h-12 text-gray-300" />
+                                                <div className="w-full h-full flex items-center justify-center bg-muted">
+                                                    <Calendar className="w-16 h-16 text-muted-foreground/20" />
                                                 </div>
                                             )}
 
                                             {/* Date Badge */}
-                                            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm">
-                                                <p className="text-sm font-bold text-gray-900">
+                                            <div className="absolute top-6 left-6 bg-background/90 backdrop-blur-xl px-5 py-2.5 rounded-2xl shadow-2xl border border-white/5">
+                                                <p className="text-sm font-black text-foreground uppercase tracking-tight">
                                                     {new Date(event.start_date).toLocaleDateString('pt-BR', {
                                                         day: 'numeric',
                                                         month: 'short'
                                                     })}
                                                 </p>
                                             </div>
+
+                                            <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
                                         </div>
 
-                                        <div className="p-8">
-                                            <h3 className="text-xl font-bold mb-4 text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+                                        <div className="p-10">
+                                            <h3 className="text-2xl font-black mb-5 text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                                                 {event.title}
                                             </h3>
 
-                                            <div className="space-y-3 text-sm text-gray-500 font-medium">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 rounded-full bg-gray-50 text-primary">
+                                            <div className="space-y-4 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="p-2.5 rounded-xl bg-muted/50 text-primary">
                                                         <Clock className="w-4 h-4" />
                                                     </div>
                                                     <span>
@@ -113,8 +119,8 @@ export default async function Homepage() {
                                                     </span>
                                                 </div>
                                                 {event.location && (
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 rounded-full bg-gray-50 text-primary">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="p-2.5 rounded-xl bg-muted/50 text-primary">
                                                             <MapPin className="w-4 h-4" />
                                                         </div>
                                                         <span className="truncate">{event.location}</span>
@@ -131,53 +137,57 @@ export default async function Homepage() {
 
             case 'courses':
                 return courses && courses.length > 0 ? (
-                    <section key="courses" className="py-20 md:py-28 bg-gray-50">
-                        <div className="container mx-auto px-4">
-                            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-                                <div>
-                                    <h2 className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">
-                                        Nossos Cursos
+                    <section key="courses" className="py-24 md:py-32 bg-muted/20 border-y border-border/40">
+                        <div className="container mx-auto px-6">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-1 bg-primary rounded-full" />
+                                        <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">EAD</span>
+                                    </div>
+                                    <h2 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter">
+                                        Escola de Líderes
                                     </h2>
-                                    <p className="text-lg text-gray-500 max-w-lg">
-                                        Conteúdos para seu crescimento espiritual e ministerial.
+                                    <p className="text-xl text-muted-foreground max-w-lg font-medium">
+                                        Conteúdos exclusivos para seu crescimento espiritual e ministerial.
                                     </p>
                                 </div>
                                 <Link href="/cursos">
-                                    <Button variant="outline" className="rounded-full px-6 font-semibold border-gray-200 hover:bg-white hover:text-primary gap-2 h-12">
-                                        Ver Todos <ArrowRight className="w-4 h-4" />
+                                    <Button variant="outline" className="rounded-full px-8 font-black border-border hover:bg-primary hover:text-primary-foreground gap-3 h-14 uppercase tracking-widest text-xs transition-all duration-500">
+                                        Conhecer Cursos <ArrowRight className="w-4 h-4" />
                                     </Button>
                                 </Link>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                                 {courses.map((course) => (
                                     <Link
                                         href={`/cursos/${course.id}`}
                                         key={course.id}
-                                        className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                                        className="group bg-card rounded-[2.5rem] overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl hover:border-primary/20 transition-all duration-500"
                                     >
-                                        <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                                        <div className="relative aspect-[16/10] overflow-hidden bg-muted/50">
                                             {course.thumbnail_url ? (
                                                 <Image
                                                     src={course.thumbnail_url}
                                                     alt={course.title}
                                                     fill
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                    className="object-cover group-hover:scale-110 transition-transform duration-1000"
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                     loading="lazy"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-secondary/5">
-                                                    <BookOpen className="w-12 h-12 text-secondary/20" />
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <BookOpen className="w-16 h-16 text-muted-foreground/10" />
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-8">
-                                            <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-primary transition-colors">
+                                        <div className="p-10">
+                                            <h3 className="text-2xl font-black mb-4 text-foreground group-hover:text-primary transition-colors leading-tight">
                                                 {course.title}
                                             </h3>
                                             {course.description && (
-                                                <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">
+                                                <p className="text-muted-foreground text-base leading-relaxed line-clamp-2 font-medium">
                                                     {course.description}
                                                 </p>
                                             )}
@@ -191,26 +201,26 @@ export default async function Homepage() {
 
             case 'about':
                 return (
-                    <section key="about" className="py-24 md:py-32 bg-white relative overflow-hidden">
+                    <section key="about" className="py-32 md:py-48 bg-background relative overflow-hidden">
                         {/* Decorative Background Elements */}
                         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                            <div className="absolute top-10 right-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl opacity-50" />
-                            <div className="absolute bottom-10 left-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl opacity-50" />
+                            <div className="absolute top-1/4 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-[120px] opacity-40 animate-pulse" />
+                            <div className="absolute bottom-1/4 -left-20 w-[30rem] h-[30rem] bg-secondary/10 rounded-full blur-[150px] opacity-30 animate-pulse" />
                         </div>
 
-                        <div className="container mx-auto px-4 relative z-10">
-                            <div className="max-w-4xl mx-auto text-center space-y-10">
-                                <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-                                    Sobre a {church.name}
+                        <div className="container mx-auto px-6 relative z-10">
+                            <div className="max-w-4xl mx-auto text-center space-y-12">
+                                <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
+                                    Sobre a <span className="text-primary italic"> {church.name}</span>
                                 </h2>
                                 {church.description && (
-                                    <p className="text-xl md:text-2xl text-gray-500 leading-relaxed font-light">
-                                        {church.description}
+                                    <p className="text-2xl md:text-3xl text-muted-foreground leading-relaxed font-light tracking-tight italic">
+                                        "{church.description}"
                                     </p>
                                 )}
-                                <div className="pt-6">
+                                <div className="pt-10">
                                     <Link href="/sobre">
-                                        <Button size="lg" className="rounded-full px-10 h-14 text-lg font-bold shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
+                                        <Button size="lg" className="rounded-full px-12 h-16 text-lg font-black uppercase tracking-widest shadow-2xl shadow-primary/20 hover:scale-105 transition-all duration-500">
                                             Conheça Nossa História
                                         </Button>
                                     </Link>
@@ -240,51 +250,61 @@ export default async function Homepage() {
         : ['events', 'courses', 'about']
 
     return (
-        <div className="flex flex-col min-h-screen bg-white text-gray-900">
+        <div className="flex flex-col min-h-screen bg-background text-foreground selection:bg-primary/20">
             {/* Hero Section */}
             {settings.hero?.enabled !== false && (
-                <section className="relative min-h-[650px] md:min-h-[800px] flex items-center justify-center overflow-hidden">
+                <section className="relative min-h-[700px] md:min-h-screen flex items-center justify-center overflow-hidden">
                     {/* Background */}
                     <div className="absolute inset-0 z-0">
                         {settings.hero?.backgroundUrl ? (
-                            <Image
-                                src={settings.hero.backgroundUrl}
-                                alt="Hero Background"
-                                fill
-                                className="object-cover"
-                                priority
-                                sizes="100vw"
-                                quality={90}
-                            />
+                            <>
+                                <Image
+                                    src={settings.hero.backgroundUrl}
+                                    alt="Hero Background"
+                                    fill
+                                    className="object-cover"
+                                    priority
+                                    sizes="100vw"
+                                    quality={100}
+                                />
+                                {/* Modern Mesh Gradient Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background" />
+                                <div className="absolute inset-0 bg-black/30 md:bg-black/40" />
+                            </>
                         ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100" />
+                            <div className="w-full h-full bg-gradient-to-br from-zinc-900 via-zinc-950 to-black" />
                         )}
-                        {/* Cleaner Overlay */}
-                        <div className={`absolute inset-0 ${settings.hero?.backgroundUrl ? 'bg-black/40' : 'bg-transparent'}`} />
 
-                        {/* Gradient Overlay for text readability if image exists, or subtle color if not */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-90" />
+                        {/* Animated Gradient Shine */}
+                        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.05),transparent)] pointer-events-none" />
                     </div>
 
                     {/* Content */}
-                    <div className="container mx-auto px-4 relative z-10 text-center space-y-8 animate-in fade-in zoom-in duration-1000 slide-in-from-bottom-8">
-                        <h1 className={`text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter max-w-5xl mx-auto leading-[0.9] ${settings.hero?.backgroundUrl ? 'text-gray-900' : 'text-gray-900'}`}>
-                            {settings.hero?.title || `Bem-vindo à ${church.name}`}
+                    <div className="container mx-auto px-6 relative z-10 text-center space-y-12 animate-in fade-in zoom-in-95 duration-1000 slide-in-from-bottom-12">
+                        <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-[calc(-0.04em)] max-w-7xl mx-auto leading-[0.85] text-white drop-shadow-2xl">
+                            {settings.hero?.title || `EKKLE CHURCH`}
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-xl md:text-3xl text-white/70 font-medium max-w-3xl mx-auto leading-relaxed tracking-tight">
                             {settings.hero?.subtitle || calculateDefaultSubtitle()}
                         </p>
 
                         {settings.hero?.cta && (
-                            <div className="pt-8">
+                            <div className="pt-10 scale-100 md:scale-110">
                                 <Link href={settings.hero.cta.link || '/sobre'}>
-                                    <Button size="lg" className="rounded-full px-10 h-14 text-lg font-bold shadow-xl shadow-primary/25 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                                    <Button size="lg" className="rounded-full px-12 h-16 text-lg font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-2 transition-all duration-500">
                                         {settings.hero.cta.text || 'Saiba Mais'}
                                     </Button>
                                 </Link>
                             </div>
                         )}
+                    </div>
+
+                    {/* Scroll Indicator */}
+                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-40">
+                        <div className="w-6 h-10 rounded-full border-2 border-white flex justify-center p-1">
+                            <div className="w-1 h-2 bg-white rounded-full" />
+                        </div>
                     </div>
                 </section>
             )}

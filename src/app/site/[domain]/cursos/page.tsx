@@ -2,7 +2,7 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
-import { BookOpen, Video, CalendarClock } from 'lucide-react'
+import { BookOpen, Video, CalendarClock, ArrowRight } from 'lucide-react'
 
 export default async function CursosPage() {
   const church = await getChurch()
@@ -24,27 +24,31 @@ export default async function CursosPage() {
     .order('order_index', { ascending: true })
 
   return (
-    <div className="py-12">
-      <div className="container mx-auto px-4">
+    <div className="py-24 bg-background animate-in fade-in duration-700">
+      <div className="container mx-auto px-6">
         {/* Page Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold mb-4">Nossos Cursos</h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Cresça espiritualmente com nossos cursos e ensinamentos
+        <div className="mb-20 space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-1 bg-primary rounded-full" />
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Academy</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter italic">Nossos Cursos</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl font-medium tracking-tight">
+            Cresça espiritualmente com nossos cursos e trilhas de conhecimento fundamentadas na Palavra.
           </p>
         </div>
 
         {/* Courses Grid */}
         {courses && courses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {courses.map((course) => {
               const videoCount = Array.isArray(course.course_videos)
                 ? course.course_videos.length
                 : course.course_videos?.count || 0
               const startDate = course.enrollment_start_date ? new Date(course.enrollment_start_date) : null
               const enrollmentLabel = startDate && startDate > new Date()
-                ? `Inscrições em ${startDate.toLocaleDateString('pt-BR')}`
-                : 'Inscrições abertas'
+                ? `Início em ${startDate.toLocaleDateString('pt-BR')}`
+                : 'Matrículas abertas'
               const priceLabel = course.is_paid
                 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((course.price_cents || 0) / 100)
                 : 'Gratuito'
@@ -53,48 +57,47 @@ export default async function CursosPage() {
                 <Link
                   key={course.id}
                   href={`/cursos/${course.id}`}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                  className="group bg-card border border-border/40 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:border-primary/20 transition-all duration-500"
                 >
-                  {course.thumbnail_url ? (
-                    <div className="relative h-48 w-full">
+                  <div className="relative h-56 w-full overflow-hidden">
+                    {course.thumbnail_url ? (
                       <Image
                         src={course.thumbnail_url}
                         alt={course.title}
                         fill
-                        className="object-cover"
+                        className="object-cover group-hover:scale-110 transition-transform duration-1000"
                       />
+                    ) : (
+                      <div className="h-full w-full bg-muted flex items-center justify-center">
+                        <BookOpen className="w-16 h-16 text-muted-foreground/10" />
+                      </div>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-card to-transparent opacity-80" />
+                  </div>
+
+                  <div className="p-10">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest">
+                        {priceLabel}
+                      </span>
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                        <Video className="w-3.5 h-3.5 text-primary" />
+                        {videoCount} aulas
+                      </div>
                     </div>
-                  ) : (
-                    <div className="h-48 w-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                      <BookOpen className="w-16 h-16 text-white opacity-50" />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="font-bold text-xl mb-3">{course.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+
+                    <h3 className="font-black text-2xl mb-4 text-foreground group-hover:text-primary transition-colors leading-[1.1]">{course.title}</h3>
+                    <p className="text-muted-foreground text-sm mb-8 line-clamp-2 font-medium">
                       {course.description}
                     </p>
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-primary">
-                        <div className="flex items-center gap-2">
-                          <Video className="w-4 h-4" />
-                          <span>
-                            {videoCount} {videoCount === 1 ? 'vídeo' : 'vídeos'}
-                          </span>
-                        </div>
-                        <span className="text-muted-foreground">
-                          {course.modules_count || 0} módulos
-                        </span>
-                        <span className="text-muted-foreground">
-                          {priceLabel}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CalendarClock className="w-4 h-4" />
+
+                    <div className="flex items-center justify-between pt-6 border-t border-border/50">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                        <CalendarClock className="w-3.5 h-3.5" />
                         <span>{enrollmentLabel}</span>
                       </div>
-                      <span className="text-primary font-semibold text-sm">
-                        Ver curso →
+                      <span className="text-primary text-xs font-black uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                        Matricular <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
                   </div>
@@ -103,30 +106,35 @@ export default async function CursosPage() {
             })}
           </div>
         ) : (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-xl font-semibold mb-2">Nenhum curso disponível</h3>
-            <p className="text-gray-600">
-              Em breve teremos cursos incríveis para você
+          <div className="text-center py-24 bg-card border border-dashed border-border rounded-[3rem]">
+            <BookOpen className="w-20 h-20 mx-auto mb-6 text-muted-foreground/20" />
+            <h3 className="text-2xl font-black text-foreground mb-2">Nenhum curso disponível</h3>
+            <p className="text-muted-foreground font-medium">
+              Em breve teremos cursos incríveis para o seu crescimento.
             </p>
           </div>
         )}
 
         {/* CTA Section */}
-        <div className="mt-16 bg-primary/5 border border-primary/20 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            Faça parte da nossa comunidade
-          </h2>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            Crie uma conta para acessar os cursos, acompanhar seu progresso e participar
-            da nossa comunidade.
-          </p>
-          <Link
-            href="/registro"
-            className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
-          >
-            Criar Conta Grátis
-          </Link>
+        <div className="mt-24 bg-primary/5 border border-primary/20 rounded-[3rem] p-12 md:p-20 text-center overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
+
+          <div className="relative z-10 space-y-8">
+            <h2 className="text-4xl md:text-5xl font-black text-foreground tracking-tighter italic">
+              Cresça conosco em comunidade
+            </h2>
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto font-medium leading-relaxed">
+              Crie sua conta para acessar os cursos, acompanhar seu progresso e participar
+              da nossa jornada de conhecimento.
+            </p>
+            <Link
+              href="/registro"
+              className="inline-block bg-primary text-primary-foreground px-12 py-5 rounded-full font-black uppercase tracking-widest text-sm shadow-2xl shadow-primary/20 hover:scale-105 transition-all duration-300"
+            >
+              Começar Jornada Agora
+            </Link>
+          </div>
         </div>
       </div>
     </div>

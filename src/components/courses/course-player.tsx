@@ -161,12 +161,12 @@ export function CoursePlayer({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* Video Player */}
-      <div className="lg:col-span-2">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="lg:col-span-3 space-y-8">
+        <div className="bg-card rounded-[2.5rem] border border-border/50 overflow-hidden shadow-2xl">
           {/* Video */}
-          <div className="relative bg-black aspect-video">
+          <div className="relative bg-black aspect-video group">
             <video
               ref={videoRef}
               src={videoUrl}
@@ -179,73 +179,79 @@ export function CoursePlayer({
           </div>
 
           {/* Video Info */}
-          <div className="p-6">
-            <h1 className="text-2xl font-bold mb-2">{currentVideo.title}</h1>
+          <div className="p-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+              <div>
+                <h1 className="text-3xl font-black text-foreground tracking-tighter leading-tight mb-2">{currentVideo.title}</h1>
+                <div className="flex items-center gap-4">
+                  {currentProgress?.completed ? (
+                    <div className="flex items-center gap-2 text-primary font-black uppercase tracking-widest text-[10px]">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Concluído</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted-foreground font-black uppercase tracking-widest text-[10px]">
+                      <Clock className="w-4 h-4 text-primary" />
+                      <span>
+                        {currentProgress
+                          ? `${formatDuration(currentProgress.watched_seconds)} assistido`
+                          : 'Não iniciado'}
+                      </span>
+                    </div>
+                  )}
+                  <div className="w-px h-3 bg-border" />
+                  {currentVideo.duration_seconds > 0 && (
+                    <span className="text-muted-foreground/60 font-black uppercase tracking-widest text-[10px]">
+                      Duração: {formatDuration(currentVideo.duration_seconds)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <div className="bg-muted px-4 py-2 rounded-2xl border border-border/50">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Aula {currentVideo.order_index + 1} de {videos.length}</span>
+                </div>
+              </div>
+            </div>
+
             {currentVideo.description && (
-              <p className="text-gray-600 mb-4 whitespace-pre-wrap">
+              <p className="text-muted-foreground font-medium leading-[1.8] whitespace-pre-wrap max-w-4xl">
                 {currentVideo.description}
               </p>
             )}
-
-            {/* Progress */}
-            <div className="flex items-center gap-4 text-sm">
-              {currentProgress?.completed ? (
-                <div className="flex items-center gap-2 text-green-600">
-                  <CheckCircle className="w-5 h-5" />
-                  <span className="font-semibold">Concluído</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Clock className="w-5 h-5" />
-                  <span>
-                    {currentProgress
-                      ? `${formatDuration(currentProgress.watched_seconds)} assistido`
-                      : 'Não iniciado'}
-                  </span>
-                </div>
-              )}
-              {currentVideo.duration_seconds > 0 && (
-                <span className="text-gray-400">
-                  Duração: {formatDuration(currentVideo.duration_seconds)}
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
-        {/* Course Info */}
-        <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold mb-2">{course.title}</h2>
-          {course.description && (
-            <p className="text-gray-600 whitespace-pre-wrap">{course.description}</p>
-          )}
-        </div>
-
         {/* Interaction Area */}
-        <CommentSection
-          videoId={currentVideo.id}
-          userId={profile.id}
-          userRole={profile.role}
-        />
+        <div className="bg-card/50 rounded-[2.5rem] border border-border/40 p-10">
+          <CommentSection
+            videoId={currentVideo.id}
+            userId={profile.id}
+            userRole={profile.role}
+          />
+        </div>
       </div>
 
       {/* Video List Sidebar */}
       <div className="lg:col-span-1">
-        <div className="bg-white rounded-lg shadow-lg sticky top-4">
-          <div className="p-6 border-b">
-            <h2 className="font-bold text-lg mb-2">Conteúdo do Curso</h2>
-            <div className="text-sm text-gray-600">
-              {enrollment.progress_percentage}% concluído
+        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-2xl sticky top-8 overflow-hidden">
+          <div className="p-8 border-b border-border/50">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-black text-xs uppercase tracking-[0.2em] text-foreground">Conteúdo</h2>
+              <div className="text-[10px] font-black text-primary uppercase tracking-widest">
+                {enrollment.progress_percentage}%
+              </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-primary h-2 rounded-full transition-all"
+                className="bg-primary h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.5)]"
                 style={{ width: `${enrollment.progress_percentage}%` }}
               />
             </div>
           </div>
 
-          <div className="max-h-[600px] overflow-y-auto">
+          <div className="max-h-[calc(100vh-250px)] overflow-y-auto no-scrollbar">
             {videos.map((video, index) => {
               const progress = progressMap.get(video.id)
               const isActive = video.id === currentVideo.id
@@ -255,42 +261,49 @@ export function CoursePlayer({
                 <button
                   key={video.id}
                   onClick={() => handleVideoSelect(video)}
-                  className={`w-full text-left p-4 border-b hover:bg-gray-50 transition-colors ${isActive ? 'bg-primary/5 border-l-4 border-l-primary' : ''
+                  className={`w-full text-left p-6 border-b border-border/40 last:border-0 transition-all duration-500 hover:bg-muted/30 ${isActive ? 'bg-primary/5' : ''
                     }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-4">
                     <div
-                      className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${isCompleted
-                        ? 'bg-green-100 text-green-700'
+                      className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black tracking-widest transition-all duration-500 ${isCompleted
+                        ? 'bg-primary/10 text-primary border border-primary/20'
                         : isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-gray-100 text-gray-600'
+                          ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110'
+                          : 'bg-muted text-muted-foreground'
                         }`}
                     >
                       {isCompleted ? (
-                        <CheckCircle className="w-5 h-5" />
+                        <CheckCircle className="w-4 h-4" />
                       ) : (
                         <span>{index + 1}</span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3
-                        className={`font-semibold text-sm mb-1 line-clamp-2 ${isActive ? 'text-primary' : ''
+                        className={`font-black text-sm mb-1 line-clamp-2 leading-snug transition-colors ${isActive ? 'text-primary' : 'text-foreground'
                           }`}
                       >
                         {video.title}
                       </h3>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
                         {video.duration_seconds > 0 && (
                           <span>{formatDuration(video.duration_seconds)}</span>
                         )}
                         {progress && !progress.completed && (
-                          <span>• {formatDuration(progress.watched_seconds)} assistido</span>
+                          <>
+                            <span className="w-1 h-1 bg-border rounded-full" />
+                            <span className="text-primary italic">{formatDuration(progress.watched_seconds)} visto</span>
+                          </>
                         )}
                       </div>
                     </div>
                     {isActive && isPlaying && (
-                      <Play className="w-4 h-4 text-primary flex-shrink-0" />
+                      <div className="flex items-center gap-1 mt-1">
+                        <div className="w-0.5 h-3 bg-primary animate-[bounce_1s_infinite]" />
+                        <div className="w-0.5 h-4 bg-primary animate-[bounce_1s_infinite_0.2s]" />
+                        <div className="w-0.5 h-2 bg-primary animate-[bounce_1s_infinite_0.4s]" />
+                      </div>
                     )}
                   </div>
                 </button>

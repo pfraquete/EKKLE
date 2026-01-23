@@ -31,70 +31,78 @@ export default async function EventosPage() {
     .limit(6)
 
   return (
-    <div className="py-12">
-      <div className="container mx-auto px-4">
+    <div className="py-24 bg-background animate-in fade-in duration-700">
+      <div className="container mx-auto px-6">
         {/* Page Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold mb-4">Nossos Eventos</h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Participe dos nossos eventos e faça parte da nossa comunidade
+        <div className="mb-20 space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-1 bg-primary rounded-full" />
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Agenda</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter italic">Nossa Casa</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl font-medium tracking-tight">
+            Participe dos nossos eventos, cursos e atividades para fortalecer sua caminhada em comunidade.
           </p>
         </div>
 
         {/* Upcoming Events */}
         {upcomingEvents && upcomingEvents.length > 0 ? (
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold mb-6">Próximos Eventos</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mb-24">
+            <div className="flex items-center gap-4 mb-10">
+              <h2 className="text-2xl font-black text-foreground uppercase tracking-tight">Próximos Eventos</h2>
+              <div className="flex-1 h-px bg-border/50" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {upcomingEvents.map((event) => (
                 <Link
                   key={event.id}
                   href={`/eventos/${event.id}`}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                  className="group bg-card border border-border/40 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:border-primary/20 transition-all duration-500"
                 >
-                  {event.image_url ? (
-                    <div className="relative h-48 w-full">
+                  <div className="relative h-56 w-full overflow-hidden">
+                    {event.image_url ? (
                       <Image
                         src={event.image_url}
                         alt={event.title}
                         fill
-                        className="object-cover"
+                        className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
                       />
-                    </div>
-                  ) : (
-                    <div className="h-48 w-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                      <Calendar className="w-16 h-16 text-white opacity-50" />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="font-bold text-xl mb-3">{event.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {event.description}
-                    </p>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-primary">
-                        <Calendar className="w-4 h-4" />
-                        {new Date(event.start_date).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: 'long',
-                          year: 'numeric',
-                        })}
+                    ) : (
+                      <div className="h-full w-full bg-muted flex items-center justify-center">
+                        <Calendar className="w-16 h-16 text-muted-foreground/10" />
                       </div>
-                      {event.end_date && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
-                          {new Date(event.start_date).toLocaleTimeString('pt-BR', {
-                            hour: '2-digit',
-                            minute: '2-digit',
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60" />
+                  </div>
+
+                  <div className="p-10">
+                    <h3 className="font-black text-2xl mb-5 text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">{event.title}</h3>
+
+                    <div className="space-y-4 mb-4">
+                      <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-primary">
+                        <Calendar className="w-4 h-4" />
+                        <span>
+                          {new Date(event.start_date).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric',
                           })}
-                        </div>
-                      )}
+                        </span>
+                      </div>
+
                       {event.location && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                           <MapPin className="w-4 h-4" />
                           <span className="line-clamp-1">{event.location}</span>
                         </div>
                       )}
+                    </div>
+
+                    <div className="pt-6 border-t border-border/50 flex justify-end">
+                      <span className="text-primary text-xs font-black uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                        Ver Detalhes →
+                      </span>
                     </div>
                   </div>
                 </Link>
@@ -102,11 +110,11 @@ export default async function EventosPage() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 bg-gray-50 rounded-lg mb-16">
-            <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-xl font-semibold mb-2">Nenhum evento próximo</h3>
-            <p className="text-gray-600">
-              Fique atento às nossas redes sociais para novos eventos
+          <div className="text-center py-24 bg-card border border-dashed border-border rounded-[3rem] mb-24">
+            <Calendar className="w-20 h-20 mx-auto mb-6 text-muted-foreground/10" />
+            <h3 className="text-2xl font-black text-foreground mb-2">Sem eventos no momento</h3>
+            <p className="text-muted-foreground font-medium">
+              Acompanhe nossas atualizações para novas programações em breve.
             </p>
           </div>
         )}
@@ -114,35 +122,39 @@ export default async function EventosPage() {
         {/* Past Events */}
         {pastEvents && pastEvents.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Eventos Anteriores</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex items-center gap-4 mb-10 opacity-50">
+              <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Eventos Anteriores</h2>
+              <div className="flex-1 h-px bg-border/50" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {pastEvents.map((event) => (
                 <Link
                   key={event.id}
                   href={`/eventos/${event.id}`}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow opacity-75"
+                  className="group bg-card/40 border border-border/20 rounded-[2rem] overflow-hidden hover:bg-card transition-all duration-300 opacity-60 hover:opacity-100"
                 >
-                  {event.image_url ? (
-                    <div className="relative h-48 w-full">
+                  <div className="relative h-40 w-full overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
+                    {event.image_url ? (
                       <Image
                         src={event.image_url}
                         alt={event.title}
                         fill
-                        className="object-cover grayscale"
+                        className="object-cover"
                       />
-                    </div>
-                  ) : (
-                    <div className="h-48 w-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center">
-                      <Calendar className="w-16 h-16 text-white opacity-50" />
-                    </div>
-                  )}
+                    ) : (
+                      <div className="h-full w-full bg-muted flex items-center justify-center">
+                        <Calendar className="w-10 h-10 text-muted-foreground/10" />
+                      </div>
+                    )}
+                  </div>
                   <div className="p-6">
-                    <h3 className="font-bold text-xl mb-3">{event.title}</h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="w-4 h-4" />
+                    <h3 className="font-bold text-lg mb-3 text-foreground line-clamp-1">{event.title}</h3>
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      <Calendar className="w-3.5 h-3.5" />
                       {new Date(event.start_date).toLocaleDateString('pt-BR', {
                         day: '2-digit',
-                        month: 'long',
+                        month: 'short',
                         year: 'numeric',
                       })}
                     </div>

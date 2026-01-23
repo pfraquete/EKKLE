@@ -2,10 +2,11 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen, User, LogOut, ShoppingBag, Package, Calendar, Home } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import Image from 'next/image'
 import { CartProvider } from '@/context/cart-context'
 import { CartButton } from '@/components/store/cart-button'
+import { SidebarNav } from '@/components/membro/sidebar-nav'
 
 export default async function MembroLayout({
   children,
@@ -37,109 +38,72 @@ export default async function MembroLayout({
 
   return (
     <CartProvider>
-      <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="border-b bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo and Church Name */}
-            <Link href="/" className="flex items-center gap-3">
-              {church.logo_url ? (
-                <Image
-                  src={church.logo_url}
-                  alt={church.name}
-                  width={40}
-                  height={40}
-                  className="rounded-lg"
-                />
-              ) : (
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-                  {church.name[0]}
+      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20">
+        {/* Header */}
+        <header className="border-b border-border/40 bg-background/60 backdrop-blur-2xl sticky top-0 z-50">
+          <div className="container mx-auto px-8 py-4">
+            <div className="flex items-center justify-between">
+              {/* Logo and Church Name */}
+              <Link href="/" className="flex items-center gap-4 group">
+                {church.logo_url ? (
+                  <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-2xl group-hover:scale-110 transition-all duration-500 border border-white/10">
+                    <Image
+                      src={church.logo_url}
+                      alt={church.name}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary font-black border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                    {church.name[0]}
+                  </div>
+                )}
+                <div className="flex flex-col">
+                  <span className="font-black text-xl tracking-tighter uppercase whitespace-nowrap leading-none mb-0.5">{church.name}</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/80">Ambiente de Membro</span>
                 </div>
-              )}
-              <span className="font-bold">{church.name}</span>
-            </Link>
-
-            {/* User Menu */}
-            <div className="flex items-center gap-4">
-              <CartButton />
-              <span className="text-sm text-gray-600 hidden sm:block">
-                {profile?.full_name || user.email}
-              </span>
-              <Link
-                href="/"
-                className="text-sm text-gray-600 hover:text-primary transition-colors"
-              >
-                Voltar ao Site
               </Link>
+
+              {/* User Menu */}
+              <div className="flex items-center gap-6">
+                <CartButton />
+                <div className="flex items-center gap-5 pl-6 border-l border-border/50">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-sm font-black text-foreground leading-none mb-1">
+                      {profile?.full_name?.split(' ')[0] || user.email?.split('@')[0]}
+                    </p>
+                    <div className="flex items-center justify-end gap-1.5 opacity-60">
+                      <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
+                      <p className="text-[9px] uppercase font-black tracking-widest text-muted-foreground">Online</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/"
+                    className="p-3 bg-muted/30 rounded-2xl text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:shadow-xl hover:shadow-primary/20 transition-all duration-500 group"
+                    title="Explorar Site Público"
+                  >
+                    <LogOut className="w-5 h-5 rotate-180 group-hover:scale-110 transition-transform" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
+        </header>
+
+        {/* Sidebar + Content */}
+        <div className="flex-1 flex max-w-[1600px] mx-auto w-full">
+          {/* Sidebar */}
+          <aside className="w-80 hidden lg:block py-12 px-8">
+            <SidebarNav />
+          </aside>
+
+          {/* Main Content */}
+          <main className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto">
+            {children}
+          </main>
         </div>
-      </header>
-
-      {/* Sidebar + Content */}
-      <div className="flex-1 flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-gray-50 border-r hidden md:block">
-          <nav className="p-4 space-y-2">
-            <Link
-              href="/membro"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
-            >
-              <User className="w-5 h-5" />
-              <span>Meu Perfil</span>
-            </Link>
-            <Link
-              href="/membro/cursos"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
-            >
-              <BookOpen className="w-5 h-5" />
-              <span>Meus Cursos</span>
-            </Link>
-            <Link
-              href="/membro/eventos"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
-            >
-              <Calendar className="w-5 h-5" />
-              <span>Meus Eventos</span>
-            </Link>
-            <Link
-              href="/membro/celulas"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
-            >
-              <Home className="w-5 h-5" />
-              <span>Células</span>
-            </Link>
-            <Link
-              href="/membro/loja"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              <span>Loja Virtual</span>
-            </Link>
-            <Link
-              href="/membro/pedidos"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
-            >
-              <Package className="w-5 h-5" />
-              <span>Meus Pedidos</span>
-            </Link>
-            <form action="/api/auth/signout" method="POST">
-              <button
-                type="submit"
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors text-red-600"
-              >
-                <LogOut className="w-5 h-5" />
-                <span>Sair</span>
-              </button>
-            </form>
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">{children}</main>
       </div>
-    </div>
     </CartProvider>
   )
 }

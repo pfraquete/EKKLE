@@ -15,30 +15,30 @@ export default async function MemberStorePage() {
   const activeCategories = categories.filter((c) => c.is_active);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 mb-2">
+      <div>
+        <div className="flex items-center gap-4 mb-2">
+          <div className="p-3 bg-primary/10 rounded-2xl">
             <ShoppingBag className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold">Loja Virtual</h1>
           </div>
-          <p className="text-muted-foreground">
-            Confira os produtos disponíveis e faça seu pedido
-          </p>
+          <div>
+            <h1 className="text-4xl font-black text-foreground tracking-tight">Loja Virtual</h1>
+            <p className="text-muted-foreground font-medium">Confira os produtos selecionados da nossa comunidade</p>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div>
         {products.length === 0 ? (
-          <Card className="p-12 text-center">
-            <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Nenhum produto disponível</h3>
-            <p className="text-muted-foreground">
-              Em breve teremos produtos disponíveis na loja
+          <div className="py-24 text-center bg-card border border-dashed border-border rounded-[3rem]">
+            <Package className="w-20 h-20 mx-auto text-muted-foreground/10 mb-6" />
+            <h3 className="text-2xl font-black text-foreground mb-2">Vitrine vazia</h3>
+            <p className="text-muted-foreground font-medium">
+              Em breve teremos produtos exclusivos disponíveis para você.
             </p>
-          </Card>
+          </div>
         ) : (
           <StoreCatalog products={products} categories={activeCategories} />
         )}
