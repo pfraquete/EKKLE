@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getChurch } from '@/lib/get-church'
-import { generateTempPassword } from '@/lib/auth-utils'
 import { sendWelcomeEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
@@ -21,12 +20,20 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { fullName, email, phone, message } = body
+    const { fullName, email, phone, password, message } = body
 
     // Validate required fields
-    if (!fullName || !email) {
+    if (!fullName || !email || !password) {
       return NextResponse.json(
-        { error: 'Nome e email são obrigatórios' },
+        { error: 'Nome, email e senha são obrigatórios' },
+        { status: 400 }
+      )
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: 'A senha deve ter pelo menos 6 caracteres' },
         { status: 400 }
       )
     }
@@ -75,13 +82,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate temporary password
-    const tempPassword = generateTempPassword()
-
-    // 1. Create user in Supabase Auth
+    // 1. Create user in Supabase Auth with user's chosen password
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email,
-      password: tempPassword,
+      password: password,
       email_confirm: true, // Auto-confirm email
       user_metadata: {
         full_name: fullName,
@@ -126,14 +130,13 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // 3. Send welcome email with credentials
+      // 3. Send welcome email
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
       const loginUrl = `${appUrl}/login`
 
       const emailResult = await sendWelcomeEmail({
         to: email,
         name: fullName,
-        tempPassword,
         churchName,
         loginUrl,
       })

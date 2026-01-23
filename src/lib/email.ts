@@ -102,13 +102,11 @@ export async function sendNewRegistrationNotification(adminEmail: string, adminN
 export async function sendWelcomeEmail({
   to,
   name,
-  tempPassword,
   churchName,
   loginUrl
 }: {
   to: string
   name: string
-  tempPassword: string
   churchName: string
   loginUrl: string
 }) {
@@ -135,15 +133,8 @@ export async function sendWelcomeEmail({
             <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>${name}</strong>!</p>
             <p style="font-size: 16px; line-height: 1.6;">Seja muito bem-vindo(a) à <strong>${churchName}</strong>! Seu cadastro foi concluído com sucesso.</p>
 
-            <div style="background-color: #fef2f2; padding: 24px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #e11d48;">
-              <p style="margin: 0 0 12px 0; font-weight: bold; font-size: 16px;">Seus dados de acesso:</p>
-              <p style="margin: 0 0 8px 0;"><strong>E-mail:</strong> <span style="font-family: monospace; background: #fee2e2; padding: 4px 8px; border-radius: 4px;">${to}</span></p>
-              <p style="margin: 0;"><strong>Senha temporária:</strong> <span style="font-family: monospace; background: #fee2e2; padding: 4px 8px; border-radius: 4px; font-size: 16px;">${tempPassword}</span></p>
-            </div>
-
-            <div style="background-color: #fff7ed; padding: 20px; border-radius: 8px; margin: 24px 0; border: 1px solid #fed7aa;">
-              <p style="margin: 0; color: #ea580c; font-weight: bold;">⚠️ IMPORTANTE:</p>
-              <p style="margin: 8px 0 0 0; color: #9a3412; line-height: 1.6;">Por segurança, recomendamos que você altere sua senha no primeiro acesso. Acesse <strong>Configurações > Perfil</strong> após fazer login.</p>
+            <div style="background-color: #f0fdf4; padding: 24px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #10b981;">
+              <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #065f46;">Agora você já pode fazer login e aproveitar todos os recursos disponíveis para membros!</p>
             </div>
 
             <div style="text-align: center; margin: 32px 0;">

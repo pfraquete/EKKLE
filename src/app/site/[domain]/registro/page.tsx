@@ -12,6 +12,8 @@ export default function RegistroPage() {
     fullName: '',
     email: '',
     phone: '',
+    password: '',
+    confirmPassword: '',
     message: '',
   })
 
@@ -20,11 +22,30 @@ export default function RegistroPage() {
     setLoading(true)
     setError('')
 
+    // Validate password
+    if (formData.password.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres')
+      setLoading(false)
+      return
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('As senhas não coincidem')
+      setLoading(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/member-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          message: formData.message,
+        }),
       })
 
       const data = await response.json()
@@ -66,7 +87,7 @@ export default function RegistroPage() {
           </div>
           <h2 className="text-2xl font-bold mb-4">Cadastro Concluído!</h2>
           <p className="text-gray-600 mb-6">
-            Seu cadastro foi realizado com sucesso! Verifique seu e-mail para acessar suas credenciais e fazer login na área de membros.
+            Sua conta foi criada com sucesso! Agora você já pode fazer login e acessar a área de membros.
           </p>
           <div className="space-y-3">
             <Link
@@ -148,6 +169,37 @@ export default function RegistroPage() {
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="(00) 00000-0000"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold mb-2">
+                Senha *
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Mínimo 6 caracteres"
+                minLength={6}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-semibold mb-2">
+                Confirmar Senha *
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                required
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Digite a senha novamente"
               />
             </div>
 
