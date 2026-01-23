@@ -2,7 +2,7 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen, User, LogOut, ShoppingBag, Package, Calendar } from 'lucide-react'
+import { BookOpen, User, LogOut, ShoppingBag, Package, Calendar, Home } from 'lucide-react'
 import Image from 'next/image'
 import { CartProvider } from '@/context/cart-context'
 import { CartButton } from '@/components/store/cart-button'
@@ -102,6 +102,13 @@ export default async function MembroLayout({
             >
               <Calendar className="w-5 h-5" />
               <span>Meus Eventos</span>
+            </Link>
+            <Link
+              href="/membro/celulas"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white transition-colors"
+            >
+              <Home className="w-5 h-5" />
+              <span>Células</span>
             </Link>
             <Link
               href="/membro/loja"

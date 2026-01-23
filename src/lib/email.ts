@@ -183,3 +183,226 @@ export async function sendWelcomeEmail({
     return { success: false, error };
   }
 }
+
+/**
+ * Send notification to cell leader when member requests to join
+ */
+export async function sendCellRequestNotification({
+  to,
+  leaderName,
+  memberName,
+  cellName,
+  message,
+  requestsUrl
+}: {
+  to: string
+  leaderName: string
+  memberName: string
+  cellName: string
+  message?: string
+  requestsUrl: string
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.FROM_EMAIL || 'Ekkle <onboarding@resend.dev>';
+
+  if (!apiKey) {
+    console.error('RESEND_API_KEY is not configured. Email not sent.');
+    return { success: false, error: 'API Key missing' };
+  }
+
+  const resend = new Resend(apiKey);
+  try {
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to,
+      subject: `Nova Solicitação para ${cellName}`,
+      html: `
+        <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+          <div style="background-color: #e11d48; padding: 24px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">Nova Solicitação de Participação</h1>
+          </div>
+          <div style="padding: 24px;">
+            <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>${leaderName}</strong>!</p>
+            <p style="font-size: 16px; line-height: 1.6;"><strong>${memberName}</strong> solicitou participação na célula <strong>${cellName}</strong>.</p>
+
+            ${message ? `
+            <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #e11d48;">
+              <p style="margin: 0 0 8px 0; font-weight: bold; color: #666; font-size: 14px;">Mensagem do solicitante:</p>
+              <p style="margin: 0; font-style: italic; color: #666;">"${message}"</p>
+            </div>
+            ` : ''}
+
+            <p style="font-size: 16px; line-height: 1.6;">Para aprovar ou recusar esta solicitação, acesse o painel de solicitações:</p>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${requestsUrl}" style="display: inline-block; background-color: #e11d48; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(225, 29, 72, 0.2);">Ver Solicitações Pendentes</a>
+            </div>
+
+            <p style="font-size: 14px; color: #666; margin-top: 24px;">
+              Este é um e-mail automático. Por favor, responda pela plataforma Ekkle.
+            </p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+            <p style="margin: 0;">© 2026 Ekkle</p>
+            <p style="margin: 8px 0 0 0;">Sistema de Gestão Eclesiástica</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending cell request notification:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Email service cell request error:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send notification to member when cell request is approved
+ */
+export async function sendCellApprovalNotification({
+  to,
+  memberName,
+  cellName,
+  cellUrl
+}: {
+  to: string
+  memberName: string
+  cellName: string
+  cellUrl: string
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.FROM_EMAIL || 'Ekkle <onboarding@resend.dev>';
+
+  if (!apiKey) {
+    console.error('RESEND_API_KEY is not configured. Email not sent.');
+    return { success: false, error: 'API Key missing' };
+  }
+
+  const resend = new Resend(apiKey);
+  try {
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to,
+      subject: `Solicitação Aprovada - ${cellName}`,
+      html: `
+        <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+          <div style="background-color: #10b981; padding: 32px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">🎉 Solicitação Aprovada!</h1>
+          </div>
+          <div style="padding: 32px;">
+            <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>${memberName}</strong>!</p>
+            <p style="font-size: 16px; line-height: 1.6;">Sua solicitação para participar da célula <strong>${cellName}</strong> foi aprovada! Você agora faz parte desta célula.</p>
+
+            <div style="background-color: #d1fae5; padding: 24px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #10b981;">
+              <p style="margin: 0; font-size: 16px; line-height: 1.6;">Acesse a página da sua célula para ver informações sobre próximos encontros, membros e muito mais.</p>
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${cellUrl}" style="display: inline-block; background-color: #10b981; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">Acessar Minha Célula</a>
+            </div>
+
+            <p style="font-size: 14px; color: #666; margin-top: 24px;">
+              Estamos felizes em ter você conosco! Seja muito bem-vindo(a).
+            </p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+            <p style="margin: 0;">© 2026 Ekkle</p>
+            <p style="margin: 8px 0 0 0;">Sistema de Gestão Eclesiástica</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending cell approval notification:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Email service cell approval error:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send notification to member when cell request is rejected
+ */
+export async function sendCellRejectionNotification({
+  to,
+  memberName,
+  cellName,
+  reason,
+  cellsUrl
+}: {
+  to: string
+  memberName: string
+  cellName: string
+  reason?: string
+  cellsUrl: string
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.FROM_EMAIL || 'Ekkle <onboarding@resend.dev>';
+
+  if (!apiKey) {
+    console.error('RESEND_API_KEY is not configured. Email not sent.');
+    return { success: false, error: 'API Key missing' };
+  }
+
+  const resend = new Resend(apiKey);
+  try {
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to,
+      subject: `Solicitação não aprovada - ${cellName}`,
+      html: `
+        <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+          <div style="background-color: #f59e0b; padding: 24px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">Sobre sua Solicitação</h1>
+          </div>
+          <div style="padding: 24px;">
+            <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>${memberName}</strong>,</p>
+            <p style="font-size: 16px; line-height: 1.6;">Informamos que sua solicitação para participar da célula <strong>${cellName}</strong> não foi aprovada no momento.</p>
+
+            ${reason ? `
+            <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #f59e0b;">
+              <p style="margin: 0 0 8px 0; font-weight: bold; color: #92400e; font-size: 14px;">Motivo:</p>
+              <p style="margin: 0; color: #92400e;">${reason}</p>
+            </div>
+            ` : ''}
+
+            <p style="font-size: 16px; line-height: 1.6;">Não desanime! Existem outras células disponíveis que podem ser a escolha certa para você. Você pode explorar e solicitar participação em outras células.</p>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${cellsUrl}" style="display: inline-block; background-color: #e11d48; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(225, 29, 72, 0.2);">Ver Outras Células</a>
+            </div>
+
+            <p style="font-size: 14px; color: #666; margin-top: 24px;">
+              Se tiver dúvidas, entre em contato com a liderança da igreja.
+            </p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+            <p style="margin: 0;">© 2026 Ekkle</p>
+            <p style="margin: 8px 0 0 0;">Sistema de Gestão Eclesiástica</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending cell rejection notification:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Email service cell rejection error:', error);
+    return { success: false, error };
+  }
+}

@@ -23,7 +23,7 @@ export async function requestCellMembership(cellId: string, message?: string) {
     // Check if cell exists and is active
     const { data: cell, error: cellError } = await supabase
         .from('cells')
-        .select('id, name, status, church_id')
+        .select('id, name, status, church_id, leader_id')
         .eq('id', cellId)
         .single()
 
@@ -69,8 +69,27 @@ export async function requestCellMembership(cellId: string, message?: string) {
         return { success: false, error: 'Erro ao criar solicitação' }
     }
 
-    // TODO: Send notification to cell leader
-    // sendCellRequestNotification(cell.leader_id, profile.full_name, cell.name)
+    // Send notification to cell leader
+    const { data: leader } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', cell.leader_id)
+        .single()
+
+    if (leader) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
+        const requestsUrl = `${appUrl}/minha-celula/solicitacoes`
+
+        const { sendCellRequestNotification } = await import('@/lib/email')
+        await sendCellRequestNotification({
+            to: leader.email,
+            leaderName: leader.full_name,
+            memberName: profile.full_name,
+            cellName: cell.name,
+            message: message,
+            requestsUrl
+        })
+    }
 
     revalidatePath('/celulas')
     revalidatePath(`/celulas/${cellId}`)
@@ -252,8 +271,25 @@ export async function approveCellRequest(requestId: string) {
         return { success: false, error: 'Erro ao adicionar membro à célula' }
     }
 
-    // TODO: Send notification to member
-    // sendCellApprovalNotification(request.profile_id, request.cell.name)
+    // Send notification to member
+    const { data: member } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', request.profile_id)
+        .single()
+
+    if (member) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
+        const cellUrl = `${appUrl}/minha-celula`
+
+        const { sendCellApprovalNotification } = await import('@/lib/email')
+        await sendCellApprovalNotification({
+            to: member.email,
+            memberName: member.full_name,
+            cellName: cell.name,
+            cellUrl
+        })
+    }
 
     revalidatePath('/minha-celula')
     revalidatePath('/minha-celula/solicitacoes')
@@ -327,8 +363,26 @@ export async function rejectCellRequest(requestId: string, reason?: string) {
         return { success: false, error: 'Erro ao rejeitar solicitação' }
     }
 
-    // TODO: Send notification to member
-    // sendCellRejectionNotification(request.profile_id, request.cell.name, reason)
+    // Send notification to member
+    const { data: member } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', request.profile_id)
+        .single()
+
+    if (member) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
+        const cellsUrl = `${appUrl}/celulas`
+
+        const { sendCellRejectionNotification } = await import('@/lib/email')
+        await sendCellRejectionNotification({
+            to: member.email,
+            memberName: member.full_name,
+            cellName: cell.name,
+            reason: reason,
+            cellsUrl
+        })
+    }
 
     revalidatePath('/minha-celula/solicitacoes')
     revalidatePath('/celulas')
