@@ -30,31 +30,40 @@ export async function setupWhatsApp() {
 
     const instanceName = `ekkle_church_${churchId.split('-')[0]}`
 
-    // 2. Check if instance exists in Evolution API
-    const existingInstance = await EvolutionService.getInstance(instanceName)
-
-    if (existingInstance) {
-        console.log('Instance already exists in Evolution API, deleting and recreating...')
-        try {
-            await EvolutionService.logoutInstance(instanceName)
-            await EvolutionService.deleteInstance(instanceName)
-            // Wait a bit before recreating
-            await new Promise(resolve => setTimeout(resolve, 2000))
-        } catch (e) {
-            console.warn('Error deleting existing instance:', e)
-        }
+    // 2. Force cleanup - delete instance regardless of state (ignore errors)
+    console.log('Force cleanup: attempting to delete any existing instance...')
+    try {
+        await EvolutionService.logoutInstance(instanceName)
+    } catch (e) {
+        console.log('Logout failed (expected if instance does not exist):', (e as Error).message)
     }
 
-    // 3. Create instance in Evolution API
+    try {
+        await EvolutionService.deleteInstance(instanceName)
+        console.log('Instance deleted successfully')
+    } catch (e) {
+        console.log('Delete failed (expected if instance does not exist):', (e as Error).message)
+    }
+
+    // Wait for cleanup to complete
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // 3. Create new instance (ignore 400 error if instance somehow still exists)
     try {
         await EvolutionService.createInstance(instanceName)
         console.log('Instance created successfully')
-        // Wait for instance to be ready
-        await new Promise(resolve => setTimeout(resolve, 3000))
     } catch (e: any) {
-        console.error('Error creating instance:', e)
-        return { success: false, error: `Erro ao criar instância: ${e.message}` }
+        // If error is 400 (already exists), continue anyway
+        if (e.message?.includes('400')) {
+            console.log('Instance already exists (400), continuing...')
+        } else {
+            console.error('Error creating instance:', e)
+            return { success: false, error: `Erro ao criar instância: ${e.message}` }
+        }
     }
+
+    // Wait for instance to be ready
+    await new Promise(resolve => setTimeout(resolve, 3000))
 
     // 4. Save or update in DB
     if (!instance) {
@@ -80,7 +89,7 @@ export async function setupWhatsApp() {
 
     // 5. Get QR Code with retry logic
     let retries = 0
-    const maxRetries = 3
+    const maxRetries = 5
     let qrCodeData: string | null = null
 
     while (retries < maxRetries && !qrCodeData) {
@@ -99,12 +108,14 @@ export async function setupWhatsApp() {
             console.error(`Error fetching QR code (attempt ${retries}/${maxRetries}):`, e.message)
 
             if (retries < maxRetries) {
-                // Wait before retrying (exponential backoff)
-                await new Promise(resolve => setTimeout(resolve, 2000 * retries))
+                // Wait before retrying (exponential backoff: 3s, 6s, 9s, 12s, 15s)
+                const waitTime = 3000 * retries
+                console.log(`Waiting ${waitTime}ms before retry...`)
+                await new Promise(resolve => setTimeout(resolve, waitTime))
             } else {
                 return {
                     success: false,
-                    error: 'Não foi possível obter o QR Code. Por favor, tente novamente em alguns instantes.'
+                    error: 'Não foi possível obter o QR Code após 5 tentativas. Verifique se a Evolution API está funcionando corretamente.'
                 }
             }
         }
@@ -128,13 +139,30 @@ export async function disconnectWhatsApp(instanceName: string) {
     const churchId = profile.church_id
     const supabase = await createClient()
 
+    // Try to logout and delete, but don't fail if instance doesn't exist (404)
     try {
         await EvolutionService.logoutInstance(instanceName)
-        await EvolutionService.deleteInstance(instanceName)
-    } catch (e) {
-        console.error('Error disconnecting from API:', e)
+        console.log('Instance logged out successfully')
+    } catch (e: any) {
+        if (e.message?.includes('404')) {
+            console.log('Instance not found during logout (404), continuing...')
+        } else {
+            console.error('Error during logout:', e)
+        }
     }
 
+    try {
+        await EvolutionService.deleteInstance(instanceName)
+        console.log('Instance deleted successfully')
+    } catch (e: any) {
+        if (e.message?.includes('404')) {
+            console.log('Instance not found during delete (404), continuing...')
+        } else {
+            console.error('Error during delete:', e)
+        }
+    }
+
+    // Delete from database
     const { error } = await supabase
         .from('whatsapp_instances')
         .delete()
@@ -162,7 +190,17 @@ export async function checkWhatsAppStatus(instanceName: string) {
             .eq('church_id', churchId)
 
         return status
-    } catch (e) {
+    } catch (e: any) {
+        // 404 means instance doesn't exist or isn't connected yet
+        if (e.message?.includes('404')) {
+            console.log('Instance not found (404), marking as DISCONNECTED')
+            await supabase
+                .from('whatsapp_instances')
+                .update({ status: 'DISCONNECTED' })
+                .eq('church_id', churchId)
+            return 'DISCONNECTED'
+        }
+
         console.error('Error checking status:', e)
         return 'ERROR'
     }
