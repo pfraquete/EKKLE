@@ -5,7 +5,7 @@ import { requestCellJoin } from '@/actions/join-cell'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, MapPin, Clock, Calendar, CheckCircle } from 'lucide-react'
-import { useToast } from '@/components/ui/use-toast'
+import { useToast } from '@/hooks/use-toast'
 
 interface CellListProps {
     cells: {
