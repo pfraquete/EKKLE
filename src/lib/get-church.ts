@@ -27,11 +27,16 @@ export async function getChurch(): Promise<Church | null> {
   // Fallback: try to extract slug from host if headers are missing
   if (!churchId && !churchSlug) {
     const host = headersList.get('host') || ''
-    const parts = host.split('.')
-    // Assuming subdomain is the first part (e.g. slug.ekkle.com.br)
-    // Avoid 'www', 'app', 'localhost'
-    if (parts.length > 2 && !['www', 'app', 'localhost'].includes(parts[0])) {
-      churchSlug = parts[0]
+    const xForwardedHost = headersList.get('x-forwarded-host')
+    const finalHost = xForwardedHost || host
+
+    const parts = finalHost.split('.')
+    // If we have a subdomain (e.g. slug.ekkle.com.br)
+    if (parts.length >= 2) {
+      const potentialSlug = parts[0]
+      if (!['www', 'app', 'localhost', '127'].includes(potentialSlug.toLowerCase())) {
+        churchSlug = potentialSlug.toLowerCase()
+      }
     }
   }
 
