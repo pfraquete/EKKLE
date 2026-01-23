@@ -10,6 +10,7 @@ export default async function NovoMembroPage() {
         <MemberForm
             cellId={profile.cell_id}
             churchId={profile.church_id}
+            currentUserRole={profile.role}
         />
     )
 }

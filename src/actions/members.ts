@@ -12,6 +12,7 @@ const memberSchema = z.object({
     birthday: z.string().optional(),
     memberStage: z.enum(['VISITOR', 'REGULAR_VISITOR', 'MEMBER', 'GUARDIAN_ANGEL', 'TRAINING_LEADER', 'LEADER', 'PASTOR']),
     cellId: z.string().uuid(),
+    role: z.enum(['MEMBER', 'LEADER', 'PASTOR']).optional(),
 })
 
 export async function createMember(formData: FormData) {
@@ -60,7 +61,7 @@ export async function createMember(formData: FormData) {
             member_stage: validatedData.memberStage,
             cell_id: validatedData.cellId,
             church_id: churchId,
-            role: 'MEMBER',
+            role: (profile.role === 'PASTOR' && validatedData.role) ? validatedData.role : 'MEMBER',
             is_active: true,
             birthday: validatedData.birthday || null
         })
@@ -84,20 +85,29 @@ export async function updateMember(id: string, formData: FormData) {
         birthday: formData.get('birthday'),
         memberStage: formData.get('memberStage'),
         cellId: formData.get('cellId'),
+        role: formData.get('role'),
     }
 
     const validatedData = memberSchema.parse(rawData)
 
+    const updates = {
+        full_name: validatedData.fullName,
+        phone: validatedData.phone || null,
+        email: validatedData.email || null,
+        member_stage: validatedData.memberStage,
+        cell_id: validatedData.cellId,
+        birthday: validatedData.birthday || null,
+        updated_at: new Date().toISOString()
+    }
+
+    if (profile.role === 'PASTOR' && validatedData.role) {
+        // @ts-ignore - Dynamic update object
+        updates.role = validatedData.role
+    }
+
     const { error } = await supabase
         .from('profiles')
-        .update({
-            full_name: validatedData.fullName,
-            phone: validatedData.phone || null,
-            email: validatedData.email || null,
-            member_stage: validatedData.memberStage,
-            cell_id: validatedData.cellId,
-            birthday: validatedData.birthday || null
-        })
+        .update(updates)
         .eq('id', id)
         .eq('church_id', churchId)
 

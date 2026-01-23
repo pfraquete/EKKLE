@@ -15,6 +15,7 @@ interface MemberFormProps {
     initialData?: MemberFormData
     cellId: string
     churchId: string
+    currentUserRole?: string
 }
 
 interface MemberFormData {
@@ -25,9 +26,10 @@ interface MemberFormData {
     email?: string | null
     member_stage?: string
     birthday?: string | null
+    role?: string
 }
 
-export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
+export function MemberForm({ initialData, cellId, churchId, currentUserRole }: MemberFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -186,6 +188,25 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                             </Select>
                         </div>
 
+                        {currentUserRole === 'PASTOR' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="role" className="text-xs font-black text-zinc-500 uppercase tracking-widest px-1">Permissão de Acesso (CUIDADO)</Label>
+                                <Select name="role" defaultValue={initialData?.role || 'MEMBER'}>
+                                    <SelectTrigger className="h-12 bg-zinc-900/50 border-destructive/20 rounded-xl text-white focus:ring-destructive">
+                                        <SelectValue placeholder="Selecione a permissão" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="MEMBER">Membro (Padrão)</SelectItem>
+                                        <SelectItem value="LEADER">Líder (Acesso Admin)</SelectItem>
+                                        <SelectItem value="PASTOR">Pastor (Acesso Total)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-[10px] text-zinc-500 px-1">
+                                    Define o nível de acesso ao sistema. Só altere se souber o que está fazendo.
+                                </p>
+                            </div>
+                        )}
+
                         <div className="space-y-2">
                             <Label htmlFor="birthday" className="text-xs font-black text-zinc-500 uppercase tracking-widest px-1">Data de Nascimento</Label>
                             <div className="relative">
@@ -233,6 +254,6 @@ export function MemberForm({ initialData, cellId, churchId }: MemberFormProps) {
                 variant="destructive"
                 isLoading={isDeleting}
             />
-        </div>
+        </div >
     )
 }

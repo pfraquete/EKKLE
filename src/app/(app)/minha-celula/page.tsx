@@ -230,6 +230,14 @@ export default async function MinhaCelulaPage() {
                         Reunião
                     </div>
                 </Link>
+                <div className="col-span-2">
+                    <Link href="/minha-celula/solicitacoes" className="group">
+                        <div className="flex items-center justify-center gap-3 w-full h-14 font-bold border border-border/50 rounded-[1.5rem] bg-zinc-900/50 hover:bg-zinc-800 transition-all text-xs uppercase tracking-widest text-zinc-400 hover:text-white">
+                            <Users className="h-4 w-4" />
+                            Ver Solicitações Pendentes
+                        </div>
+                    </Link>
+                </div>
             </div>
         </div>
     )
