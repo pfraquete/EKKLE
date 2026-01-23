@@ -27,17 +27,17 @@ export default async function ComunicacoesPage() {
             </div>
 
             <Tabs defaultValue="bulk" className="space-y-6">
-                <TabsList className="bg-white/5 p-1 rounded-2xl border border-white/10 h-12">
+                <TabsList className="h-12 rounded-2xl border border-border bg-muted/40 p-1">
                     <TabsTrigger
                         value="bulk"
-                        className="rounded-xl px-6 py-2 h-full text-gray-400 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-lg transition-all font-bold gap-2"
+                        className="h-full gap-2 rounded-xl px-6 py-2 font-bold text-muted-foreground transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
                     >
                         <Share2 className="h-4 w-4" />
                         Disparo em Massa
                     </TabsTrigger>
                     <TabsTrigger
                         value="config"
-                        className="rounded-xl px-6 py-2 h-full text-gray-400 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-lg transition-all font-bold gap-2"
+                        className="h-full gap-2 rounded-xl px-6 py-2 font-bold text-muted-foreground transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
                     >
                         <Settings className="h-4 w-4" />
                         Conexão WhatsApp
@@ -48,12 +48,12 @@ export default async function ComunicacoesPage() {
                     {instance?.status === 'CONNECTED' ? (
                         <BulkMessagingForm />
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-muted/20 rounded-3xl border-2 border-dashed">
-                            <div className="h-20 w-20 bg-amber-500/10 rounded-full flex items-center justify-center">
-                                <MessageSquare className="h-10 w-10 text-amber-500" />
+                        <div className="flex flex-col items-center justify-center space-y-4 rounded-3xl border-2 border-dashed border-border bg-muted/20 py-20 text-center">
+                            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                                <MessageSquare className="h-10 w-10 text-primary" />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="font-bold text-lg">WhatsApp Desconectado</h3>
+                                <h3 className="text-lg font-bold text-foreground">WhatsApp Desconectado</h3>
                                 <p className="text-muted-foreground max-w-sm">
                                     Para realizar disparos em massa, você precisa primeiro conectar seu número na aba <b>Conexão WhatsApp</b>.
                                 </p>

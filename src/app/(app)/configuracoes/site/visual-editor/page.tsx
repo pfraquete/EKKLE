@@ -21,18 +21,18 @@ export default async function VisualEditorPage() {
     }
 
     return (
-        <div className="flex flex-col h-screen bg-white">
+        <div className="flex h-screen flex-col bg-background">
             {/* Header Area */}
-            <div className="px-8 py-4 border-b flex items-center justify-between bg-card shrink-0">
+            <div className="shrink-0 border-b border-border bg-card px-8 py-4">
                 <div className="flex items-center gap-4">
                     <Link
                         href="/configuracoes/site"
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        className="rounded-full p-2 transition-colors hover:bg-muted"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div>
-                        <h1 className="text-xl font-bold flex items-center gap-2">
+                        <h1 className="flex items-center gap-2 text-xl font-bold text-foreground">
                             <Sparkles className="w-5 h-5 text-primary" />
                             Editor Visual do Site
                         </h1>
@@ -44,7 +44,7 @@ export default async function VisualEditorPage() {
             </div>
 
             {/* Main Editor Area */}
-            <div className="flex-1 overflow-hidden p-6 bg-gray-50/50">
+            <div className="flex-1 overflow-hidden bg-muted/30 p-6">
                 <VisualEditor />
             </div>
         </div>
