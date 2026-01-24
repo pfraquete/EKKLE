@@ -30,7 +30,9 @@ export default async function MembroCelulasPage() {
     .single()
 
   // Get all active cells
-  const { data: cells } = await supabase
+  console.log('Fetching cells for church slug/id:', church.slug, church.id)
+
+  const { data: cells, error } = await supabase
     .from('cells')
     .select(`
       id,
@@ -40,7 +42,7 @@ export default async function MembroCelulasPage() {
       meeting_time,
       address,
       neighborhood,
-      leader:profiles(
+      leader:profiles!leader_id(
         id,
         full_name
       )
@@ -48,6 +50,12 @@ export default async function MembroCelulasPage() {
     .eq('church_id', church.id)
     .eq('status', 'ACTIVE')
     .order('name')
+
+  if (error) {
+    console.error('CELULAS FETCH ERROR:', error)
+  } else {
+    console.log('CELULAS FETCH SUCCESS:', cells?.length)
+  }
 
   // Get member counts for each cell
   const cellsWithCounts = await Promise.all(
