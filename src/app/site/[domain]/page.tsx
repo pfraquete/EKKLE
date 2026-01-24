@@ -282,11 +282,11 @@ export default async function Homepage() {
                     {/* Content */}
                     <div className="container mx-auto px-6 relative z-10 text-center space-y-12 animate-in fade-in zoom-in-95 duration-1000 slide-in-from-bottom-12">
                         <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-[calc(-0.04em)] max-w-7xl mx-auto leading-[0.85] text-white drop-shadow-2xl">
-                            {settings.hero?.title || `EKKLE CHURCH`}
+                            {settings.hero?.title || church.name || 'EKKLE CHURCH'}
                         </h1>
 
                         <p className="text-xl md:text-3xl text-white/70 font-medium max-w-3xl mx-auto leading-relaxed tracking-tight">
-                            {settings.hero?.subtitle || calculateDefaultSubtitle()}
+                            {settings.hero?.subtitle || church.description || "Somos uma comunidade de fé, esperança e amor."}
                         </p>
 
                         {settings.hero?.cta && (
@@ -315,6 +315,3 @@ export default async function Homepage() {
     )
 }
 
-function calculateDefaultSubtitle() {
-    return "Somos uma comunidade de fé, esperança e amor."
-}
