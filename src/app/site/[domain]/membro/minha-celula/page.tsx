@@ -16,6 +16,8 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
+import { getCellPhotos } from '@/actions/cell-album'
+import { CellPhotoGallery } from '@/components/cell-album/cell-photo-gallery'
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
@@ -45,6 +47,8 @@ export default async function MembroMinhaCelulaPage() {
     const { cell, stats, members, recentMeetings } = data
     // Handle leader object which might be an array or single object from Supabase join
     const leader = Array.isArray(cell.leader) ? cell.leader[0] : cell.leader
+
+    const { data: photos } = await getCellPhotos(cell.id)
 
     return (
         <div className="max-w-6xl mx-auto space-y-12 pb-32 animate-in fade-in duration-700">
@@ -220,6 +224,8 @@ export default async function MembroMinhaCelulaPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            <CellPhotoGallery photos={photos || []} />
         </div>
     )
 }

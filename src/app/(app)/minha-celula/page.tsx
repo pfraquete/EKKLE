@@ -19,6 +19,8 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
+import { getCellPhotos } from '@/actions/cell-album'
+import { CellAlbumManager } from '@/components/cell-album/cell-album-manager'
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
@@ -27,7 +29,6 @@ export default async function MinhaCelulaPage() {
     if (!profile) redirect('/login')
 
     const data = await getMyCellData()
-
     if (!data) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[70vh] text-center p-8 bg-card rounded-[2.5rem] shadow-2xl border border-border/50">
@@ -46,6 +47,7 @@ export default async function MinhaCelulaPage() {
     }
 
     const { cell, stats, members, recentMeetings } = data
+    const { data: photos } = await getCellPhotos(cell.id)
 
     return (
         <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -239,6 +241,12 @@ export default async function MinhaCelulaPage() {
                     </Link>
                 </div>
             </div>
+
+            <CellAlbumManager
+                cellId={cell.id}
+                churchId={profile.church_id}
+                initialPhotos={photos || []}
+            />
         </div>
     )
 }
