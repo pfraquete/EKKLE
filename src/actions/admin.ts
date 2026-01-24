@@ -303,7 +303,7 @@ export async function createEvent(event: Omit<EventData, 'id'>) {
 
     const { data, error } = await supabase
         .from('events')
-        .insert([{ ...event, church_id: churchId }])
+        .insert([{ ...event, church_id: churchId, created_by: profile.id }])
         .select()
         .single()
 

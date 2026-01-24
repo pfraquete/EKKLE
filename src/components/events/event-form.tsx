@@ -43,6 +43,16 @@ export function EventForm({ initialData }: EventFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
+  const extractTime = (dateStr?: string | null) => {
+    if (!dateStr) return ''
+    try {
+      const date = new Date(dateStr)
+      return date.toISOString().slice(11, 16)
+    } catch {
+      return ''
+    }
+  }
+
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
@@ -50,7 +60,7 @@ export function EventForm({ initialData }: EventFormProps) {
       description: initialData?.description || '',
       location: initialData?.location || '',
       start_date: initialData ? new Date(initialData.start_date).toISOString().slice(0, 16) : '',
-      end_time: initialData?.end_time || '',
+      end_time: initialData?.end_time || extractTime(initialData?.end_date),
       category: initialData?.category || 'EVENT',
       requires_registration: initialData?.requires_registration || false,
       is_paid: initialData?.is_paid || false,
@@ -81,21 +91,21 @@ export function EventForm({ initialData }: EventFormProps) {
         location: values.location || null,
         end_time: values.end_time || null,
         image_url: values.image_url || null,
-        recurrence_pattern: null,
+        recurrence_pattern: null, // Default
       }
 
       if (initialData) {
-        await updateEvent(initialData.id, payload)
+        await updateEvent(initialData.id, payload as any)
         toast.success('Atualizado com sucesso!')
       } else {
-        await createEvent(payload)
+        await createEvent(payload as any)
         toast.success('Criado com sucesso!')
       }
       router.push('/dashboard/eventos')
       router.refresh()
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
-      toast.error('Erro ao salvar')
+      toast.error('Erro ao salvar: ' + (error.message || 'Erro desconhecido'))
     } finally {
       setLoading(false)
     }
@@ -182,6 +192,7 @@ export function EventForm({ initialData }: EventFormProps) {
                     <SelectItem value="PRAYER_CAMPAIGN">Campanha de Oração</SelectItem>
                     <SelectItem value="SERVICE">Culto</SelectItem>
                     <SelectItem value="COMMUNITY">Comunhão</SelectItem>
+                    <SelectItem value="OTHER">Outro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

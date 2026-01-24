@@ -12,7 +12,8 @@ export interface EventData {
   description: string | null
   location: string | null
   start_date: string
-  end_time: string | null
+  end_date: string | null
+  end_time?: string | null // Keep for form compatibility
   category: EventCategory
   image_url: string | null
 
@@ -77,20 +78,25 @@ export async function createEvent(event: Omit<EventData, 'id'>) {
 
   const supabase = await createClient()
 
+  // Prepare data for insertion, removing fields that don't exist in DB
+  const { end_time, ...insertData } = event as any
+
   const { data, error } = await supabase
     .from('events')
     .insert({
-      ...event,
+      ...insertData,
       church_id: churchId,
-      // Map legacy event_type if needed, or just rely on category
-      event_type: ['SERVICE', 'COMMUNITY', 'OTHER'].includes(event.category) ? event.category : 'EVENT'
+      created_by: profile.id,
+      // end_date logic: if end_time exists, we could combine it with start_date, 
+      // but for now let's just ensure we don't send end_time which doesn't exist
+      end_date: end_time ? `${event.start_date.split('T')[0]}T${end_time}` : null
     })
     .select()
     .single()
 
   if (error) {
     console.error('Error creating event:', error)
-    throw new Error('Failed to create event')
+    throw new Error(`Failed to create event: ${error.message}`)
   }
 
   revalidatePath('/dashboard/eventos')
@@ -107,13 +113,22 @@ export async function updateEvent(id: string, event: Partial<Omit<EventData, 'id
 
   const supabase = await createClient()
 
+  const { end_time, ...updateData } = event as any
+
+  // Prepare update payload
+  const payload: any = { ...updateData }
+  if (end_time !== undefined) {
+    const startDate = updateData.start_date || (await getEvent(id))?.start_date
+    if (startDate && end_time) {
+      payload.end_date = `${startDate.split('T')[0]}T${end_time}`
+    } else if (end_time === null) {
+      payload.end_date = null
+    }
+  }
+
   const { data, error } = await supabase
     .from('events')
-    .update({
-      ...event,
-      // Map legacy event_type if needed
-      event_type: event.category && ['SERVICE', 'COMMUNITY', 'OTHER'].includes(event.category) ? event.category : undefined
-    })
+    .update(payload)
     .eq('id', id)
     .eq('church_id', churchId)
     .select()
@@ -121,7 +136,7 @@ export async function updateEvent(id: string, event: Partial<Omit<EventData, 'id
 
   if (error) {
     console.error('Error updating event:', error)
-    throw new Error('Failed to update event')
+    throw new Error(`Failed to update event: ${error.message}`)
   }
 
   revalidatePath('/dashboard/eventos')
