@@ -2,22 +2,34 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut } from 'lucide-react'
+import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles } from 'lucide-react'
 
-const navItems = [
-    { href: '/membro', label: 'Meu Perfil', icon: User },
-    { href: '/membro/cursos', label: 'Meus Cursos', icon: BookOpen },
-    { href: '/membro/eventos', label: 'Meus Eventos', icon: Calendar },
-    { href: '/membro/celulas', label: 'Células', icon: Home },
-    { href: '/membro/loja', label: 'Loja Virtual', icon: ShoppingBag },
-    { href: '/membro/pedidos', label: 'Meus Pedidos', icon: Package },
-]
+interface SidebarNavProps {
+    profile: any
+}
 
-export function SidebarNav() {
+export function SidebarNav({ profile }: SidebarNavProps) {
     const pathname = usePathname()
 
+    const navItems = [
+        { href: '/membro', label: 'Meu Perfil', icon: User },
+        { href: '/membro/cursos', label: 'Meus Cursos', icon: BookOpen },
+        { href: '/membro/eventos', label: 'Meus Eventos', icon: Calendar },
+        ...(profile?.cell_id
+            ? [
+                { href: '/membro/minha-celula', label: 'Minha Célula', icon: Sparkles },
+                { href: '/membro/celulas', label: 'Explorar Células', icon: Search }
+            ]
+            : [
+                { href: '/membro/celulas', label: 'Células', icon: Home }
+            ]
+        ),
+        { href: '/membro/loja', label: 'Loja Virtual', icon: ShoppingBag },
+        { href: '/membro/pedidos', label: 'Meus Pedidos', icon: Package },
+    ]
+
     return (
-        <nav className="space-y-2">
+        <nav className="space-y-4">
             {navItems.map((item) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href || (item.href !== '/membro' && pathname.startsWith(item.href))
@@ -26,12 +38,12 @@ export function SidebarNav() {
                     <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-widest group border ${isActive
-                                ? 'bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20 scale-[1.02]'
-                                : 'bg-transparent text-muted-foreground border-transparent hover:bg-card hover:text-primary hover:border-border/50'
+                        className={`flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 font-black text-[10px] uppercase tracking-[0.2em] group border ${isActive
+                            ? 'bg-primary text-primary-foreground border-primary shadow-2xl shadow-primary/30 scale-[1.05]'
+                            : 'bg-transparent text-muted-foreground border-transparent hover:bg-card hover:text-primary hover:border-border/50'
                             }`}
                     >
-                        <Icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                        <Icon className={`w-5 h-5 transition-transform duration-500 ${isActive ? 'scale-110 rotate-3' : 'group-hover:scale-110 group-hover:-rotate-3'}`} />
                         <span>{item.label}</span>
                     </Link>
                 )

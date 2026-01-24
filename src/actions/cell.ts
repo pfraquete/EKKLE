@@ -11,6 +11,11 @@ export interface MyCellData {
         neighborhood: string | null
         dayOfWeek: number | null
         meetingTime: string | null
+        leader?: {
+            id: string
+            full_name: string
+            photo_url: string | null
+        } | null
     }
     stats: {
         membersCount: number
@@ -240,6 +245,100 @@ export async function getMyCellData(): Promise<MyCellData | null> {
         recentMeetings,
         alerts,
         activeMeeting
+    }
+}
+
+/**
+ * Get data for a regular member's cell
+ */
+export async function getMemberCellData(): Promise<MyCellData | null> {
+    const profile = await getProfile()
+    if (!profile || !profile.cell_id) return null
+
+    const supabase = await createClient()
+
+    // Get cell details and leader
+    const { data: cell, error: cellError } = await supabase
+        .from('cells')
+        .select(`
+            *,
+            leader:profiles!leader_id(id, full_name, photo_url)
+        `)
+        .eq('id', profile.cell_id)
+        .eq('status', 'ACTIVE')
+        .maybeSingle()
+
+    if (cellError || !cell) return null
+
+    // Fetch members and recent meetings
+    const [membersResponse, meetingsResponse] = await Promise.all([
+        supabase
+            .from('profiles')
+            .select('id, full_name, photo_url')
+            .eq('cell_id', cell.id)
+            .eq('is_active', true)
+            .order('full_name'),
+        supabase
+            .from('cell_meetings')
+            .select(`
+                id,
+                date,
+                status,
+                report:cell_reports(id),
+                attendance(status)
+            `)
+            .eq('cell_id', cell.id)
+            .eq('status', 'COMPLETED')
+            .order('date', { ascending: false })
+            .limit(5)
+    ])
+
+    const members = (membersResponse.data || []) as CellMemberRow[]
+    const meetings = ((meetingsResponse.data || []) as unknown) as CellMeetingRow[]
+
+    // Calculate stats
+    const totals = meetings.reduce(
+        (acc, m) => {
+            const attendance = m.attendance || []
+            const present = attendance.filter(a => a.status === 'PRESENT').length
+            const total = attendance.length
+            return {
+                present: acc.present + present,
+                total: acc.total + total
+            }
+        },
+        { present: 0, total: 0 }
+    )
+    const avgAttendance = totals.total === 0 ? 0 : Math.round((totals.present / totals.total) * 100)
+
+    return {
+        cell: {
+            id: cell.id,
+            name: cell.name,
+            address: cell.address,
+            neighborhood: cell.neighborhood,
+            dayOfWeek: cell.day_of_week,
+            meetingTime: cell.meeting_time,
+            leader: cell.leader
+        },
+        stats: {
+            membersCount: members.length,
+            avgAttendance
+        },
+        members: members.map(m => ({
+            id: m.id,
+            fullName: m.full_name,
+            photoUrl: m.photo_url,
+            consecutiveAbsences: 0 // Not relevant for members view
+        })),
+        recentMeetings: meetings.map(m => ({
+            id: m.id,
+            date: m.date,
+            presentCount: (m.attendance || []).filter(a => a.status === 'PRESENT').length,
+            hasReport: (m.report?.length || 0) > 0
+        })),
+        alerts: [],
+        activeMeeting: null
     }
 }
 

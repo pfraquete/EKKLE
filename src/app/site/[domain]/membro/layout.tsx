@@ -95,7 +95,7 @@ export default async function MembroLayout({
         <div className="flex-1 flex max-w-[1600px] mx-auto w-full">
           {/* Sidebar */}
           <aside className="w-80 hidden lg:block py-12 px-8">
-            <SidebarNav />
+            <SidebarNav profile={profile} />
           </aside>
 
           {/* Main Content */}

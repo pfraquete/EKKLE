@@ -1,7 +1,8 @@
 import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Home, MapPin, Clock, Users, CheckCircle2 } from 'lucide-react'
+import { Home, MapPin, Clock, Users, CheckCircle2, Sparkles } from 'lucide-react'
 import { RequestCellMembershipButton } from '@/components/cells/request-cell-membership-button'
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
@@ -185,10 +186,13 @@ export default async function MembroCelulasPage() {
 
                   <div className="pt-8 mt-auto border-t border-border/40">
                     {isUserInCell ? (
-                      <div className="bg-primary/10 text-primary border border-primary/20 px-4 py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/5">
-                        <CheckCircle2 className="w-4 h-4 mx-auto mb-2" />
-                        Você já faz parte desta Célula
-                      </div>
+                      <Link
+                        href="/membro/minha-celula"
+                        className="flex flex-col items-center bg-primary text-primary-foreground border border-primary/20 px-4 py-6 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                      >
+                        <Sparkles className="w-5 h-5 mx-auto mb-3 animate-pulse" />
+                        Acessar Painel da Minha Célula
+                      </Link>
                     ) : hasPendingRequest ? (
                       <div className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-4 py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/5">
                         <Clock className="w-4 h-4 mx-auto mb-2" />
