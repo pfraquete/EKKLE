@@ -1,7 +1,7 @@
 import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Home, MapPin, Clock, Users } from 'lucide-react'
+import { Home, MapPin, Clock, Users, CheckCircle2 } from 'lucide-react'
 import { RequestCellMembershipButton } from '@/components/cells/request-cell-membership-button'
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
@@ -40,7 +40,7 @@ export default async function MembroCelulasPage() {
       meeting_time,
       address,
       neighborhood,
-      leader:profiles!cells_leader_id_fkey(
+      leader:profiles!cells_leader_fk(
         id,
         full_name
       )
@@ -74,35 +74,37 @@ export default async function MembroCelulasPage() {
   const pendingCellIds = new Set(pendingRequests?.map(r => r.cell_id) || [])
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Células Disponíveis</h1>
-        <p className="text-gray-600">
-          Encontre uma célula para participar e crescer em comunidade
-        </p>
-      </div>
-
-      {profile?.cell_id && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-lg mb-8">
-          <p className="font-semibold">
-            Você já faz parte de uma célula!
-          </p>
-          <p className="text-sm text-green-700 mt-1">
-            Você pode visualizar as outras células disponíveis, mas só pode participar de uma célula por vez.
+    <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-foreground tracking-tighter italic">Células Disponíveis</h1>
+          <p className="text-muted-foreground font-medium mt-2">
+            Encontre o seu lugar para pertencer, crescer e servir em comunidade.
           </p>
         </div>
-      )}
+
+        {profile?.cell_id && (
+          <div className="bg-primary/5 border border-primary/20 px-6 py-3 rounded-2xl flex items-center gap-3">
+            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-primary">
+              Membro Ativo de Célula
+            </p>
+          </div>
+        )}
+      </div>
 
       {cellsWithCounts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-lg p-16 text-center">
-          <Home className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 text-lg mb-2">Nenhuma célula disponível</p>
-          <p className="text-gray-500 text-sm">
-            Entre em contato com a liderança para mais informações
+        <div className="bg-card border border-dashed border-border rounded-[3rem] p-24 text-center">
+          <div className="bg-muted w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl">
+            <Home className="w-12 h-12 text-muted-foreground/30" />
+          </div>
+          <h2 className="text-3xl font-black text-foreground mb-4 tracking-tight italic">Nenhuma célula encontrada</h2>
+          <p className="text-muted-foreground font-medium max-w-md mx-auto leading-relaxed">
+            Nós valorizamos a vida em comunidade. Entre em contato com nossa recepção para descobrir novas turmas em formação.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {cellsWithCounts.map((cell) => {
             const leader = Array.isArray(cell.leader) ? cell.leader[0] : cell.leader
             const isUserInCell = profile?.cell_id === cell.id
@@ -111,67 +113,84 @@ export default async function MembroCelulasPage() {
             return (
               <div
                 key={cell.id}
-                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                className="group bg-card border border-border/40 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:border-primary/20 transition-all duration-500 flex flex-col h-full"
               >
-                <div className="bg-gradient-to-r from-primary to-primary/80 p-6 text-white">
-                  <h3 className="text-xl font-bold mb-2">{cell.name}</h3>
-                  {leader && (
-                    <p className="text-sm opacity-90">
-                      Líder: {leader.full_name}
-                    </p>
-                  )}
+                {/* Header Card */}
+                <div className="bg-gradient-to-br from-primary to-primary/60 p-10 text-primary-foreground relative overflow-hidden">
+                  <div className="relative z-10">
+                    <h3 className="text-2xl font-black tracking-tighter mb-2 italic drop-shadow-md">{cell.name}</h3>
+                    {leader && (
+                      <div className="flex items-center gap-2 opacity-90 text-[10px] font-black uppercase tracking-widest">
+                        <Users className="w-3.5 h-3.5" />
+                        <span>Líder {leader.full_name}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
                 </div>
 
-                <div className="p-6 space-y-4">
+                <div className="p-10 space-y-8 flex-1 flex flex-col">
                   {cell.description && (
-                    <p className="text-gray-600 text-sm line-clamp-3">
+                    <p className="text-muted-foreground text-sm font-medium leading-relaxed line-clamp-3">
                       {cell.description}
                     </p>
                   )}
 
-                  <div className="space-y-2 text-sm text-gray-600">
+                  <div className="space-y-4 flex-1">
                     {cell.day_of_week !== null && (
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-primary" />
-                        <span>
-                          {DAYS[cell.day_of_week]}
-                          {cell.meeting_time && ` às ${cell.meeting_time.slice(0, 5)}`}
-                        </span>
+                      <div className="flex items-center gap-4 group/item">
+                        <div className="w-10 h-10 rounded-xl bg-muted border border-border/50 flex items-center justify-center group-hover/item:border-primary/30 transition-colors">
+                          <Clock className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Encontro</p>
+                          <p className="text-sm font-bold text-foreground">
+                            {DAYS[cell.day_of_week]}
+                            {cell.meeting_time && ` às ${cell.meeting_time.slice(0, 5)}`}
+                          </p>
+                        </div>
                       </div>
                     )}
 
-                    {cell.neighborhood && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-primary" />
-                        <span>{cell.neighborhood}</span>
+                    {(cell.neighborhood || cell.address) && (
+                      <div className="flex items-center gap-4 group/item">
+                        <div className="w-10 h-10 rounded-xl bg-muted border border-border/50 flex items-center justify-center group-hover/item:border-primary/30 transition-colors">
+                          <MapPin className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Localização</p>
+                          <p className="text-sm font-bold text-foreground">
+                            {cell.neighborhood || 'Endereço Disponível'}
+                          </p>
+                        </div>
                       </div>
                     )}
 
-                    {cell.address && (
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <MapPin className="w-4 h-4 invisible" />
-                        <span>{cell.address}</span>
+                    <div className="flex items-center gap-4 group/item">
+                      <div className="w-10 h-10 rounded-xl bg-muted border border-border/50 flex items-center justify-center group-hover/item:border-primary/30 transition-colors">
+                        <Users className="w-5 h-5 text-primary" />
                       </div>
-                    )}
-
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-primary" />
-                      <span>{cell.membersCount} membros</span>
+                      <div>
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Membros</p>
+                        <p className="text-sm font-bold text-foreground">{cell.membersCount} Pessoas</p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t">
+                  <div className="pt-8 mt-auto border-t border-border/40">
                     {isUserInCell ? (
-                      <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg text-center text-sm font-semibold">
-                        Você participa desta célula
+                      <div className="bg-primary/10 text-primary border border-primary/20 px-4 py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/5">
+                        <CheckCircle2 className="w-4 h-4 mx-auto mb-2" />
+                        Você já faz parte desta Célula
                       </div>
                     ) : hasPendingRequest ? (
-                      <div className="bg-amber-100 text-amber-800 px-4 py-2 rounded-lg text-center text-sm font-semibold">
-                        Solicitação Pendente
+                      <div className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-4 py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/5">
+                        <Clock className="w-4 h-4 mx-auto mb-2" />
+                        Solicitação em Análise
                       </div>
                     ) : profile?.cell_id ? (
-                      <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-center text-sm">
-                        Você já participa de outra célula
+                      <div className="bg-muted px-4 py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border border-border/50">
+                        Indisponível (Já vinculado)
                       </div>
                     ) : (
                       <RequestCellMembershipButton
