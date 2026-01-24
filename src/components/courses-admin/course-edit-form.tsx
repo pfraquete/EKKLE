@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { adminCreateCourse } from '@/actions/courses-admin'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { ImageUpload } from '@/components/ui/image-upload'
 
 export function CourseEditForm() {
   const router = useRouter()
@@ -96,13 +97,12 @@ export function CourseEditForm() {
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">URL da Thumbnail</label>
-            <input
-              type="url"
+            <ImageUpload
               value={formData.thumbnail_url}
-              onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
-              className="w-full h-16 bg-muted/30 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none placeholder:text-muted-foreground/30"
-              placeholder="https://sua-imagem.com/foto.jpg"
+              onChange={(url) => setFormData({ ...formData, thumbnail_url: url })}
+              bucket="course-images"
+              label="Thumbnail do Curso"
+              aspectRatio="video"
             />
           </div>
 

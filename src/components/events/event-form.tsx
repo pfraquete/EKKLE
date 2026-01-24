@@ -15,6 +15,7 @@ import { EventData, createEvent, updateEvent } from '@/actions/events'
 import { toast } from 'sonner'
 import { Loader2, Calendar, MapPin, DollarSign, Users, Link as LinkIcon, Image as ImageIcon } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { ImageUpload } from '@/components/ui/image-upload'
 
 const eventSchema = z.object({
   title: z.string().min(3, 'Título deve ter pelo menos 3 caracteres'),
@@ -198,11 +199,13 @@ export function EventForm({ initialData }: EventFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>Imagem de Capa (URL)</Label>
-                <div className="relative">
-                  <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input {...form.register('image_url')} placeholder="https://..." className="pl-10 h-12" />
-                </div>
+                <ImageUpload
+                  value={form.watch('image_url') || ''}
+                  onChange={(url) => form.setValue('image_url', url)}
+                  bucket="event-images"
+                  label="Imagem de Capa"
+                  aspectRatio="video"
+                />
               </div>
             </CardContent>
           </Card>
