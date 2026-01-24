@@ -160,9 +160,14 @@ export default async function MembroCelulasPage() {
                         </div>
                         <div>
                           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Localização</p>
-                          <p className="text-sm font-bold text-foreground">
+                          <p className="text-sm font-bold text-foreground leading-tight">
                             {cell.neighborhood || 'Endereço Disponível'}
                           </p>
+                          {cell.address && (
+                            <p className="text-[11px] text-muted-foreground font-medium mt-1">
+                              {cell.address}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}
