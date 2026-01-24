@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
 import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles } from 'lucide-react'
 
@@ -50,7 +51,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
             })}
 
             <div className="pt-8 mt-8 border-t border-border/50">
-                <form action="/api/auth/signout" method="POST">
+                <form action={signOut}>
                     <button
                         type="submit"
                         className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-destructive hover:bg-destructive/10 transition-all duration-300 font-black text-xs uppercase tracking-widest group"
