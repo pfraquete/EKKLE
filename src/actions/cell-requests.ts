@@ -166,7 +166,7 @@ export async function getMyCellRequests() {
             cell:cells (
                 id,
                 name,
-                leader:profiles!cells_leader_id_fkey (
+                leader:profiles!cells_leader_fk (
                     full_name
                 )
             )
