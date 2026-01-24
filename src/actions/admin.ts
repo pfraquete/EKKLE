@@ -158,7 +158,8 @@ export async function getAllCellsOverview(): Promise<CellOverview[]> {
         const hasRecentReport = sortedMeetings.some(meeting =>
             new Date(meeting.date) >= lastWeek && (meeting.report?.length ?? 0) > 0
         )
-        const leaderName = cell.leader?.[0]?.full_name || 'Sem Líder'
+        const leaderData = cell.leader as any
+        const leaderName = (Array.isArray(leaderData) ? leaderData[0]?.full_name : leaderData?.full_name) || 'Sem Líder'
 
         return {
             id: cell.id,
