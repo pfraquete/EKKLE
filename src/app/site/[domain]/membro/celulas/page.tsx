@@ -37,7 +37,6 @@ export default async function MembroCelulasPage() {
     .select(`
       id,
       name,
-      description,
       day_of_week,
       meeting_time,
       address,
@@ -138,12 +137,6 @@ export default async function MembroCelulasPage() {
                 </div>
 
                 <div className="p-10 space-y-8 flex-1 flex flex-col">
-                  {cell.description && (
-                    <p className="text-muted-foreground text-sm font-medium leading-relaxed line-clamp-3">
-                      {cell.description}
-                    </p>
-                  )}
-
                   <div className="space-y-4 flex-1">
                     {cell.day_of_week !== null && (
                       <div className="flex items-center gap-4 group/item">
