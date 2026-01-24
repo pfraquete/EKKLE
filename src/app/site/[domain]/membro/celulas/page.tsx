@@ -40,7 +40,7 @@ export default async function MembroCelulasPage() {
       meeting_time,
       address,
       neighborhood,
-      leader:profiles!cells_leader_fk(
+      leader:profiles(
         id,
         full_name
       )
@@ -59,7 +59,7 @@ export default async function MembroCelulasPage() {
 
       return {
         ...cell,
-        membersCount: count || 0
+        membersCount: count || 0,
       }
     })
   )
