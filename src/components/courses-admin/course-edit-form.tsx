@@ -46,79 +46,142 @@ export function CourseEditForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard/cursos" className="p-2 hover:bg-gray-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></Link>
-        <h1 className="text-3xl font-bold">Novo Curso</h1>
+    <form onSubmit={handleSubmit} className="space-y-10 max-w-4xl mx-auto pb-20 animate-in fade-in duration-700">
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="flex items-center gap-6">
+          <Link
+            href="/dashboard/cursos"
+            className="p-4 bg-muted/40 hover:bg-muted/80 border border-border/50 rounded-2xl transition-all duration-300 overflow-hidden group"
+          >
+            <ArrowLeft className="w-5 h-5 text-muted-foreground group-hover:-translate-x-1 transition-transform" />
+          </Link>
+          <div>
+            <h1 className="text-4xl font-black text-foreground tracking-tighter italic uppercase italic">Novo Curso</h1>
+            <p className="text-xs text-muted-foreground font-black uppercase tracking-widest mt-1">Crie conteúdos incríveis para sua igreja</p>
+          </div>
+        </div>
       </div>
 
-      {error && <div className="bg-red-50 border border-red-200 rounded-lg p-4"><p className="text-red-800">{error}</p></div>}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-3xl p-6 shadow-2xl animate-in shake duration-500">
+          <p className="text-destructive font-black text-xs uppercase tracking-widest">{error}</p>
+        </div>
+      )}
 
-      <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-        <div>
-          <label className="block text-sm font-semibold mb-2">Título *</label>
-          <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary" placeholder="Nome do curso" />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-2">Descrição</label>
-          <textarea rows={4} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary resize-none" placeholder="Sobre o curso..." />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-2">URL da Thumbnail</label>
-          <input type="url" value={formData.thumbnail_url} onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary" placeholder="https://..." />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold mb-2">Quantidade de módulos</label>
+      <div className="bg-card border border-border/50 rounded-[2.5rem] p-10 space-y-10 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] -mr-32 -mt-32 rounded-full pointer-events-none" />
+
+        <div className="grid grid-cols-1 gap-8 relative z-10">
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Título do Curso *</label>
             <input
-              type="number"
-              min={0}
-              value={formData.modules_count}
-              onChange={(e) => setFormData({ ...formData, modules_count: Number(e.target.value) })}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
-              placeholder="0"
+              type="text"
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full h-16 bg-muted/30 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none placeholder:text-muted-foreground/30"
+              placeholder="Ex: Fundamentos da Fé"
             />
           </div>
-          <div>
-            <label className="block text-sm font-semibold mb-2">Data de início das inscrições</label>
-            <input
-              type="date"
-              value={formData.enrollment_start_date}
-              onChange={(e) => setFormData({ ...formData, enrollment_start_date: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Descrição Detalhada</label>
+            <textarea
+              rows={5}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full bg-muted/30 border border-border/40 rounded-2xl p-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none placeholder:text-muted-foreground/30 resize-none"
+              placeholder="Descreva o que os alunos aprenderão neste curso..."
             />
           </div>
-        </div>
-        <div className="border rounded-lg p-4 space-y-4">
-          <div className="flex items-center gap-3">
-            <input type="checkbox" checked={formData.is_paid} onChange={(e) => setFormData({ ...formData, is_paid: e.target.checked })} className="w-4 h-4 text-primary border-gray-300 rounded" />
-            <label className="text-sm font-semibold">Curso pago</label>
+
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">URL da Thumbnail</label>
+            <input
+              type="url"
+              value={formData.thumbnail_url}
+              onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
+              className="w-full h-16 bg-muted/30 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none placeholder:text-muted-foreground/30"
+              placeholder="https://sua-imagem.com/foto.jpg"
+            />
           </div>
-          {formData.is_paid && (
-            <div>
-              <label className="block text-sm font-semibold mb-2">Preço (R$)</label>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Qtd. de Módulos</label>
               <input
-                type="text"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                placeholder="Ex: 49,90"
+                type="number"
+                min={0}
+                value={formData.modules_count}
+                onChange={(e) => setFormData({ ...formData, modules_count: Number(e.target.value) })}
+                className="w-full h-16 bg-muted/30 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none"
               />
             </div>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <input type="checkbox" checked={formData.is_published} onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })} className="w-4 h-4 text-primary border-gray-300 rounded" />
-          <label className="text-sm font-semibold">Publicar curso no site</label>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Início das Inscrições</label>
+              <input
+                type="date"
+                value={formData.enrollment_start_date}
+                onChange={(e) => setFormData({ ...formData, enrollment_start_date: e.target.value })}
+                className="w-full h-16 bg-muted/30 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="bg-muted/20 border border-border/30 rounded-[2rem] p-8 space-y-6">
+            <div className="flex items-center gap-4">
+              <input
+                type="checkbox"
+                id="is_paid"
+                checked={formData.is_paid}
+                onChange={(e) => setFormData({ ...formData, is_paid: e.target.checked })}
+                className="w-6 h-6 text-primary border-border/50 rounded-lg focus:ring-primary bg-muted/50"
+              />
+              <label htmlFor="is_paid" className="text-xs font-black uppercase tracking-widest cursor-pointer select-none">Curso Pago / Investimento</label>
+            </div>
+
+            {formData.is_paid && (
+              <div className="space-y-3 pl-10 animate-in slide-in-from-left-4 duration-500">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Valor (R$)</label>
+                <input
+                  type="text"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  className="w-full h-16 bg-muted/40 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none"
+                  placeholder="Ex: 49,90"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4 bg-primary/5 border border-primary/20 rounded-[2rem] p-8">
+            <input
+              type="checkbox"
+              id="is_published"
+              checked={formData.is_published}
+              onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
+              className="w-6 h-6 text-primary border-primary/30 rounded-lg focus:ring-primary bg-primary/10"
+            />
+            <label htmlFor="is_published" className="text-xs font-black uppercase tracking-widest text-primary cursor-pointer select-none">Publicar Imediatamente no Site</label>
+          </div>
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <button type="submit" disabled={loading} className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-bold hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2">
-          {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-          {loading ? 'Criando...' : 'Criar Curso'}
+      <div className="flex flex-col sm:flex-row gap-5">
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex-1 h-16 bg-primary text-primary-foreground rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-primary/30 hover:scale-[1.02] hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+        >
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+          {loading ? 'Processando...' : 'Criar Novo Curso'}
         </button>
-        <Link href="/dashboard/cursos" className="px-6 py-3 border rounded-lg font-semibold hover:bg-gray-50">Cancelar</Link>
+        <Link
+          href="/dashboard/cursos"
+          className="flex-1 h-16 border border-border/50 bg-muted/20 rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-muted-foreground hover:bg-muted/40 transition-all flex items-center justify-center shadow-lg"
+        >
+          Cancelar
+        </Link>
       </div>
     </form>
   )
