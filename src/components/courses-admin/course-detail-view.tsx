@@ -3,8 +3,16 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, UploadCloud, Loader2, Users } from 'lucide-react'
+import { ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, UploadCloud, Loader2, Users, Save, X } from 'lucide-react'
 import { adminUpdateCourse, adminDeleteCourse, adminCreateVideo, adminUpdateVideo, adminDeleteVideo, adminUploadCourseVideo } from '@/actions/courses-admin'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { ImageUpload } from '@/components/ui/image-upload'
 
 type Course = {
   id: string
@@ -107,93 +115,115 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
       </div>
 
       {editMode ? (
-        <div className="bg-card rounded-3xl shadow-xl p-8 border border-border space-y-6">
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Título do Curso</label>
-              <input type="text" value={courseData.title} onChange={(e) => setCourseData({ ...courseData, title: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/30 text-foreground" placeholder="Título" />
-            </div>
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Descrição</label>
-              <textarea value={courseData.description || ''} onChange={(e) => setCourseData({ ...courseData, description: e.target.value })} rows={3} className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all resize-none placeholder:text-muted-foreground/30 text-foreground" placeholder="Descrição" />
-            </div>
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">URL da Thumbnail</label>
-              <input type="url" value={courseData.thumbnail_url || ''} onChange={(e) => setCourseData({ ...courseData, thumbnail_url: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/30 text-foreground" placeholder="https://..." />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Módulos</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={courseData.modules_count}
-                  onChange={(e) => setCourseData({ ...courseData, modules_count: Number(e.target.value) })}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground"
+        <Card className="bg-card rounded-3xl shadow-xl border-border/50 animate-in fade-in slide-in-from-top-4 duration-500 overflow-hidden">
+          <CardContent className="p-8 space-y-8">
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título do Curso</Label>
+                <Input
+                  value={courseData.title}
+                  onChange={(e) => setCourseData({ ...courseData, title: e.target.value })}
+                  className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 transition-all text-base"
+                  placeholder="Título"
                 />
               </div>
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Início das Inscrições</label>
-                <input
-                  type="date"
-                  value={enrollmentStartDate}
-                  onChange={(e) => setEnrollmentStartDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground"
+
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição</Label>
+                <Textarea
+                  value={courseData.description || ''}
+                  onChange={(e) => setCourseData({ ...courseData, description: e.target.value })}
+                  rows={4}
+                  className="bg-muted/30 border-border/40 rounded-2xl p-6 font-bold focus:ring-2 focus:ring-primary/40 transition-all resize-none text-base"
+                  placeholder="Descrição"
                 />
               </div>
-            </div>
-          </div>
 
-          <div className="bg-muted/30 rounded-2xl p-6 border border-border space-y-4">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="is_paid"
-                checked={courseData.is_paid}
-                onChange={(e) => setCourseData({ ...courseData, is_paid: e.target.checked })}
-                className="w-5 h-5 rounded-md border-border bg-background text-primary focus:ring-primary"
-              />
-              <label htmlFor="is_paid" className="text-sm font-bold text-foreground">Este é um curso pago</label>
-            </div>
-            {courseData.is_paid && (
-              <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Preço (R$)</label>
-                <input
-                  type="text"
-                  value={priceInput}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    const parsed = Math.round(Number(value.replace(',', '.')) * 100)
-                    setPriceInput(value)
-                    setCourseData({ ...courseData, price_cents: Number.isNaN(parsed) ? 0 : parsed })
-                  }}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/30 text-foreground"
-                  placeholder="0,00"
+              <div className="space-y-3">
+                <ImageUpload
+                  value={courseData.thumbnail_url || ''}
+                  onChange={(url) => setCourseData({ ...courseData, thumbnail_url: url })}
+                  bucket="course-images"
+                  label="Thumbnail do Curso"
+                  aspectRatio="video"
                 />
               </div>
-            )}
-          </div>
 
-          <div className="flex items-center gap-3 px-1">
-            <input
-              type="checkbox"
-              id="is_published"
-              checked={courseData.is_published}
-              onChange={(e) => setCourseData({ ...courseData, is_published: e.target.checked })}
-              className="w-5 h-5 rounded-md border-border bg-background text-primary focus:ring-primary"
-            />
-            <label htmlFor="is_published" className="text-sm font-bold text-foreground">Publicado</label>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Módulos</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={courseData.modules_count}
+                    onChange={(e) => setCourseData({ ...courseData, modules_count: Number(e.target.value) })}
+                    className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all text-base"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Início das Inscrições</Label>
+                  <Input
+                    type="date"
+                    value={enrollmentStartDate}
+                    onChange={(e) => setEnrollmentStartDate(e.target.value)}
+                    className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all text-base block"
+                  />
+                </div>
+              </div>
 
-          <div className="flex gap-3 pt-2">
-            <button onClick={handleUpdateCourse} className="flex-1 bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-black shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-              Salvar Alterações
-            </button>
-            <button onClick={() => setEditMode(false)} className="px-8 py-4 border border-border rounded-2xl font-bold hover:bg-muted text-foreground transition-all">
-              Cancelar
-            </button>
-          </div>
-        </div>
+              <div className="bg-muted/20 rounded-[2rem] p-8 border border-border/30 space-y-6">
+                <div className="flex items-center gap-4">
+                  <Checkbox
+                    id="is_paid"
+                    checked={courseData.is_paid}
+                    onCheckedChange={(checked) => setCourseData({ ...courseData, is_paid: !!checked })}
+                    className="w-6 h-6 border-border/50 rounded-lg data-[state=checked]:bg-primary"
+                  />
+                  <Label htmlFor="is_paid" className="text-xs font-black uppercase tracking-widest cursor-pointer select-none">Este é um curso pago</Label>
+                </div>
+
+                {courseData.is_paid && (
+                  <div className="space-y-3 pl-10 animate-in slide-in-from-left-4 duration-500">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Preço (R$)</Label>
+                    <Input
+                      type="text"
+                      value={priceInput}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        const parsed = Math.round(Number(value.replace(',', '.')) * 100)
+                        setPriceInput(value)
+                        setCourseData({ ...courseData, price_cents: Number.isNaN(parsed) ? 0 : parsed })
+                      }}
+                      className="h-16 bg-muted/40 border-border/40 rounded-2xl px-6 font-bold transition-all text-base"
+                      placeholder="0,00"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-4 bg-primary/5 border border-primary/20 rounded-[2rem] p-8">
+                <Checkbox
+                  id="is_published"
+                  checked={courseData.is_published}
+                  onCheckedChange={(checked) => setCourseData({ ...courseData, is_published: !!checked })}
+                  className="w-6 h-6 border-primary/30 rounded-lg data-[state=checked]:bg-primary"
+                />
+                <Label htmlFor="is_published" className="text-xs font-black uppercase tracking-widest text-primary cursor-pointer select-none">Publicar no Site</Label>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button onClick={handleUpdateCourse} className="flex-1 h-16 bg-primary text-primary-foreground rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 transition-all gap-2">
+                <Save className="w-5 h-5" />
+                Salvar Alterações
+              </Button>
+              <Button onClick={() => setEditMode(false)} variant="ghost" className="flex-1 h-16 border border-border/50 bg-muted/20 rounded-2xl font-black text-xs uppercase tracking-widest text-muted-foreground hover:bg-muted/40 transition-all gap-2">
+                <X className="w-5 h-5" />
+                Cancelar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <div className="bg-card rounded-3xl shadow-xl p-8 border border-border">
           <div className="flex items-center gap-2 mb-6">
@@ -242,87 +272,88 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
         </div>
 
         {videoForm && (
-          <div className="bg-card rounded-3xl shadow-xl p-8 border border-border animate-in fade-in slide-in-from-top-4 duration-500 space-y-6">
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Título da Aula</label>
-                <input type="text" value={videoData.title} onChange={(e) => setVideoData({ ...videoData, title: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/30 text-foreground" placeholder="Título do vídeo" />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Descrição</label>
-                <textarea value={videoData.description || ''} onChange={(e) => setVideoData({ ...videoData, description: e.target.value })} rows={2} className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all resize-none placeholder:text-muted-foreground/30 text-foreground" placeholder="O que será ensinado nesta aula?" />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    <UploadCloud className="w-4 h-4" />
-                    Arquivo de Vídeo
-                  </label>
-                  {videoUploading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+          <Card className="bg-card rounded-3xl shadow-xl border-border/50 animate-in fade-in slide-in-from-top-4 duration-500 overflow-hidden">
+            <CardContent className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título da Aula</Label>
+                  <Input value={videoData.title} onChange={(e) => setVideoData({ ...videoData, title: e.target.value })} className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-base" placeholder="Título do vídeo" />
                 </div>
-                <div className="bg-muted/30 border-2 border-dashed border-border rounded-2xl p-8 text-center hover:border-primary/50 transition-colors group relative cursor-pointer">
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) void handleVideoUpload(file)
-                    }}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                  <div className="flex flex-col items-center gap-2">
-                    <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <p className="text-sm font-bold text-foreground">Clique ou arraste o vídeo aqui</p>
-                    <p className="text-xs text-muted-foreground font-medium">MP4, WebM ou Ogg</p>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição</Label>
+                  <Textarea value={videoData.description || ''} onChange={(e) => setVideoData({ ...videoData, description: e.target.value })} rows={2} className="bg-muted/30 border-border/40 rounded-xl p-4 font-bold transition-all resize-none text-base" placeholder="O que será ensinado nesta aula?" />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between px-1">
+                    <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                      <UploadCloud className="w-4 h-4" />
+                      Arquivo de Vídeo
+                    </Label>
+                    {videoUploading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+                  </div>
+                  <div className="bg-muted/20 border-2 border-dashed border-border/40 rounded-2xl p-8 text-center hover:bg-muted/30 hover:border-primary/50 transition-all group relative cursor-pointer">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) void handleVideoUpload(file)
+                      }}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                    <div className="flex flex-col items-center gap-2">
+                      <UploadCloud className="w-8 h-8 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-foreground">Clique ou arraste o vídeo aqui</p>
+                      <p className="text-[9px] text-muted-foreground/40 font-bold uppercase tracking-widest">MP4, WebM ou Ogg</p>
+                    </div>
+                  </div>
+                  {videoUploadError && <p className="text-xs text-red-500 font-bold px-1">{videoUploadError}</p>}
+
+                  <div className="pt-2 space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">URL Alternativa / Caminho</Label>
+                    <Input
+                      type="text"
+                      value={videoData.video_url}
+                      onChange={(e) => setVideoData({ ...videoData, video_url: e.target.value })}
+                      className="h-12 bg-muted/40 border-border/40 rounded-xl px-4 font-bold transition-all text-sm"
+                      placeholder="URL do vídeo ou caminho no Supabase"
+                    />
                   </div>
                 </div>
-                {videoUploadError && <p className="text-xs text-red-500 font-bold px-1">{videoUploadError}</p>}
 
-                <div className="pt-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">URL Alternativa / Caminho</label>
-                  <input
-                    type="text"
-                    value={videoData.video_url}
-                    onChange={(e) => setVideoData({ ...videoData, video_url: e.target.value })}
-                    className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/30 text-foreground"
-                    placeholder="URL do vídeo ou caminho no Supabase"
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Duração (segundos)</Label>
+                    <Input type="number" value={videoData.duration_seconds} onChange={(e) => setVideoData({ ...videoData, duration_seconds: parseInt(e.target.value) })} className="h-12 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Ordem</Label>
+                    <Input type="number" value={videoData.order_index} onChange={(e) => setVideoData({ ...videoData, order_index: parseInt(e.target.value) })} className="h-12 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-sm" />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 px-1 py-2">
+                  <Checkbox
+                    id="pub_video"
+                    checked={videoData.is_published}
+                    onCheckedChange={(checked) => setVideoData({ ...videoData, is_published: !!checked })}
+                    className="w-5 h-5 border-border/50 rounded-md data-[state=checked]:bg-primary"
                   />
+                  <Label htmlFor="pub_video" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none">Vídeo disponível para alunos</Label>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Duração (segundos)</label>
-                  <input type="number" value={videoData.duration_seconds} onChange={(e) => setVideoData({ ...videoData, duration_seconds: parseInt(e.target.value) })} className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground" />
-                </div>
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Ordem de Exibição</label>
-                  <input type="number" value={videoData.order_index} onChange={(e) => setVideoData({ ...videoData, order_index: parseInt(e.target.value) })} className="w-full px-4 py-3 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground" />
-                </div>
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border/40">
+                <Button onClick={handleSaveVideo} className="flex-1 h-14 bg-primary text-primary-foreground rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 transition-all">
+                  Salvar Aula
+                </Button>
+                <Button variant="ghost" onClick={() => { setVideoForm(false); setEditingVideo(null) }} className="h-14 border border-border/50 bg-muted/20 rounded-xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-muted/40 transition-all">
+                  Cancelar
+                </Button>
               </div>
-
-              <div className="flex items-center gap-3 px-1">
-                <input
-                  type="checkbox"
-                  id="pub_video"
-                  checked={videoData.is_published}
-                  onChange={(e) => setVideoData({ ...videoData, is_published: e.target.checked })}
-                  className="w-5 h-5 rounded-md border-border bg-background text-primary focus:ring-primary"
-                />
-                <label htmlFor="pub_video" className="text-sm font-bold text-foreground">Vídeo disponível para alunos</label>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4 border-t border-border">
-              <button onClick={handleSaveVideo} className="flex-1 bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-black shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                Salvar Aula
-              </button>
-              <button onClick={() => { setVideoForm(false); setEditingVideo(null) }} className="px-8 py-4 border border-border rounded-2xl font-bold hover:bg-muted text-foreground transition-all">
-                Cancelar
-              </button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         <div className="grid gap-3">

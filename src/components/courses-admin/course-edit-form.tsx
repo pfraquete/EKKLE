@@ -6,6 +6,12 @@ import { adminCreateCourse } from '@/actions/courses-admin'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { ImageUpload } from '@/components/ui/image-upload'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export function CourseEditForm() {
   const router = useRouter()
@@ -74,24 +80,23 @@ export function CourseEditForm() {
 
         <div className="grid grid-cols-1 gap-8 relative z-10">
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Título do Curso *</label>
-            <input
-              type="text"
+            <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Título do Curso *</Label>
+            <Input
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full h-16 bg-muted/30 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none placeholder:text-muted-foreground/30"
+              className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30 text-base"
               placeholder="Ex: Fundamentos da Fé"
             />
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Descrição Detalhada</label>
-            <textarea
+            <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Descrição Detalhada</Label>
+            <Textarea
               rows={5}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full bg-muted/30 border border-border/40 rounded-2xl p-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none placeholder:text-muted-foreground/30 resize-none"
+              className="bg-muted/30 border-border/40 rounded-2xl p-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30 resize-none text-base"
               placeholder="Descreva o que os alunos aprenderão neste curso..."
             />
           </div>
@@ -108,46 +113,45 @@ export function CourseEditForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Qtd. de Módulos</label>
-              <input
+              <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Qtd. de Módulos</Label>
+              <Input
                 type="number"
                 min={0}
                 value={formData.modules_count}
                 onChange={(e) => setFormData({ ...formData, modules_count: Number(e.target.value) })}
-                className="w-full h-16 bg-muted/30 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none"
+                className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all text-base"
               />
             </div>
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Início das Inscrições</label>
-              <input
+              <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Início das Inscrições</Label>
+              <Input
                 type="date"
                 value={formData.enrollment_start_date}
                 onChange={(e) => setFormData({ ...formData, enrollment_start_date: e.target.value })}
-                className="w-full h-16 bg-muted/30 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none"
+                className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all text-base block"
               />
             </div>
           </div>
 
           <div className="bg-muted/20 border border-border/30 rounded-[2rem] p-8 space-y-6">
             <div className="flex items-center gap-4">
-              <input
-                type="checkbox"
+              <Checkbox
                 id="is_paid"
                 checked={formData.is_paid}
-                onChange={(e) => setFormData({ ...formData, is_paid: e.target.checked })}
-                className="w-6 h-6 text-primary border-border/50 rounded-lg focus:ring-primary bg-muted/50"
+                onCheckedChange={(checked) => setFormData({ ...formData, is_paid: !!checked })}
+                className="w-6 h-6 border-border/50 rounded-lg data-[state=checked]:bg-primary"
               />
-              <label htmlFor="is_paid" className="text-xs font-black uppercase tracking-widest cursor-pointer select-none">Curso Pago / Investimento</label>
+              <Label htmlFor="is_paid" className="text-xs font-black uppercase tracking-widest cursor-pointer select-none">Curso Pago / Investimento</Label>
             </div>
 
             {formData.is_paid && (
               <div className="space-y-3 pl-10 animate-in slide-in-from-left-4 duration-500">
-                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Valor (R$)</label>
-                <input
+                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Valor (R$)</Label>
+                <Input
                   type="text"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="w-full h-16 bg-muted/40 border border-border/40 rounded-2xl px-6 font-bold text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all outline-none"
+                  className="h-16 bg-muted/40 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all text-base"
                   placeholder="Ex: 49,90"
                 />
               </div>
@@ -155,14 +159,13 @@ export function CourseEditForm() {
           </div>
 
           <div className="flex items-center gap-4 bg-primary/5 border border-primary/20 rounded-[2rem] p-8">
-            <input
-              type="checkbox"
+            <Checkbox
               id="is_published"
               checked={formData.is_published}
-              onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
-              className="w-6 h-6 text-primary border-primary/30 rounded-lg focus:ring-primary bg-primary/10"
+              onCheckedChange={(checked) => setFormData({ ...formData, is_published: !!checked })}
+              className="w-6 h-6 border-primary/30 rounded-lg data-[state=checked]:bg-primary"
             />
-            <label htmlFor="is_published" className="text-xs font-black uppercase tracking-widest text-primary cursor-pointer select-none">Publicar Imediatamente no Site</label>
+            <Label htmlFor="is_published" className="text-xs font-black uppercase tracking-widest text-primary cursor-pointer select-none">Publicar Imediatamente no Site</Label>
           </div>
         </div>
       </div>
