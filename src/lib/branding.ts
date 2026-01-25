@@ -1,8 +1,63 @@
 /**
  * Branding utilities for applying custom church theme
+ *
+ * SECURITY: All user-provided colors and fonts are validated
+ * to prevent CSS injection attacks
  */
 
 import { BrandingSettings } from '@/actions/branding'
+
+/**
+ * Allowed font families (whitelist to prevent CSS injection)
+ */
+const ALLOWED_FONTS = [
+  'Inter',
+  'Roboto',
+  'Open Sans',
+  'Lato',
+  'Montserrat',
+  'Poppins',
+  'Nunito',
+  'Raleway',
+  'Source Sans Pro',
+  'Ubuntu',
+  'Merriweather',
+  'Playfair Display',
+  'PT Sans',
+  'Oswald',
+  'Quicksand',
+]
+
+/**
+ * Validate hex color format
+ * Only allows #RRGGBB or #RGB format
+ */
+function isValidHexColor(color: string): boolean {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color)
+}
+
+/**
+ * Validate font family against whitelist
+ */
+function isValidFont(font: string): boolean {
+  return ALLOWED_FONTS.includes(font)
+}
+
+/**
+ * Sanitize and validate color, returning default if invalid
+ */
+function sanitizeColor(color: string | undefined, defaultColor: string): string {
+  if (!color) return defaultColor
+  return isValidHexColor(color) ? color : defaultColor
+}
+
+/**
+ * Sanitize and validate font, returning default if invalid
+ */
+function sanitizeFont(font: string | undefined, defaultFont: string): string {
+  if (!font) return defaultFont
+  return isValidFont(font) ? font : defaultFont
+}
 
 /**
  * Generate CSS variables from branding settings
@@ -11,6 +66,15 @@ export function generateThemeCSS(settings: BrandingSettings): string {
   const colors = settings.colors || {}
   const fonts = settings.fonts || {}
   const theme = settings.theme || {}
+
+  // Sanitize colors (validate hex format)
+  const safePrimary = sanitizeColor(colors.primary, '#e11d48')
+  const safeSecondary = sanitizeColor(colors.secondary, '#111827')
+  const safeAccent = sanitizeColor(colors.accent, '#f43f5e')
+
+  // Sanitize fonts (validate against whitelist)
+  const safeHeadingFont = sanitizeFont(fonts.heading, 'Inter')
+  const safeBodyFont = sanitizeFont(fonts.body, 'Inter')
 
   // Convert hex to RGB for Tailwind opacity utilities
   const hexToRgb = (hex: string): string => {
@@ -33,17 +97,17 @@ export function generateThemeCSS(settings: BrandingSettings): string {
 
   const css = `
     :root {
-      /* Colors */
-      --color-primary: ${colors.primary || '#e11d48'};
-      --color-primary-rgb: ${hexToRgb(colors.primary || '#e11d48')};
-      --color-secondary: ${colors.secondary || '#111827'};
-      --color-secondary-rgb: ${hexToRgb(colors.secondary || '#111827')};
-      --color-accent: ${colors.accent || '#f43f5e'};
-      --color-accent-rgb: ${hexToRgb(colors.accent || '#f43f5e')};
+      /* Colors (validated hex format) */
+      --color-primary: ${safePrimary};
+      --color-primary-rgb: ${hexToRgb(safePrimary)};
+      --color-secondary: ${safeSecondary};
+      --color-secondary-rgb: ${hexToRgb(safeSecondary)};
+      --color-accent: ${safeAccent};
+      --color-accent-rgb: ${hexToRgb(safeAccent)};
 
-      /* Fonts */
-      --font-heading: "${fonts.heading || 'Inter'}", sans-serif;
-      --font-body: "${fonts.body || 'Inter'}", sans-serif;
+      /* Fonts (validated against whitelist) */
+      --font-heading: "${safeHeadingFont}", sans-serif;
+      --font-body: "${safeBodyFont}", sans-serif;
 
       /* Theme Tokens */
       --radius-custom: ${getRadius(theme.borderRadius)};
@@ -100,22 +164,24 @@ export function generateThemeCSS(settings: BrandingSettings): string {
 
 /**
  * Get Google Fonts import URL for the selected fonts
+ * Only includes fonts from the whitelist
  */
 export function getGoogleFontsURL(settings: BrandingSettings): string {
   const fonts = settings.fonts || {}
   const fontFamilies = new Set<string>()
 
-  if (fonts.heading) fontFamilies.add(fonts.heading)
-  if (fonts.body) fontFamilies.add(fonts.body)
+  // Only add fonts that pass validation
+  if (fonts.heading && isValidFont(fonts.heading)) fontFamilies.add(fonts.heading)
+  if (fonts.body && isValidFont(fonts.body)) fontFamilies.add(fonts.body)
 
   if (fontFamilies.size === 0) {
     return 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap'
   }
 
-  // Build Google Fonts URL
+  // Build Google Fonts URL (fonts already validated)
   const fontParams = Array.from(fontFamilies)
     .map((font) => {
-      // Replace spaces with +
+      // Replace spaces with + (safe since font is from whitelist)
       const fontName = font.replace(/\s+/g, '+')
       return `family=${fontName}:wght@300;400;500;600;700;800;900`
     })
@@ -125,13 +191,41 @@ export function getGoogleFontsURL(settings: BrandingSettings): string {
 }
 
 /**
+ * Export allowed fonts for UI components
+ */
+export { ALLOWED_FONTS }
+
+/**
  * Generate meta tags for favicon
+ * SECURITY: URL is validated to prevent injection
  */
 export function generateFaviconMeta(faviconUrl?: string): string {
   if (!faviconUrl) return ''
 
+  // Validate URL format (only allow https URLs or relative paths)
+  try {
+    const url = new URL(faviconUrl, 'https://placeholder.com')
+    // Only allow https protocol or relative paths
+    if (url.protocol !== 'https:' && !faviconUrl.startsWith('/')) {
+      console.warn('[Branding] Invalid favicon URL protocol, must be HTTPS')
+      return ''
+    }
+  } catch {
+    // If it's not a valid URL, only allow paths starting with /
+    if (!faviconUrl.startsWith('/')) {
+      console.warn('[Branding] Invalid favicon URL format')
+      return ''
+    }
+  }
+
+  // Escape any potential HTML in the URL
+  const safeUrl = faviconUrl
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
   return `
-    <link rel="icon" type="image/png" href="${faviconUrl}" />
-    <link rel="shortcut icon" href="${faviconUrl}" />
+    <link rel="icon" type="image/png" href="${safeUrl}" />
+    <link rel="shortcut icon" href="${safeUrl}" />
   `
 }
