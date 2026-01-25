@@ -1,9 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import slugify from 'slugify'
+import crypto from 'crypto'
+import { rateLimiters, getClientIP } from '@/lib/rate-limiter'
+
+// Password validation function
+function validatePassword(password: string): { valid: boolean; message?: string } {
+  if (password.length < 8) {
+    return { valid: false, message: 'A senha deve ter pelo menos 8 caracteres' }
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, message: 'A senha deve conter pelo menos uma letra maiúscula' }
+  }
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, message: 'A senha deve conter pelo menos uma letra minúscula' }
+  }
+  if (!/[0-9]/.test(password)) {
+    return { valid: false, message: 'A senha deve conter pelo menos um número' }
+  }
+  return { valid: true }
+}
+
+// Generate unique slug with crypto-safe random suffix
+async function generateUniqueSlug(supabase: any, churchName: string): Promise<string> {
+  const baseSlug = slugify(churchName, { lower: true, strict: true })
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const slug = attempt === 0
+      ? baseSlug
+      : `${baseSlug}-${crypto.randomBytes(4).toString('hex')}`
+
+    const { data: existing } = await supabase
+      .from('churches')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle()
+
+    if (!existing) return slug
+  }
+
+  // Fallback: use UUID
+  return `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const clientIP = getClientIP(request)
+    const rateLimitResult = await rateLimiters.churchRegistration(clientIP)
+
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
+      return NextResponse.json(
+        { error: `Muitas tentativas de cadastro. Tente novamente em ${retryAfter} segundos.` },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': retryAfter.toString(),
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          },
+        }
+      )
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -27,28 +88,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (password.length < 6) {
+    // Validate password strength
+    const passwordValidation = validatePassword(password)
+    if (!passwordValidation.valid) {
       return NextResponse.json(
-        { error: 'A senha deve ter pelo menos 6 caracteres' },
+        { error: passwordValidation.message },
         { status: 400 }
       )
     }
 
-    // 2. Slug Generation & Uniqueness
-    let slug = slugify(churchName, { lower: true, strict: true })
-    const randomSuffix = Math.floor(Math.random() * 1000)
-
-    // Check if slug exists
-    const { data: existingChurch } = await supabase
-      .from('churches')
-      .select('id')
-      .eq('slug', slug)
-      .single()
-
-    // If slug exists, append random number (simple collision handling)
-    if (existingChurch) {
-      slug = `${slug}-${randomSuffix}`
-    }
+    // 2. Slug Generation & Uniqueness (with crypto-safe collision handling)
+    const slug = await generateUniqueSlug(supabase, churchName)
 
     // 3. Create Auth User
     // We use admin.createUser to skip email confirmation if desired, or handle it manually.

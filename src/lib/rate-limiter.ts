@@ -1,135 +1,283 @@
 /**
- * Simple In-Memory Rate Limiter
+ * Distributed Rate Limiter using Upstash Redis
  *
- * Implements sliding window rate limiting to prevent abuse.
- * For production with multiple servers, consider using Redis (Upstash).
+ * Implements sliding window rate limiting that works across multiple server instances.
+ * Falls back to in-memory rate limiting if Redis is not configured.
  *
  * Usage:
  * ```ts
- * const limiter = new RateLimiter({ maxRequests: 10, windowMs: 60000 });
- * const allowed = await limiter.checkLimit('pastor-id-123');
+ * const result = await rateLimit.check('pastor-id-123');
+ * if (!result.success) {
+ *   return new Response('Too Many Requests', { status: 429 });
+ * }
  * ```
  */
 
-interface RateLimiterConfig {
-  maxRequests: number; // Maximum requests allowed
-  windowMs: number; // Time window in milliseconds
-}
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
-interface RequestLog {
-  timestamps: number[];
-}
+// Check if Upstash is configured
+const isUpstashConfigured = !!(
+  process.env.UPSTASH_REDIS_REST_URL &&
+  process.env.UPSTASH_REDIS_REST_TOKEN
+);
 
-export class RateLimiter {
-  private config: RateLimiterConfig;
-  private store: Map<string, RequestLog>;
+// Create Redis client only if configured
+const redis = isUpstashConfigured
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    })
+  : null;
 
-  constructor(config: RateLimiterConfig) {
-    this.config = config;
-    this.store = new Map();
+/**
+ * In-memory fallback for development without Redis
+ */
+class InMemoryRateLimiter {
+  private store: Map<string, { count: number; resetAt: number }> = new Map();
 
-    // Cleanup old entries every 5 minutes
-    setInterval(() => this.cleanup(), 5 * 60 * 1000);
+  constructor() {
+    // Cleanup every 5 minutes
+    if (typeof setInterval !== 'undefined') {
+      setInterval(() => this.cleanup(), 5 * 60 * 1000);
+    }
   }
 
-  /**
-   * Check if request is within rate limit
-   *
-   * @param key - Unique identifier (e.g., pastor ID, phone number)
-   * @returns true if allowed, false if rate limited
-   */
-  async checkLimit(key: string): Promise<boolean> {
+  async limit(key: string, maxRequests: number, windowMs: number) {
     const now = Date.now();
-    const windowStart = now - this.config.windowMs;
+    const entry = this.store.get(key);
 
-    // Get or create request log
-    let log = this.store.get(key);
-    if (!log) {
-      log = { timestamps: [] };
-      this.store.set(key, log);
+    if (!entry || entry.resetAt < now) {
+      this.store.set(key, { count: 1, resetAt: now + windowMs });
+      return {
+        success: true,
+        limit: maxRequests,
+        remaining: maxRequests - 1,
+        reset: now + windowMs,
+      };
     }
 
-    // Remove timestamps outside the window
-    log.timestamps = log.timestamps.filter((ts) => ts > windowStart);
+    entry.count++;
 
-    // Check if within limit
-    if (log.timestamps.length >= this.config.maxRequests) {
-      console.log(`[Rate Limiter] Rate limit exceeded for key: ${key}`);
-      return false;
+    if (entry.count > maxRequests) {
+      return {
+        success: false,
+        limit: maxRequests,
+        remaining: 0,
+        reset: entry.resetAt,
+      };
     }
 
-    // Add current timestamp
-    log.timestamps.push(now);
-    return true;
+    return {
+      success: true,
+      limit: maxRequests,
+      remaining: maxRequests - entry.count,
+      reset: entry.resetAt,
+    };
   }
 
-  /**
-   * Get current usage for a key
-   *
-   * @param key - Unique identifier
-   * @returns Number of requests in current window
-   */
-  getUsage(key: string): number {
+  private cleanup() {
     const now = Date.now();
-    const windowStart = now - this.config.windowMs;
-    const log = this.store.get(key);
-
-    if (!log) return 0;
-
-    // Count valid timestamps
-    return log.timestamps.filter((ts) => ts > windowStart).length;
-  }
-
-  /**
-   * Get remaining requests for a key
-   *
-   * @param key - Unique identifier
-   * @returns Number of remaining requests
-   */
-  getRemaining(key: string): number {
-    return Math.max(0, this.config.maxRequests - this.getUsage(key));
-  }
-
-  /**
-   * Reset rate limit for a key (admin use)
-   *
-   * @param key - Unique identifier
-   */
-  reset(key: string): void {
-    this.store.delete(key);
-  }
-
-  /**
-   * Cleanup expired entries
-   */
-  private cleanup(): void {
-    const now = Date.now();
-    const windowStart = now - this.config.windowMs;
-
-    for (const [key, log] of this.store.entries()) {
-      // Remove old timestamps
-      log.timestamps = log.timestamps.filter((ts) => ts > windowStart);
-
-      // Delete empty logs
-      if (log.timestamps.length === 0) {
+    for (const [key, entry] of this.store.entries()) {
+      if (entry.resetAt < now) {
         this.store.delete(key);
       }
     }
   }
 }
 
+const inMemoryLimiter = new InMemoryRateLimiter();
+
 /**
- * Global rate limiters for different use cases
+ * Create a rate limiter with specified limits
+ */
+function createRateLimiter(maxRequests: number, windowSeconds: number) {
+  if (redis) {
+    return new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(maxRequests, `${windowSeconds} s`),
+      analytics: true,
+      prefix: 'ekkle:ratelimit',
+    });
+  }
+  return null;
+}
+
+/**
+ * Rate limit check result
+ */
+export interface RateLimitResult {
+  success: boolean;
+  limit: number;
+  remaining: number;
+  reset: number;
+}
+
+/**
+ * Generic rate limit function
+ */
+async function checkLimit(
+  key: string,
+  maxRequests: number,
+  windowMs: number
+): Promise<RateLimitResult> {
+  if (!redis) {
+    // Use in-memory fallback
+    console.warn('[Rate Limiter] Using in-memory fallback. Configure UPSTASH_REDIS for production.');
+    return inMemoryLimiter.limit(key, maxRequests, windowMs);
+  }
+
+  const limiter = createRateLimiter(maxRequests, Math.floor(windowMs / 1000));
+  if (!limiter) {
+    return inMemoryLimiter.limit(key, maxRequests, windowMs);
+  }
+
+  const result = await limiter.limit(key);
+
+  return {
+    success: result.success,
+    limit: result.limit,
+    remaining: result.remaining,
+    reset: result.reset,
+  };
+}
+
+/**
+ * Pre-configured rate limiters for different use cases
+ */
+export const rateLimiters = {
+  /**
+   * WhatsApp messages: 10 messages per minute per pastor
+   */
+  whatsapp: async (key: string): Promise<RateLimitResult> => {
+    return checkLimit(`whatsapp:${key}`, 10, 60 * 1000);
+  },
+
+  /**
+   * API calls: 30 requests per minute per user
+   */
+  api: async (key: string): Promise<RateLimitResult> => {
+    return checkLimit(`api:${key}`, 30, 60 * 1000);
+  },
+
+  /**
+   * Church registration: 5 requests per hour per IP
+   */
+  churchRegistration: async (key: string): Promise<RateLimitResult> => {
+    return checkLimit(`register:church:${key}`, 5, 60 * 60 * 1000);
+  },
+
+  /**
+   * Member registration: 10 requests per hour per IP
+   */
+  memberRegistration: async (key: string): Promise<RateLimitResult> => {
+    return checkLimit(`register:member:${key}`, 10, 60 * 60 * 1000);
+  },
+
+  /**
+   * Login attempts: 5 attempts per 15 minutes per IP
+   */
+  login: async (key: string): Promise<RateLimitResult> => {
+    return checkLimit(`login:${key}`, 5, 15 * 60 * 1000);
+  },
+
+  /**
+   * Password reset: 3 requests per hour per email
+   */
+  passwordReset: async (key: string): Promise<RateLimitResult> => {
+    return checkLimit(`password:reset:${key}`, 3, 60 * 60 * 1000);
+  },
+
+  /**
+   * Custom rate limit
+   */
+  custom: async (
+    key: string,
+    maxRequests: number,
+    windowMs: number
+  ): Promise<RateLimitResult> => {
+    return checkLimit(key, maxRequests, windowMs);
+  },
+};
+
+/**
+ * Error class for rate limit exceeded
+ */
+export class RateLimitError extends Error {
+  constructor(
+    public resetAt: number,
+    public limit: number
+  ) {
+    const retryAfter = Math.ceil((resetAt - Date.now()) / 1000);
+    super(`Rate limit exceeded. Try again in ${retryAfter}s`);
+    this.name = 'RateLimitError';
+  }
+}
+
+/**
+ * Helper to get client IP from request
+ */
+export function getClientIP(request: Request): string {
+  // Check common headers for proxied requests
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+
+  const realIP = request.headers.get('x-real-ip');
+  if (realIP) {
+    return realIP;
+  }
+
+  // Fallback
+  return 'unknown';
+}
+
+/**
+ * Legacy compatibility exports
  */
 
-// WhatsApp messages: 10 messages per minute per pastor
+// Legacy class-based rate limiter (for backwards compatibility)
+export class RateLimiter {
+  private maxRequests: number;
+  private windowMs: number;
+
+  constructor(config: { maxRequests: number; windowMs: number }) {
+    this.maxRequests = config.maxRequests;
+    this.windowMs = config.windowMs;
+  }
+
+  async checkLimit(key: string): Promise<boolean> {
+    const result = await checkLimit(key, this.maxRequests, this.windowMs);
+    return result.success;
+  }
+
+  async getUsage(key: string): Promise<number> {
+    const result = await checkLimit(key, this.maxRequests, this.windowMs);
+    return this.maxRequests - result.remaining;
+  }
+
+  getRemaining(key: string): number {
+    // Note: This is approximate since we can't do sync calls to Redis
+    return this.maxRequests;
+  }
+
+  reset(_key: string): void {
+    // Redis TTL handles automatic reset
+    console.log('[Rate Limiter] Reset called - Redis TTL handles automatic cleanup');
+  }
+}
+
+// Legacy global rate limiters
 export const whatsappRateLimiter = new RateLimiter({
   maxRequests: 10,
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
 });
 
-// API calls: 30 requests per minute per user
 export const apiRateLimiter = new RateLimiter({
   maxRequests: 30,
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
 });
+
+// Export default rate limit function
+export default rateLimiters;

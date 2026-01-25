@@ -149,7 +149,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
                                     id="phone"
                                     name="phone"
                                     placeholder="(12) 99999-9999"
-                                    defaultValue={initialData?.phone || ''}
+                                    defaultValue={initialData?.phone ?? ''}
                                     className="pl-10 h-12 bg-zinc-900/50 border-zinc-800 rounded-xl text-white placeholder:text-zinc-500"
                                 />
                             </div>
@@ -164,7 +164,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
                                     name="email"
                                     type="email"
                                     placeholder="exemplo@email.com"
-                                    defaultValue={initialData?.email || ''}
+                                    defaultValue={initialData?.email ?? ''}
                                     className="pl-10 h-12 bg-zinc-900/50 border-zinc-800 rounded-xl text-white placeholder:text-zinc-500"
                                 />
                             </div>
@@ -215,7 +215,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
                                     id="birthday"
                                     name="birthday"
                                     type="date"
-                                    defaultValue={initialData?.birthday || ''}
+                                    defaultValue={initialData?.birthday ?? ''}
                                     className="pl-10 h-12 bg-zinc-900/50 border-zinc-800 rounded-xl appearance-none text-white"
                                 />
                             </div>

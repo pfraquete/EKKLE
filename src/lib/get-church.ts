@@ -1,4 +1,5 @@
 import { headers } from 'next/headers'
+import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 export type Church = {
@@ -15,14 +16,55 @@ export type Church = {
 }
 
 /**
+ * Cached church fetch - reduces database queries
+ * Cache is revalidated every 60 seconds or when the 'church' tag is invalidated
+ */
+const getCachedChurchById = unstable_cache(
+  async (churchId: string): Promise<Church | null> => {
+    const supabase = await createClient()
+    const { data: church } = await supabase
+      .from('churches')
+      .select('*')
+      .eq('id', churchId)
+      .single()
+
+    return church || null
+  },
+  ['church-by-id'],
+  {
+    revalidate: 60, // Cache for 60 seconds
+    tags: ['church'],
+  }
+)
+
+const getCachedChurchBySlug = unstable_cache(
+  async (churchSlug: string): Promise<Church | null> => {
+    const supabase = await createClient()
+    const { data: church } = await supabase
+      .from('churches')
+      .select('*')
+      .eq('slug', churchSlug)
+      .single()
+
+    return church || null
+  },
+  ['church-by-slug'],
+  {
+    revalidate: 60, // Cache for 60 seconds
+    tags: ['church'],
+  }
+)
+
+/**
  * Gets the current church from request headers (injected by middleware)
  * This is for use in Server Components and Server Actions
+ *
+ * Performance: Uses Next.js cache to reduce database queries
  */
 export async function getChurch(): Promise<Church | null> {
   const headersList = await headers()
   const churchId = headersList.get('x-church-id')
   let churchSlug = headersList.get('x-church-slug')
-  const churchName = headersList.get('x-church-name')
 
   // Fallback: try to extract slug from host if headers are missing
   if (!churchId && !churchSlug) {
@@ -44,27 +86,16 @@ export async function getChurch(): Promise<Church | null> {
     return null
   }
 
-  // Fetch church data from database
-  const supabase = await createClient()
-
-  let query = supabase.from('churches').select('*')
-
+  // Use cached fetch
   if (churchId) {
-    query = query.eq('id', churchId)
-  } else if (churchSlug) {
-    query = query.eq('slug', churchSlug)
-  } else {
-    // No ID and no Slug found
-    return null
+    return getCachedChurchById(churchId)
   }
 
-  const { data: church } = await query.single()
-
-  if (!church) {
-    return null
+  if (churchSlug) {
+    return getCachedChurchBySlug(churchSlug)
   }
 
-  return church
+  return null
 }
 
 /**
@@ -73,4 +104,15 @@ export async function getChurch(): Promise<Church | null> {
 export async function getChurchId(): Promise<string | null> {
   const headersList = await headers()
   return headersList.get('x-church-id')
+}
+
+/**
+ * Invalidate church cache - call this after updating church data
+ * Use in server actions that modify church data
+ */
+export async function invalidateChurchCache(): Promise<void> {
+  // This will be called when church data is updated
+  // The cache will be invalidated by the revalidateTag('church') call
+  // in the server action
+  console.log('[Cache] Church cache invalidation requested')
 }

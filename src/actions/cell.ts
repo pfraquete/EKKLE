@@ -91,7 +91,7 @@ interface CellMeetingRow {
     id: string
     date: string
     status: string
-    report?: { id: string }[] | null
+    report?: { id: string }[] | { id: string } | null
     attendance?: CellMeetingAttendance[] | null
 }
 
@@ -158,7 +158,15 @@ export async function getMyCellData(): Promise<MyCellData | null> {
 
     // Process members and absences
     const members = (membersResponse.data || []) as CellMemberRow[]
-    const meetings = ((meetingsResponse.data || []) as unknown) as CellMeetingRow[]
+    // Map raw meeting data to our expected structure
+    const rawMeetings = meetingsResponse.data || []
+    const meetings: CellMeetingRow[] = rawMeetings.map((m: { id: string; date: string; status: string; report?: { id: string }[] | null; attendance?: { status: string }[] | null }) => ({
+        id: m.id,
+        date: m.date,
+        status: m.status,
+        report: m.report,
+        attendance: m.attendance
+    }))
     const activeMeeting = (activeMeetingResponse.data || null) as { id: string; date: string } | null
 
     const memberIds = members.map(member => member.id)
@@ -213,7 +221,7 @@ export async function getMyCellData(): Promise<MyCellData | null> {
         id: m.id,
         date: m.date,
         presentCount: (m.attendance || []).filter(a => a.status === 'PRESENT').length,
-        hasReport: (m.report?.length || 0) > 0
+        hasReport: Array.isArray(m.report) ? m.report.length > 0 : !!m.report
     }))
 
     // Alerts
@@ -294,7 +302,15 @@ export async function getMemberCellData(): Promise<MyCellData | null> {
     ])
 
     const members = (membersResponse.data || []) as CellMemberRow[]
-    const meetings = ((meetingsResponse.data || []) as unknown) as CellMeetingRow[]
+    // Map raw meeting data to our expected structure
+    const rawMeetings2 = meetingsResponse.data || []
+    const meetings: CellMeetingRow[] = rawMeetings2.map((m: { id: string; date: string; status: string; report?: { id: string }[] | null; attendance?: { status: string }[] | null }) => ({
+        id: m.id,
+        date: m.date,
+        status: m.status,
+        report: m.report,
+        attendance: m.attendance
+    }))
 
     // Calculate stats
     const totals = meetings.reduce(
@@ -319,7 +335,7 @@ export async function getMemberCellData(): Promise<MyCellData | null> {
             neighborhood: cell.neighborhood,
             dayOfWeek: cell.day_of_week,
             meetingTime: cell.meeting_time,
-            leader: cell.leader
+            leader: cell.leader ? (Array.isArray(cell.leader) ? cell.leader[0] : cell.leader) : null
         },
         stats: {
             membersCount: members.length,
@@ -335,7 +351,7 @@ export async function getMemberCellData(): Promise<MyCellData | null> {
             id: m.id,
             date: m.date,
             presentCount: (m.attendance || []).filter(a => a.status === 'PRESENT').length,
-            hasReport: (m.report?.length || 0) > 0
+            hasReport: Array.isArray(m.report) ? m.report.length > 0 : !!m.report
         })),
         alerts: [],
         activeMeeting: null
@@ -389,7 +405,15 @@ export async function getCellDetails(cellId: string): Promise<CellDetails | null
     ])
 
     const members = (membersResponse.data || []) as CellMemberRow[]
-    const meetings = ((meetingsResponse.data || []) as unknown) as CellMeetingRow[]
+    // Map raw meeting data to our expected structure
+    const rawMeetings3 = meetingsResponse.data || []
+    const meetings: CellMeetingRow[] = rawMeetings3.map((m: { id: string; date: string; status: string; report?: { id: string }[] | null; attendance?: { status: string }[] | null }) => ({
+        id: m.id,
+        date: m.date,
+        status: m.status,
+        report: m.report,
+        attendance: m.attendance
+    }))
 
     const totals = meetings.reduce(
         (acc, meeting) => {
@@ -411,7 +435,7 @@ export async function getCellDetails(cellId: string): Promise<CellDetails | null
         date: meeting.date,
         status: meeting.status,
         presentCount: (meeting.attendance || []).filter(a => a.status === 'PRESENT').length,
-        hasReport: (meeting.report?.length || 0) > 0
+        hasReport: Array.isArray(meeting.report) ? meeting.report.length > 0 : !!meeting.report
     }))
 
     return {
