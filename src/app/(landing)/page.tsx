@@ -28,6 +28,17 @@ import {
   Menu,
   X,
   Play,
+  ShoppingBag,
+  CreditCard,
+  FileText,
+  Bell,
+  Upload,
+  Smartphone,
+  Video,
+  DollarSign,
+  TrendingUp,
+  UserPlus,
+  Home,
 } from 'lucide-react';
 
 // =====================================================
@@ -37,6 +48,16 @@ import {
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
+
+const fadeInLeft = {
+  hidden: { opacity: 0, x: -50 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6 } },
+};
+
+const fadeInRight = {
+  hidden: { opacity: 0, x: 50 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6 } },
 };
 
 const staggerContainer = {
@@ -129,6 +150,12 @@ function Header() {
               Recursos
             </a>
             <a
+              href="#screenshots"
+              className="text-zinc-400 hover:text-white transition-colors text-sm font-medium"
+            >
+              Sistema
+            </a>
+            <a
               href="#pricing"
               className="text-zinc-400 hover:text-white transition-colors text-sm font-medium"
             >
@@ -190,6 +217,13 @@ function Header() {
                 Recursos
               </a>
               <a
+                href="#screenshots"
+                className="text-zinc-400 hover:text-white transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sistema
+              </a>
+              <a
                 href="#pricing"
                 className="text-zinc-400 hover:text-white transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
@@ -233,7 +267,7 @@ function Header() {
 }
 
 // =====================================================
-// HERO SECTION
+// HERO SECTION WITH IMAGE
 // =====================================================
 
 function HeroSection() {
@@ -245,162 +279,146 @@ function HeroSection() {
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#B89A5F]/10 rounded-full blur-[120px]" />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-full px-4 py-2 mb-8"
-          >
-            <Zap className="w-4 h-4 text-[#B89A5F]" />
-            <span className="text-sm text-zinc-300">
-              Sistema completo de gestão para igrejas
-            </span>
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
-          >
-            Transforme a{' '}
-            <span className="bg-gradient-to-r from-[#66A5AD] to-[#B89A5F] bg-clip-text text-transparent">
-              gestão da sua igreja
-            </span>{' '}
-            com tecnologia
-          </motion.h1>
-
-          {/* Subheadline */}
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl md:text-2xl text-zinc-400 mb-10 max-w-2xl mx-auto"
-          >
-            Gerencie células, membros, eventos e comunicação em um único lugar.
-            Automatize tarefas e foque no que realmente importa: as pessoas.
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
-          >
-            <Link
-              href="/registro"
-              className="group bg-gradient-to-r from-[#1C2E4A] to-[#66A5AD] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition-all hover:shadow-xl hover:shadow-[#66A5AD]/20 flex items-center justify-center gap-2"
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left Content */}
+          <div className="text-center lg:text-left">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-full px-4 py-2 mb-8"
             >
-              Começar Teste Grátis
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <a
-              href="#demo"
-              className="group bg-zinc-800/50 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-zinc-800 transition-colors border border-zinc-700 flex items-center justify-center gap-2"
-            >
-              <Play className="w-5 h-5" />
-              Ver Demonstração
-            </a>
-          </motion.div>
+              <Zap className="w-4 h-4 text-[#B89A5F]" />
+              <span className="text-sm text-zinc-300">
+                Sistema completo de gestão para igrejas
+              </span>
+            </motion.div>
 
-          {/* Social Proof */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6 text-zinc-400"
-          >
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4, 5].map((i) => (
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+            >
+              Transforme a{' '}
+              <span className="bg-gradient-to-r from-[#66A5AD] to-[#B89A5F] bg-clip-text text-transparent">
+                gestão da sua igreja
+              </span>{' '}
+              com tecnologia
+            </motion.h1>
+
+            {/* Subheadline */}
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-xl text-zinc-400 mb-10 max-w-xl"
+            >
+              Gerencie células, membros, eventos, loja virtual e comunicação em um único lugar.
+              Automatize tarefas e foque no que realmente importa: as pessoas.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
+            >
+              <Link
+                href="/registro"
+                className="group bg-gradient-to-r from-[#1C2E4A] to-[#66A5AD] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition-all hover:shadow-xl hover:shadow-[#66A5AD]/20 flex items-center justify-center gap-2"
+              >
+                Começar Teste Grátis
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <a
+                href="#screenshots"
+                className="group bg-zinc-800/50 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-zinc-800 transition-colors border border-zinc-700 flex items-center justify-center gap-2"
+              >
+                <Play className="w-5 h-5" />
+                Ver Sistema
+              </a>
+            </motion.div>
+
+            {/* Social Proof */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex flex-wrap items-center gap-6 justify-center lg:justify-start"
+            >
+              <div className="flex -space-x-3">
+                {['👨‍💼', '👩‍💼', '👨‍🦳', '👩', '👨'].map((emoji, i) => (
                   <div
                     key={i}
-                    className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-600 to-zinc-800 border-2 border-[#09090b] flex items-center justify-center text-xs text-zinc-400"
+                    className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-[#09090b] flex items-center justify-center text-lg"
                   >
-                    {['👨‍💼', '👩‍💼', '👨‍🦳', '👩', '👨'][i - 1]}
+                    {emoji}
                   </div>
                 ))}
               </div>
-              <span className="text-sm">+100 igrejas já usam</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Star key={i} className="w-4 h-4 fill-[#B89A5F] text-[#B89A5F]" />
-              ))}
-              <span className="text-sm ml-1">4.9/5 de avaliação</span>
+              <div className="text-sm">
+                <span className="text-white font-semibold">+100 igrejas</span>
+                <span className="text-zinc-400"> já usam</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} className="w-4 h-4 fill-[#B89A5F] text-[#B89A5F]" />
+                ))}
+                <span className="text-zinc-400 text-sm ml-1">4.9/5</span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right Image - Hero Image */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="relative"
+          >
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/50">
+              <Image
+                src="/images/landing/congregation.jpg"
+                alt="Comunidade em adoração"
+                width={700}
+                height={500}
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#09090b]/80 via-transparent to-transparent" />
+              
+              {/* Floating Stats Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+                className="absolute bottom-6 left-6 right-6 bg-zinc-900/90 backdrop-blur-lg rounded-2xl p-4 border border-zinc-700"
+              >
+                <div className="grid grid-cols-4 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-white">1.247</div>
+                    <div className="text-xs text-zinc-400">Membros</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-[#66A5AD]">48</div>
+                    <div className="text-xs text-zinc-400">Células</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-[#B89A5F]">12</div>
+                    <div className="text-xs text-zinc-400">Eventos</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-400">+15%</div>
+                    <div className="text-xs text-zinc-400">Crescimento</div>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
-
-        {/* Dashboard Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-16 relative"
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent z-10 pointer-events-none" />
-          <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden shadow-2xl shadow-black/50 mx-auto max-w-5xl">
-            <div className="bg-zinc-800 px-4 py-3 flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="text-zinc-400 text-sm ml-4">ekkle.com.br/dashboard</span>
-            </div>
-            <div className="p-4 md:p-8 bg-gradient-to-br from-zinc-900 to-zinc-950">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {[
-                  { label: 'Membros Ativos', value: '1.247', icon: Users, color: 'text-[#66A5AD]' },
-                  { label: 'Células', value: '48', icon: Heart, color: 'text-[#B89A5F]' },
-                  { label: 'Eventos', value: '12', icon: Calendar, color: 'text-green-400' },
-                  { label: 'Mensagens', value: '3.2k', icon: MessageSquare, color: 'text-purple-400' },
-                ].map((stat, i) => (
-                  <div key={i} className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700/50">
-                    <stat.icon className={`w-5 h-5 ${stat.color} mb-2`} />
-                    <div className="text-2xl font-bold text-white">{stat.value}</div>
-                    <div className="text-xs md:text-sm text-zinc-400">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="md:col-span-2 h-48 bg-zinc-800/30 rounded-xl border border-zinc-700/50 p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-zinc-400">Crescimento Mensal</span>
-                    <span className="text-xs text-green-400">+15%</span>
-                  </div>
-                  <div className="flex items-end justify-between h-32 gap-2">
-                    {[40, 65, 45, 80, 55, 90, 70, 95, 85, 100, 88, 110].map((h, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 bg-gradient-to-t from-[#1C2E4A] to-[#66A5AD] rounded-t"
-                        style={{ height: `${h}%` }}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="h-48 bg-zinc-800/30 rounded-xl border border-zinc-700/50 p-4">
-                  <span className="text-sm text-zinc-400">Atividade Recente</span>
-                  <div className="mt-4 space-y-3">
-                    {[
-                      { text: 'Nova célula criada', time: '2min' },
-                      { text: 'Membro cadastrado', time: '5min' },
-                      { text: 'Relatório enviado', time: '12min' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs">
-                        <span className="text-zinc-300">{item.text}</span>
-                        <span className="text-zinc-500">{item.time}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
@@ -447,15 +465,15 @@ function ProblemsSection() {
           </motion.p>
         </AnimatedSection>
 
-        <AnimatedSection className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <AnimatedSection className="grid md:grid-cols-3 gap-8">
           {problems.map((problem, index) => (
             <motion.div
               key={index}
               variants={fadeInUp}
-              className="bg-zinc-800/30 border border-zinc-700/50 rounded-2xl p-8 hover:border-red-500/30 transition-colors group"
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-red-500/30 transition-all"
             >
-              <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <problem.icon className="w-6 h-6 text-red-400" />
+              <div className="w-14 h-14 bg-red-500/10 rounded-xl flex items-center justify-center mb-6">
+                <problem.icon className="w-7 h-7 text-red-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">{problem.title}</h3>
               <p className="text-zinc-400">{problem.description}</p>
@@ -468,20 +486,20 @@ function ProblemsSection() {
 }
 
 // =====================================================
-// FEATURES SECTION
+// FEATURES SECTION - EXPANDED
 // =====================================================
 
 function FeaturesSection() {
   const features = [
     {
-      icon: Users,
+      icon: Home,
       title: 'Gestão de Células',
       description:
         'Organize células, líderes e membros. Acompanhe reuniões, relatórios e crescimento de cada grupo.',
       color: 'from-[#1C2E4A] to-[#66A5AD]',
     },
     {
-      icon: Heart,
+      icon: Users,
       title: 'Gestão de Membros',
       description:
         'Cadastro completo de membros com histórico, estágio espiritual, aniversários e muito mais.',
@@ -515,6 +533,48 @@ function FeaturesSection() {
         'Dashboards com métricas de crescimento, frequência, engajamento e muito mais.',
       color: 'from-[#B89A5F] to-[#66A5AD]',
     },
+    {
+      icon: ShoppingBag,
+      title: 'Loja Virtual',
+      description:
+        'Venda produtos, livros, camisetas e materiais da igreja com gestão completa de estoque e pagamentos.',
+      color: 'from-[#1C2E4A] to-[#66A5AD]',
+    },
+    {
+      icon: Video,
+      title: 'Gestão de Cultos',
+      description:
+        'Organize cultos, escalas de ministério, pregações e acompanhe a frequência dos membros.',
+      color: 'from-[#66A5AD] to-[#B89A5F]',
+    },
+    {
+      icon: DollarSign,
+      title: 'Controle Financeiro',
+      description:
+        'Gerencie entradas, saídas, dízimos e ofertas com relatórios detalhados e transparência total.',
+      color: 'from-[#B89A5F] to-[#1C2E4A]',
+    },
+    {
+      icon: Calendar,
+      title: 'Calendário Integrado',
+      description:
+        'Visualize todos os eventos, cultos e reuniões em um calendário unificado e compartilhável.',
+      color: 'from-[#1C2E4A] to-[#B89A5F]',
+    },
+    {
+      icon: Upload,
+      title: 'Importação de Dados',
+      description:
+        'Importe membros de planilhas Excel ou Google Sheets de forma rápida e sem complicação.',
+      color: 'from-[#66A5AD] to-[#1C2E4A]',
+    },
+    {
+      icon: Bell,
+      title: 'Comunicações em Massa',
+      description:
+        'Envie avisos, convites e mensagens para grupos específicos ou toda a igreja de uma vez.',
+      color: 'from-[#B89A5F] to-[#66A5AD]',
+    },
   ];
 
   return (
@@ -525,7 +585,7 @@ function FeaturesSection() {
             variants={fadeInUp}
             className="text-[#66A5AD] font-medium mb-4 block"
           >
-            RECURSOS
+            RECURSOS COMPLETOS
           </motion.span>
           <motion.h2
             variants={fadeInUp}
@@ -538,23 +598,246 @@ function FeaturesSection() {
           </motion.p>
         </AnimatedSection>
 
-        <AnimatedSection className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <AnimatedSection className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {features.map((feature, index) => (
             <motion.div
               key={index}
               variants={fadeInUp}
-              className="group bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20"
+              className="group bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20"
             >
               <div
-                className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg`}
+                className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}
               >
-                <feature.icon className="w-7 h-7 text-white" />
+                <feature.icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-              <p className="text-zinc-400">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+              <p className="text-sm text-zinc-400">{feature.description}</p>
             </motion.div>
           ))}
         </AnimatedSection>
+      </div>
+    </section>
+  );
+}
+
+// =====================================================
+// SCREENSHOTS SECTION - NEW
+// =====================================================
+
+function ScreenshotsSection() {
+  const screenshots = [
+    {
+      title: 'Dashboard Completo',
+      description: 'Visão geral com KPIs, gráficos de crescimento e próximos eventos',
+      image: '/images/landing/dashboard-example.png',
+    },
+  ];
+
+  return (
+    <section id="screenshots" className="py-20 bg-zinc-900/50">
+      <div className="container mx-auto px-4">
+        <AnimatedSection className="text-center mb-16">
+          <motion.span
+            variants={fadeInUp}
+            className="text-[#B89A5F] font-medium mb-4 block"
+          >
+            CONHEÇA O SISTEMA
+          </motion.span>
+          <motion.h2
+            variants={fadeInUp}
+            className="text-3xl md:text-4xl font-bold text-white mb-4"
+          >
+            Interface moderna e intuitiva
+          </motion.h2>
+          <motion.p variants={fadeInUp} className="text-xl text-zinc-400 max-w-2xl mx-auto">
+            Design dark mode elegante, fácil de usar e com todas as informações que você precisa.
+          </motion.p>
+        </AnimatedSection>
+
+        {/* Main Screenshot */}
+        <AnimatedSection>
+          <motion.div
+            variants={scaleIn}
+            className="relative max-w-5xl mx-auto"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1C2E4A]/30 to-[#66A5AD]/30 rounded-3xl blur-3xl" />
+            <div className="relative bg-zinc-900 border border-zinc-700 rounded-3xl overflow-hidden shadow-2xl">
+              {/* Browser Header */}
+              <div className="bg-zinc-800 px-4 py-3 flex items-center gap-2 border-b border-zinc-700">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <div className="bg-zinc-700 rounded-lg px-4 py-1 text-sm text-zinc-400">
+                    ekkle.com.br/dashboard
+                  </div>
+                </div>
+              </div>
+              {/* Screenshot */}
+              <Image
+                src="/images/landing/dashboard-example.png"
+                alt="Dashboard do Ekkle"
+                width={1200}
+                height={800}
+                className="w-full h-auto"
+              />
+            </div>
+          </motion.div>
+        </AnimatedSection>
+
+        {/* Feature Highlights */}
+        <AnimatedSection className="grid md:grid-cols-3 gap-8 mt-16">
+          {[
+            {
+              icon: TrendingUp,
+              title: 'Métricas em Tempo Real',
+              description: 'Acompanhe o crescimento da sua igreja com gráficos atualizados',
+            },
+            {
+              icon: UserPlus,
+              title: 'Gestão Simplificada',
+              description: 'Cadastre e gerencie membros com poucos cliques',
+            },
+            {
+              icon: Bell,
+              title: 'Notificações Automáticas',
+              description: 'Receba alertas sobre eventos, aniversários e relatórios pendentes',
+            },
+          ].map((item, index) => (
+            <motion.div
+              key={index}
+              variants={fadeInUp}
+              className="text-center"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-xl flex items-center justify-center mx-auto mb-4">
+                <item.icon className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+              <p className="text-zinc-400">{item.description}</p>
+            </motion.div>
+          ))}
+        </AnimatedSection>
+      </div>
+    </section>
+  );
+}
+
+// =====================================================
+// COMMUNITY SECTION - NEW WITH IMAGES
+// =====================================================
+
+function CommunitySection() {
+  return (
+    <section className="py-20">
+      <div className="container mx-auto px-4">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left - Images Grid */}
+          <AnimatedSection className="relative">
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div variants={fadeInUp} className="space-y-4">
+                <div className="rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/landing/small-group.jpeg"
+                    alt="Célula em reunião"
+                    width={300}
+                    height={200}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+                <div className="rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/landing/bible-study.jpg"
+                    alt="Estudo bíblico"
+                    width={300}
+                    height={200}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+              </motion.div>
+              <motion.div variants={fadeInUp} className="space-y-4 pt-8">
+                <div className="rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/landing/youth-worship.jpg"
+                    alt="Jovens em adoração"
+                    width={300}
+                    height={200}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+                <div className="rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/landing/church-worship.jpg"
+                    alt="Culto de celebração"
+                    width={300}
+                    height={200}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+              </motion.div>
+            </div>
+            
+            {/* Floating Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+              className="absolute -bottom-4 -right-4 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-2xl p-4 shadow-xl"
+            >
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">+100</div>
+                <div className="text-sm text-white/80">Igrejas</div>
+              </div>
+            </motion.div>
+          </AnimatedSection>
+
+          {/* Right - Content */}
+          <AnimatedSection>
+            <motion.span
+              variants={fadeInUp}
+              className="text-[#66A5AD] font-medium mb-4 block"
+            >
+              COMUNIDADE
+            </motion.span>
+            <motion.h2
+              variants={fadeInUp}
+              className="text-3xl md:text-4xl font-bold text-white mb-6"
+            >
+              Feito para igrejas que querem crescer
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="text-xl text-zinc-400 mb-8">
+              O Ekkle foi desenvolvido por quem entende as necessidades reais de uma igreja em crescimento. 
+              Cada funcionalidade foi pensada para facilitar o trabalho pastoral e fortalecer a comunidade.
+            </motion.p>
+
+            <motion.div variants={staggerContainer} className="space-y-4">
+              {[
+                'Gestão completa de células e membros',
+                'Automação de comunicação via WhatsApp',
+                'Site personalizado para sua igreja',
+                'Loja virtual integrada',
+                'Relatórios e métricas em tempo real',
+                'Suporte dedicado e treinamento',
+              ].map((item, index) => (
+                <motion.div key={index} variants={fadeInUp} className="flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-[#66A5AD] flex-shrink-0" />
+                  <span className="text-zinc-300">{item}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div variants={fadeInUp} className="mt-8">
+              <Link
+                href="/registro"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#1C2E4A] to-[#66A5AD] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
+              >
+                Começar Agora
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </motion.div>
+          </AnimatedSection>
+        </div>
       </div>
     </section>
   );
@@ -719,6 +1002,13 @@ function BenefitsSection() {
                     title: 'Crescimento de 15%',
                     desc: 'Sua igreja cresceu este mês!',
                   },
+                  {
+                    icon: ShoppingBag,
+                    iconBg: 'bg-purple-500/20',
+                    iconColor: 'text-purple-400',
+                    title: 'Nova venda na loja',
+                    desc: 'Bíblia de Estudo - R$ 89,90',
+                  },
                 ].map((item, i) => (
                   <motion.div
                     key={i}
@@ -797,12 +1087,12 @@ function TestimonialsSection() {
           </motion.p>
         </AnimatedSection>
 
-        <AnimatedSection className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <AnimatedSection className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
               variants={fadeInUp}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-colors"
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8"
             >
               <div className="flex gap-1 mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
@@ -810,8 +1100,12 @@ function TestimonialsSection() {
                 ))}
               </div>
               <p className="text-zinc-300 mb-6 italic">&ldquo;{testimonial.content}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-full" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-full flex items-center justify-center">
+                  <span className="text-white font-semibold">
+                    {testimonial.name.split(' ').map((n) => n[0]).join('')}
+                  </span>
+                </div>
                 <div>
                   <div className="font-semibold text-white">{testimonial.name}</div>
                   <div className="text-sm text-zinc-400">{testimonial.role}</div>
@@ -833,9 +1127,9 @@ function PricingSection() {
   const plans = [
     {
       name: 'Plano Mensal',
-      price: 57,
-      interval: '/mês',
       description: 'Ideal para começar a transformar sua igreja',
+      price: '57',
+      interval: '/mês',
       features: [
         'Gestão ilimitada de células',
         'Gestão ilimitada de membros',
@@ -843,6 +1137,7 @@ function PricingSection() {
         'Automação via WhatsApp',
         'Site personalizado para igreja',
         'Cursos e eventos',
+        'Loja virtual',
         'Suporte prioritário',
       ],
       cta: 'Começar Agora',
@@ -850,10 +1145,10 @@ function PricingSection() {
     },
     {
       name: 'Plano Anual',
-      price: 397,
-      originalPrice: 684,
-      interval: '/ano',
       description: 'Economize 42% pagando anualmente',
+      price: '397',
+      interval: '/ano',
+      originalPrice: '684',
       features: [
         'Tudo do plano mensal',
         'Economia de R$ 287 por ano',
@@ -862,6 +1157,7 @@ function PricingSection() {
         'Consultoria de implantação',
         'Treinamento para líderes',
         'Backup prioritário',
+        'Integrações avançadas',
       ],
       cta: 'Economizar 42%',
       popular: true,
@@ -893,7 +1189,7 @@ function PricingSection() {
           {plans.map((plan, index) => (
             <motion.div
               key={index}
-              variants={scaleIn}
+              variants={fadeInUp}
               className={`relative bg-zinc-900 border rounded-3xl p-8 ${
                 plan.popular
                   ? 'border-[#66A5AD] shadow-xl shadow-[#66A5AD]/10'
@@ -993,6 +1289,16 @@ function FAQSection() {
       question: 'Vocês oferecem suporte?',
       answer:
         'Sim! Oferecemos suporte via WhatsApp, email e chat. Assinantes do plano anual têm prioridade no atendimento e acesso a consultoria de implantação.',
+    },
+    {
+      question: 'Como funciona a loja virtual?',
+      answer:
+        'Você pode cadastrar produtos, definir preços e estoque. Os membros podem comprar diretamente pelo site da igreja e você recebe os pagamentos via Stripe ou PIX.',
+    },
+    {
+      question: 'Posso personalizar o site da minha igreja?',
+      answer:
+        'Sim! Você pode personalizar cores, logo, descrição e todas as informações do site. Cada igreja tem um subdomínio exclusivo (suaigreja.ekkle.com.br).',
     },
   ];
 
@@ -1156,6 +1462,11 @@ function Footer() {
                 </a>
               </li>
               <li>
+                <a href="#screenshots" className="text-zinc-400 hover:text-white transition-colors">
+                  Sistema
+                </a>
+              </li>
+              <li>
                 <a href="#pricing" className="text-zinc-400 hover:text-white transition-colors">
                   Planos
                 </a>
@@ -1224,6 +1535,8 @@ export default function LandingPage() {
         <HeroSection />
         <ProblemsSection />
         <FeaturesSection />
+        <ScreenshotsSection />
+        <CommunitySection />
         <HowItWorksSection />
         <BenefitsSection />
         <TestimonialsSection />
