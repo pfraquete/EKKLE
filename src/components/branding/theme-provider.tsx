@@ -1,6 +1,23 @@
 import { BrandingSettings } from '@/actions/branding'
 import { generateThemeCSS, getGoogleFontsURL } from '@/lib/branding'
 
+/**
+ * Validate favicon URL - only allow HTTPS or relative paths
+ * SECURITY: Prevents injection of malicious protocols (javascript:, data:, etc.)
+ */
+function isValidFaviconUrl(url: string | undefined): boolean {
+  if (!url) return false
+  // Allow relative paths starting with /
+  if (url.startsWith('/')) return true
+  // Only allow HTTPS URLs
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 interface ThemeProviderProps {
   settings?: BrandingSettings
   children?: React.ReactNode
@@ -29,11 +46,11 @@ export function ThemeProvider({ settings, children }: ThemeProviderProps) {
       />
       <link href={fontsURL} rel="stylesheet" />
 
-      {/* Favicon */}
-      {settings.logo?.favicon_url && (
+      {/* Favicon - Only render if URL is valid (HTTPS or relative path) */}
+      {isValidFaviconUrl(settings.logo?.favicon_url) && (
         <>
-          <link rel="icon" type="image/png" href={settings.logo.favicon_url} />
-          <link rel="shortcut icon" href={settings.logo.favicon_url} />
+          <link rel="icon" type="image/png" href={settings.logo!.favicon_url!} />
+          <link rel="shortcut icon" href={settings.logo!.favicon_url!} />
         </>
       )}
 
