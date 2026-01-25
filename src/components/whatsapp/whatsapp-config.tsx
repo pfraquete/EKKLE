@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -169,10 +170,13 @@ export function WhatsAppConfig({ initialInstance }: WhatsAppConfigProps) {
                             {instance.status !== 'CONNECTED' && instance.qr_code && (
                                 <div className="flex flex-col items-center space-y-4 p-6 bg-muted/30 rounded-2xl border-2 border-dashed border-muted">
                                     <div className="bg-white p-4 rounded-xl shadow-inner">
-                                        <img
+                                        <Image
                                             src={instance.qr_code}
                                             alt="WhatsApp QR Code"
-                                            className="w-64 h-64 object-contain"
+                                            width={256}
+                                            height={256}
+                                            className="object-contain"
+                                            unoptimized
                                         />
                                     </div>
                                     <div className="text-center space-y-2">

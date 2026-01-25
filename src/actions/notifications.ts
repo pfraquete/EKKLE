@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { EvolutionService } from '@/lib/evolution'
 import { getWhatsAppInstance } from './whatsapp'
+import { escapeHtml } from '@/lib/sanitize'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -78,23 +79,30 @@ export async function sendTomorrowReminders() {
 
             if (!sentViaWhatsapp && recipient.email) {
                 try {
+                    // Sanitize user-provided data for HTML email
+                    const safeCellName = escapeHtml(meeting.cell.name || '')
+                    const safeRecipientName = escapeHtml(recipient.full_name || '')
+                    const safeMeetingTime = escapeHtml(meeting.cell.meeting_time || '19:30')
+                    const safeAddress = escapeHtml(meeting.cell.address || 'Consultar com o líder')
+                    const safeChurchName = escapeHtml(meeting.cell.church.name || '')
+
                     await resend.emails.send({
                         from: 'Ekkle <contato@ekkle.com.br>',
                         to: recipient.email,
-                        subject: `🙏 Lembrete: Reunião da ${meeting.cell.name} Amanhã!`,
+                        subject: `🙏 Lembrete: Reunião da ${safeCellName} Amanhã!`,
                         html: `
                             <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px; padding: 20px;">
-                                <h2 style="color: #4f46e5;">Olá, ${recipient.full_name}!</h2>
+                                <h2 style="color: #4f46e5;">Olá, ${safeRecipientName}!</h2>
                                 <p>Passando para lembrar da nossa reunião de célula amanhã.</p>
                                 <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                                    <p style="margin: 5px 0;"><strong>Célula:</strong> ${meeting.cell.name}</p>
+                                    <p style="margin: 5px 0;"><strong>Célula:</strong> ${safeCellName}</p>
                                     <p style="margin: 5px 0;"><strong>Data:</strong> ${format(new Date(meeting.date), "EEEE, d 'de' MMMM", { locale: ptBR })}</p>
-                                    <p style="margin: 5px 0;"><strong>Horário:</strong> ${meeting.cell.meeting_time || '19:30'}</p>
-                                    <p style="margin: 5px 0;"><strong>Local:</strong> ${meeting.cell.address || 'Consultar com o líder'}</p>
+                                    <p style="margin: 5px 0;"><strong>Horário:</strong> ${safeMeetingTime}</p>
+                                    <p style="margin: 5px 0;"><strong>Local:</strong> ${safeAddress}</p>
                                 </div>
                                 <p>Esperamos por você!</p>
                                 <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-                                <p style="font-size: 12px; color: #999; text-align: center;">${meeting.cell.church.name} • Ekkle</p>
+                                <p style="font-size: 12px; color: #999; text-align: center;">${safeChurchName} • Ekkle</p>
                             </div>
                         `
                     })

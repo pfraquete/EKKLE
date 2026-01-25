@@ -4,6 +4,7 @@ import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { escapeHtml } from '@/lib/sanitize'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const fromEmail = process.env.FROM_EMAIL || 'Ekkle <eventos@resend.dev>'
@@ -37,14 +38,21 @@ export async function sendRegistrationConfirmation(registrationId: string) {
         const profile = registration.profile as any
         const church = registration.church as any
 
+        // Sanitize user-provided data to prevent XSS
+        const safeChurchName = escapeHtml(church.name || '')
+        const safeProfileName = escapeHtml(profile.full_name || '')
+        const safeEventTitle = escapeHtml(event.title || '')
+        const safeEventDescription = escapeHtml(event.description || '')
+        const safeLocation = escapeHtml(event.location || 'Local não especificado')
+
         // Format date and time
         const eventDate = format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
         const eventTime = format(new Date(event.start_date), 'HH:mm', { locale: ptBR })
 
-        // Determine location
+        // Determine location (sanitized)
         const location = event.is_online
-            ? `Online: ${event.online_url || 'Link será enviado'}`
-            : event.location || 'Local não especificado'
+            ? `Online: ${escapeHtml(event.online_url || 'Link será enviado')}`
+            : safeLocation
 
         // Build email content based on registration status
         let statusMessage = ''
@@ -99,22 +107,22 @@ export async function sendRegistrationConfirmation(registrationId: string) {
         const { error: emailError } = await resend.emails.send({
             from: fromEmail,
             to: profile.email,
-            subject: `Inscrição no Evento: ${event.title}`,
+            subject: `Inscrição no Evento: ${safeEventTitle}`,
             html: `
                 <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                     <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%);">
-                        <h1 style="color: white; margin: 0;">${church.name}</h1>
+                        <h1 style="color: white; margin: 0;">${safeChurchName}</h1>
                         <p style="color: #fecdd3; margin: 5px 0 0 0;">Sistema de Eventos</p>
                     </div>
 
                     <div style="padding: 30px;">
                         <h2 style="color: #e11d48; margin-top: 0;">Inscrição Recebida!</h2>
-                        <p>Olá, <strong>${profile.full_name}</strong>!</p>
+                        <p>Olá, <strong>${safeProfileName}</strong>!</p>
                         <p>Recebemos sua inscrição para o evento:</p>
 
                         <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                            <h3 style="margin-top: 0; color: #1f2937;">${event.title}</h3>
-                            ${event.description ? `<p style="color: #6b7280;">${event.description}</p>` : ''}
+                            <h3 style="margin-top: 0; color: #1f2937;">${safeEventTitle}</h3>
+                            ${safeEventDescription ? `<p style="color: #6b7280;">${safeEventDescription}</p>` : ''}
                             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 15px 0;" />
                             <p style="margin: 5px 0;"><strong>📅 Data:</strong> ${eventDate}</p>
                             <p style="margin: 5px 0;"><strong>🕐 Horário:</strong> ${eventTime}</p>
@@ -132,7 +140,7 @@ export async function sendRegistrationConfirmation(registrationId: string) {
                     </div>
 
                     <div style="text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${church.name}</p>
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${safeChurchName}</p>
                         <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">
                             Powered by <a href="https://ekkle.com.br" style="color: #e11d48; text-decoration: none;">Ekkle</a>
                         </p>
@@ -179,6 +187,12 @@ export async function sendCancellationConfirmation(registrationId: string) {
         const profile = registration.profile as any
         const church = registration.church as any
 
+        // Sanitize user-provided data to prevent XSS
+        const safeChurchName = escapeHtml(church.name || '')
+        const safeProfileName = escapeHtml(profile.full_name || '')
+        const safeEventTitle = escapeHtml(event.title || '')
+        const safeCancellationReason = escapeHtml(registration.cancellation_reason || '')
+
         const eventDate = format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
 
         // Refund information
@@ -197,22 +211,22 @@ export async function sendCancellationConfirmation(registrationId: string) {
         const { error: emailError } = await resend.emails.send({
             from: fromEmail,
             to: profile.email,
-            subject: `Cancelamento de Inscrição: ${event.title}`,
+            subject: `Cancelamento de Inscrição: ${safeEventTitle}`,
             html: `
                 <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                     <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%);">
-                        <h1 style="color: white; margin: 0;">${church.name}</h1>
+                        <h1 style="color: white; margin: 0;">${safeChurchName}</h1>
                         <p style="color: #fecdd3; margin: 5px 0 0 0;">Sistema de Eventos</p>
                     </div>
 
                     <div style="padding: 30px;">
                         <h2 style="color: #dc2626; margin-top: 0;">Inscrição Cancelada</h2>
-                        <p>Olá, <strong>${profile.full_name}</strong>!</p>
-                        <p>Sua inscrição no evento <strong>${event.title}</strong> foi cancelada conforme solicitado.</p>
+                        <p>Olá, <strong>${safeProfileName}</strong>!</p>
+                        <p>Sua inscrição no evento <strong>${safeEventTitle}</strong> foi cancelada conforme solicitado.</p>
 
                         <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
                             <p style="margin: 5px 0;"><strong>📅 Data do Evento:</strong> ${eventDate}</p>
-                            ${registration.cancellation_reason ? `<p style="margin: 15px 0 5px 0;"><strong>Motivo:</strong> ${registration.cancellation_reason}</p>` : ''}
+                            ${safeCancellationReason ? `<p style="margin: 15px 0 5px 0;"><strong>Motivo:</strong> ${safeCancellationReason}</p>` : ''}
                         </div>
 
                         ${refundInfo}
@@ -228,7 +242,7 @@ export async function sendCancellationConfirmation(registrationId: string) {
                     </div>
 
                     <div style="text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${church.name}</p>
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${safeChurchName}</p>
                         <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">
                             Powered by <a href="https://ekkle.com.br" style="color: #e11d48; text-decoration: none;">Ekkle</a>
                         </p>
@@ -275,12 +289,19 @@ export async function sendWaitlistPromotion(registrationId: string) {
         const profile = registration.profile as any
         const church = registration.church as any
 
+        // Sanitize user-provided data to prevent XSS
+        const safeChurchName = escapeHtml(church.name || '')
+        const safeProfileName = escapeHtml(profile.full_name || '')
+        const safeEventTitle = escapeHtml(event.title || '')
+        const safeEventDescription = escapeHtml(event.description || '')
+        const safeLocation = escapeHtml(event.location || 'Local não especificado')
+
         const eventDate = format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
         const eventTime = format(new Date(event.start_date), 'HH:mm', { locale: ptBR })
 
         const location = event.is_online
-            ? `Online: ${event.online_url || 'Link será enviado'}`
-            : event.location || 'Local não especificado'
+            ? `Online: ${escapeHtml(event.online_url || 'Link será enviado')}`
+            : safeLocation
 
         // Payment action if required
         let paymentSection = ''
@@ -311,7 +332,7 @@ export async function sendWaitlistPromotion(registrationId: string) {
         const { error: emailError } = await resend.emails.send({
             from: fromEmail,
             to: profile.email,
-            subject: `🎉 Vaga Disponível: ${event.title}`,
+            subject: `🎉 Vaga Disponível: ${safeEventTitle}`,
             html: `
                 <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                     <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
@@ -321,12 +342,12 @@ export async function sendWaitlistPromotion(registrationId: string) {
 
                     <div style="padding: 30px;">
                         <h2 style="color: #059669; margin-top: 0;">Você saiu da lista de espera!</h2>
-                        <p>Olá, <strong>${profile.full_name}</strong>!</p>
-                        <p>Temos uma ótima notícia! Uma vaga abriu no evento <strong>${event.title}</strong> e sua inscrição foi confirmada.</p>
+                        <p>Olá, <strong>${safeProfileName}</strong>!</p>
+                        <p>Temos uma ótima notícia! Uma vaga abriu no evento <strong>${safeEventTitle}</strong> e sua inscrição foi confirmada.</p>
 
                         <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                            <h3 style="margin-top: 0; color: #1f2937;">${event.title}</h3>
-                            ${event.description ? `<p style="color: #6b7280;">${event.description}</p>` : ''}
+                            <h3 style="margin-top: 0; color: #1f2937;">${safeEventTitle}</h3>
+                            ${safeEventDescription ? `<p style="color: #6b7280;">${safeEventDescription}</p>` : ''}
                             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 15px 0;" />
                             <p style="margin: 5px 0;"><strong>📅 Data:</strong> ${eventDate}</p>
                             <p style="margin: 5px 0;"><strong>🕐 Horário:</strong> ${eventTime}</p>
@@ -341,7 +362,7 @@ export async function sendWaitlistPromotion(registrationId: string) {
                     </div>
 
                     <div style="text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${church.name}</p>
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${safeChurchName}</p>
                         <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">
                             Powered by <a href="https://ekkle.com.br" style="color: #e11d48; text-decoration: none;">Ekkle</a>
                         </p>
@@ -394,23 +415,29 @@ export async function sendEventReminder(eventId: string) {
             return { success: false, error: 'No confirmed registrations' }
         }
 
+        // Sanitize event data
+        const safeEventTitle = escapeHtml(event.title || '')
+        const safeChurchName = escapeHtml((event.church as any).name || '')
+        const safeLocation = escapeHtml(event.location || '')
+
         const eventDate = format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
         const eventTime = format(new Date(event.start_date), 'HH:mm', { locale: ptBR })
 
         const location = event.is_online
-            ? `<strong>Link para o evento:</strong> <a href="${event.online_url}" style="color: #e11d48;">${event.online_url}</a>`
-            : `<strong>Local:</strong> ${event.location}`
+            ? `<strong>Link para o evento:</strong> <a href="${escapeHtml(event.online_url || '')}" style="color: #e11d48;">${escapeHtml(event.online_url || '')}</a>`
+            : `<strong>Local:</strong> ${safeLocation}`
 
         let sentCount = 0
 
         // Send reminder to each registrant
         for (const registration of registrations) {
             const profile = registration.profile as any
+            const safeProfileName = escapeHtml(profile.full_name || '')
 
             const { error: emailError } = await resend.emails.send({
                 from: fromEmail,
                 to: profile.email,
-                subject: `⏰ Lembrete: ${event.title} é amanhã!`,
+                subject: `⏰ Lembrete: ${safeEventTitle} é amanhã!`,
                 html: `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%);">
@@ -419,11 +446,11 @@ export async function sendEventReminder(eventId: string) {
 
                         <div style="padding: 30px;">
                             <h2 style="color: #e11d48; margin-top: 0;">Não esqueça!</h2>
-                            <p>Olá, <strong>${profile.full_name}</strong>!</p>
-                            <p>Este é um lembrete de que o evento <strong>${event.title}</strong> acontecerá em breve.</p>
+                            <p>Olá, <strong>${safeProfileName}</strong>!</p>
+                            <p>Este é um lembrete de que o evento <strong>${safeEventTitle}</strong> acontecerá em breve.</p>
 
                             <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                                <h3 style="margin-top: 0; color: #1f2937;">${event.title}</h3>
+                                <h3 style="margin-top: 0; color: #1f2937;">${safeEventTitle}</h3>
                                 <p style="margin: 5px 0;"><strong>📅 Data:</strong> ${eventDate}</p>
                                 <p style="margin: 5px 0;"><strong>🕐 Horário:</strong> ${eventTime}</p>
                                 <p style="margin: 5px 0;">${location}</p>
@@ -438,7 +465,7 @@ export async function sendEventReminder(eventId: string) {
                         </div>
 
                         <div style="text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                            <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${(event.church as any).name}</p>
+                            <p style="margin: 0; font-size: 12px; color: #6b7280;">© 2026 ${safeChurchName}</p>
                         </div>
                     </div>
                 `,

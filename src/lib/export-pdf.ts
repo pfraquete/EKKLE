@@ -1,12 +1,16 @@
 /**
  * Simple PDF export using browser's print functionality
  * Works with any HTML content without external dependencies
+ *
+ * SECURITY: All user-provided content is sanitized to prevent XSS attacks
  */
+
+import { escapeHtml } from '@/lib/sanitize'
 
 interface ExportPDFOptions {
   filename: string
   title: string
-  content: string
+  content: string // Expected to be pre-sanitized HTML from generateMeetingReportHTML
 }
 
 /**
@@ -15,6 +19,8 @@ interface ExportPDFOptions {
  */
 export function exportToPDF(options: ExportPDFOptions) {
   const { title, content } = options
+  // Sanitize title to prevent XSS
+  const safeTitle = escapeHtml(title)
 
   // Create a hidden iframe
   const iframe = document.createElement('iframe')
@@ -40,7 +46,7 @@ export function exportToPDF(options: ExportPDFOptions) {
     <html>
       <head>
         <meta charset="utf-8">
-        <title>${title}</title>
+        <title>${safeTitle}</title>
         <style>
           @media print {
             @page {
@@ -177,6 +183,7 @@ export function exportToPDF(options: ExportPDFOptions) {
 
 /**
  * Generate HTML for meeting report PDF
+ * SECURITY: All user-provided data is sanitized with escapeHtml
  */
 export function generateMeetingReportHTML(data: {
   cellName: string
@@ -200,6 +207,19 @@ export function generateMeetingReportHTML(data: {
     ? Math.round((presentCount / totalMembers) * 100)
     : 0
 
+  // Sanitize all user-provided data to prevent XSS
+  const safeCellName = escapeHtml(data.cellName)
+  const safeLeaderName = escapeHtml(data.leaderName)
+  const safeObservations = escapeHtml(data.observations || '').replace(/\n/g, '<br>')
+  const safeAttendance = data.attendance.map(a => ({
+    name: escapeHtml(a.name),
+    present: a.present
+  }))
+  const safeVisitors = data.visitors.map(v => ({
+    name: escapeHtml(v.name),
+    phone: escapeHtml(v.phone)
+  }))
+
   return `
     <h1>Relatório de Reunião de Célula</h1>
 
@@ -208,7 +228,7 @@ export function generateMeetingReportHTML(data: {
       <table>
         <tr>
           <th>Célula</th>
-          <td>${data.cellName}</td>
+          <td>${safeCellName}</td>
         </tr>
         <tr>
           <th>Data</th>
@@ -220,7 +240,7 @@ export function generateMeetingReportHTML(data: {
         </tr>
         <tr>
           <th>Líder</th>
-          <td>${data.leaderName}</td>
+          <td>${safeLeaderName}</td>
         </tr>
       </table>
     </div>
@@ -270,7 +290,7 @@ export function generateMeetingReportHTML(data: {
       </table>
     </div>
 
-    ${data.attendance.length > 0 ? `
+    ${safeAttendance.length > 0 ? `
       <div class="section">
         <h2>Presença de Membros</h2>
         <table>
@@ -281,7 +301,7 @@ export function generateMeetingReportHTML(data: {
             </tr>
           </thead>
           <tbody>
-            ${data.attendance.map(a => `
+            ${safeAttendance.map(a => `
               <tr>
                 <td>${a.name}</td>
                 <td style="text-align: center;">${a.present ? '✓ Presente' : '✗ Ausente'}</td>
@@ -292,7 +312,7 @@ export function generateMeetingReportHTML(data: {
       </div>
     ` : ''}
 
-    ${data.visitors.length > 0 ? `
+    ${safeVisitors.length > 0 ? `
       <div class="section">
         <h2>Visitantes</h2>
         <table>
@@ -303,7 +323,7 @@ export function generateMeetingReportHTML(data: {
             </tr>
           </thead>
           <tbody>
-            ${data.visitors.map(v => `
+            ${safeVisitors.map(v => `
               <tr>
                 <td>${v.name}</td>
                 <td>${v.phone}</td>
@@ -314,10 +334,10 @@ export function generateMeetingReportHTML(data: {
       </div>
     ` : ''}
 
-    ${data.observations ? `
+    ${safeObservations ? `
       <div class="section">
         <h2>Observações</h2>
-        <p>${data.observations.replace(/\n/g, '<br>')}</p>
+        <p>${safeObservations}</p>
       </div>
     ` : ''}
   `
