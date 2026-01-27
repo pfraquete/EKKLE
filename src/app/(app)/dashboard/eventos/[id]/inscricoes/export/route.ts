@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getProfile } from '@/actions/auth'
 import { exportRegistrantsToCsv } from '@/actions/event-registrations'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

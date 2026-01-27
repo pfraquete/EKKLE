@@ -22,15 +22,17 @@ import {
 } from '@/lib/ai-agent/system-prompt-optimized'; // Using optimized prompt
 import { whatsappRateLimiter } from '@/lib/rate-limiter';
 
-// Service role client for webhook processing
+// Service role client will be initialized inside handler to avoid build-time errors
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+export const dynamic = 'force-dynamic';
 
 /**
  * POST handler - Receives incoming WhatsApp messages from Twilio
  */
 export async function POST(request: NextRequest) {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
   console.log('[Twilio Webhook] Received POST request');
 
   try {

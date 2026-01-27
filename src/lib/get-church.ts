@@ -1,6 +1,6 @@
 import { headers } from 'next/headers'
 import { unstable_cache } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createStaticClient } from '@/lib/supabase/server'
 
 export type Church = {
   id: string
@@ -21,7 +21,7 @@ export type Church = {
  */
 const getCachedChurchById = unstable_cache(
   async (churchId: string): Promise<Church | null> => {
-    const supabase = await createClient()
+    const supabase = createStaticClient()
     const { data: church } = await supabase
       .from('churches')
       .select('*')
@@ -39,7 +39,7 @@ const getCachedChurchById = unstable_cache(
 
 const getCachedChurchBySlug = unstable_cache(
   async (churchSlug: string): Promise<Church | null> => {
-    const supabase = await createClient()
+    const supabase = createStaticClient()
     const { data: church } = await supabase
       .from('churches')
       .select('*')
