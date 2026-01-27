@@ -13,7 +13,12 @@ export default async function LoginPage({
     searchParams: Promise<{ message?: string; error?: string }>
 }) {
     const { message, error } = await searchParams
-    const church = await getChurch()
+    let church = null
+    try {
+        church = await getChurch()
+    } catch (err) {
+        console.error('Error loading church for login:', err)
+    }
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-background via-background/50 to-muted/20">

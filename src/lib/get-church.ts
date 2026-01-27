@@ -21,16 +21,22 @@ export type Church = {
  */
 const getCachedChurchById = unstable_cache(
   async (churchId: string): Promise<Church | null> => {
-    const supabase = createStaticClient()
-    const { data: church } = await supabase
-      .from('churches')
-      .select('*')
-      .eq('id', churchId)
-      .single()
+    console.log('[get-church] Fetching church by ID:', churchId)
+    try {
+      const supabase = createStaticClient()
+      const { data: church } = await supabase
+        .from('churches')
+        .select('*')
+        .eq('id', churchId)
+        .single()
 
-    return church || null
+      return church || null
+    } catch (error) {
+      console.error('[get-church] Error fetching church by ID:', error)
+      return null
+    }
   },
-  ['church-by-id'],
+  ['church-by-id-v2'],
   {
     revalidate: 60, // Cache for 60 seconds
     tags: ['church'],
@@ -39,16 +45,22 @@ const getCachedChurchById = unstable_cache(
 
 const getCachedChurchBySlug = unstable_cache(
   async (churchSlug: string): Promise<Church | null> => {
-    const supabase = createStaticClient()
-    const { data: church } = await supabase
-      .from('churches')
-      .select('*')
-      .eq('slug', churchSlug)
-      .single()
+    console.log('[get-church] Fetching church by slug:', churchSlug)
+    try {
+      const supabase = createStaticClient()
+      const { data: church } = await supabase
+        .from('churches')
+        .select('*')
+        .eq('slug', churchSlug)
+        .single()
 
-    return church || null
+      return church || null
+    } catch (error) {
+      console.error('[get-church] Error fetching church by slug:', error)
+      return null
+    }
   },
-  ['church-by-slug'],
+  ['church-by-slug-v2'],
   {
     revalidate: 60, // Cache for 60 seconds
     tags: ['church'],
