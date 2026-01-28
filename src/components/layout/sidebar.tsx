@@ -14,7 +14,8 @@ import {
     Wallet,
     MessageSquare,
     Globe,
-    Video
+    Video,
+    Radio
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -85,6 +86,13 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: BookOpen,
             href: '/dashboard/cursos',
             active: pathname.startsWith('/dashboard/cursos'),
+            show: isPastor
+        },
+        {
+            label: 'Lives',
+            icon: Radio,
+            href: '/dashboard/lives',
+            active: pathname.startsWith('/dashboard/lives'),
             show: isPastor
         },
         {

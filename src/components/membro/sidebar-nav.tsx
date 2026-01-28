@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
-import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles } from 'lucide-react'
+import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio } from 'lucide-react'
 
 interface SidebarNavProps {
     profile: any
@@ -14,6 +14,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
     const navItems = [
         { href: '/membro', label: 'Meu Perfil', icon: User },
+        { href: '/membro/lives', label: 'Lives', icon: Radio },
         { href: '/membro/cursos', label: 'Meus Cursos', icon: BookOpen },
         { href: '/membro/eventos', label: 'Meus Eventos', icon: Calendar },
         ...(profile?.cell_id
