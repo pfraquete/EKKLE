@@ -58,6 +58,58 @@ export async function signIn(formData: FormData) {
     redirect('/dashboard')
 }
 
+export async function signUp(formData: FormData) {
+    const supabase = await createClient()
+
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    const fullName = formData.get('full_name') as string
+    const phone = formData.get('phone') as string
+    const churchId = formData.get('church_id') as string
+
+    // Create auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+            data: {
+                full_name: fullName,
+            }
+        }
+    })
+
+    if (authError) {
+        return redirect(`/cadastro?error=${encodeURIComponent(authError.message)}`)
+    }
+
+    if (!authData.user) {
+        return redirect(`/cadastro?error=${encodeURIComponent('Erro ao criar usuário')}`)
+    }
+
+    // Create profile
+    const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+            id: authData.user.id,
+            church_id: churchId,
+            full_name: fullName,
+            email: email,
+            phone: phone || null,
+            role: 'MEMBER',
+            member_stage: 'VISITOR',
+            is_active: true,
+        })
+
+    if (profileError) {
+        console.error('Error creating profile:', profileError)
+        return redirect(`/cadastro?error=${encodeURIComponent('Erro ao criar perfil')}`)
+    }
+
+    revalidatePath('/', 'layout')
+    redirect('/login?message=Conta criada com sucesso! Faça login para continuar.')
+}
+
+
 export async function signOut() {
     const supabase = await createClient()
     await supabase.auth.signOut()
