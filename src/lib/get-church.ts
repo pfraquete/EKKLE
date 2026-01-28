@@ -1,6 +1,7 @@
 import { headers } from 'next/headers'
 import { unstable_cache } from 'next/cache'
-import { createClient, createStaticClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 
 export type Church = {
   id: string
