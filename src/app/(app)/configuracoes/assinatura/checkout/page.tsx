@@ -2,6 +2,8 @@ import { getProfile } from '@/actions/auth'
 import { createCheckoutSession } from '@/actions/subscription'
 import { redirect } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CheckoutPage({
   searchParams,
 }: {
