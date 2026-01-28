@@ -35,7 +35,8 @@ export async function middleware(request: NextRequest) {
                 url.pathname.startsWith('/presenca-cultos') ||
                 url.pathname.startsWith('/importar') ||
                 url.pathname.startsWith('/calendario') ||
-                url.pathname.startsWith('/configuracoes')
+                url.pathname.startsWith('/configuracoes') ||
+                url.pathname.startsWith('/membro')
 
             if (isBypassRoute) {
                 // Just inject headers for tenant context
