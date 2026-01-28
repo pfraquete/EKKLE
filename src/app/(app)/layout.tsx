@@ -15,8 +15,9 @@ export default async function AppLayout({
         redirect('/login')
     }
 
-    // MEMBER role should not access admin area at all
-    if (profile.role === 'MEMBER') {
+    // MEMBER role with a cell should use member area
+    // MEMBER without cell needs dashboard access to choose a cell
+    if (profile.role === 'MEMBER' && profile.cell_id) {
         redirect('/membro')
     }
 

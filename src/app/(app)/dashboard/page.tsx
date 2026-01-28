@@ -28,7 +28,11 @@ export default async function DashboardPage() {
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    // Only PASTOR reaches here (layout handles MEMBER and LEADER redirects)
+    // MEMBER with cell should use member area
+    // MEMBER without cell can access dashboard to choose a cell
+    if (profile.role === 'MEMBER' && profile.cell_id) {
+        redirect('/membro')
+    }
     const [
         { stats },
         cells,
