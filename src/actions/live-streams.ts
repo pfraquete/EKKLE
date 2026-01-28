@@ -26,6 +26,7 @@ export type LiveStream = {
   youtube_url: string | null
   custom_embed_url: string | null
   chat_enabled: boolean
+  is_public: boolean
   is_recording: boolean
   recording_url: string | null
   peak_viewers: number
@@ -84,6 +85,7 @@ export async function createLiveStream(input: {
   youtube_url?: string
   custom_embed_url?: string
   chat_enabled?: boolean
+  is_public?: boolean
 }) {
   try {
     const profile = await getProfile()
@@ -132,6 +134,7 @@ export async function createLiveStream(input: {
         youtube_url: input.youtube_url || null,
         custom_embed_url: input.custom_embed_url || null,
         chat_enabled: input.chat_enabled ?? true,
+        is_public: input.is_public ?? false,
         mux_stream_key: muxStreamKey,
         mux_playback_id: muxPlaybackId,
         mux_live_stream_id: muxLiveStreamId,
@@ -494,6 +497,109 @@ export async function getLiveStream(streamId: string) {
   } catch (error) {
     console.error('Error getting live stream:', error)
     return null
+  }
+}
+
+/**
+ * Get public live streams for a church (no auth required)
+ */
+export async function getPublicLiveStreams(churchId: string) {
+  try {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from('live_streams')
+      .select(`
+        *,
+        created_by_profile:profiles!live_streams_created_by_fkey(id, full_name, photo_url)
+      `)
+      .eq('church_id', churchId)
+      .eq('is_public', true)
+      .in('status', ['SCHEDULED', 'LIVE'])
+      .order('status', { ascending: false }) // LIVE first
+      .order('scheduled_start', { ascending: true })
+
+    if (error) {
+      console.error('Error getting public live streams:', error)
+      return []
+    }
+
+    return data as LiveStream[]
+  } catch (error) {
+    console.error('Error getting public live streams:', error)
+    return []
+  }
+}
+
+/**
+ * Get a public live stream by ID (no auth required)
+ */
+export async function getPublicLiveStream(streamId: string, churchId: string) {
+  try {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from('live_streams')
+      .select(`
+        *,
+        created_by_profile:profiles!live_streams_created_by_fkey(id, full_name, photo_url)
+      `)
+      .eq('id', streamId)
+      .eq('church_id', churchId)
+      .eq('is_public', true)
+      .single()
+
+    if (error) {
+      return null
+    }
+
+    return data as LiveStream
+  } catch (error) {
+    console.error('Error getting public live stream:', error)
+    return null
+  }
+}
+
+/**
+ * Get public chat messages for a stream (no auth required, read-only)
+ */
+export async function getPublicChatMessages(streamId: string, churchId: string, limit = 100) {
+  try {
+    const supabase = await createClient()
+
+    // First check if the stream is public
+    const { data: stream } = await supabase
+      .from('live_streams')
+      .select('is_public')
+      .eq('id', streamId)
+      .eq('church_id', churchId)
+      .single()
+
+    if (!stream?.is_public) {
+      return []
+    }
+
+    const { data, error } = await supabase
+      .from('live_chat_messages')
+      .select(`
+        *,
+        profile:profiles(id, full_name, photo_url, role)
+      `)
+      .eq('live_stream_id', streamId)
+      .eq('church_id', churchId)
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: true })
+      .limit(limit)
+
+    if (error) {
+      console.error('Error getting public chat messages:', error)
+      return []
+    }
+
+    return data as LiveChatMessage[]
+  } catch (error) {
+    console.error('Error getting public chat messages:', error)
+    return []
   }
 }
 

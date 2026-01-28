@@ -74,6 +74,11 @@ export default async function SiteLayout({
                         Cultos Online
                       </Link>
                     </li>
+                    <li>
+                      <Link href="/lives" className="text-gray-600 hover:text-primary">
+                        Lives
+                      </Link>
+                    </li>
                   </ul>
                 </div>
 

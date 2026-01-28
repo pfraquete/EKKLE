@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Radio, Youtube, Link as LinkIcon, Loader2 } from 'lucide-react'
+import { Radio, Youtube, Link as LinkIcon, Loader2, Globe, Lock } from 'lucide-react'
 import { createLiveStream, LiveStreamProvider } from '@/actions/live-streams'
 import { toast } from 'sonner'
 
@@ -16,6 +16,7 @@ export function NewLiveStreamForm() {
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [customEmbedUrl, setCustomEmbedUrl] = useState('')
   const [chatEnabled, setChatEnabled] = useState(true)
+  const [isPublic, setIsPublic] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,6 +46,7 @@ export function NewLiveStreamForm() {
       youtube_url: provider === 'YOUTUBE' ? youtubeUrl.trim() : undefined,
       custom_embed_url: provider === 'CUSTOM' ? customEmbedUrl.trim() : undefined,
       chat_enabled: chatEnabled,
+      is_public: isPublic,
     })
 
     setLoading(false)
@@ -233,6 +235,40 @@ export function NewLiveStreamForm() {
           <div
             className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-md ${
               chatEnabled ? 'translate-x-6' : 'translate-x-0.5'
+            }`}
+          />
+        </button>
+      </div>
+
+      {/* Public Toggle */}
+      <div className="flex items-center justify-between p-4 bg-muted rounded-xl">
+        <div className="flex items-start gap-3">
+          {isPublic ? (
+            <Globe className="w-5 h-5 text-green-500 mt-0.5" />
+          ) : (
+            <Lock className="w-5 h-5 text-muted-foreground mt-0.5" />
+          )}
+          <div>
+            <h4 className="font-medium text-sm">
+              {isPublic ? 'Live Publica' : 'Live Privada'}
+            </h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {isPublic
+                ? 'Visitantes podem assistir sem fazer login'
+                : 'Apenas membros logados podem assistir'}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsPublic(!isPublic)}
+          className={`relative w-12 h-6 rounded-full transition-colors ${
+            isPublic ? 'bg-green-500' : 'bg-muted-foreground/30'
+          }`}
+        >
+          <div
+            className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-md ${
+              isPublic ? 'translate-x-6' : 'translate-x-0.5'
             }`}
           />
         </button>
