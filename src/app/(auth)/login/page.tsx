@@ -115,9 +115,15 @@ export default async function LoginPage({
                     </CardContent>
                     <div className="p-6 bg-muted/20 text-center text-sm border-t border-border">
                         <span className="text-muted-foreground font-medium">Não tem uma conta?</span>{' '}
-                        <Link href="/registro" className="text-primary hover:underline font-black">
-                            Criar minha igreja
-                        </Link>
+                        {church ? (
+                            <Link href="/cadastro" className="text-primary hover:underline font-black">
+                                Criar conta como membro
+                            </Link>
+                        ) : (
+                            <Link href="/registro" className="text-primary hover:underline font-black">
+                                Criar minha igreja
+                            </Link>
+                        )}
                     </div>
                 </Card>
             </div>
