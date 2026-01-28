@@ -64,6 +64,61 @@ export async function updateSession(request: NextRequest) {
     )
     const isApiRoute = pathname.startsWith('/api')
 
+    // =====================================================
+    // SUBSCRIPTION CHECK - Block access if subscription expired
+    // =====================================================
+    if (church && !isApiRoute && !isAuthRoute) {
+        // Check if church has active subscription
+        const { data: hasSubscription } = await supabase
+            .rpc('has_active_subscription', { p_church_id: church.id })
+            .single()
+
+        const subscriptionActive = hasSubscription as boolean
+
+        // Routes that are always accessible (even without subscription)
+        const subscriptionExemptRoutes = [
+            '/assinatura-expirada',
+            '/logout',
+        ]
+
+        const isSubscriptionExempt = subscriptionExemptRoutes.some(route =>
+            pathname.startsWith(route)
+        )
+
+        // If no active subscription and not exempt route
+        if (!subscriptionActive && !isSubscriptionExempt) {
+            // Get user profile to check if pastor
+            let isPastor = false
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single()
+
+                isPastor = profile?.role === 'PASTOR'
+            }
+
+            // Pastor can access billing page even without subscription
+            const isBillingPage = pathname.startsWith('/configuracoes/assinatura')
+
+            if (!isPastor || !isBillingPage) {
+                // Redirect to subscription expired page
+                const url = request.nextUrl.clone()
+                url.pathname = '/assinatura-expirada'
+                const redirectResponse = NextResponse.redirect(url)
+
+                // Copy cookies
+                const allCookies = supabaseResponse.cookies.getAll()
+                allCookies.forEach(cookie => {
+                    redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+                })
+
+                return redirectResponse
+            }
+        }
+    }
+
     // Public website routes don't require authentication
     if (isPublicWebsite && church) {
         // Allow access to public website even without auth
