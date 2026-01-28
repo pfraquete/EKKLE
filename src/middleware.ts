@@ -1,17 +1,88 @@
-// RESCUE MODE - Simplified Middleware
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-    // Just update session, no complex routing
-    const response = await updateSession(request)
+    try {
+        // Update session first (auth)
+        const sessionResponse = await updateSession(request)
 
-    console.log('[Middleware] Request:', {
-        pathname: request.nextUrl.pathname,
-        hostname: request.headers.get('host'),
-    })
+        const url = request.nextUrl
+        const hostname = request.headers.get('host') || ''
 
-    return response
+        // Check if it's a tenant subdomain
+        if (
+            hostname !== 'localhost:3000' &&
+            hostname !== 'ekkle.com.br' &&
+            hostname !== 'www.ekkle.com.br' &&
+            hostname !== 'app.ekkle.com.br'
+        ) {
+            // It's a tenant subdomain
+            const subdomain = hostname.split('.')[0]
+
+            // Routes that should NOT be rewritten to /site/[domain]
+            const isBypassRoute =
+                url.pathname.startsWith('/login') ||
+                url.pathname.startsWith('/register') ||
+                url.pathname.startsWith('/cadastro') ||
+                url.pathname.startsWith('/forgot-password') ||
+                url.pathname.startsWith('/reset-password') ||
+                url.pathname.startsWith('/api') ||
+                url.pathname.startsWith('/dashboard') ||
+                url.pathname.startsWith('/minha-celula') ||
+                url.pathname.startsWith('/celulas') ||
+                url.pathname.startsWith('/membros') ||
+                url.pathname.startsWith('/financeiro') ||
+                url.pathname.startsWith('/presenca-cultos') ||
+                url.pathname.startsWith('/importar') ||
+                url.pathname.startsWith('/calendario') ||
+                url.pathname.startsWith('/configuracoes')
+
+            if (isBypassRoute) {
+                // Just inject headers for tenant context
+                const requestHeaders = new Headers(request.headers)
+                requestHeaders.set('x-church-slug', subdomain)
+
+                const response = NextResponse.next({
+                    request: {
+                        headers: requestHeaders,
+                    },
+                })
+
+                // Apply session cookies
+                sessionResponse.cookies.getAll().forEach((cookie) => {
+                    response.cookies.set(cookie.name, cookie.value, cookie)
+                })
+
+                return response
+            }
+
+            // Rewrite to /site/${subdomain}${url.pathname}
+            url.pathname = `/site/${subdomain}${url.pathname}`
+
+            const requestHeaders = new Headers(request.headers)
+            requestHeaders.set('x-church-slug', subdomain)
+
+            const response = NextResponse.rewrite(url, {
+                request: {
+                    headers: requestHeaders,
+                },
+            })
+
+            // Apply cookies from sessionResponse
+            sessionResponse.cookies.getAll().forEach((cookie) => {
+                response.cookies.set(cookie.name, cookie.value, cookie)
+            })
+
+            return response
+        }
+
+        // Root domain - normal behavior
+        return sessionResponse
+    } catch (error) {
+        console.error('[Middleware] Error:', error)
+        // On error, just pass through
+        return NextResponse.next()
+    }
 }
 
 export const config = {
