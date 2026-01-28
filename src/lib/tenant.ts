@@ -134,11 +134,12 @@ export function getTenantFromHeaders(request: NextRequest) {
 export function isPublicWebsiteRoute(pathname: string): boolean {
     // Public website routes start with /site or are the root for subdomains
     return pathname.startsWith('/site') ||
-           pathname === '/' ||
-           pathname.startsWith('/eventos') ||
-           pathname.startsWith('/cursos') ||
-           pathname.startsWith('/cultos') ||
-           pathname.startsWith('/sobre')
+        pathname === '/' ||
+        pathname.startsWith('/eventos') ||
+        pathname.startsWith('/cursos') ||
+        pathname.startsWith('/cultos') ||
+        pathname.startsWith('/sobre') ||
+        pathname.startsWith('/membro')
 }
 
 /**
@@ -146,10 +147,10 @@ export function isPublicWebsiteRoute(pathname: string): boolean {
  */
 export function isAdminRoute(pathname: string): boolean {
     return pathname.startsWith('/dashboard') ||
-           pathname.startsWith('/celulas') ||
-           pathname.startsWith('/membros') ||
-           pathname.startsWith('/minha-celula') ||
-           pathname.startsWith('/calendario') ||
-           pathname.startsWith('/importar') ||
-           pathname.startsWith('/configuracoes')
+        pathname.startsWith('/celulas') ||
+        pathname.startsWith('/membros') ||
+        pathname.startsWith('/minha-celula') ||
+        pathname.startsWith('/calendario') ||
+        pathname.startsWith('/importar') ||
+        pathname.startsWith('/configuracoes')
 }
