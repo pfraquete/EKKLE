@@ -4,6 +4,10 @@ import slugify from 'slugify'
 import crypto from 'crypto'
 import { rateLimiters, getClientIP } from '@/lib/rate-limiter'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // Password validation function
 function validatePassword(password: string): { valid: boolean; message?: string } {
   if (password.length < 8) {

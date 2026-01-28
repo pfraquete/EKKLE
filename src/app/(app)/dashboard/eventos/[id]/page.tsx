@@ -7,6 +7,10 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Users } from 'lucide-react'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+
 type PageProps = {
   params: Promise<{ id: string }>
 }

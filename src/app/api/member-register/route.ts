@@ -4,6 +4,11 @@ import { getChurch } from '@/lib/get-church'
 import { sendWelcomeEmail } from '@/lib/email'
 import { rateLimiters, getClientIP } from '@/lib/rate-limiter'
 
+// Force dynamic rendering - prevents build-time execution
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+
 // Password validation function
 function validatePassword(password: string): { valid: boolean; message?: string } {
   if (password.length < 8) {
