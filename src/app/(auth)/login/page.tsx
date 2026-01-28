@@ -116,7 +116,7 @@ export default async function LoginPage({
                     <div className="p-6 bg-muted/20 text-center text-sm border-t border-border">
                         <span className="text-muted-foreground font-medium">Não tem uma conta?</span>{' '}
                         {church ? (
-                            <Link href="/cadastro" className="text-primary hover:underline font-black">
+                            <Link href="/registro" className="text-primary hover:underline font-black">
                                 Criar conta como membro
                             </Link>
                         ) : (
