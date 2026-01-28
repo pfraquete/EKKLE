@@ -25,6 +25,7 @@ export function SiteHeader({ church, branding }: { church: Church, branding?: Br
         { href: '/eventos', label: 'Eventos' },
         { href: '/cursos', label: 'Cursos' },
         { href: '/cultos', label: 'Cultos' },
+        { href: '/lives', label: 'Lives' },
     ]
 
     const isActive = (path: string) => pathname === path
