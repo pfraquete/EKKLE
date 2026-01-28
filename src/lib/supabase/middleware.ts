@@ -58,7 +58,7 @@ export async function updateSession(request: NextRequest) {
     const isAdmin = isAdminRoute(pathname)
 
     // Rotas públicas (auth)
-    const authRoutes = ['/login', '/forgot-password', '/reset-password', '/register', '/registro', '/cadastro']
+    const authRoutes = ['/login', '/forgot-password', '/reset-password', '/register', '/registro']
     const isAuthRoute = authRoutes.some(route =>
         pathname.startsWith(route)
     )

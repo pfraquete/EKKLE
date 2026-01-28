@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
             const isBypassRoute =
                 url.pathname.startsWith('/login') ||
                 url.pathname.startsWith('/register') ||
-                url.pathname.startsWith('/cadastro') ||
+                url.pathname.startsWith('/registro') ||
                 url.pathname.startsWith('/forgot-password') ||
                 url.pathname.startsWith('/reset-password') ||
                 url.pathname.startsWith('/api') ||

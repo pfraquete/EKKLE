@@ -28,18 +28,7 @@ export default async function DashboardPage() {
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    // If role is LEADER, redirect to their cell page
-    if (profile.role === 'LEADER') {
-        redirect('/minha-celula')
-    }
-
-    // If role is MEMBER, they should NOT be in the admin dashboard
-    if (profile.role === 'MEMBER') {
-        // Redirect to their profile/member page on the public site
-        redirect('/membro')
-    }
-
-    // Only PASTOR continues here
+    // Only PASTOR reaches here (layout handles MEMBER and LEADER redirects)
     const [
         { stats },
         cells,

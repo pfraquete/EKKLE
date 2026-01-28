@@ -15,6 +15,16 @@ export default async function AppLayout({
         redirect('/login')
     }
 
+    // MEMBER role should not access admin area at all
+    if (profile.role === 'MEMBER') {
+        redirect('/membro')
+    }
+
+    // LEADER role redirects to their cell page
+    if (profile.role === 'LEADER') {
+        redirect('/minha-celula')
+    }
+
     return (
         <div className="flex h-screen bg-background text-foreground overflow-hidden dark">
             <Sidebar profile={profile} />
