@@ -27,10 +27,12 @@
     "@supabase/supabase-js": "^2.47.10",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.1",
+    "@vladmandic/face-api": "^1.7.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "face-api.js": "^0.22.2",
     "framer-motion": "^12.28.1",
     "hls.js": "^1.6.15",
     "isomorphic-dompurify": "^2.35.0",
@@ -58,6 +60,6 @@
     "eslint-config-next": "15.1.11",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.2"
+    "typescript": "5.9.3"
   }
 }

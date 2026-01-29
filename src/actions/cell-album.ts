@@ -62,7 +62,7 @@ export async function registerCellPhoto(data: {
     revalidatePath('/membro/minha-celula')
     revalidatePath('/membro/minha-celula/album')
 
-    return { success: true }
+    return { success: true, photoId: insertedData?.[0]?.id }
 }
 
 /**
@@ -157,7 +157,9 @@ export async function getCellPhotos(cellId: string) {
         .from('cell_photos')
         .select(`
             *,
-            uploader:profiles!uploaded_by(full_name)
+            uploader:profiles!uploaded_by(full_name),
+            face_processed,
+            face_count
         `)
         .eq('cell_id', cellId)
         .eq('church_id', profile.church_id)
