@@ -32,22 +32,31 @@ export async function registerCellPhoto(data: {
         return { success: false, error: 'Apenas líderes podem postar fotos no álbum' }
     }
 
-    const { error } = await supabase
+    // Ensure empty strings are converted to null
+    const description = data.description?.trim() || null
+    const photoDate = data.photoDate || null
+
+    console.log('[registerCellPhoto] Saving with:', { description, photoDate })
+
+    const { data: insertedData, error } = await supabase
         .from('cell_photos')
         .insert({
             cell_id: data.cellId,
             church_id: data.churchId,
             storage_path: data.storagePath,
             photo_url: data.photoUrl,
-            description: data.description || null,
-            photo_date: data.photoDate || null,
+            description,
+            photo_date: photoDate,
             uploaded_by: profile.id
         })
+        .select()
 
     if (error) {
         console.error('Error registering cell photo:', error)
         return { success: false, error: 'Erro ao registrar foto no banco' }
     }
+
+    console.log('[registerCellPhoto] Inserted successfully:', insertedData?.[0])
 
     revalidatePath('/minha-celula')
     revalidatePath('/membro/minha-celula')
@@ -88,18 +97,33 @@ export async function updateCellPhoto(data: {
         return { success: false, error: 'Apenas líderes podem editar fotos do álbum' }
     }
 
-    const { error } = await supabase
+    // Ensure empty strings are converted to null
+    const description = data.description?.trim() || null
+    const photoDate = data.photoDate || null
+
+    console.log('[updateCellPhoto] Updating with:', { photoId: data.photoId, description, photoDate })
+
+    const { data: updatedData, error } = await supabase
         .from('cell_photos')
         .update({
-            description: data.description || null,
-            photo_date: data.photoDate || null
+            description,
+            photo_date: photoDate
         })
         .eq('id', data.photoId)
+        .select()
 
     if (error) {
         console.error('Error updating cell photo:', error)
         return { success: false, error: 'Erro ao atualizar foto' }
     }
+
+    // Check if any row was actually updated (RLS might silently block)
+    if (!updatedData || updatedData.length === 0) {
+        console.error('No rows updated - RLS may have blocked the operation')
+        return { success: false, error: 'Permissão negada para atualizar esta foto' }
+    }
+
+    console.log('[updateCellPhoto] Updated successfully:', updatedData[0])
 
     revalidatePath('/minha-celula')
     revalidatePath('/membro/minha-celula')
