@@ -13,6 +13,7 @@ export async function registerCellPhoto(data: {
     storagePath: string
     photoUrl: string
     description?: string
+    photoDate?: string // ISO date string (YYYY-MM-DD)
 }) {
     const profile = await getProfile()
     if (!profile) return { success: false, error: 'Não autenticado' }
@@ -38,7 +39,8 @@ export async function registerCellPhoto(data: {
             church_id: data.churchId,
             storage_path: data.storagePath,
             photo_url: data.photoUrl,
-            description: data.description,
+            description: data.description || null,
+            photo_date: data.photoDate || null,
             uploaded_by: profile.id
         })
 
@@ -49,6 +51,59 @@ export async function registerCellPhoto(data: {
 
     revalidatePath('/minha-celula')
     revalidatePath('/membro/minha-celula')
+    revalidatePath('/membro/minha-celula/album')
+
+    return { success: true }
+}
+
+/**
+ * Update photo description and date
+ */
+export async function updateCellPhoto(data: {
+    photoId: string
+    description?: string
+    photoDate?: string | null
+}) {
+    const profile = await getProfile()
+    if (!profile) return { success: false, error: 'Não autenticado' }
+
+    const supabase = await createClient()
+
+    // Get the photo to verify ownership/permissions
+    const { data: photo } = await supabase
+        .from('cell_photos')
+        .select('*, cell:cells!cell_id(leader_id)')
+        .eq('id', data.photoId)
+        .single()
+
+    if (!photo) {
+        return { success: false, error: 'Foto não encontrada' }
+    }
+
+    // Check if user is the cell leader or pastor
+    const isLeader = photo.cell?.leader_id === profile.id
+    const isPastor = profile.role === 'PASTOR'
+
+    if (!isLeader && !isPastor) {
+        return { success: false, error: 'Apenas líderes podem editar fotos do álbum' }
+    }
+
+    const { error } = await supabase
+        .from('cell_photos')
+        .update({
+            description: data.description || null,
+            photo_date: data.photoDate || null
+        })
+        .eq('id', data.photoId)
+
+    if (error) {
+        console.error('Error updating cell photo:', error)
+        return { success: false, error: 'Erro ao atualizar foto' }
+    }
+
+    revalidatePath('/minha-celula')
+    revalidatePath('/membro/minha-celula')
+    revalidatePath('/membro/minha-celula/album')
 
     return { success: true }
 }
@@ -109,6 +164,7 @@ export async function deleteCellPhoto(photoId: string) {
 
     revalidatePath('/minha-celula')
     revalidatePath('/membro/minha-celula')
+    revalidatePath('/membro/minha-celula/album')
 
     return { success: true }
 }
