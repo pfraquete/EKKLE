@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { CartProvider } from '@/context/cart-context'
 import { CartButton } from '@/components/store/cart-button'
 import { SidebarNav } from '@/components/membro/sidebar-nav'
+import { MemberMobileNav } from '@/components/membro/mobile-nav'
 
 export default async function MembroLayout({
   children,
@@ -40,13 +41,13 @@ export default async function MembroLayout({
     <CartProvider>
       <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20">
         {/* Header */}
-        <header className="border-b border-border/40 bg-background/60 backdrop-blur-2xl sticky top-0 z-50">
-          <div className="container mx-auto px-8 py-4">
-            <div className="flex items-center justify-between">
+        <header className="border-b border-border/40 bg-background/95 backdrop-blur-xl sticky top-0 z-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+            <div className="flex items-center justify-between gap-3">
               {/* Logo and Church Name */}
-              <Link href="/" className="flex items-center gap-4 group">
+              <Link href="/" className="flex items-center gap-2 sm:gap-4 group min-w-0 flex-1">
                 {church.logo_url ? (
-                  <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-2xl group-hover:scale-110 transition-all duration-500 border border-white/10">
+                  <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg group-hover:scale-105 transition-all duration-300 border border-white/10 flex-shrink-0">
                     <Image
                       src={church.logo_url}
                       alt={church.name}
@@ -55,21 +56,21 @@ export default async function MembroLayout({
                     />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary font-black border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-primary font-black border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 flex-shrink-0">
                     {church.name[0]}
                   </div>
                 )}
-                <div className="flex flex-col">
-                  <span className="font-black text-xl tracking-tighter uppercase whitespace-nowrap leading-none mb-0.5">{church.name}</span>
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/80">Ambiente de Membro</span>
+                <div className="flex flex-col min-w-0">
+                  <span className="font-black text-base sm:text-xl tracking-tighter uppercase leading-none mb-0.5 truncate">{church.name}</span>
+                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-primary/80 hidden sm:block">Membro</span>
                 </div>
               </Link>
 
               {/* User Menu */}
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 flex-shrink-0">
                 <CartButton />
-                <div className="flex items-center gap-5 pl-6 border-l border-border/50">
-                  <div className="text-right hidden sm:block">
+                <div className="flex items-center gap-2 sm:gap-5 pl-2 sm:pl-6 border-l border-border/50">
+                  <div className="text-right hidden md:block">
                     <p className="text-sm font-black text-foreground leading-none mb-1">
                       {profile?.full_name?.split(' ')[0] || user.email?.split('@')[0]}
                     </p>
@@ -80,10 +81,10 @@ export default async function MembroLayout({
                   </div>
                   <Link
                     href="/"
-                    className="p-3 bg-muted/30 rounded-2xl text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:shadow-xl hover:shadow-primary/20 transition-all duration-500 group"
+                    className="p-2.5 sm:p-3 bg-muted/30 rounded-xl sm:rounded-2xl text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 group"
                     title="Explorar Site Público"
                   >
-                    <LogOut className="w-5 h-5 rotate-180 group-hover:scale-110 transition-transform" />
+                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5 rotate-180 group-hover:scale-110 transition-transform" />
                   </Link>
                 </div>
               </div>
@@ -93,16 +94,19 @@ export default async function MembroLayout({
 
         {/* Sidebar + Content */}
         <div className="flex-1 flex max-w-[1600px] mx-auto w-full">
-          {/* Sidebar */}
+          {/* Sidebar - Desktop only */}
           <aside className="w-80 hidden lg:block py-12 px-8">
             <SidebarNav profile={profile} />
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto">
+          <main className="flex-1 p-4 sm:p-6 lg:p-12 pb-24 lg:pb-12 overflow-y-auto">
             {children}
           </main>
         </div>
+
+        {/* Mobile Navigation */}
+        <MemberMobileNav profile={profile} />
       </div>
     </CartProvider>
   )
