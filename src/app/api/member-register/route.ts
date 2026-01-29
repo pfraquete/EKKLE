@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getChurch } from '@/lib/get-church'
 import { sendWelcomeEmail } from '@/lib/email'
 import { rateLimiters, getClientIP } from '@/lib/rate-limiter'
+import { validateInviteToken, incrementInviteUsage } from '@/actions/cell-invites'
 
 // Force dynamic rendering - prevents build-time execution
 export const dynamic = 'force-dynamic'
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { fullName, email, phone, password, message } = body
+    const { fullName, email, phone, password, message, inviteToken } = body
 
     // Validate required fields
     if (!fullName || !email || !password) {
@@ -97,6 +98,18 @@ export async function POST(request: NextRequest) {
         { error: 'Nome deve ter pelo menos 2 caracteres' },
         { status: 400 }
       )
+    }
+
+    // Validate invite token if provided
+    let inviteValidation = null
+    if (inviteToken) {
+      inviteValidation = await validateInviteToken(inviteToken)
+      if (!inviteValidation.valid) {
+        return NextResponse.json(
+          { error: inviteValidation.error || 'Link de convite inválido' },
+          { status: 400 }
+        )
+      }
     }
 
     // Create Supabase client with service role (bypasses RLS)
@@ -148,19 +161,22 @@ export async function POST(request: NextRequest) {
     try {
       // 2. Create/update profile in profiles table
       // Using upsert because Supabase trigger might auto-create profile
+      // If invite token is valid, use cell_id from invite and set member as MEMBER (not VISITOR)
+      const profileData = {
+        id: authUser.user.id,
+        church_id: churchId,
+        full_name: fullName.trim(),
+        email,
+        phone: phone || null,
+        member_stage: inviteValidation?.valid ? 'MEMBER' : 'VISITOR',
+        role: 'MEMBER',
+        cell_id: inviteValidation?.valid ? inviteValidation.cell?.id : null,
+        is_active: true,
+      }
+
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({
-          id: authUser.user.id,
-          church_id: churchId,
-          full_name: fullName.trim(),
-          email,
-          phone: phone || null,
-          member_stage: 'VISITOR',
-          role: 'MEMBER',
-          cell_id: null,
-          is_active: true,
-        }, {
+        .upsert(profileData, {
           onConflict: 'id'
         })
 
@@ -191,9 +207,19 @@ export async function POST(request: NextRequest) {
         // Just log the error and continue
       }
 
+      // 4. Increment invite usage if registered via invite link
+      if (inviteToken && inviteValidation?.valid) {
+        await incrementInviteUsage(inviteToken)
+      }
+
+      const successMessage = inviteValidation?.valid
+        ? `Cadastro concluído com sucesso! Você já faz parte da célula ${inviteValidation.cell?.name}.`
+        : 'Cadastro concluído com sucesso! Verifique seu email para acessar sua conta.'
+
       return NextResponse.json({
         success: true,
-        message: 'Cadastro concluído com sucesso! Verifique seu email para acessar sua conta.',
+        message: successMessage,
+        cellName: inviteValidation?.cell?.name || null,
       })
     } catch (error) {
       console.error('Error in registration process:', error)

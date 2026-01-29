@@ -21,6 +21,7 @@ import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
 import { getCellPhotos } from '@/actions/cell-album'
 import { CellAlbumManager } from '@/components/cell-album/cell-album-manager'
+import { CreateInviteLinkDialog } from '@/components/cell-invites/create-invite-link-dialog'
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
@@ -232,6 +233,9 @@ export default async function MinhaCelulaPage() {
                         Reunião
                     </div>
                 </Link>
+                <div className="col-span-2">
+                    <CreateInviteLinkDialog cellId={cell.id} churchSlug={profile.church_id} />
+                </div>
                 <div className="col-span-2">
                     <Link href="/minha-celula/solicitacoes" className="group">
                         <div className="flex items-center justify-center gap-3 w-full h-14 font-bold border border-border/50 rounded-[1.5rem] bg-zinc-900/50 hover:bg-zinc-800 transition-all text-xs uppercase tracking-widest text-zinc-400 hover:text-white">
