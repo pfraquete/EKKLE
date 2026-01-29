@@ -175,7 +175,7 @@ export async function createChurchRecipient(input: RecipientInput) {
       return { success: false, error: 'Erro ao salvar recebedor no banco de dados' };
     }
 
-    revalidatePath('/dashboard/configuracoes/recebedor');
+    revalidatePath('/configuracoes/pagamentos');
     revalidatePath('/dashboard/loja');
 
     return { success: true, recipient };
@@ -253,7 +253,7 @@ export async function updateChurchRecipient(input: Partial<RecipientInput>) {
       }
     }
 
-    revalidatePath('/dashboard/configuracoes/recebedor');
+    revalidatePath('/configuracoes/pagamentos');
 
     return { success: true };
   } catch (error) {
@@ -313,7 +313,7 @@ export async function syncRecipientFromPagarme() {
       return { success: false, error: 'Erro ao sincronizar recebedor' };
     }
 
-    revalidatePath('/dashboard/configuracoes/recebedor');
+    revalidatePath('/configuracoes/pagamentos');
 
     return { success: true, recipient: pagarmeRecipient };
   } catch (error) {

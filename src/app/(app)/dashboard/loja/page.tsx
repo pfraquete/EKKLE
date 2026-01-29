@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Package, AlertCircle, Settings } from 'lucide-react';
+import { Plus, Package } from 'lucide-react';
 import { ProductCard } from '@/components/products/product-card';
 
 export default async function ProductsListPage() {
@@ -32,43 +32,16 @@ export default async function ProductsListPage() {
           <p className="text-muted-foreground mt-2">Gerencie os produtos da sua loja</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard/configuracoes/recebedor">
-            <Button variant="outline">
-              <Settings className="w-4 h-4 mr-2" />
-              Configurar Recebedor
+        {isRecipientConfigured && (
+          <Link href="/dashboard/loja/novo">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Produto
             </Button>
           </Link>
-          {isRecipientConfigured && (
-            <Link href="/dashboard/loja/novo">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Produto
-              </Button>
-            </Link>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Recipient Warning */}
-      {!isRecipientConfigured && (
-        <Card className="p-6 bg-yellow-50 border-yellow-200">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-6 h-6 text-yellow-600 mt-1 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-yellow-900">Configuração Necessária</h3>
-              <p className="text-sm text-yellow-700 mt-1">
-                Antes de criar produtos, você precisa configurar uma conta bancária para receber os pagamentos.
-              </p>
-              <Link href="/dashboard/configuracoes/recebedor">
-                <Button variant="outline" size="sm" className="mt-3">
-                  Configurar Agora
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </Card>
-      )}
 
       {/* Stats */}
       {isRecipientConfigured && products.length > 0 && (
@@ -106,7 +79,7 @@ export default async function ProductsListPage() {
           <p className="text-muted-foreground mb-6">
             {isRecipientConfigured
               ? 'Comece adicionando produtos à sua loja virtual'
-              : 'Configure o recebedor para começar a vender produtos'}
+              : 'Configure a conta bancária em Configurações > Pagamentos para começar a vender'}
           </p>
           {isRecipientConfigured && (
             <Link href="/dashboard/loja/novo">
