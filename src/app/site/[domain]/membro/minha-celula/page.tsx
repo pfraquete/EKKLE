@@ -1,4 +1,5 @@
 import { getMemberCellData } from '@/actions/cell'
+import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -18,11 +19,14 @@ import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
 import { getCellPhotos } from '@/actions/cell-album'
 import { CellPhotoGallery } from '@/components/cell-album/cell-photo-gallery'
+import { CreateInviteLinkDialog } from '@/components/cell-invites/create-invite-link-dialog'
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
 export default async function MembroMinhaCelulaPage() {
+    const profile = await getProfile()
     const data = await getMemberCellData()
+    const isLeader = profile?.role === 'LEADER'
 
     if (!data) {
         return (
@@ -224,6 +228,24 @@ export default async function MembroMinhaCelulaPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Ações do Líder */}
+            {isLeader && (
+                <div className="bg-card border border-border/40 rounded-[3rem] p-10 shadow-2xl">
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="p-4 bg-primary/10 rounded-2xl">
+                            <Users className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-foreground tracking-tighter italic uppercase">Área do Líder</h3>
+                            <p className="text-xs text-muted-foreground font-black uppercase tracking-widest">Gerencie sua célula</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <CreateInviteLinkDialog cellId={cell.id} churchSlug={profile?.church_id || ''} />
+                    </div>
+                </div>
+            )}
 
             <CellPhotoGallery photos={photos || []} />
         </div>
