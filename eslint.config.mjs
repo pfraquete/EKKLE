@@ -24,6 +24,9 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "react/no-unescaped-entities": "off",
+      // Warn about console.log in production builds
+      // Use logger from @/lib/logger instead
+      "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
     },
   },
 ];
