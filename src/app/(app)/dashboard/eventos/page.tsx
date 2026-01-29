@@ -91,7 +91,9 @@ export default async function EventsPage() {
                   </div>
                 </div>
 
-                <h3 className="text-xl font-black text-foreground mb-2 line-clamp-1">{event.title}</h3>
+                <Link href={`/dashboard/eventos/${event.id}`} className="block">
+                  <h3 className="text-xl font-black text-foreground mb-2 line-clamp-1 hover:text-primary transition-colors">{event.title}</h3>
+                </Link>
 
                 <div className="space-y-2 text-sm text-muted-foreground font-medium">
                   <div className="flex items-center gap-2">

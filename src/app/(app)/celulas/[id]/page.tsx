@@ -66,23 +66,23 @@ export default async function CellDetailsPage({ params }: CellDetailsPageProps) 
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap gap-2 text-xs sm:text-sm text-muted-foreground">
                         {cell.dayOfWeek !== null && (
-                            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1">
-                                <Clock className="h-4 w-4" />
-                                {DAYS[cell.dayOfWeek]} {cell.meetingTime ? `• ${cell.meetingTime.slice(0, 5)}` : ''}
+                            <span className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-muted px-2.5 sm:px-3 py-1">
+                                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                                <span className="truncate">{DAYS[cell.dayOfWeek]} {cell.meetingTime ? `• ${cell.meetingTime.slice(0, 5)}` : ''}</span>
                             </span>
                         )}
                         {cell.neighborhood && (
-                            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1">
-                                <MapPin className="h-4 w-4" />
-                                {cell.neighborhood}
+                            <span className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-muted px-2.5 sm:px-3 py-1">
+                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                                <span className="truncate max-w-[150px] sm:max-w-none">{cell.neighborhood}</span>
                             </span>
                         )}
                         {cell.address && (
-                            <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1">
-                                <MapPin className="h-4 w-4" />
-                                {cell.address}
+                            <span className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-muted px-2.5 sm:px-3 py-1">
+                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                                <span className="truncate max-w-[150px] sm:max-w-none">{cell.address}</span>
                             </span>
                         )}
                     </div>

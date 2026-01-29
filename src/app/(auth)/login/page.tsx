@@ -25,7 +25,7 @@ export default async function LoginPage({
         <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-background via-background/50 to-muted/20">
             <div className="w-full max-w-md space-y-6">
                 <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-card border border-border/50">
-                    <CardHeader className="space-y-1 bg-muted/30 border-b border-border text-center p-8">
+                    <CardHeader className="space-y-1 bg-muted/30 border-b border-border text-center p-4 sm:p-8">
                         {church ? (
                             <div className="flex flex-col items-center gap-4">
                                 {church.logo_url ? (
@@ -60,7 +60,7 @@ export default async function LoginPage({
                             </div>
                         )}
                     </CardHeader>
-                    <CardContent className="p-8">
+                    <CardContent className="p-4 sm:p-8">
                         {message && (
                             <div className="mb-6 p-4 bg-emerald-500/10 text-emerald-500 text-sm rounded-xl border border-emerald-500/20 font-bold">
                                 {message}

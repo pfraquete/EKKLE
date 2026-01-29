@@ -65,7 +65,7 @@ export function MobileNav({ profile }: MobileNavProps) {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                        "flex flex-col items-center justify-center gap-1 w-full h-full text-[10px] font-medium transition-colors",
+                        "flex flex-col items-center justify-center gap-1 w-full h-full text-xs font-medium transition-colors",
                         link.active ? "text-primary" : "text-muted-foreground"
                     )}
                 >

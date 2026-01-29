@@ -24,23 +24,26 @@ export default async function FinanceDashboardPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Financeiro</h1>
                     <p className="text-muted-foreground">Gestão de dízimos, ofertas, vendas e despesas.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button asChild variant="outline">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <Button asChild variant="outline" className="flex-1 sm:flex-none">
                         <Link href="/dashboard/financeiro/transacoes">
                             <History className="w-4 h-4 mr-2" />
-                            Ver Tudo
+                            <span className="hidden sm:inline">Ver Tudo</span>
+                            <span className="sm:hidden">Todos</span>
                         </Link>
                     </Button>
-                    <Button asChild className="bg-green-600 hover:bg-green-700">
+                    <Button asChild className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none">
                         <Link href="/dashboard/financeiro/transacoes?type=INCOME">
                             <PlusCircle className="w-4 h-4 mr-2" />
-                            Nova Entrada
+                            <span className="hidden sm:inline">Nova Entrada</span>
+                            <span className="sm:hidden">Entrada</span>
                         </Link>
                     </Button>
-                    <Button asChild variant="destructive">
+                    <Button asChild variant="destructive" className="flex-1 sm:flex-none">
                         <Link href="/dashboard/financeiro/transacoes?type=EXPENSE">
                             <ArrowDownCircle className="w-4 h-4 mr-2" />
-                            Nova Despesa
+                            <span className="hidden sm:inline">Nova Despesa</span>
+                            <span className="sm:hidden">Despesa</span>
                         </Link>
                     </Button>
                 </div>
@@ -104,7 +107,7 @@ export default async function FinanceDashboardPage() {
             </div>
 
             {/* Summary Cards */}
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                 <Card className="border-none shadow-lg bg-gradient-to-br from-green-500/10 to-green-500/5">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium">Entradas</CardTitle>
@@ -142,7 +145,7 @@ export default async function FinanceDashboardPage() {
             </div>
 
             {/* Main Content Sections */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                 {/* Recent Transactions */}
                 <Card className="shadow-xl border-none">
                     <CardHeader className="flex flex-row items-center justify-between">

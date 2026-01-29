@@ -111,24 +111,24 @@ export function TitheTable({ monthsData, currentYear }: TitheTableProps) {
                                                 <span className="text-muted-foreground text-sm">-</span>
                                             )}
                                         </td>
-                                        <td className="px-4 sm:px-6 py-4 text-center">
+                                        <td className="px-2 sm:px-6 py-4 text-center">
                                             {tithe?.receipt_url ? (
                                                 <a
                                                     href={tithe.receipt_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-[10px] sm:text-xs font-bold hover:bg-primary/20 transition-colors"
+                                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] bg-primary/10 text-primary rounded-lg text-[10px] sm:text-xs font-bold hover:bg-primary/20 transition-colors"
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
-                                                    Ver
+                                                    <span className="hidden sm:inline">Ver</span>
                                                 </a>
                                             ) : tithe?.status !== 'CONFIRMED' ? (
                                                 <button
                                                     onClick={() => setSelectedMonth(monthData)}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted text-muted-foreground rounded-lg text-[10px] sm:text-xs font-bold hover:bg-muted/80 hover:text-foreground transition-colors"
+                                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] bg-muted text-muted-foreground rounded-lg text-[10px] sm:text-xs font-bold hover:bg-muted/80 hover:text-foreground transition-colors"
                                                 >
                                                     <Upload className="w-3.5 h-3.5" />
-                                                    Enviar
+                                                    <span className="hidden sm:inline">Enviar</span>
                                                 </button>
                                             ) : (
                                                 <span className="text-muted-foreground text-sm">-</span>

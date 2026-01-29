@@ -77,7 +77,7 @@ export default async function SettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* App Status Card */}
-                <Card className="border-none shadow-lg rounded-3xl">
+                <Card className="border-none shadow-lg rounded-3xl md:max-w-md">
                     <CardHeader>
                         <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
                             <Smartphone className="h-5 w-5 text-primary" />

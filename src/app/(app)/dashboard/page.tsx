@@ -58,13 +58,13 @@ export default async function DashboardPage() {
 
     return (
         <div className="space-y-6 pb-20">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-black text-foreground">Visão Geral</h1>
                     <p className="text-sm text-muted-foreground font-medium tracking-tight">Painel Pastoral • Ekkle</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Link href="/configuracoes/whatsapp">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Link href="/configuracoes/whatsapp" className="hidden sm:block">
                         <Button
                             variant={whatsapp?.status === 'CONNECTED' ? 'secondary' : 'outline'}
                             className={cn(
@@ -76,14 +76,14 @@ export default async function DashboardPage() {
                             {whatsapp?.status === 'CONNECTED' ? 'WhatsApp Ativo' : 'Configurar Zap'}
                         </Button>
                     </Link>
-                    <Link href="/importar">
+                    <Link href="/importar" className="hidden sm:block">
                         <Button variant="outline" className="rounded-2xl h-11 px-4 font-bold border-2">
                             <Download className="h-5 w-5 mr-2" />
                             Importar
                         </Button>
                     </Link>
-                    <Link href="/celulas/nova">
-                        <Button className="rounded-2xl shadow-lg h-11 px-6 font-bold">
+                    <Link href="/celulas/nova" className="flex-1 sm:flex-none">
+                        <Button className="rounded-2xl shadow-lg h-11 px-6 font-bold w-full sm:w-auto">
                             <Plus className="h-5 w-5 mr-2" />
                             Nova Célula
                         </Button>
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
                                 </div>
                                 <p className="text-2xl font-black text-foreground leading-none">{extendedStats.courses.totalEnrollments}</p>
                                 <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Matrículas</p>
-                                <p className="text-[9px] text-muted-foreground">{extendedStats.courses.publishedCourses} cursos ativos</p>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground">{extendedStats.courses.publishedCourses} cursos ativos</p>
                             </CardContent>
                         </Card>
                     </Link>
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
                                 </div>
                                 <p className="text-2xl font-black text-foreground leading-none">{extendedStats.orders.paidOrders}</p>
                                 <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pagos</p>
-                                <p className="text-[9px] text-muted-foreground">{formatCurrency(extendedStats.orders.totalRevenueCents / 100)} em vendas</p>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground">{formatCurrency(extendedStats.orders.totalRevenueCents / 100)} em vendas</p>
                             </CardContent>
                         </Card>
                     </Link>
@@ -171,7 +171,7 @@ export default async function DashboardPage() {
                                 </div>
                                 <p className="text-2xl font-black text-foreground leading-none">{extendedStats.events.upcomingEvents}</p>
                                 <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Eventos Próximos</p>
-                                <p className="text-[9px] text-muted-foreground">{extendedStats.events.totalRegistrations} inscrições</p>
+                                <p className="text-[10px] sm:text-xs text-muted-foreground">{extendedStats.events.totalRegistrations} inscrições</p>
                             </CardContent>
                         </Card>
                     </Link>
@@ -185,7 +185,7 @@ export default async function DashboardPage() {
                                     </div>
                                     <p className="text-2xl font-black text-foreground leading-none">{extendedStats.orders.pendingOrders}</p>
                                     <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pendentes</p>
-                                    <p className="text-[9px] text-yellow-600">Aguardando pagamento</p>
+                                    <p className="text-[10px] sm:text-xs text-yellow-600">Aguardando pagamento</p>
                                 </CardContent>
                             </Card>
                         </Link>

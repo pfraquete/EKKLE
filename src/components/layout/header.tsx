@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ profile }: HeaderProps) {
     return (
-        <header className="h-16 border-b border-border bg-background flex items-center justify-between px-6">
+        <header className="h-16 border-b border-border bg-background flex items-center justify-between px-4 sm:px-6">
             <div>
                 <h2 className="text-muted-foreground text-sm font-medium">
                     Bem-vindo de volta,

@@ -13,6 +13,7 @@ import {
     Home
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import Link from 'next/link'
 
 interface ChurchMember {
     id: string
@@ -111,9 +112,10 @@ export default async function MembersPage() {
                             </div>
                         ) : (
                             members.map(member => (
-                                <div
+                                <Link
                                     key={member.id}
-                                    className="flex items-center justify-between p-4 hover:bg-muted/50 transition-all group"
+                                    href={`/membros/${member.id}`}
+                                    className="flex items-center justify-between p-4 min-h-[72px] hover:bg-muted/50 transition-all group"
                                 >
                                     <div className="flex items-center gap-4 min-w-0">
                                         <Avatar className="h-12 w-12 border-2 border-background shadow-sm shrink-0">
@@ -123,7 +125,7 @@ export default async function MembersPage() {
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="min-w-0">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
                                                 <h4 className="font-bold text-foreground truncate">{member.full_name}</h4>
                                                 {getStageBadge(member.member_stage)}
                                             </div>
@@ -141,7 +143,7 @@ export default async function MembersPage() {
                                         </div>
                                         <ChevronRight className="h-5 w-5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                                     </div>
-                                </div>
+                                </Link>
                             ))
                         )}
                     </div>

@@ -47,50 +47,56 @@ export function CalendarView({ initialEvents }: CalendarViewProps) {
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="p-0">
-                <div className="grid grid-cols-7 border-b bg-muted/30">
-                    {['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'].map((day) => (
-                        <div key={day} className="py-2 text-center text-[10px] uppercase font-black text-muted-foreground tracking-widest">
-                            {day}
-                        </div>
-                    ))}
-                </div>
-                <div className="grid grid-cols-7 border-l border-t">
-                    {days.map((day) => {
-                        const dayEvents = events.filter(e => isSameDay(new Date(e.start_date), day))
-                        return (
-                            <div
-                                key={day.toString()}
-                                className={cn(
-                                    "min-h-[100px] border-r border-b p-2 transition-colors hover:bg-muted/10",
-                                    !isSameMonth(day, monthStart) && "bg-muted/20 text-muted-foreground",
-                                    isSameDay(day, new Date()) && "bg-blue-50/50"
-                                )}
-                            >
-                                <span className={cn(
-                                    "text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full mb-1",
-                                    isSameDay(day, new Date()) && "bg-blue-600 text-white"
-                                )}>
-                                    {format(day, 'd')}
-                                </span>
-                                <div className="space-y-1">
-                                    {dayEvents.map(event => (
-                                        <div
-                                            key={event.id}
-                                            className={cn(
-                                                "text-[9px] px-1.5 py-0.5 rounded-md font-bold truncate cursor-pointer transition-transform active:scale-95",
-                                                event.event_type === 'SERVICE' ? "bg-indigo-100 text-indigo-700 border-l-2 border-indigo-500" :
-                                                    event.event_type === 'EVENT' ? "bg-emerald-100 text-emerald-700 border-l-2 border-emerald-500" :
-                                                        "bg-amber-100 text-amber-700 border-l-2 border-amber-500"
-                                            )}
-                                        >
-                                            {format(new Date(event.start_date), 'HH:mm')} • {event.title}
-                                        </div>
-                                    ))}
-                                </div>
+            <CardContent className="p-0 overflow-x-auto">
+                <div className="min-w-[320px]">
+                    <div className="grid grid-cols-7 border-b bg-muted/30">
+                        {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, i) => (
+                            <div key={i} className="py-2 text-center text-[10px] sm:text-xs uppercase font-black text-muted-foreground tracking-widest">
+                                <span className="sm:hidden">{day}</span>
+                                <span className="hidden sm:inline">{['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][i]}</span>
                             </div>
-                        )
-                    })}
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-7 border-l border-t">
+                        {days.map((day) => {
+                            const dayEvents = events.filter(e => isSameDay(new Date(e.start_date), day))
+                            return (
+                                <div
+                                    key={day.toString()}
+                                    className={cn(
+                                        "min-h-[60px] sm:min-h-[100px] border-r border-b p-1 sm:p-2 transition-colors hover:bg-muted/10",
+                                        !isSameMonth(day, monthStart) && "bg-muted/20 text-muted-foreground",
+                                        isSameDay(day, new Date()) && "bg-blue-50/50"
+                                    )}
+                                >
+                                    <span className={cn(
+                                        "text-[10px] sm:text-xs font-bold w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full mb-0.5 sm:mb-1",
+                                        isSameDay(day, new Date()) && "bg-blue-600 text-white"
+                                    )}>
+                                        {format(day, 'd')}
+                                    </span>
+                                    <div className="space-y-0.5 sm:space-y-1">
+                                        {dayEvents.slice(0, 2).map(event => (
+                                            <div
+                                                key={event.id}
+                                                className={cn(
+                                                    "text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-md font-bold truncate cursor-pointer transition-transform active:scale-95",
+                                                    event.event_type === 'SERVICE' ? "bg-indigo-100 text-indigo-700 border-l-2 border-indigo-500" :
+                                                        event.event_type === 'EVENT' ? "bg-emerald-100 text-emerald-700 border-l-2 border-emerald-500" :
+                                                            "bg-amber-100 text-amber-700 border-l-2 border-amber-500"
+                                                )}
+                                            >
+                                                <span className="hidden sm:inline">{format(new Date(event.start_date), 'HH:mm')} • </span>{event.title}
+                                            </div>
+                                        ))}
+                                        {dayEvents.length > 2 && (
+                                            <div className="text-[8px] text-muted-foreground font-bold">+{dayEvents.length - 2}</div>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
             </CardContent>
         </Card>

@@ -76,7 +76,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
     }
 
     return (
-        <div className="space-y-6 pb-20 max-w-lg mx-auto bg-zinc-950 min-h-screen p-4 rounded-[2.5rem]">
+        <div className="space-y-6 pb-20 w-full max-w-lg mx-auto bg-zinc-950 min-h-screen p-4 sm:rounded-[2.5rem]">
             {/* Dynamic Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
