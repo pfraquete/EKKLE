@@ -55,7 +55,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
     // Leader-only items
     const leaderItems = isLeader
-        ? [{ href: '/dashboard/cultos', label: 'Cultos', icon: Video }]
+        ? [{ href: '/membro/cultos', label: 'Cultos', icon: Video }]
         : []
 
     // Teacher-only items
@@ -81,8 +81,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
     const renderNavItem = (item: { href: string; label: string; icon: any }) => {
         const Icon = item.icon
         const isActive = pathname === item.href ||
-            (item.href !== '/membro' && pathname.startsWith(item.href) && !pathname.startsWith('/membro/minha-celula')) ||
-            (item.href === '/dashboard/cultos' && pathname.startsWith('/dashboard/cultos'))
+            (item.href !== '/membro' && pathname.startsWith(item.href) && !pathname.startsWith('/membro/minha-celula'))
 
         return (
             <Link
