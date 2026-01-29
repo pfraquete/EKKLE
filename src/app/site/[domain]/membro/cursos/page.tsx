@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { BookOpen, Play, CheckCircle, ArrowRight } from 'lucide-react'
+import { BookOpen, Play, CheckCircle, ArrowRight, Radio, Calendar, Clock } from 'lucide-react'
 
 export default async function MeusCursosPage() {
   const church = await getChurch()
@@ -38,8 +38,27 @@ export default async function MeusCursosPage() {
     .eq('church_id', church.id)
     .order('enrolled_at', { ascending: false })
 
-  // Get available courses (not enrolled)
+  // Get live lessons for enrolled courses
   const enrolledCourseIds = enrollments?.map((e: { course_id: string }) => e.course_id) || []
+
+  // Get live lessons for enrolled courses (SCHEDULED or LIVE)
+  const { data: liveLessons } = await supabase
+    .from('course_live_lessons')
+    .select('id, course_id, title, status, scheduled_start')
+    .in('course_id', enrolledCourseIds.length > 0 ? enrolledCourseIds : ['null'])
+    .in('status', ['SCHEDULED', 'LIVE'])
+    .order('scheduled_start', { ascending: true })
+
+  // Create a map of course_id to live lessons
+  const liveLessonsByCoursde = liveLessons?.reduce((acc: any, lesson: any) => {
+    if (!acc[lesson.course_id]) {
+      acc[lesson.course_id] = []
+    }
+    acc[lesson.course_id].push(lesson)
+    return acc
+  }, {}) || {}
+
+  // Get available courses (not enrolled)
   const { data: availableCourses } = await supabase
     .from('courses')
     .select(`
@@ -73,65 +92,112 @@ export default async function MeusCursosPage() {
                 ? course.course_videos.length
                 : course.course_videos?.count || 0
 
+              // Check for live lessons
+              const courseLiveLessons = liveLessonsByCoursde[course.id] || []
+              const liveNow = courseLiveLessons.find((l: any) => l.status === 'LIVE')
+              const nextScheduled = courseLiveLessons.find((l: any) => l.status === 'SCHEDULED')
+
               return (
-                <Link
-                  key={enrollment.id}
-                  href={`/membro/cursos/${course.id}`}
-                  className="group bg-card border border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden hover:shadow-2xl hover:border-primary/20 transition-all duration-300"
-                >
-                  <div className="relative h-36 sm:h-44 lg:h-48 w-full overflow-hidden">
-                    {course.thumbnail_url ? (
-                      <Image
-                        src={course.thumbnail_url}
-                        alt={course.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-muted flex items-center justify-center">
-                        <BookOpen className="w-10 sm:w-12 h-10 sm:h-12 text-primary/20" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60" />
-                  </div>
-
-                  <div className="p-4 sm:p-6 lg:p-8">
-                    <h3 className="font-black text-base sm:text-lg lg:text-xl mb-3 sm:mb-4 text-foreground group-hover:text-primary transition-colors line-clamp-2">{course.title}</h3>
-
-                    {/* Progress Bar */}
-                    <div className="mb-4 sm:mb-6 bg-muted/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-border/50">
-                      <div className="flex items-center justify-between mb-2 sm:mb-3">
-                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Progresso</span>
-                        <span className="text-xs sm:text-sm font-black text-primary">
-                          {enrollment.progress_percentage}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-background rounded-full h-2 sm:h-2.5 overflow-hidden">
-                        <div
-                          className="bg-primary h-full rounded-full transition-all duration-1000 ease-out"
-                          style={{ width: `${enrollment.progress_percentage}%` }}
+                <div key={enrollment.id} className="relative">
+                  <Link
+                    href={`/membro/cursos/${course.id}`}
+                    className="group block bg-card border border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden hover:shadow-2xl hover:border-primary/20 transition-all duration-300"
+                  >
+                    <div className="relative h-36 sm:h-44 lg:h-48 w-full overflow-hidden">
+                      {course.thumbnail_url ? (
+                        <Image
+                          src={course.thumbnail_url}
+                          alt={course.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-700"
                         />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 sm:pt-2">
-                      <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold text-muted-foreground">
-                        <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary/60" />
-                        <span>{videoCount} aulas</span>
-                      </div>
-                      {enrollment.completed_at ? (
-                        <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-500/10 text-emerald-500 rounded-full text-[9px] sm:text-[10px] font-black uppercase">
-                          <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                          Concluído
-                        </div>
                       ) : (
-                        <span className="text-primary text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest flex items-center gap-1.5 sm:gap-2 group-hover:gap-2 sm:group-hover:gap-3 transition-all">
-                          Continuar <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                        </span>
+                        <div className="h-full w-full bg-muted flex items-center justify-center">
+                          <BookOpen className="w-10 sm:w-12 h-10 sm:h-12 text-primary/20" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60" />
+
+                      {/* Live Badge */}
+                      {liveNow && (
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 bg-red-500 text-white rounded-lg text-[10px] font-black uppercase shadow-lg animate-pulse">
+                          <Radio className="w-3 h-3" />
+                          AO VIVO
+                        </div>
                       )}
                     </div>
-                  </div>
-                </Link>
+
+                    <div className="p-4 sm:p-6 lg:p-8">
+                      <h3 className="font-black text-base sm:text-lg lg:text-xl mb-3 sm:mb-4 text-foreground group-hover:text-primary transition-colors line-clamp-2">{course.title}</h3>
+
+                      {/* Progress Bar */}
+                      <div className="mb-4 sm:mb-6 bg-muted/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-border/50">
+                        <div className="flex items-center justify-between mb-2 sm:mb-3">
+                          <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Progresso</span>
+                          <span className="text-xs sm:text-sm font-black text-primary">
+                            {enrollment.progress_percentage}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-background rounded-full h-2 sm:h-2.5 overflow-hidden">
+                          <div
+                            className="bg-primary h-full rounded-full transition-all duration-1000 ease-out"
+                            style={{ width: `${enrollment.progress_percentage}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1 sm:pt-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold text-muted-foreground">
+                          <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary/60" />
+                          <span>{videoCount} aulas</span>
+                        </div>
+                        {enrollment.completed_at ? (
+                          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-500/10 text-emerald-500 rounded-full text-[9px] sm:text-[10px] font-black uppercase">
+                            <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            Concluído
+                          </div>
+                        ) : (
+                          <span className="text-primary text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest flex items-center gap-1.5 sm:gap-2 group-hover:gap-2 sm:group-hover:gap-3 transition-all">
+                            Continuar <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* Live Lesson Quick Access */}
+                  {liveNow && (
+                    <Link
+                      href={`/membro/aulas-ao-vivo/${liveNow.id}`}
+                      className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 p-3 bg-red-500/95 text-white rounded-xl shadow-xl backdrop-blur-sm hover:bg-red-600 transition-colors z-10"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Radio className="w-4 h-4 animate-pulse" />
+                        <span className="font-bold text-sm truncate">{liveNow.title}</span>
+                      </div>
+                      <span className="text-xs font-black uppercase whitespace-nowrap">Assistir</span>
+                    </Link>
+                  )}
+
+                  {/* Scheduled Lesson Info */}
+                  {!liveNow && nextScheduled && (
+                    <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3 p-3 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-xl backdrop-blur-sm z-10">
+                      <Calendar className="w-4 h-4 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-xs truncate">{nextScheduled.title}</p>
+                        <p className="text-[10px] flex items-center gap-1 mt-0.5">
+                          <Clock className="w-3 h-3" />
+                          {new Date(nextScheduled.scheduled_start).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>

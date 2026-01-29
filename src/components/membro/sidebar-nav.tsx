@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video, GraduationCap, Podcast } from 'lucide-react'
+import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video, GraduationCap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SidebarNavProps {
@@ -43,7 +43,6 @@ export function SidebarNav({ profile }: SidebarNavProps) {
         { href: '/membro', label: 'Meu Perfil', icon: User },
         { href: '/membro/lives', label: 'Lives', icon: Radio },
         { href: '/membro/cursos', label: 'Meus Cursos', icon: BookOpen },
-        { href: '/membro/aulas-ao-vivo', label: 'Aulas ao Vivo', icon: Podcast },
         { href: '/membro/eventos', label: 'Meus Eventos', icon: Calendar },
     ]
 
