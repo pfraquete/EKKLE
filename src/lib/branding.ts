@@ -68,9 +68,9 @@ export function generateThemeCSS(settings: BrandingSettings): string {
   const theme = settings.theme || {}
 
   // Sanitize colors (validate hex format)
-  const safePrimary = sanitizeColor(colors.primary, '#e11d48')
+  const safePrimary = sanitizeColor(colors.primary, '#0ea5e9')  // Sky-500 (azul claro)
   const safeSecondary = sanitizeColor(colors.secondary, '#111827')
-  const safeAccent = sanitizeColor(colors.accent, '#f43f5e')
+  const safeAccent = sanitizeColor(colors.accent, '#38bdf8')  // Sky-400
 
   // Sanitize fonts (validate against whitelist)
   const safeHeadingFont = sanitizeFont(fonts.heading, 'Inter')

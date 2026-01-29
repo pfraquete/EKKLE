@@ -39,9 +39,9 @@ export function getAvailableFonts() {
 export function getDefaultBrandingSettings(): BrandingSettings {
   return {
     colors: {
-      primary: '#e11d48', // Rose-600
+      primary: '#0ea5e9', // Sky-500 (azul claro)
       secondary: '#111827', // Gray-900
-      accent: '#f43f5e', // Rose-500
+      accent: '#38bdf8', // Sky-400
     },
     fonts: {
       heading: 'Inter',
