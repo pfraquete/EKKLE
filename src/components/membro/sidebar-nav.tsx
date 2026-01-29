@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
-import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio } from 'lucide-react'
+import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image } from 'lucide-react'
 
 interface SidebarNavProps {
     profile: any
@@ -11,6 +11,8 @@ interface SidebarNavProps {
 
 export function SidebarNav({ profile }: SidebarNavProps) {
     const pathname = usePathname()
+
+    const isLeader = profile?.role === 'LEADER'
 
     const navItems = [
         { href: '/membro', label: 'Meu Perfil', icon: User },
@@ -20,6 +22,14 @@ export function SidebarNav({ profile }: SidebarNavProps) {
         ...(profile?.cell_id
             ? [
                 { href: '/membro/minha-celula', label: 'Minha Célula', icon: Sparkles },
+                // Leader-only menu items
+                ...(isLeader ? [
+                    { href: '/membro/minha-celula/reunioes', label: 'Reuniões', icon: ClipboardList },
+                    { href: '/membro/minha-celula/membros', label: 'Membros', icon: Users },
+                    { href: '/membro/minha-celula/album', label: 'Álbum de Fotos', icon: Image },
+                ] : [
+                    { href: '/membro/minha-celula/album', label: 'Álbum da Célula', icon: Image },
+                ]),
                 { href: '/membro/celulas', label: 'Explorar Células', icon: Search }
             ]
             : [

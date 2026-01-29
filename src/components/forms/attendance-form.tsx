@@ -35,9 +35,10 @@ interface Member {
 interface Props {
     members: Member[]
     cellId: string
+    redirectPath?: string
 }
 
-export function AttendanceForm({ members, cellId }: Props) {
+export function AttendanceForm({ members, cellId, redirectPath = '/minha-celula/reunioes' }: Props) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -103,7 +104,7 @@ export function AttendanceForm({ members, cellId }: Props) {
             }
 
             await createFullMeetingReport(payload)
-            router.push('/minha-celula/reunioes?success=true')
+            router.push(`${redirectPath}?success=true`)
             router.refresh()
         } catch (error) {
             console.error(error)
