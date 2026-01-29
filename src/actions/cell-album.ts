@@ -136,7 +136,22 @@ export async function updateCellPhoto(data: {
  * Get photos for a specific cell
  */
 export async function getCellPhotos(cellId: string) {
+    const profile = await getProfile()
+    if (!profile) return { data: null, error: 'Não autenticado' }
+
     const supabase = await createClient()
+
+    // Verify the cell belongs to user's church
+    const { data: cell } = await supabase
+        .from('cells')
+        .select('id, church_id')
+        .eq('id', cellId)
+        .eq('church_id', profile.church_id)
+        .single()
+
+    if (!cell) {
+        return { data: null, error: 'Célula não encontrada' }
+    }
 
     const { data, error } = await supabase
         .from('cell_photos')
@@ -145,6 +160,7 @@ export async function getCellPhotos(cellId: string) {
             uploader:profiles!uploaded_by(full_name)
         `)
         .eq('cell_id', cellId)
+        .eq('church_id', profile.church_id)
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -164,23 +180,33 @@ export async function deleteCellPhoto(photoId: string) {
 
     const supabase = await createClient()
 
-    // Get photo info first to delete from storage
+    // Get photo info first - ensure it belongs to user's church
     const { data: photo } = await supabase
         .from('cell_photos')
-        .select('*')
+        .select('*, cell:cells!cell_id(leader_id)')
         .eq('id', photoId)
+        .eq('church_id', profile.church_id)
         .single()
 
     if (!photo) return { success: false, error: 'Foto não encontrada' }
 
-    // RLS handles permission on the DB, but we check here too
+    // Check if user is the cell leader or pastor
+    const isLeader = photo.cell?.leader_id === profile.id
+    const isPastor = profile.role === 'PASTOR'
+
+    if (!isLeader && !isPastor) {
+        return { success: false, error: 'Apenas líderes podem excluir fotos do álbum' }
+    }
+
+    // Delete from database
     const { error: dbError } = await supabase
         .from('cell_photos')
         .delete()
         .eq('id', photoId)
+        .eq('church_id', profile.church_id)
 
     if (dbError) {
-        return { success: false, error: 'Erro ao remover do banco (permissão negada?)' }
+        return { success: false, error: 'Erro ao remover do banco' }
     }
 
     // Attempt to delete from storage

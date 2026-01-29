@@ -92,10 +92,32 @@ export async function deleteComment(commentId: string) {
         if (!profile) return { success: false, error: 'Não autenticado' }
 
         const supabase = await createClient()
+
+        // First verify the comment belongs to user's church and user is author or pastor
+        const { data: comment } = await supabase
+            .from('course_lesson_comments')
+            .select('id, profile_id, church_id')
+            .eq('id', commentId)
+            .eq('church_id', profile.church_id)
+            .single()
+
+        if (!comment) {
+            return { success: false, error: 'Comentário não encontrado' }
+        }
+
+        // Check permission: user must be the author or a pastor
+        const isAuthor = comment.profile_id === profile.id
+        const isPastor = profile.role === 'PASTOR'
+
+        if (!isAuthor && !isPastor) {
+            return { success: false, error: 'Sem permissão para excluir este comentário' }
+        }
+
         const { error } = await supabase
             .from('course_lesson_comments')
             .delete()
             .eq('id', commentId)
+            .eq('church_id', profile.church_id)
 
         if (error) throw error
 
@@ -116,10 +138,13 @@ export async function togglePinComment(commentId: string, isPinned: boolean) {
         if (!profile || profile.role !== 'PASTOR') return { success: false, error: 'Sem permissão' }
 
         const supabase = await createClient()
+
+        // Ensure comment belongs to pastor's church
         const { error } = await supabase
             .from('course_lesson_comments')
             .update({ is_pinned: isPinned })
             .eq('id', commentId)
+            .eq('church_id', profile.church_id)
 
         if (error) throw error
 
@@ -139,10 +164,13 @@ export async function toggleAnsweredComment(commentId: string, isAnswered: boole
         if (!profile || profile.role !== 'PASTOR') return { success: false, error: 'Sem permissão' }
 
         const supabase = await createClient()
+
+        // Ensure comment belongs to pastor's church
         const { error } = await supabase
             .from('course_lesson_comments')
             .update({ is_answered: isAnswered })
             .eq('id', commentId)
+            .eq('church_id', profile.church_id)
 
         if (error) throw error
 
