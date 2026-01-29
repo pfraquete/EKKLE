@@ -16,7 +16,8 @@ import {
     Globe,
     Video,
     Radio,
-    GraduationCap
+    GraduationCap,
+    Landmark
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -109,6 +110,13 @@ export function Sidebar({ profile }: SidebarProps) {
             href: '/dashboard/comunicacoes',
             active: pathname.startsWith('/dashboard/comunicacoes'),
             show: isPastor
+        },
+        {
+            label: 'Financeiro',
+            icon: Landmark,
+            href: '/dashboard/financeiro',
+            active: pathname.startsWith('/dashboard/financeiro'),
+            show: isPastor || profile.is_finance_team
         },
         {
             label: 'Configurações',
