@@ -1,7 +1,8 @@
 import { getChurch } from '@/lib/get-church'
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getCellBalance, getCellOfferings } from '@/actions/cell-offerings'
+import { getProfile } from '@/actions/auth'
+import { getMemberCellData } from '@/actions/cell'
 import { Wallet, HandCoins, CheckCircle, Clock, XCircle, ArrowLeft } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import Link from 'next/link'
@@ -10,28 +11,25 @@ import { CellOfferingButton } from '@/components/cell-offering/cell-offering-but
 
 export default async function CellOfferingsPage() {
     const church = await getChurch()
-    const supabase = await createClient()
 
     if (!church) {
         redirect('/')
     }
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const profile = await getProfile()
 
-    if (!user) {
+    if (!profile) {
         redirect('/login')
     }
 
-    // Get user profile
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('*, cell:cells(id, name)')
-        .eq('id', user.id)
-        .single()
+    // Get cell data - this checks if user has an active cell
+    const cellData = await getMemberCellData()
 
-    if (!profile?.cell_id) {
+    if (!cellData) {
         redirect('/membro/minha-celula')
     }
+
+    const { cell } = cellData
 
     // Fetch data
     const [balanceResult, offeringsResult] = await Promise.all([
@@ -65,7 +63,7 @@ export default async function CellOfferingsPage() {
                     Oferta da Célula
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground font-medium mt-1">
-                    {profile.cell?.name}
+                    {cell.name}
                 </p>
             </div>
 
