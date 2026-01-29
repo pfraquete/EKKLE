@@ -185,32 +185,15 @@ export async function validateInviteToken(token: string): Promise<InviteValidati
     try {
         const supabase = await createClient()
 
-        // Get the invite link with cell and church info
+        // Get the invite link first
         const { data: invite, error } = await supabase
             .from('cell_invite_links')
-            .select(`
-                *,
-                cells (
-                    id,
-                    name,
-                    neighborhood,
-                    day_of_week,
-                    meeting_time,
-                    leader:profiles!cells_leader_fk (
-                        full_name
-                    )
-                ),
-                churches (
-                    id,
-                    name,
-                    slug,
-                    logo_url
-                )
-            `)
+            .select('*')
             .eq('token', token)
             .single()
 
         if (error || !invite) {
+            console.error('[validateInviteToken] Invite not found:', error)
             return { valid: false, error: 'Link de convite inválido ou não encontrado' }
         }
 
@@ -229,20 +212,39 @@ export async function validateInviteToken(token: string): Promise<InviteValidati
             return { valid: false, error: 'Este link de convite atingiu o limite de usos' }
         }
 
-        const cell = invite.cells as {
-            id: string
-            name: string
-            neighborhood: string | null
-            day_of_week: number | null
-            meeting_time: string | null
-            leader: { full_name: string } | null
+        // Get cell info separately
+        const { data: cell, error: cellError } = await supabase
+            .from('cells')
+            .select('id, name, neighborhood, day_of_week, meeting_time, leader_id')
+            .eq('id', invite.cell_id)
+            .single()
+
+        if (cellError || !cell) {
+            console.error('[validateInviteToken] Cell not found:', cellError)
+            return { valid: false, error: 'Célula não encontrada' }
         }
 
-        const church = invite.churches as {
-            id: string
-            name: string
-            slug: string
-            logo_url: string | null
+        // Get leader name
+        let leaderName: string | null = null
+        if (cell.leader_id) {
+            const { data: leader } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', cell.leader_id)
+                .single()
+            leaderName = leader?.full_name || null
+        }
+
+        // Get church info
+        const { data: church, error: churchError } = await supabase
+            .from('churches')
+            .select('id, name, slug, logo_url')
+            .eq('id', invite.church_id)
+            .single()
+
+        if (churchError || !church) {
+            console.error('[validateInviteToken] Church not found:', churchError)
+            return { valid: false, error: 'Igreja não encontrada' }
         }
 
         return {
@@ -253,7 +255,7 @@ export async function validateInviteToken(token: string): Promise<InviteValidati
                 neighborhood: cell.neighborhood,
                 day_of_week: cell.day_of_week,
                 meeting_time: cell.meeting_time,
-                leader_name: cell.leader?.full_name || null
+                leader_name: leaderName
             },
             church: {
                 id: church.id,

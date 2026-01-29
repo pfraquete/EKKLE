@@ -24,10 +24,10 @@ export default async function AppLayout({
         redirect('/membro')
     }
 
-    // LEADER role redirects to their cell page
+    // LEADER role also redirects to member area (they manage their cell from there)
     if (profile.role === 'LEADER') {
-        console.log('[AppLayout] Redirecting LEADER to /minha-celula')
-        redirect('/minha-celula')
+        console.log('[AppLayout] Redirecting LEADER to /membro')
+        redirect('/membro')
     }
 
     return (
