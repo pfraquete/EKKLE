@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown } from 'lucide-react'
+import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SidebarNavProps {
@@ -49,6 +49,11 @@ export function SidebarNav({ profile }: SidebarNavProps) {
         ? [{ href: '/membro/celulas', label: 'Explorar Células', icon: Search }]
         : [{ href: '/membro/celulas', label: 'Células', icon: Home }]
 
+    // Leader-only items
+    const leaderItems = isLeader
+        ? [{ href: '/dashboard/cultos', label: 'Cultos', icon: Video }]
+        : []
+
     const bottomNavItems = [
         { href: '/membro/loja', label: 'Loja Virtual', icon: ShoppingBag },
         { href: '/membro/pedidos', label: 'Meus Pedidos', icon: Package },
@@ -56,7 +61,9 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
     const renderNavItem = (item: { href: string; label: string; icon: any }) => {
         const Icon = item.icon
-        const isActive = pathname === item.href || (item.href !== '/membro' && pathname.startsWith(item.href) && !pathname.startsWith('/membro/minha-celula'))
+        const isActive = pathname === item.href ||
+            (item.href !== '/membro' && pathname.startsWith(item.href) && !pathname.startsWith('/membro/minha-celula')) ||
+            (item.href === '/dashboard/cultos' && pathname.startsWith('/dashboard/cultos'))
 
         return (
             <Link
@@ -147,6 +154,9 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
             {/* After cell items (Explorar Células) */}
             {afterCellItems.map(renderNavItem)}
+
+            {/* Leader-only items (Cultos) */}
+            {leaderItems.map(renderNavItem)}
 
             {/* Bottom nav items */}
             {bottomNavItems.map(renderNavItem)}
