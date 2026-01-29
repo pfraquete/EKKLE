@@ -159,15 +159,31 @@ export async function getMembersNotInFinanceTeam(search?: string) {
 
     const supabase = await createClient()
 
+    // First, get the IDs of members already in the finance team
+    const { data: teamMembers, error: teamError } = await supabase
+        .from('finance_team')
+        .select('profile_id')
+        .eq('church_id', profile.church_id)
+
+    if (teamError) {
+        console.error('Error fetching finance team members:', teamError)
+        return { success: false, error: 'Erro ao buscar equipe' }
+    }
+
+    const teamMemberIds = teamMembers?.map(m => m.profile_id) || []
+
     // Get all profiles not in finance team
     let query = supabase
         .from('profiles')
         .select('id, full_name, email, photo_url')
         .eq('church_id', profile.church_id)
         .eq('is_active', true)
-        .not('id', 'in', `(SELECT profile_id FROM finance_team WHERE church_id = '${profile.church_id}')`)
         .order('full_name')
-        .limit(20)
+
+    // Exclude members already in the team (if there are any)
+    if (teamMemberIds.length > 0) {
+        query = query.not('id', 'in', `(${teamMemberIds.join(',')})`)
+    }
 
     if (search) {
         query = query.ilike('full_name', `%${search}%`)
