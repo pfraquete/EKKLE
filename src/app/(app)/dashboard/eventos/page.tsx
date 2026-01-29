@@ -9,6 +9,7 @@ import { ptBR } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { DeleteEventButton } from '@/components/events/delete-event-button'
+import { PublishEventToggle } from '@/components/events/publish-event-toggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,13 +78,16 @@ export default async function EventsPage() {
                     {getLabel(event.category)}
                   </Badge>
 
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" asChild>
-                      <Link href={`/dashboard/eventos/${event.id}/editar`} title="Editar">
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <DeleteEventButton id={event.id} />
+                  <div className="flex items-center gap-2">
+                    <PublishEventToggle eventId={event.id} isPublished={event.is_published ?? false} />
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" asChild>
+                        <Link href={`/dashboard/eventos/${event.id}/editar`} title="Editar">
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <DeleteEventButton id={event.id} />
+                    </div>
                   </div>
                 </div>
 

@@ -16,6 +16,7 @@ export interface EventData {
   end_time?: string | null // Keep for form compatibility
   category: EventCategory
   image_url: string | null
+  is_published: boolean
 
   // Advanced options
   requires_registration: boolean
@@ -141,6 +142,74 @@ export async function updateEvent(id: string, event: Partial<Omit<EventData, 'id
 
   revalidatePath('/dashboard/eventos')
   return { success: true, data }
+}
+
+// Get published events for members (events they can register for)
+export async function getPublishedEvents() {
+  const profile = await getProfile()
+  if (!profile) throw new Error('Not authenticated')
+  const churchId = profile.church_id
+
+  const supabase = await createClient()
+  const now = new Date().toISOString()
+
+  // Get upcoming published events
+  const { data: upcomingEvents, error: upcomingError } = await supabase
+    .from('events')
+    .select('*')
+    .eq('church_id', churchId)
+    .eq('is_published', true)
+    .gte('start_date', now)
+    .order('start_date', { ascending: true })
+
+  // Get past published events (limited)
+  const { data: pastEvents, error: pastError } = await supabase
+    .from('events')
+    .select('*')
+    .eq('church_id', churchId)
+    .eq('is_published', true)
+    .lt('start_date', now)
+    .order('start_date', { ascending: false })
+    .limit(6)
+
+  if (upcomingError) {
+    console.error('Error fetching upcoming events:', upcomingError)
+  }
+  if (pastError) {
+    console.error('Error fetching past events:', pastError)
+  }
+
+  return {
+    upcoming: (upcomingEvents || []) as EventData[],
+    past: (pastEvents || []) as EventData[]
+  }
+}
+
+// Toggle event publication status
+export async function toggleEventPublished(id: string, isPublished: boolean) {
+  const profile = await getProfile()
+  if (!profile) throw new Error('Not authenticated')
+  if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') {
+    throw new Error('Acesso não autorizado')
+  }
+  const churchId = profile.church_id
+
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('events')
+    .update({ is_published: isPublished })
+    .eq('id', id)
+    .eq('church_id', churchId)
+
+  if (error) {
+    console.error('Error toggling event publication:', error)
+    throw new Error('Failed to update event')
+  }
+
+  revalidatePath('/dashboard/eventos')
+  revalidatePath('/membro/eventos')
+  return { success: true }
 }
 
 export async function deleteEvent(id: string) {
