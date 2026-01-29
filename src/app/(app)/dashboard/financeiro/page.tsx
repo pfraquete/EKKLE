@@ -1,7 +1,7 @@
 import { getFinancialSummary, getTransactions } from '@/actions/finance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { PlusCircle, ArrowUpCircle, ArrowDownCircle, Wallet, History, Search } from 'lucide-react'
+import { PlusCircle, ArrowUpCircle, ArrowDownCircle, Wallet, History, Search, ShoppingBag, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
 
@@ -11,7 +11,8 @@ export default async function FinanceDashboardPage() {
 
     const summary = summaryResult.success && summaryResult.data
         ? summaryResult.data
-        : { income: 0, expense: 0, balance: 0 }
+        : { income: 0, expense: 0, balance: 0, breakdown: { donations: 0, shopRevenue: 0, expenses: 0, ordersCount: 0 } }
+    const breakdown = summary.breakdown || { donations: 0, shopRevenue: 0, expenses: 0, ordersCount: 0 }
     const transactions = transactionsResult.success && transactionsResult.data
         ? transactionsResult.data
         : []
@@ -124,15 +125,70 @@ export default async function FinanceDashboardPage() {
                     </CardContent>
                 </Card>
 
-                {/* Charts or Stats (Placeholder for now) */}
-                <Card className="shadow-xl border-none flex flex-col items-center justify-center p-6 text-center">
-                    <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
-                        <History className="w-10 h-10 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-bold">Distribuição por Categoria</h3>
-                    <p className="text-muted-foreground text-sm max-w-[250px]">
-                        Gráficos e relatórios detalhados estarão disponíveis em breve conforme os lançamentos aumentarem.
-                    </p>
+                {/* Revenue Breakdown */}
+                <Card className="shadow-xl border-none">
+                    <CardHeader>
+                        <CardTitle className="text-xl">Composição da Receita</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {/* Donations */}
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-200/50">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-full bg-purple-100 text-purple-700">
+                                    <Heart className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-sm">Dízimos e Ofertas</p>
+                                    <p className="text-xs text-muted-foreground">Lançamentos manuais</p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-lg font-bold text-purple-700">{formatCurrency(breakdown.donations / 100)}</p>
+                            </div>
+                        </div>
+
+                        {/* Shop Revenue */}
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-200/50">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-full bg-blue-100 text-blue-700">
+                                    <ShoppingBag className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-sm">Vendas da Loja</p>
+                                    <p className="text-xs text-muted-foreground">{breakdown.ordersCount} pedido{breakdown.ordersCount !== 1 ? 's' : ''} pago{breakdown.ordersCount !== 1 ? 's' : ''}</p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-lg font-bold text-blue-700">{formatCurrency(breakdown.shopRevenue / 100)}</p>
+                            </div>
+                        </div>
+
+                        {/* Expenses */}
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-red-500/10 to-red-500/5 border border-red-200/50">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-full bg-red-100 text-red-700">
+                                    <ArrowDownCircle className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-sm">Despesas</p>
+                                    <p className="text-xs text-muted-foreground">Saídas registradas</p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-lg font-bold text-red-700">-{formatCurrency(breakdown.expenses / 100)}</p>
+                            </div>
+                        </div>
+
+                        {/* Summary Bar */}
+                        <div className="pt-4 border-t">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium text-muted-foreground">Saldo Líquido</span>
+                                <span className={`text-xl font-bold ${summary.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatCurrency(summary.balance / 100)}
+                                </span>
+                            </div>
+                        </div>
+                    </CardContent>
                 </Card>
             </div>
         </div>

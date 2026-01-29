@@ -1,8 +1,14 @@
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { getProfile } from '@/actions/auth'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { MobileNav } from '@/components/layout/mobile-nav'
+
+// Routes that LEADER role can access in the dashboard
+const LEADER_ALLOWED_ROUTES = [
+    '/dashboard/cultos',
+]
 
 export default async function AppLayout({
     children,
@@ -10,8 +16,10 @@ export default async function AppLayout({
     children: React.ReactNode
 }) {
     const profile = await getProfile()
+    const headersList = await headers()
+    const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
 
-    console.log('[AppLayout] Profile:', profile?.email, 'Role:', profile?.role, 'Cell:', profile?.cell_id)
+    console.log('[AppLayout] Profile:', profile?.email, 'Role:', profile?.role, 'Cell:', profile?.cell_id, 'Path:', pathname)
 
     if (!profile) {
         redirect('/login')
@@ -24,10 +32,13 @@ export default async function AppLayout({
         redirect('/membro')
     }
 
-    // LEADER role also redirects to member area (they manage their cell from there)
+    // LEADER role redirects to member area, EXCEPT for specific allowed routes
     if (profile.role === 'LEADER') {
-        console.log('[AppLayout] Redirecting LEADER to /membro')
-        redirect('/membro')
+        const isAllowedRoute = LEADER_ALLOWED_ROUTES.some(route => pathname.startsWith(route))
+        if (!isAllowedRoute) {
+            console.log('[AppLayout] Redirecting LEADER to /membro')
+            redirect('/membro')
+        }
     }
 
     return (

@@ -43,6 +43,7 @@ export async function middleware(request: NextRequest) {
                 // Just inject headers for tenant context
                 const requestHeaders = new Headers(request.headers)
                 requestHeaders.set('x-church-slug', subdomain)
+                requestHeaders.set('x-pathname', url.pathname)
 
                 const response = NextResponse.next({
                     request: {
@@ -78,8 +79,22 @@ export async function middleware(request: NextRequest) {
             return response
         }
 
-        // Root domain - normal behavior
-        return sessionResponse
+        // Root domain - inject pathname header and return
+        const requestHeaders = new Headers(request.headers)
+        requestHeaders.set('x-pathname', url.pathname)
+
+        const response = NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        })
+
+        // Apply session cookies
+        sessionResponse.cookies.getAll().forEach((cookie) => {
+            response.cookies.set(cookie.name, cookie.value, cookie)
+        })
+
+        return response
     } catch (error) {
         console.error('[Middleware] Error:', error)
         // On error, just pass through

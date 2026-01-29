@@ -195,9 +195,17 @@ function StreamCard({
           </div>
         )}
 
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users className="w-4 h-4 text-primary" />
-          <span>{stream.total_views} visualizacoes</span>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
+            <span>{stream.total_views} visualizações</span>
+          </div>
+          {stream.peak_viewers > 0 && (
+            <div className="flex items-center gap-1 text-xs bg-primary/10 px-2 py-0.5 rounded-full">
+              <span className="text-muted-foreground">Pico:</span>
+              <span className="font-bold text-primary">{stream.peak_viewers}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">

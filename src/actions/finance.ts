@@ -23,20 +23,37 @@ export async function getFinancialSummary(startDate?: string, endDate?: string) 
         if (!profile || profile.role !== 'PASTOR') throw new Error('Não autorizado')
 
         const supabase = await createClient()
-        let query = supabase
+
+        // Get financial transactions
+        let transactionsQuery = supabase
             .from('financial_transactions')
             .select('type, amount_cents')
             .eq('church_id', profile.church_id)
             .eq('status', 'PAID')
 
-        if (startDate) query = query.gte('date', startDate)
-        if (endDate) query = query.lte('date', endDate)
+        if (startDate) transactionsQuery = transactionsQuery.gte('date', startDate)
+        if (endDate) transactionsQuery = transactionsQuery.lte('date', endDate)
 
-        const { data, error } = await query
+        const { data: transactionsData, error: transactionsError } = await transactionsQuery
 
-        if (error) throw error
+        if (transactionsError) throw transactionsError
 
-        const summary = (data || []).reduce(
+        // Get paid orders (shop revenue)
+        let ordersQuery = supabase
+            .from('orders')
+            .select('total_cents, created_at')
+            .eq('church_id', profile.church_id)
+            .eq('payment_status', 'paid')
+
+        if (startDate) ordersQuery = ordersQuery.gte('created_at', startDate)
+        if (endDate) ordersQuery = ordersQuery.lte('created_at', endDate)
+
+        const { data: ordersData, error: ordersError } = await ordersQuery
+
+        if (ordersError) throw ordersError
+
+        // Calculate transactions summary
+        const transactionsSummary = (transactionsData || []).reduce(
             (acc, curr) => {
                 if (curr.type === 'INCOME') acc.income += curr.amount_cents
                 else acc.expense += curr.amount_cents
@@ -45,11 +62,26 @@ export async function getFinancialSummary(startDate?: string, endDate?: string) 
             { income: 0, expense: 0 }
         )
 
+        // Calculate shop revenue
+        const shopRevenue = (ordersData || []).reduce((sum, order) => sum + order.total_cents, 0)
+
+        // Combined totals
+        const totalIncome = transactionsSummary.income + shopRevenue
+        const totalExpense = transactionsSummary.expense
+
         return {
             success: true,
             data: {
-                ...summary,
-                balance: summary.income - summary.expense,
+                income: totalIncome,
+                expense: totalExpense,
+                balance: totalIncome - totalExpense,
+                // Breakdown for detailed view
+                breakdown: {
+                    donations: transactionsSummary.income,
+                    shopRevenue: shopRevenue,
+                    expenses: transactionsSummary.expense,
+                    ordersCount: ordersData?.length || 0,
+                },
             },
         }
     } catch (error) {

@@ -1,4 +1,4 @@
-import { getPastorDashboardData, getAllCellsOverview, getGrowthData } from '@/actions/admin'
+import { getPastorDashboardData, getAllCellsOverview, getGrowthData, getExtendedDashboardStats } from '@/actions/admin'
 import { getWhatsAppInstance } from '@/actions/whatsapp'
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +12,10 @@ import {
     AlertCircle,
     TrendingUp,
     Plus,
-    MessageSquare
+    MessageSquare,
+    BookOpen,
+    ShoppingBag,
+    CalendarCheck
 } from 'lucide-react'
 import Link from 'next/link'
 import { CellsList } from '@/components/dashboard/cells-list'
@@ -22,7 +25,7 @@ import { getEvents } from '@/actions/admin'
 import { Calendar, Download } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 
 export default async function DashboardPage() {
     const profile = await getProfile()
@@ -38,13 +41,15 @@ export default async function DashboardPage() {
         cells,
         growthData,
         events,
-        { data: whatsapp }
+        { data: whatsapp },
+        extendedStats
     ] = await Promise.all([
         getPastorDashboardData(),
         getAllCellsOverview(),
         getGrowthData(),
         getEvents(),
-        getWhatsAppInstance()
+        getWhatsAppInstance(),
+        getExtendedDashboardStats()
     ])
 
     const upcomingEvents = events
@@ -86,7 +91,7 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* KPI Grid */}
+            {/* KPI Grid - Primary Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="border-none shadow-sm hover:shadow-md transition-all">
                     <CardContent className="p-4 flex flex-col items-center text-center">
@@ -128,6 +133,65 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* KPI Grid - Secondary Metrics (Courses, Orders, Events) */}
+            {extendedStats && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Link href="/dashboard/cursos">
+                        <Card className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02]">
+                            <CardContent className="p-4 flex flex-col items-center text-center">
+                                <div className="w-10 h-10 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center mb-3">
+                                    <BookOpen className="h-5 w-5" />
+                                </div>
+                                <p className="text-2xl font-black text-foreground leading-none">{extendedStats.courses.totalEnrollments}</p>
+                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Matrículas</p>
+                                <p className="text-[9px] text-muted-foreground">{extendedStats.courses.publishedCourses} cursos ativos</p>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    <Link href="/dashboard/loja">
+                        <Card className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02]">
+                            <CardContent className="p-4 flex flex-col items-center text-center">
+                                <div className="w-10 h-10 bg-orange-500/10 text-orange-400 rounded-xl flex items-center justify-center mb-3">
+                                    <ShoppingBag className="h-5 w-5" />
+                                </div>
+                                <p className="text-2xl font-black text-foreground leading-none">{extendedStats.orders.paidOrders}</p>
+                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pagos</p>
+                                <p className="text-[9px] text-muted-foreground">{formatCurrency(extendedStats.orders.totalRevenueCents / 100)} em vendas</p>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    <Link href="/dashboard/eventos">
+                        <Card className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02]">
+                            <CardContent className="p-4 flex flex-col items-center text-center">
+                                <div className="w-10 h-10 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center mb-3">
+                                    <CalendarCheck className="h-5 w-5" />
+                                </div>
+                                <p className="text-2xl font-black text-foreground leading-none">{extendedStats.events.upcomingEvents}</p>
+                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Eventos Próximos</p>
+                                <p className="text-[9px] text-muted-foreground">{extendedStats.events.totalRegistrations} inscrições</p>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    {extendedStats.orders.pendingOrders > 0 && (
+                        <Link href="/dashboard/loja">
+                            <Card className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02] border-l-4 border-l-yellow-400">
+                                <CardContent className="p-4 flex flex-col items-center text-center">
+                                    <div className="w-10 h-10 bg-yellow-500/10 text-yellow-500 rounded-xl flex items-center justify-center mb-3">
+                                        <AlertCircle className="h-5 w-5" />
+                                    </div>
+                                    <p className="text-2xl font-black text-foreground leading-none">{extendedStats.orders.pendingOrders}</p>
+                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pendentes</p>
+                                    <p className="text-[9px] text-yellow-600">Aguardando pagamento</p>
+                                </CardContent>
+                            </Card>
+                        </Link>
+                    )}
+                </div>
+            )}
 
             {/* Activities & Growth */}
             <div className="grid md:grid-cols-3 gap-6">

@@ -428,3 +428,127 @@ export async function importMembers(members: Record<string, unknown>[]) {
 
     return results
 }
+
+/**
+ * Get course and order statistics for pastor dashboard
+ */
+export interface DashboardExtendedStats {
+    courses: {
+        totalCourses: number
+        publishedCourses: number
+        totalEnrollments: number
+        completedEnrollments: number
+    }
+    orders: {
+        totalOrders: number
+        paidOrders: number
+        totalRevenueCents: number
+        pendingOrders: number
+    }
+    events: {
+        upcomingEvents: number
+        totalRegistrations: number
+    }
+}
+
+export async function getExtendedDashboardStats(): Promise<DashboardExtendedStats | null> {
+    try {
+        const profile = await getProfile()
+        if (!profile || (profile.role !== 'PASTOR' && profile.role !== 'LEADER')) {
+            return null
+        }
+
+        const supabase = await createClient()
+        const churchId = profile.church_id
+
+        // Run all queries in parallel
+        const [
+            totalCoursesRes,
+            publishedCoursesRes,
+            totalEnrollmentsRes,
+            completedEnrollmentsRes,
+            totalOrdersRes,
+            paidOrdersRes,
+            revenueDataRes,
+            pendingOrdersRes,
+            upcomingEventsRes,
+            totalRegistrationsRes
+        ] = await Promise.all([
+            // Courses
+            supabase
+                .from('courses')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId),
+            supabase
+                .from('courses')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .eq('is_published', true),
+            supabase
+                .from('course_enrollments')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId),
+            supabase
+                .from('course_enrollments')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .eq('status', 'COMPLETED'),
+
+            // Orders
+            supabase
+                .from('orders')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId),
+            supabase
+                .from('orders')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .eq('payment_status', 'paid'),
+            supabase
+                .from('orders')
+                .select('total_cents')
+                .eq('church_id', churchId)
+                .eq('payment_status', 'paid'),
+            supabase
+                .from('orders')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .eq('payment_status', 'pending'),
+
+            // Events
+            supabase
+                .from('events')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+                .gte('start_date', new Date().toISOString()),
+            supabase
+                .from('event_registrations')
+                .select('*', { count: 'exact', head: true })
+                .eq('church_id', churchId)
+        ])
+
+        const totalRevenueCents = revenueDataRes.data?.reduce((sum, order) => sum + order.total_cents, 0) || 0
+
+        return {
+            courses: {
+                totalCourses: totalCoursesRes.count || 0,
+                publishedCourses: publishedCoursesRes.count || 0,
+                totalEnrollments: totalEnrollmentsRes.count || 0,
+                completedEnrollments: completedEnrollmentsRes.count || 0,
+            },
+            orders: {
+                totalOrders: totalOrdersRes.count || 0,
+                paidOrders: paidOrdersRes.count || 0,
+                totalRevenueCents,
+                pendingOrders: pendingOrdersRes.count || 0,
+            },
+            events: {
+                upcomingEvents: upcomingEventsRes.count || 0,
+                totalRegistrations: totalRegistrationsRes.count || 0,
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching extended dashboard stats:', error)
+        return null
+    }
+}
