@@ -67,7 +67,14 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: Video,
             href: '/dashboard/cultos',
             active: pathname.startsWith('/dashboard/cultos'),
-            show: isPastor || profile.role === 'LEADER'
+            show: isPastor
+        },
+        {
+            label: 'Cultos',
+            icon: Video,
+            href: '/membro/cultos',
+            active: pathname.startsWith('/membro/cultos'),
+            show: !isPastor && profile.role === 'LEADER'
         },
         {
             label: 'Loja',
