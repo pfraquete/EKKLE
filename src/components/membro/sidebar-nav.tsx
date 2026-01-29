@@ -70,7 +70,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
     // Finance team items (only for finance team members or pastors)
     const financeTeamItems = isFinanceTeam
-        ? [{ href: '/membro/financeiro-igreja', label: 'Financeiro Igreja', icon: Landmark }]
+        ? [{ href: '/membro/financeiro', label: 'Financeiro Igreja', icon: Landmark }]
         : []
 
     const bottomNavItems = [

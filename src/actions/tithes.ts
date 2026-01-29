@@ -223,7 +223,7 @@ export async function confirmTithe(titheId: string) {
 
     revalidatePath('/membro/dizimos')
     revalidatePath('/dashboard/financeiro/dizimos')
-    revalidatePath('/membro/financeiro-igreja/dizimos')
+    revalidatePath('/membro/financeiro/dizimos')
     return { success: true }
 }
 
