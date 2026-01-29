@@ -31,16 +31,16 @@ export default async function EventosPage() {
     .limit(6)
 
   return (
-    <div className="py-24 bg-background animate-in fade-in duration-700">
-      <div className="container mx-auto px-6">
+    <div className="py-12 sm:py-24 bg-background animate-in fade-in duration-700">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Page Header */}
-        <div className="mb-20 space-y-4">
+        <div className="mb-12 sm:mb-20 space-y-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-1 bg-primary rounded-full" />
             <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Agenda</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter italic">Nossa Casa</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl font-medium tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-foreground tracking-tighter italic">Nossa Casa</h1>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl font-medium tracking-tight">
             Participe dos nossos eventos, cursos e atividades para fortalecer sua caminhada em comunidade.
           </p>
         </div>
@@ -76,10 +76,10 @@ export default async function EventosPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60" />
                   </div>
 
-                  <div className="p-10">
-                    <h3 className="font-black text-2xl mb-5 text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">{event.title}</h3>
+                  <div className="p-6 sm:p-10">
+                    <h3 className="font-black text-xl sm:text-2xl mb-4 sm:mb-5 text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">{event.title}</h3>
 
-                    <div className="space-y-4 mb-4">
+                    <div className="space-y-3 sm:space-y-4 mb-4">
                       <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-primary">
                         <Calendar className="w-4 h-4" />
                         <span>

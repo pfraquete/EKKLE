@@ -300,7 +300,7 @@ function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
             >
               Transforme a{' '}
               <span className="bg-gradient-to-r from-[#66A5AD] to-[#B89A5F] bg-clip-text text-transparent">
@@ -314,7 +314,7 @@ function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl text-zinc-400 mb-10 max-w-xl"
+              className="text-lg sm:text-xl text-zinc-400 mb-10 max-w-xl mx-auto lg:mx-0"
             >
               Gerencie células, membros, eventos, loja virtual e comunicação em um único lugar.
               Automatize tarefas e foque no que realmente importa: as pessoas.
@@ -395,24 +395,24 @@ function HeroSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
-                className="absolute bottom-6 left-6 right-6 bg-zinc-900/90 backdrop-blur-lg rounded-2xl p-4 border border-zinc-700"
+                className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-zinc-900/90 backdrop-blur-lg rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-zinc-700"
               >
-                <div className="grid grid-cols-4 gap-4 text-center">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-white">1.247</div>
-                    <div className="text-xs text-zinc-400">Membros</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">1.247</div>
+                    <div className="text-[10px] sm:text-xs text-zinc-400">Membros</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-[#66A5AD]">48</div>
-                    <div className="text-xs text-zinc-400">Células</div>
+                    <div className="text-xl sm:text-2xl font-bold text-[#66A5AD]">48</div>
+                    <div className="text-[10px] sm:text-xs text-zinc-400">Células</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-[#B89A5F]">12</div>
-                    <div className="text-xs text-zinc-400">Eventos</div>
+                    <div className="text-xl sm:text-2xl font-bold text-[#B89A5F]">12</div>
+                    <div className="text-[10px] sm:text-xs text-zinc-400">Eventos</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-green-400">+15%</div>
-                    <div className="text-xs text-zinc-400">Crescimento</div>
+                    <div className="text-xl sm:text-2xl font-bold text-green-400">+15%</div>
+                    <div className="text-[10px] sm:text-xs text-zinc-400">Crescimento</div>
                   </div>
                 </div>
               </motion.div>
@@ -598,7 +598,7 @@ function FeaturesSection() {
           </motion.p>
         </AnimatedSection>
 
-        <AnimatedSection className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <AnimatedSection className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {features.map((feature, index) => (
             <motion.div
               key={index}

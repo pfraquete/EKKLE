@@ -101,12 +101,12 @@ export default async function Homepage() {
                                             <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
                                         </div>
 
-                                        <div className="p-10">
-                                            <h3 className="text-2xl font-black mb-5 text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                                        <div className="p-6 sm:p-10">
+                                            <h3 className="text-xl sm:text-2xl font-black mb-4 sm:mb-5 text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                                                 {event.title}
                                             </h3>
 
-                                            <div className="space-y-4 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                            <div className="space-y-3 sm:space-y-4 text-xs font-black uppercase tracking-widest text-muted-foreground">
                                                 <div className="flex items-center gap-4">
                                                     <div className="p-2.5 rounded-xl bg-muted/50 text-primary">
                                                         <Clock className="w-4 h-4" />
@@ -182,12 +182,12 @@ export default async function Homepage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-10">
-                                            <h3 className="text-2xl font-black mb-4 text-foreground group-hover:text-primary transition-colors leading-tight">
+                                        <div className="p-6 sm:p-10">
+                                            <h3 className="text-xl sm:text-2xl font-black mb-3 sm:mb-4 text-foreground group-hover:text-primary transition-colors leading-tight">
                                                 {course.title}
                                             </h3>
                                             {course.description && (
-                                                <p className="text-muted-foreground text-base leading-relaxed line-clamp-2 font-medium">
+                                                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed line-clamp-2 font-medium">
                                                     {course.description}
                                                 </p>
                                             )}
@@ -209,12 +209,12 @@ export default async function Homepage() {
                         </div>
 
                         <div className="container mx-auto px-6 relative z-10">
-                            <div className="max-w-4xl mx-auto text-center space-y-12">
-                                <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
+                            <div className="max-w-4xl mx-auto text-center space-y-8 sm:space-y-12">
+                                <h2 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
                                     Sobre a <span className="text-primary italic"> {church.name}</span>
                                 </h2>
                                 {church.description && (
-                                    <p className="text-2xl md:text-3xl text-muted-foreground leading-relaxed font-light tracking-tight italic">
+                                    <p className="text-xl sm:text-2xl md:text-3xl text-muted-foreground leading-relaxed font-light tracking-tight italic">
                                         "{church.description}"
                                     </p>
                                 )}
@@ -280,12 +280,12 @@ export default async function Homepage() {
                     </div>
 
                     {/* Content */}
-                    <div className="container mx-auto px-6 relative z-10 text-center space-y-12 animate-in fade-in zoom-in-95 duration-1000 slide-in-from-bottom-12">
-                        <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-[calc(-0.04em)] max-w-7xl mx-auto leading-[0.85] text-white drop-shadow-2xl">
+                    <div className="container mx-auto px-4 sm:px-6 relative z-10 text-center space-y-8 sm:space-y-12 animate-in fade-in zoom-in-95 duration-1000 slide-in-from-bottom-12">
+                        <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[10rem] font-black tracking-[calc(-0.04em)] max-w-7xl mx-auto leading-[0.85] text-white drop-shadow-2xl">
                             {settings.hero?.title || church.name || 'EKKLE CHURCH'}
                         </h1>
 
-                        <p className="text-xl md:text-3xl text-white/70 font-medium max-w-3xl mx-auto leading-relaxed tracking-tight">
+                        <p className="text-lg sm:text-xl md:text-3xl text-white/70 font-medium max-w-3xl mx-auto leading-relaxed tracking-tight">
                             {settings.hero?.subtitle || church.description || "Somos uma comunidade de fé, esperança e amor."}
                         </p>
 
