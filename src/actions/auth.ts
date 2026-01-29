@@ -16,6 +16,7 @@ export interface Profile {
     cell_id: string | null
     is_active: boolean
     is_teacher: boolean
+    is_finance_team: boolean
     joined_at: string | null
 }
 

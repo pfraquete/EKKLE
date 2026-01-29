@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video, GraduationCap } from 'lucide-react'
+import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video, GraduationCap, HandCoins, Landmark } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SidebarNavProps {
@@ -15,6 +15,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
     const pathname = usePathname()
     const isLeader = profile?.role === 'LEADER'
     const isTeacher = profile?.is_teacher === true || profile?.role === 'PASTOR'
+    const isFinanceTeam = profile?.is_finance_team === true || profile?.role === 'PASTOR'
     const hasCell = !!profile?.cell_id
 
     // Check if current path is within cell section
@@ -34,9 +35,11 @@ export function SidebarNav({ profile }: SidebarNavProps) {
             { href: '/membro/minha-celula/reunioes', label: 'Reuniões', icon: ClipboardList },
             { href: '/membro/minha-celula/membros', label: 'Membros', icon: Users },
             { href: '/membro/minha-celula/album', label: 'Álbum de Fotos', icon: Image },
+            { href: '/membro/minha-celula/ofertas', label: 'Caixa da Célula', icon: HandCoins },
         ]
         : [
             { href: '/membro/minha-celula/album', label: 'Álbum da Célula', icon: Image },
+            { href: '/membro/minha-celula/ofertas', label: 'Caixa da Célula', icon: HandCoins },
         ]
 
     const mainNavItems = [
@@ -58,6 +61,16 @@ export function SidebarNav({ profile }: SidebarNavProps) {
     // Teacher-only items
     const teacherItems = isTeacher
         ? [{ href: '/membro/professor', label: 'Área do Professor', icon: GraduationCap }]
+        : []
+
+    // Finance items (visible to all members)
+    const financeItems = [
+        { href: '/membro/dizimos', label: 'Dízimos e Ofertas', icon: HandCoins },
+    ]
+
+    // Finance team items (only for finance team members or pastors)
+    const financeTeamItems = isFinanceTeam
+        ? [{ href: '/membro/financeiro-igreja', label: 'Financeiro Igreja', icon: Landmark }]
         : []
 
     const bottomNavItems = [
@@ -166,6 +179,12 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
             {/* Teacher-only items (Área do Professor) */}
             {teacherItems.map(renderNavItem)}
+
+            {/* Finance items (Dízimos e Ofertas) */}
+            {financeItems.map(renderNavItem)}
+
+            {/* Finance team items (Financeiro Igreja) */}
+            {financeTeamItems.map(renderNavItem)}
 
             {/* Bottom nav items */}
             {bottomNavItems.map(renderNavItem)}

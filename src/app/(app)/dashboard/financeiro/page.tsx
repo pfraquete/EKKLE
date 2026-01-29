@@ -1,7 +1,7 @@
 import { getFinancialSummary, getTransactions } from '@/actions/finance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { PlusCircle, ArrowUpCircle, ArrowDownCircle, Wallet, History, Search, ShoppingBag, Heart } from 'lucide-react'
+import { PlusCircle, ArrowUpCircle, ArrowDownCircle, Wallet, History, Search, ShoppingBag, Heart, HandCoins, Users, UserPlus, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
 
@@ -44,6 +44,63 @@ export default async function FinanceDashboardPage() {
                         </Link>
                     </Button>
                 </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="grid gap-4 md:grid-cols-3">
+                <Link
+                    href="/dashboard/financeiro/dizimos"
+                    className="flex items-center justify-between p-5 bg-card border border-border rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
+                            <HandCoins className="w-6 h-6 text-purple-500" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-foreground">Dízimos</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Confirmar comprovantes
+                            </p>
+                        </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </Link>
+
+                <Link
+                    href="/dashboard/financeiro/celulas"
+                    className="flex items-center justify-between p-5 bg-card border border-border rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
+                            <Users className="w-6 h-6 text-blue-500" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-foreground">Caixa das Células</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Saldo de cada célula
+                            </p>
+                        </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </Link>
+
+                <Link
+                    href="/dashboard/financeiro/equipe"
+                    className="flex items-center justify-between p-5 bg-card border border-border rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
+                            <UserPlus className="w-6 h-6 text-emerald-500" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-foreground">Equipe Financeira</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Gerenciar acessos
+                            </p>
+                        </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </Link>
             </div>
 
             {/* Summary Cards */}
