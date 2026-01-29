@@ -11,6 +11,8 @@ export default async function AppLayout({
 }) {
     const profile = await getProfile()
 
+    console.log('[AppLayout] Profile:', profile?.email, 'Role:', profile?.role, 'Cell:', profile?.cell_id)
+
     if (!profile) {
         redirect('/login')
     }
@@ -18,11 +20,13 @@ export default async function AppLayout({
     // MEMBER role with a cell should use member area
     // MEMBER without cell needs dashboard access to choose a cell
     if (profile.role === 'MEMBER' && profile.cell_id) {
+        console.log('[AppLayout] Redirecting MEMBER to /membro')
         redirect('/membro')
     }
 
     // LEADER role redirects to their cell page
     if (profile.role === 'LEADER') {
+        console.log('[AppLayout] Redirecting LEADER to /minha-celula')
         redirect('/minha-celula')
     }
 

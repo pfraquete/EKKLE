@@ -20,6 +20,7 @@ export async function middleware(request: NextRequest) {
             const subdomain = hostname.split('.')[0]
 
             // Routes that should NOT be rewritten to /site/[domain]
+            // These are admin routes that exist in the (app) group
             const isBypassRoute =
                 url.pathname.startsWith('/login') ||
                 url.pathname.startsWith('/register') ||
@@ -35,8 +36,8 @@ export async function middleware(request: NextRequest) {
                 url.pathname.startsWith('/presenca-cultos') ||
                 url.pathname.startsWith('/importar') ||
                 url.pathname.startsWith('/calendario') ||
-                url.pathname.startsWith('/configuracoes') ||
-                url.pathname.startsWith('/membro')
+                url.pathname.startsWith('/configuracoes')
+            // Note: /membro is NOT bypassed - it should rewrite to /site/[domain]/membro
 
             if (isBypassRoute) {
                 // Just inject headers for tenant context
