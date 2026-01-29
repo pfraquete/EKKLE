@@ -2,6 +2,7 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { User, Mail, Phone, Calendar } from 'lucide-react'
+import { ProfilePhotoUpload } from '@/components/profile/profile-photo-upload'
 
 export default async function MembroPage() {
   try {
@@ -35,9 +36,20 @@ export default async function MembroPage() {
 
     return (
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">Meu Perfil</h1>
-          <p className="text-sm sm:text-base text-muted-foreground font-medium mt-1">Gerencie suas informações e acompanhe seu crescimento</p>
+        {/* Profile Header with Photo */}
+        <div className="flex items-center gap-4 sm:gap-6">
+          <ProfilePhotoUpload
+            currentPhotoUrl={profile?.photo_url || null}
+            userName={profile?.full_name || 'Usuário'}
+          />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight truncate">
+              {profile?.full_name || 'Meu Perfil'}
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground font-medium mt-1">
+              Gerencie suas informações e acompanhe seu crescimento
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
@@ -132,7 +144,7 @@ export default async function MembroPage() {
           <div className="p-4 sm:p-6 lg:p-8 bg-muted/20 border-t border-border">
             <p className="text-[10px] sm:text-xs text-muted-foreground font-medium flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-pulse flex-shrink-0" />
-              Para alterar suas informações cadastrais, entre em contato com a secretaria da igreja.
+              Clique na foto de perfil para alterá-la. Para outras informações, entre em contato com a secretaria.
             </p>
           </div>
         </div>
