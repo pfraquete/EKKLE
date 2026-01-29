@@ -15,6 +15,7 @@ export interface Profile {
     role: 'PASTOR' | 'LEADER' | 'MEMBER'
     cell_id: string | null
     is_active: boolean
+    is_teacher: boolean
     joined_at: string | null
 }
 

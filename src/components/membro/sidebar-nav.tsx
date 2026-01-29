@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video } from 'lucide-react'
+import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video, GraduationCap, Podcast } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SidebarNavProps {
@@ -14,6 +14,7 @@ interface SidebarNavProps {
 export function SidebarNav({ profile }: SidebarNavProps) {
     const pathname = usePathname()
     const isLeader = profile?.role === 'LEADER'
+    const isTeacher = profile?.is_teacher === true || profile?.role === 'PASTOR'
     const hasCell = !!profile?.cell_id
 
     // Check if current path is within cell section
@@ -42,6 +43,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
         { href: '/membro', label: 'Meu Perfil', icon: User },
         { href: '/membro/lives', label: 'Lives', icon: Radio },
         { href: '/membro/cursos', label: 'Meus Cursos', icon: BookOpen },
+        { href: '/membro/aulas-ao-vivo', label: 'Aulas ao Vivo', icon: Podcast },
         { href: '/membro/eventos', label: 'Meus Eventos', icon: Calendar },
     ]
 
@@ -52,6 +54,11 @@ export function SidebarNav({ profile }: SidebarNavProps) {
     // Leader-only items
     const leaderItems = isLeader
         ? [{ href: '/dashboard/cultos', label: 'Cultos', icon: Video }]
+        : []
+
+    // Teacher-only items
+    const teacherItems = isTeacher
+        ? [{ href: '/membro/professor', label: 'Área do Professor', icon: GraduationCap }]
         : []
 
     const bottomNavItems = [
@@ -157,6 +164,9 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
             {/* Leader-only items (Cultos) */}
             {leaderItems.map(renderNavItem)}
+
+            {/* Teacher-only items (Área do Professor) */}
+            {teacherItems.map(renderNavItem)}
 
             {/* Bottom nav items */}
             {bottomNavItems.map(renderNavItem)}

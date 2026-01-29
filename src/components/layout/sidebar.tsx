@@ -15,7 +15,8 @@ import {
     MessageSquare,
     Globe,
     Video,
-    Radio
+    Radio,
+    GraduationCap
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -86,6 +87,13 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: BookOpen,
             href: '/dashboard/cursos',
             active: pathname.startsWith('/dashboard/cursos'),
+            show: isPastor
+        },
+        {
+            label: 'Professores',
+            icon: GraduationCap,
+            href: '/dashboard/professores',
+            active: pathname.startsWith('/dashboard/professores'),
             show: isPastor
         },
         {
