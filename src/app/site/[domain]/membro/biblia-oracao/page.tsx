@@ -2,15 +2,18 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen, Flame, ArrowRight, Calendar, CheckCircle, Play } from 'lucide-react'
+import { BookOpen, Flame, ArrowRight, Calendar, CheckCircle, Play, Mic, Clock, Users, Sparkles } from 'lucide-react'
 import { getMyActivePlan, getTodaysReading, getAvailablePlans } from '@/actions/bible-reading'
-import { getBookName } from '@/lib/api-bible'
+import { getPrayerStreak, getPrayerStats } from '@/actions/prayers'
 import { TodaysReadingCard } from '@/components/bible/todays-reading-card'
 import { StreakDisplay } from '@/components/bible/streak-display'
+import { StreakDisplay as PrayerStreakDisplay } from '@/components/prayers/streak-display'
 import { PlanCard } from '@/components/bible/plan-card'
 import { Progress } from '@/components/ui/progress'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
-export default async function BibliaPage() {
+export default async function BibliaOracaoPage() {
   const church = await getChurch()
   const supabase = await createClient()
 
@@ -43,6 +46,13 @@ export default async function BibliaPage() {
   const plansResult = await getAvailablePlans()
   const availablePlans = plansResult.data?.slice(0, 3) || []
 
+  // Get prayer stats
+  const streakResult = await getPrayerStreak()
+  const prayerStreak = streakResult.success ? streakResult.streak : null
+
+  const weeklyStatsResult = await getPrayerStats('week')
+  const weeklyStats = weeklyStatsResult.success ? weeklyStatsResult.stats : null
+
   // Calculate progress
   const progressPercent = activePlan
     ? Math.round((activePlan.progress.length / activePlan.totalReadings) * 100)
@@ -51,10 +61,100 @@ export default async function BibliaPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">Biblia</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">Biblia e Oracao</h1>
         <p className="text-sm sm:text-base text-muted-foreground font-medium mt-1">
-          Seu plano de leitura biblica
+          Sua jornada espiritual diaria
         </p>
+      </div>
+
+      {/* Prayer Quick Actions */}
+      <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary/70 mb-1">
+              Oracao
+            </p>
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground">
+              Converse com Deus
+            </h2>
+          </div>
+          {prayerStreak && (
+            <PrayerStreakDisplay
+              currentStreak={prayerStreak.current_streak}
+              longestStreak={prayerStreak.longest_streak}
+              size="md"
+            />
+          )}
+        </div>
+
+        {/* Prayer Stats */}
+        {weeklyStats && (
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="bg-background/50 rounded-xl p-3 text-center">
+              <div className="flex items-center justify-center gap-1 text-primary mb-1">
+                <Calendar className="w-4 h-4" />
+                <span className="text-lg font-black">{weeklyStats.totalPrayers}</span>
+              </div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                Esta Semana
+              </p>
+            </div>
+            <div className="bg-background/50 rounded-xl p-3 text-center">
+              <div className="flex items-center justify-center gap-1 text-blue-500 mb-1">
+                <Clock className="w-4 h-4" />
+                <span className="text-lg font-black">{weeklyStats.totalMinutes}</span>
+              </div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                Minutos
+              </p>
+            </div>
+            <div className="bg-background/50 rounded-xl p-3 text-center">
+              <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
+                <Users className="w-4 h-4" />
+                <span className="text-lg font-black">{weeklyStats.peoplePrayed}</span>
+              </div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                Pessoas
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Prayer Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link href="/membro/biblia-oracao/oracao/nova">
+            <Button className="w-full py-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
+              <Mic className="w-5 h-5 mr-2" />
+              Gravar Nova Oracao
+            </Button>
+          </Link>
+          <Link href="/membro/biblia-oracao/oracao">
+            <Button variant="outline" className="w-full py-6">
+              <BookOpen className="w-5 h-5 mr-2" />
+              Ver Historico
+            </Button>
+          </Link>
+        </div>
+
+        {/* Quick links */}
+        <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-primary/10">
+          <Link
+            href="/membro/biblia-oracao/oracao/relatorios"
+            className="text-xs text-primary hover:underline font-bold flex items-center gap-1"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Relatorios
+          </Link>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Leitura Biblica
+        </span>
+        <div className="flex-1 h-px bg-border" />
       </div>
 
       {/* Active Plan Section */}
@@ -95,7 +195,7 @@ export default async function BibliaPage() {
             </div>
 
             <Link
-              href="/membro/biblia/meu-plano"
+              href="/membro/biblia-oracao/meu-plano"
               className="flex items-center justify-center gap-2 w-full py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-bold text-sm transition-colors"
             >
               Ver Plano Completo
@@ -139,7 +239,7 @@ export default async function BibliaPage() {
               Escolha um plano de leitura e desenvolva o habito diario de ler a Palavra de Deus
             </p>
             <Link
-              href="/membro/biblia/planos"
+              href="/membro/biblia-oracao/planos"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
             >
               <Play className="w-4 h-4" />
@@ -158,7 +258,7 @@ export default async function BibliaPage() {
                   </h2>
                 </div>
                 <Link
-                  href="/membro/biblia/planos"
+                  href="/membro/biblia-oracao/planos"
                   className="text-primary text-xs sm:text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all"
                 >
                   Ver todos <ArrowRight className="w-3.5 h-3.5" />
@@ -174,7 +274,7 @@ export default async function BibliaPage() {
                     description={plan.description}
                     durationDays={plan.duration_days}
                     planType={plan.plan_type}
-                    href={`/membro/biblia/planos/${plan.id}`}
+                    href={`/membro/biblia-oracao/planos/${plan.id}`}
                   />
                 ))}
               </div>
@@ -218,7 +318,7 @@ export default async function BibliaPage() {
       {activePlan && (
         <div className="text-center pt-4">
           <Link
-            href="/membro/biblia/planos"
+            href="/membro/biblia-oracao/planos"
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             Explorar outros planos de leitura

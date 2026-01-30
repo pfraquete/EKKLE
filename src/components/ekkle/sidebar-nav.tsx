@@ -21,7 +21,7 @@ export function EkkleSidebarNav({ profile }: EkkleSidebarNavProps) {
         { href: '/ekkle/membro/igrejas', label: 'Pesquisar Igreja', icon: Search, highlight: true },
         { href: '/ekkle/membro/cursos', label: 'Cursos Ekkle', icon: BookOpen },
         { href: '/ekkle/membro/lives', label: 'Lives', icon: Radio },
-        { href: '/ekkle/membro/biblia', label: 'Bíblia', icon: BookMarked },
+        { href: '/ekkle/membro/biblia-oracao', label: 'Bíblia e Oração', icon: BookMarked },
     ]
 
     const renderNavItem = (item: { href: string; label: string; icon: typeof User; highlight?: boolean }) => {

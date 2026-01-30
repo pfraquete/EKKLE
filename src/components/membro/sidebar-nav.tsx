@@ -46,7 +46,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
         { href: '/membro', label: 'Meu Perfil', icon: User },
         { href: '/membro/lives', label: 'Lives', icon: Radio },
         { href: '/membro/cursos', label: 'Meus Cursos', icon: BookOpen },
-        { href: '/membro/biblia', label: 'Bíblia', icon: BookMarked },
+        { href: '/membro/biblia-oracao', label: 'Bíblia e Oração', icon: BookMarked },
         { href: '/membro/eventos', label: 'Meus Eventos', icon: Calendar },
     ]
 

@@ -42,9 +42,9 @@ export function EkkleMobileNav() {
         },
         {
             icon: BookMarked,
-            label: 'Bíblia',
-            href: '/ekkle/membro/biblia',
-            active: pathname.startsWith('/ekkle/membro/biblia'),
+            label: 'Oração',
+            href: '/ekkle/membro/biblia-oracao',
+            active: pathname.startsWith('/ekkle/membro/biblia-oracao'),
         },
     ]
 

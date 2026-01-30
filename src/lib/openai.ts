@@ -224,6 +224,211 @@ export class OpenAIService {
   }
 
   /**
+   * Transcribe audio using OpenAI Whisper API
+   *
+   * @param audioBuffer - Audio file as Buffer or Blob
+   * @param filename - Original filename with extension (e.g., 'audio.webm')
+   * @returns Transcribed text in Portuguese
+   *
+   * @example
+   * ```ts
+   * const transcription = await OpenAIService.transcribeAudio(audioBuffer, 'prayer.webm');
+   * console.log(transcription); // 'Senhor, eu te agradeço...'
+   * ```
+   */
+  static async transcribeAudio(
+    audioBuffer: Buffer | Blob,
+    filename: string = 'audio.webm'
+  ): Promise<string> {
+    if (!OPENAI_API_KEY) {
+      throw new Error('OpenAI API key não configurada');
+    }
+
+    const formData = new FormData();
+
+    // Handle both Buffer and Blob
+    if (audioBuffer instanceof Buffer) {
+      const blob = new Blob([audioBuffer], { type: 'audio/webm' });
+      formData.append('file', blob, filename);
+    } else {
+      formData.append('file', audioBuffer, filename);
+    }
+
+    formData.append('model', 'whisper-1');
+    formData.append('language', 'pt');
+    formData.append('response_format', 'text');
+
+    try {
+      const response = await fetchWithRetry(
+        'https://api.openai.com/v1/audio/transcriptions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: formData,
+        },
+        {
+          maxRetries: 3,
+          initialDelayMs: 2000,
+          timeoutMs: 120000, // 2 minute timeout for audio transcription
+          onRetry: (attempt, error) => {
+            console.warn(
+              `[OpenAI Whisper] Retry attempt ${attempt}/3 due to: ${error.message}`
+            );
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({
+          error: { message: 'Unknown error' },
+        }));
+        throw new Error(
+          error.error?.message || `Whisper API error: ${response.status}`
+        );
+      }
+
+      const text = await response.text();
+
+      console.log('[OpenAI Whisper] Transcription completed:', {
+        textLength: text.length,
+        preview: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+      });
+
+      return text;
+    } catch (error) {
+      console.error('Error calling Whisper API:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Analyze prayer transcription and extract categories using GPT
+   *
+   * @param transcription - The transcribed prayer text
+   * @returns Parsed prayer analysis with categories
+   *
+   * @example
+   * ```ts
+   * const analysis = await OpenAIService.analyzePrayer('Senhor, eu oro por minha família...');
+   * console.log(analysis.pessoas); // [{ name: 'família', reason: 'intercessão geral' }]
+   * ```
+   */
+  static async analyzePrayer(transcription: string): Promise<{
+    motivos: Array<{ content: string }>;
+    promessas: Array<{ content: string; verse_reference?: string }>;
+    transformacoes: Array<{ content: string }>;
+    pessoas: Array<{ name: string; reason?: string }>;
+    summary: string;
+    suggested_verses: Array<{ reference: string; text: string }>;
+  }> {
+    const systemPrompt = `Você é um assistente especializado em análise de orações cristãs.
+Analise a oração transcrita e extraia as seguintes categorias:
+
+1. MOTIVOS DE ORAÇÃO - Pedidos específicos feitos a Deus (cura, provisão, proteção, etc.)
+2. PROMESSAS - Versículos ou promessas bíblicas mencionadas ou reivindicadas
+3. TRANSFORMAÇÕES - Mudanças pessoais ou espirituais desejadas (paciência, fé, caráter, etc.)
+4. PESSOAS INTERCEDIDAS - Nomes de pessoas ou grupos pelos quais foi orado
+
+Retorne APENAS um JSON válido no seguinte formato (sem markdown, sem código):
+{
+  "motivos": [{"content": "texto do pedido"}],
+  "promessas": [{"content": "texto da promessa", "verse_reference": "referência bíblica se aplicável"}],
+  "transformacoes": [{"content": "transformação desejada"}],
+  "pessoas": [{"name": "nome ou descrição", "reason": "motivo da intercessão"}],
+  "summary": "resumo da oração em 2-3 frases",
+  "suggested_verses": [{"reference": "Livro capítulo:versículo", "text": "texto do versículo"}]
+}
+
+Se uma categoria não tiver itens, retorne um array vazio [].
+Sugira 2-3 versículos bíblicos relacionados aos temas da oração.`;
+
+    const response = await this.createChatCompletion({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Analise esta oração:\n\n${transcription}` },
+      ],
+      temperature: 0.3,
+      max_tokens: 1500,
+    });
+
+    const text = this.extractTextResponse(response);
+
+    try {
+      // Try to parse the JSON response
+      const parsed = JSON.parse(text);
+      return {
+        motivos: parsed.motivos || [],
+        promessas: parsed.promessas || [],
+        transformacoes: parsed.transformacoes || [],
+        pessoas: parsed.pessoas || [],
+        summary: parsed.summary || '',
+        suggested_verses: parsed.suggested_verses || [],
+      };
+    } catch (parseError) {
+      console.error('Error parsing prayer analysis:', parseError);
+      // Return empty structure if parsing fails
+      return {
+        motivos: [],
+        promessas: [],
+        transformacoes: [],
+        pessoas: [],
+        summary: text.substring(0, 200),
+        suggested_verses: [],
+      };
+    }
+  }
+
+  /**
+   * Generate AI encouragement based on prayer history
+   *
+   * @param prayerSummaries - Array of recent prayer summaries
+   * @param stats - Prayer statistics
+   * @returns Encouraging message
+   */
+  static async generateEncouragement(
+    prayerSummaries: string[],
+    stats: {
+      totalPrayers: number;
+      streak: number;
+      peoplesPrayed: number;
+      answeredPrayers: number;
+    }
+  ): Promise<string> {
+    const systemPrompt = `Você é um assistente pastoral carinhoso e encorajador.
+Baseado no histórico de orações e estatísticas do usuário, gere uma mensagem de encorajamento personalizada.
+A mensagem deve ser:
+- Breve (2-3 frases)
+- Bíblica (pode incluir uma referência)
+- Pessoal e calorosa
+- Em português brasileiro`;
+
+    const userContent = `
+Estatísticas de oração:
+- Total de orações: ${stats.totalPrayers}
+- Dias consecutivos orando: ${stats.streak}
+- Pessoas intercedidas: ${stats.peoplesPrayed}
+- Orações respondidas: ${stats.answeredPrayers}
+
+Resumos das últimas orações:
+${prayerSummaries.slice(0, 5).join('\n')}
+
+Gere uma mensagem de encorajamento:`;
+
+    const response = await this.createChatCompletion({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userContent },
+      ],
+      temperature: 0.7,
+      max_tokens: 200,
+    });
+
+    return this.extractTextResponse(response);
+  }
+
+  /**
    * Check if OpenAI is configured
    */
   static isConfigured(): boolean {
