@@ -34,8 +34,8 @@ export default async function HistoricoOracaoPage({ searchParams }: Props) {
   // Get prayer history
   const result = await getPrayerHistory(page, limit)
   const prayers = result.success ? result.prayers : []
-  const totalPages = result.success ? result.totalPages : 1
-  const total = result.success ? result.total : 0
+  const totalPages = result.success && result.totalPages ? result.totalPages : 1
+  const total = result.success && result.total ? result.total : 0
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
