@@ -17,6 +17,9 @@ const churchConfigSchema = z.object({
   instagram_url: z.string().url().optional().or(z.literal('')),
   whatsapp_url: z.string().url().optional().or(z.literal('')),
   youtube_channel_url: z.string().url().optional().or(z.literal('')),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  is_public_listed: z.boolean().optional(),
 })
 
 type ChurchConfigInput = z.infer<typeof churchConfigSchema>
@@ -63,6 +66,9 @@ export async function updateChurchConfig(data: ChurchConfigInput) {
         instagram_url: validated.instagram_url || null,
         whatsapp_url: validated.whatsapp_url || null,
         youtube_channel_url: validated.youtube_channel_url || null,
+        city: validated.city || null,
+        state: validated.state || null,
+        is_public_listed: validated.is_public_listed || false,
       })
       .eq('id', profile.church_id)
 

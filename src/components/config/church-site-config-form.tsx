@@ -16,6 +16,9 @@ type Church = {
   instagram_url: string | null
   whatsapp_url: string | null
   youtube_channel_url: string | null
+  city: string | null
+  state: string | null
+  is_public_listed: boolean | null
 }
 
 type ChurchSiteConfigFormProps = {
@@ -37,6 +40,9 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
     instagram_url: church.instagram_url || '',
     whatsapp_url: church.whatsapp_url || '',
     youtube_channel_url: church.youtube_channel_url || '',
+    city: church.city || '',
+    state: church.state || '',
+    is_public_listed: church.is_public_listed || false,
   })
 
   const siteUrl = formData.slug
@@ -198,6 +204,62 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
           />
         </div>
 
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="city" className="block text-sm font-semibold mb-2 text-foreground">
+              Cidade
+            </label>
+            <input
+              id="city"
+              type="text"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder:text-muted-foreground"
+              placeholder="São Paulo"
+            />
+          </div>
+          <div>
+            <label htmlFor="state" className="block text-sm font-semibold mb-2 text-foreground">
+              Estado
+            </label>
+            <select
+              id="state"
+              value={formData.state}
+              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+              className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
+            >
+              <option value="">Selecione...</option>
+              <option value="AC">Acre</option>
+              <option value="AL">Alagoas</option>
+              <option value="AP">Amapá</option>
+              <option value="AM">Amazonas</option>
+              <option value="BA">Bahia</option>
+              <option value="CE">Ceará</option>
+              <option value="DF">Distrito Federal</option>
+              <option value="ES">Espírito Santo</option>
+              <option value="GO">Goiás</option>
+              <option value="MA">Maranhão</option>
+              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul</option>
+              <option value="MG">Minas Gerais</option>
+              <option value="PA">Pará</option>
+              <option value="PB">Paraíba</option>
+              <option value="PR">Paraná</option>
+              <option value="PE">Pernambuco</option>
+              <option value="PI">Piauí</option>
+              <option value="RJ">Rio de Janeiro</option>
+              <option value="RN">Rio Grande do Norte</option>
+              <option value="RS">Rio Grande do Sul</option>
+              <option value="RO">Rondônia</option>
+              <option value="RR">Roraima</option>
+              <option value="SC">Santa Catarina</option>
+              <option value="SP">São Paulo</option>
+              <option value="SE">Sergipe</option>
+              <option value="TO">Tocantins</option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-semibold mb-2 text-foreground">
             Logo da Igreja
@@ -319,6 +381,50 @@ export function ChurchSiteConfigForm({ church }: ChurchSiteConfigFormProps) {
             placeholder="https://youtube.com/@suaigreja"
           />
         </div>
+      </div>
+
+      {/* Public Directory */}
+      <div className="bg-card rounded-lg border border-border p-6 space-y-6">
+        <h2 className="text-xl font-bold text-foreground">Diretório Público Ekkle</h2>
+        <p className="text-sm text-muted-foreground">
+          Permita que pessoas encontrem sua igreja no diretório público do Ekkle.
+          Usuários que ainda não pertencem a uma igreja poderão descobrir e se afiliar à sua comunidade.
+        </p>
+
+        <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg border border-border">
+          <div className="flex-1">
+            <label htmlFor="is_public_listed" className="flex items-center gap-3 cursor-pointer">
+              <input
+                id="is_public_listed"
+                type="checkbox"
+                checked={formData.is_public_listed}
+                onChange={(e) => setFormData({ ...formData, is_public_listed: e.target.checked })}
+                className="w-5 h-5 rounded border-input text-primary focus:ring-primary focus:ring-offset-0"
+              />
+              <div>
+                <span className="font-semibold text-foreground">
+                  Aparecer no diretório público
+                </span>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Sua igreja será listada para novos usuários que buscam uma comunidade
+                </p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {formData.is_public_listed && (
+          <div className="text-sm text-muted-foreground bg-primary/5 border border-primary/20 rounded-lg p-4">
+            <p className="font-semibold text-primary mb-2">Informações exibidas no diretório:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Nome da igreja</li>
+              <li>Logo (se configurado)</li>
+              <li>Descrição</li>
+              <li>Cidade e estado</li>
+              <li>Quantidade aproximada de membros</li>
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Actions */}

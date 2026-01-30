@@ -4,6 +4,7 @@ import { getProfile } from '@/actions/auth'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { MobileNav } from '@/components/layout/mobile-nav'
+import { isEkkleHubUser } from '@/lib/ekkle-utils'
 
 // Routes that LEADER role can access in the dashboard
 const LEADER_ALLOWED_ROUTES = [
@@ -23,6 +24,12 @@ export default async function AppLayout({
 
     if (!profile) {
         redirect('/login')
+    }
+
+    // Ekkle Hub users (unaffiliated) should use the Ekkle member area
+    if (isEkkleHubUser(profile)) {
+        console.log('[AppLayout] Redirecting Ekkle Hub user to /ekkle/membro')
+        redirect('/ekkle/membro')
     }
 
     // MEMBER role with a cell should use member area

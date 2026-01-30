@@ -120,8 +120,8 @@ export default async function LoginPage({
                                 Criar conta como membro
                             </Link>
                         ) : (
-                            <Link href="/registro" className="text-primary hover:underline font-black">
-                                Criar minha igreja
+                            <Link href="/cadastro" className="text-primary hover:underline font-black">
+                                Criar conta gratuita
                             </Link>
                         )}
                     </div>

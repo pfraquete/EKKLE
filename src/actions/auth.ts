@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { isEkkleHubUser } from '@/lib/ekkle-utils'
 
 export interface Profile {
     id: string
@@ -47,13 +48,32 @@ export async function signIn(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     })
 
     if (error) {
         return redirect(`/login?error=${encodeURIComponent(error.message)}`)
+    }
+
+    // Get user profile to determine redirect
+    if (authData.user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('church_id, role')
+            .eq('id', authData.user.id)
+            .single()
+
+        revalidatePath('/', 'layout')
+
+        // Ekkle Hub users go to /ekkle/membro
+        if (profile && isEkkleHubUser(profile)) {
+            redirect('/ekkle/membro')
+        }
+
+        // Regular users go to dashboard (which will redirect based on role)
+        redirect('/dashboard')
     }
 
     revalidatePath('/', 'layout')
