@@ -35,13 +35,26 @@ export async function createMember(formData: FormData) {
     const validatedData = memberSchema.parse(rawData)
 
     // Check for duplicates before creating
-    const { data: existingMember } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, phone')
-        .eq('church_id', churchId)
-        .or(`email.eq.${validatedData.email},phone.eq.${validatedData.phone}`)
-        .limit(1)
-        .single()
+    // Build OR conditions safely to avoid injection
+    const orConditions: string[] = []
+    if (validatedData.email) {
+        orConditions.push(`email.eq.${validatedData.email}`)
+    }
+    if (validatedData.phone) {
+        orConditions.push(`phone.eq.${validatedData.phone}`)
+    }
+
+    let existingMember = null
+    if (orConditions.length > 0) {
+        const { data } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, phone')
+            .eq('church_id', churchId)
+            .or(orConditions.join(','))
+            .limit(1)
+            .single()
+        existingMember = data
+    }
 
     if (existingMember) {
         if (existingMember.email === validatedData.email && validatedData.email) {
@@ -261,7 +274,9 @@ export async function listMembers(cellId?: string, search?: string) {
     }
 
     if (search) {
-        query = query.ilike('full_name', `%${search}%`)
+        // Sanitize search input to prevent SQL injection via ilike wildcards
+        const sanitizedSearch = search.replace(/[%_\\]/g, '\\$&')
+        query = query.ilike('full_name', `%${sanitizedSearch}%`)
     }
 
     const { data, error } = await query.order('full_name')

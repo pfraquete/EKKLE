@@ -57,22 +57,25 @@ export async function POST(req: NextRequest) {
 
         let event: Stripe.Event
 
-        if (webhookSecret) {
-            // Production: verify signature
-            try {
-                const stripe = getStripeClient()
-                event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
-            } catch (err) {
-                console.error('[Webhook] Signature verification failed:', err)
-                return NextResponse.json(
-                    { error: 'Invalid signature' },
-                    { status: 401 }
-                )
-            }
-        } else {
-            // Development fallback (warn but allow)
-            console.warn('[Webhook] STRIPE_WEBHOOK_SECRET not configured - skipping signature verification')
-            event = JSON.parse(body) as Stripe.Event
+        // SECURITY: Always require webhook secret - no fallback allowed
+        if (!webhookSecret) {
+            console.error('[Webhook] STRIPE_WEBHOOK_SECRET not configured')
+            return NextResponse.json(
+                { error: 'Webhook not configured' },
+                { status: 500 }
+            )
+        }
+
+        // Verify signature
+        try {
+            const stripe = getStripeClient()
+            event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+        } catch (err) {
+            console.error('[Webhook] Signature verification failed')
+            return NextResponse.json(
+                { error: 'Invalid signature' },
+                { status: 401 }
+            )
         }
 
         const supabase = createSupabaseClient()
