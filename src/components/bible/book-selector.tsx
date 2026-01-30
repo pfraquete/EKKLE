@@ -9,7 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChevronDown, Book } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -123,7 +122,7 @@ export function BookSelector({ selectedBook, onSelectBook, className }: BookSele
         <DialogHeader>
           <DialogTitle>Selecionar Livro</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[400px] pr-4">
+        <div className="h-[400px] overflow-y-auto pr-4">
           <div className="space-y-4">
             {/* Old Testament */}
             <div>
@@ -169,7 +168,7 @@ export function BookSelector({ selectedBook, onSelectBook, className }: BookSele
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   )
