@@ -2,7 +2,7 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen, Flame, ArrowRight, Calendar, CheckCircle, Play, Mic, Clock, Users, Sparkles } from 'lucide-react'
+import { BookOpen, Flame, ArrowRight, Calendar, CheckCircle, Play, Clock, Users } from 'lucide-react'
 import { getMyActivePlan, getTodaysReading, getAvailablePlans } from '@/actions/bible-reading'
 import { getPrayerStreak, getPrayerStats } from '@/actions/prayers'
 import { TodaysReadingCard } from '@/components/bible/todays-reading-card'
@@ -120,32 +120,13 @@ export default async function BibliaOracaoPage() {
           </div>
         )}
 
-        {/* Prayer Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Link href="/membro/biblia-oracao/oracao/nova">
-            <Button className="w-full py-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
-              <Mic className="w-5 h-5 mr-2" />
-              Gravar Nova Oracao
-            </Button>
-          </Link>
-          <Link href="/membro/biblia-oracao/oracao">
-            <Button variant="outline" className="w-full py-6">
-              <BookOpen className="w-5 h-5 mr-2" />
-              Ver Historico
-            </Button>
-          </Link>
-        </div>
-
-        {/* Quick links */}
-        <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-primary/10">
-          <Link
-            href="/membro/biblia-oracao/oracao/relatorios"
-            className="text-xs text-primary hover:underline font-bold flex items-center gap-1"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            Relatorios
-          </Link>
-        </div>
+        {/* Prayer Action */}
+        <Link href="/membro/biblia-oracao/oracao">
+          <Button className="w-full py-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
+            <Flame className="w-5 h-5 mr-2" />
+            Espaco de Oracao
+          </Button>
+        </Link>
       </section>
 
       {/* Divider */}
