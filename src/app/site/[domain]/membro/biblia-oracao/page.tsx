@@ -138,6 +138,24 @@ export default async function BibliaOracaoPage() {
         <div className="flex-1 h-px bg-border" />
       </div>
 
+      {/* Free Bible Reading */}
+      <Link href="/membro/biblia-oracao/leitor">
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-foreground">Ler Biblia</h3>
+              <p className="text-sm text-muted-foreground">
+                Leitura livre de qualquer livro e capitulo
+              </p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-muted-foreground" />
+          </CardContent>
+        </Card>
+      </Link>
+
       {/* Active Plan Section */}
       {activePlan ? (
         <>
