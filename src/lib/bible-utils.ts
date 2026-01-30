@@ -34,7 +34,7 @@ export const BIBLE_BOOKS: Record<string, string> = {
     EZR: 'Esdras',
     NEH: 'Neemias',
     EST: 'Ester',
-    JOB: 'Jo',
+    JOB: 'Jó',
     PSA: 'Salmos',
     PRO: 'Proverbios',
     ECC: 'Eclesiastes',
