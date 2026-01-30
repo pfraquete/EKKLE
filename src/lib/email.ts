@@ -1,10 +1,29 @@
 import { Resend } from 'resend';
 import { escapeHtml } from '@/lib/sanitize';
 
+/**
+ * Helper to get app URL with fallback and warning
+ */
+function getAppUrl(): string {
+  const url = process.env.NEXT_PUBLIC_APP_URL;
+  if (!url) {
+    console.warn('[Email] NEXT_PUBLIC_APP_URL not set, using fallback');
+    return 'https://ekkle.up.railway.app';
+  }
+  return url;
+}
+
+/**
+ * Helper to get from email with fallback
+ */
+function getFromEmail(): string {
+  return process.env.FROM_EMAIL || 'Ekkle <onboarding@resend.dev>';
+}
+
 export async function sendLeaderWelcomeEmail(email: string, name: string, password: string) {
   const apiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.FROM_EMAIL || 'Ekkle <onboarding@resend.dev>';
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app';
+  const fromEmail = getFromEmail();
+  const appUrl = getAppUrl();
 
   if (!apiKey) {
     console.error('RESEND_API_KEY is not configured. Email not sent.');
@@ -395,6 +414,85 @@ export async function sendCellRejectionNotification({
     return { success: true, data };
   } catch (error) {
     console.error('Email service cell rejection error:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send notification to church admin about LGPD deletion request
+ */
+export async function sendDeletionRequestNotification({
+  to,
+  adminName,
+  memberName,
+  reason,
+  lgpdUrl,
+}: {
+  to: string;
+  adminName: string;
+  memberName: string;
+  reason: string;
+  lgpdUrl: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = getFromEmail();
+
+  if (!apiKey) {
+    console.error('RESEND_API_KEY is not configured. Email not sent.');
+    return { success: false, error: 'API Key missing' };
+  }
+
+  const resend = new Resend(apiKey);
+  try {
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: to,
+      subject: '⚠️ Solicitação de Exclusão de Conta - LGPD',
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+          <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 32px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">Solicitação de Exclusão - LGPD</h1>
+          </div>
+          <div style="padding: 24px;">
+            <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>${escapeHtml(adminName)}</strong>,</p>
+            <p style="font-size: 16px; line-height: 1.6;">Um membro da sua igreja solicitou a exclusão de sua conta conforme a Lei Geral de Proteção de Dados (LGPD).</p>
+
+            <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #dc2626;">
+              <p style="margin: 0 0 12px 0; font-weight: bold; color: #991b1b;">Detalhes da Solicitação:</p>
+              <p style="margin: 0 0 8px 0; color: #7f1d1d;"><strong>Membro:</strong> ${escapeHtml(memberName)}</p>
+              <p style="margin: 0; color: #7f1d1d;"><strong>Motivo:</strong> ${escapeHtml(reason)}</p>
+            </div>
+
+            <div style="background-color: #fef3c7; padding: 16px; border-radius: 8px; margin: 24px 0;">
+              <p style="margin: 0; color: #92400e; font-size: 14px;">
+                <strong>⚠️ Importante:</strong> De acordo com a LGPD, você tem até <strong>15 dias</strong> para processar esta solicitação.
+              </p>
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${escapeHtml(lgpdUrl)}" style="display: inline-block; background-color: #dc2626; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Gerenciar Solicitação</a>
+            </div>
+
+            <p style="font-size: 14px; color: #666; margin-top: 24px;">
+              Acesse o painel de administração para revisar e processar esta solicitação.
+            </p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+            <p style="margin: 0;">© 2026 Ekkle</p>
+            <p style="margin: 8px 0 0 0;">Sistema de Gestão Eclesiástica</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending LGPD deletion notification:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Email service LGPD deletion error:', error);
     return { success: false, error };
   }
 }

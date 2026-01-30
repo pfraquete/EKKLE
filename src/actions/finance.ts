@@ -20,7 +20,7 @@ export type TransactionInput = z.infer<typeof transactionSchema>
 export async function getFinancialSummary(startDate?: string, endDate?: string) {
     try {
         const profile = await getProfile()
-        if (!profile || profile.role !== 'PASTOR') throw new Error('Não autorizado')
+        if (!profile || (profile.role !== 'PASTOR' && !profile.is_finance_team)) throw new Error('Não autorizado')
 
         const supabase = await createClient()
 
@@ -98,7 +98,7 @@ export async function getTransactions(options?: {
 }) {
     try {
         const profile = await getProfile()
-        if (!profile || profile.role !== 'PASTOR') throw new Error('Não autorizado')
+        if (!profile || (profile.role !== 'PASTOR' && !profile.is_finance_team)) throw new Error('Não autorizado')
 
         const supabase = await createClient()
         let query = supabase

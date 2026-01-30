@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getProfile } from './auth'
 import { revalidatePath } from 'next/cache'
+import { sendDeletionRequestNotification } from '@/lib/email'
 
 /**
  * Get user's current consent status
@@ -164,8 +165,28 @@ export async function requestAccountDeletion(reason?: string) {
         return { success: false, error: 'Erro ao solicitar exclusão' }
     }
 
-    // Notify church admin
-    // TODO: Send email notification to church admin
+    // Notify church admin via email
+    try {
+        const { data: admins } = await supabase
+            .from('profiles')
+            .select('email, full_name')
+            .eq('church_id', profile.church_id)
+            .eq('role', 'PASTOR')
+
+        if (admins && admins.length > 0) {
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
+            await sendDeletionRequestNotification({
+                to: admins[0].email,
+                adminName: admins[0].full_name || 'Administrador',
+                memberName: profile.full_name || 'Membro',
+                reason: reason || 'Não informado',
+                lgpdUrl: `${appUrl}/configuracoes/lgpd`,
+            })
+        }
+    } catch (emailError) {
+        // Log but don't fail the request if email fails
+        console.error('[requestAccountDeletion] Email notification error:', emailError)
+    }
 
     return { success: true }
 }

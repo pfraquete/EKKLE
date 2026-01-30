@@ -14,6 +14,7 @@ import {
     TrendingUp,
 } from 'lucide-react'
 import { TitheConfirmButton } from '@/components/tithe/tithe-confirm-button'
+import { MonthSelect } from '@/components/tithe/month-select'
 
 const MONTHS = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -132,21 +133,7 @@ export default async function MemberDizimosPage({ searchParams }: PageProps) {
 
             {/* Filters */}
             <div className="flex flex-wrap gap-3">
-                <select
-                    defaultValue={currentMonth}
-                    onChange={(e) => {
-                        const url = new URL(window.location.href)
-                        url.searchParams.set('month', e.target.value)
-                        window.location.href = url.toString()
-                    }}
-                    className="h-10 px-4 rounded-xl bg-background border border-border text-foreground text-sm"
-                >
-                    {MONTHS.map((month, index) => (
-                        <option key={index} value={index + 1}>
-                            {month}
-                        </option>
-                    ))}
-                </select>
+                <MonthSelect currentMonth={currentMonth} />
 
                 <div className="flex rounded-xl border border-border overflow-hidden">
                     <Link

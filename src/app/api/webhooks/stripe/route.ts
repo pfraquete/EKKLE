@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import Stripe from 'stripe'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+// Initialize Stripe client
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2025-12-15.clover',
+})
 
 /**
  * Helper to create Supabase client for webhooks
@@ -37,11 +43,27 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        // TODO: Verify webhook signature with Stripe
-        // const event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+        // Verify webhook signature with Stripe
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
-        // For now, parse the body
-        const event = JSON.parse(body)
+        let event: Stripe.Event
+
+        if (webhookSecret) {
+            // Production: verify signature
+            try {
+                event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+            } catch (err) {
+                console.error('[Webhook] Signature verification failed:', err)
+                return NextResponse.json(
+                    { error: 'Invalid signature' },
+                    { status: 401 }
+                )
+            }
+        } else {
+            // Development fallback (warn but allow)
+            console.warn('[Webhook] STRIPE_WEBHOOK_SECRET not configured - skipping signature verification')
+            event = JSON.parse(body) as Stripe.Event
+        }
 
         const supabase = createSupabaseClient()
 

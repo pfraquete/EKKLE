@@ -97,7 +97,7 @@ export async function getAllCellBalances() {
             cell:cells(
                 id,
                 name,
-                leader:profiles!cells_leader_id_fkey(id, full_name, photo_url)
+                leader:profiles!cells_leader_fk(id, full_name, photo_url)
             )
         `)
         .eq('church_id', profile.church_id)

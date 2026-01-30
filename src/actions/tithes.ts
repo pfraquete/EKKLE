@@ -257,7 +257,7 @@ export async function getAllTithes(params: GetAllTithesParams = {}) {
         .from('member_tithes')
         .select(`
             *,
-            profile:profiles(id, full_name, photo_url, email)
+            profile:profiles!member_tithes_profile_id_fkey(id, full_name, photo_url, email)
         `)
         .eq('church_id', profile.church_id)
         .eq('year', currentYear)
