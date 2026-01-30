@@ -233,7 +233,7 @@ export async function startReadingPlan(
 
         if (error) throw error
 
-        revalidatePath('/membro/biblia')
+        revalidatePath('/membro/biblia-oracao')
         return { success: true, data: userPlan }
     } catch (error) {
         console.error('[Bible Reading] Error starting plan:', error)
@@ -544,7 +544,7 @@ export async function pauseReadingPlan(): Promise<{
 
         if (error) throw error
 
-        revalidatePath('/membro/biblia')
+        revalidatePath('/membro/biblia-oracao')
         return { success: true }
     } catch (error) {
         console.error('[Bible Reading] Error pausing plan:', error)
@@ -575,7 +575,7 @@ export async function resumeReadingPlan(): Promise<{
 
         if (error) throw error
 
-        revalidatePath('/membro/biblia')
+        revalidatePath('/membro/biblia-oracao')
         return { success: true }
     } catch (error) {
         console.error('[Bible Reading] Error resuming plan:', error)

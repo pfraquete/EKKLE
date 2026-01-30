@@ -40,7 +40,7 @@ export default async function PlanosPage() {
       {/* Header */}
       <div className="flex items-start gap-4">
         <Link
-          href="/membro/biblia"
+          href="/membro/biblia-oracao"
           className="mt-1 p-2 hover:bg-muted rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />

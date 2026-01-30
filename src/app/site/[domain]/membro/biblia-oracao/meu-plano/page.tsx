@@ -50,7 +50,7 @@ export default function MeuPlanoPage() {
     const result = await pauseReadingPlan()
     if (result.success) {
       toast.success('Plano pausado')
-      router.push('/membro/biblia')
+      router.push('/membro/biblia-oracao')
     } else {
       toast.error(result.error || 'Erro ao pausar')
     }
@@ -117,7 +117,7 @@ export default function MeuPlanoPage() {
       {/* Header */}
       <div className="flex items-start gap-4">
         <Link
-          href="/membro/biblia"
+          href="/membro/biblia-oracao"
           className="mt-1 p-2 hover:bg-muted rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
