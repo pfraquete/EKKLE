@@ -2,7 +2,7 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Mic, History, BarChart3, Plus, Video } from 'lucide-react'
+import { Mic, History, BarChart3, Plus, Video, Users } from 'lucide-react'
 import { getPrayerHistory, getPrayerStreak, getPrayerStats } from '@/actions/prayers'
 import { PrayerHistoryItem, StreakDisplay, PrayerStatsCard } from '@/components/prayers'
 import { Button } from '@/components/ui/button'
@@ -57,11 +57,17 @@ export default async function OracaoPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-        <Link href="/membro/biblia-oracao/oracao/nova" className="col-span-1 sm:col-span-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Link href="/membro/biblia-oracao/oracao/nova" className="col-span-2">
           <Button className="w-full py-8 text-lg bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-2xl">
             <Mic className="w-6 h-6 mr-3" />
             Gravar Nova Oracao
+          </Button>
+        </Link>
+        <Link href="/membro/biblia-oracao/oracao/parceiro">
+          <Button variant="outline" className="w-full py-8 rounded-2xl">
+            <Users className="w-5 h-5 mr-2" />
+            Parceiro
           </Button>
         </Link>
         <Link href="/membro/biblia-oracao/oracao/salas">
@@ -70,10 +76,10 @@ export default async function OracaoPage() {
             Salas
           </Button>
         </Link>
-        <Link href="/membro/biblia-oracao/oracao/relatorios">
-          <Button variant="outline" className="w-full py-8 rounded-2xl">
-            <BarChart3 className="w-5 h-5 mr-2" />
-            Relatorios
+        <Link href="/membro/biblia-oracao/oracao/relatorios" className="col-span-2 sm:col-span-4">
+          <Button variant="ghost" className="w-full py-4 rounded-2xl text-muted-foreground">
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Ver Relatorios
           </Button>
         </Link>
       </div>
