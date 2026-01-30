@@ -78,7 +78,7 @@ export default async function PlanosPage() {
                 durationDays={plan.duration_days}
                 planType={plan.plan_type}
                 isActive={plan.id === activePlanId}
-                href={`/membro/biblia/planos/${plan.id}`}
+                href={`/membro/biblia-oracao/planos/${plan.id}`}
               />
             ))}
           </div>
@@ -108,7 +108,7 @@ export default async function PlanosPage() {
                 durationDays={plan.duration_days}
                 planType={plan.plan_type}
                 isActive={plan.id === activePlanId}
-                href={`/membro/biblia/planos/${plan.id}`}
+                href={`/membro/biblia-oracao/planos/${plan.id}`}
               />
             ))}
           </div>
@@ -138,7 +138,7 @@ export default async function PlanosPage() {
                 durationDays={plan.duration_days}
                 planType={plan.plan_type}
                 isActive={plan.id === activePlanId}
-                href={`/membro/biblia/planos/${plan.id}`}
+                href={`/membro/biblia-oracao/planos/${plan.id}`}
               />
             ))}
           </div>

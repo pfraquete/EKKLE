@@ -90,7 +90,7 @@ export default function MeuPlanoPage() {
           Voce ainda nao iniciou nenhum plano de leitura
         </p>
         <Link
-          href="/membro/biblia/planos"
+          href="/membro/biblia-oracao/planos"
           className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
         >
           <Play className="w-4 h-4" />

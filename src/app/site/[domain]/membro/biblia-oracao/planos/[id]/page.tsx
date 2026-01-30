@@ -81,7 +81,7 @@ export default function PlanDetailsPage({ params }: PlanDetailsPageProps) {
       <div className="max-w-4xl mx-auto text-center py-24">
         <BookOpen className="w-16 h-16 text-muted-foreground/40 mx-auto mb-4" />
         <h2 className="text-xl font-bold mb-2">Plano nao encontrado</h2>
-        <Link href="/membro/biblia/planos" className="text-primary hover:underline">
+        <Link href="/membro/biblia-oracao/planos" className="text-primary hover:underline">
           Voltar para planos
         </Link>
       </div>
@@ -93,7 +93,7 @@ export default function PlanDetailsPage({ params }: PlanDetailsPageProps) {
       {/* Header */}
       <div className="flex items-start gap-4">
         <Link
-          href="/membro/biblia/planos"
+          href="/membro/biblia-oracao/planos"
           className="mt-1 p-2 hover:bg-muted rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -128,7 +128,7 @@ export default function PlanDetailsPage({ params }: PlanDetailsPageProps) {
       <div className="flex gap-3">
         {isActivePlan ? (
           <Button asChild className="flex-1" size="lg">
-            <Link href="/membro/biblia/meu-plano">
+            <Link href="/membro/biblia-oracao/meu-plano">
               <Play className="w-4 h-4 mr-2" />
               Continuar Leitura
             </Link>
@@ -139,7 +139,7 @@ export default function PlanDetailsPage({ params }: PlanDetailsPageProps) {
               Voce ja possui um plano ativo. Pause ou complete o atual para iniciar este.
             </p>
             <Link
-              href="/membro/biblia/meu-plano"
+              href="/membro/biblia-oracao/meu-plano"
               className="text-primary text-sm font-medium hover:underline mt-2 inline-block"
             >
               Ver meu plano

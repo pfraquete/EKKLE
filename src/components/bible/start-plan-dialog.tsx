@@ -63,7 +63,7 @@ export function StartPlanDialog({
             if (result.success) {
                 toast.success('Plano iniciado com sucesso!')
                 onOpenChange(false)
-                router.push('/membro/biblia/meu-plano')
+                router.push('/membro/biblia-oracao/meu-plano')
             } else {
                 toast.error(result.error || 'Erro ao iniciar plano')
             }

@@ -508,8 +508,8 @@ export async function markReadingComplete(
             .eq('id', userPlan.id)
             .single()
 
-        revalidatePath('/membro/biblia')
-        revalidatePath('/membro/biblia/meu-plano')
+        revalidatePath('/membro/biblia-oracao')
+        revalidatePath('/membro/biblia-oracao/meu-plano')
 
         return {
             success: true,
