@@ -6,10 +6,19 @@ import Stripe from 'stripe'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-// Initialize Stripe client
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2025-12-15.clover',
-})
+/**
+ * Lazy initialization of Stripe client
+ * Avoids module-level initialization that fails during build
+ */
+function getStripeClient(): Stripe {
+    const apiKey = process.env.STRIPE_SECRET_KEY
+    if (!apiKey) {
+        throw new Error('STRIPE_SECRET_KEY is not configured')
+    }
+    return new Stripe(apiKey, {
+        apiVersion: '2025-12-15.clover',
+    })
+}
 
 /**
  * Helper to create Supabase client for webhooks
@@ -51,6 +60,7 @@ export async function POST(req: NextRequest) {
         if (webhookSecret) {
             // Production: verify signature
             try {
+                const stripe = getStripeClient()
                 event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
             } catch (err) {
                 console.error('[Webhook] Signature verification failed:', err)

@@ -5,15 +5,21 @@
  * Handles execution, confirmations, and error handling.
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Note: We'll implement the actual imports after creating the helper functions
-// For now, we'll use placeholders and implement them properly
+/**
+ * Get Supabase client (lazy initialization to avoid build-time errors)
+ */
+function getSupabaseClient(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+  if (!url || !key) {
+    throw new Error('Supabase configuration is missing');
+  }
+
+  return createClient(url, key);
+}
 
 /**
  * Execution context
@@ -164,7 +170,7 @@ async function handleCreateCell(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { data, error } = await supabase.rpc('agent_create_cell', {
+  const { data, error } = await getSupabaseClient().rpc('agent_create_cell', {
     p_church_id: context.churchId,
     p_pastor_id: context.pastorId,
     p_name: args.name,
@@ -192,7 +198,7 @@ async function handleCreateCell(
 async function handleListCells(
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('cells')
     .select(
       `
@@ -236,7 +242,7 @@ async function handleGetCellDetails(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('cells')
     .select(
       `
@@ -285,7 +291,7 @@ async function handleDeleteCellRequest(
     };
   } else {
     // Execute deletion
-    const { error } = await supabase
+    const { error } = await getSupabaseClient()
       .from('cells')
       .delete()
       .eq('id', args.cellId)
@@ -312,7 +318,7 @@ async function handleCreateMember(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { error } = await supabase.from('profiles').insert({
+  const { error } = await getSupabaseClient().from('profiles').insert({
     full_name: args.fullName,
     phone: args.phone || null,
     email: args.email || null,
@@ -344,7 +350,7 @@ async function handleListMembers(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  let query = supabase
+  let query = getSupabaseClient()
     .from('profiles')
     .select(
       `
@@ -398,7 +404,7 @@ async function handleGetMemberDetails(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('profiles')
     .select(
       `
@@ -444,7 +450,7 @@ async function handleDeleteMemberRequest(
       message: 'Aguardando confirmação...',
     };
   } else {
-    const { error } = await supabase
+    const { error } = await getSupabaseClient()
       .from('profiles')
       .update({ is_active: false })
       .eq('id', args.memberId)
@@ -471,7 +477,7 @@ async function handleCreateService(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { error } = await supabase.from('services').insert({
+  const { error } = await getSupabaseClient().from('services').insert({
     church_id: context.churchId,
     title: args.title,
     service_date: args.service_date,
@@ -502,7 +508,7 @@ async function handleListServices(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  let query = supabase
+  let query = getSupabaseClient()
     .from('services')
     .select('id, title, service_date, service_time, type, location')
     .eq('church_id', context.churchId);
@@ -542,7 +548,7 @@ async function handleCreateEvent(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { error } = await supabase.from('events').insert({
+  const { error } = await getSupabaseClient().from('events').insert({
     church_id: context.churchId,
     title: args.title,
     description: args.description || '',
@@ -571,7 +577,7 @@ async function handleCreateEvent(
 async function handleListEvents(
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('events')
     .select('id, title, start_date, location, category')
     .eq('church_id', context.churchId)
@@ -607,7 +613,7 @@ async function handleSendBulkWhatsApp(
 ): Promise<FunctionExecutionResult> {
   try {
     // Get messaging targets
-    let query = supabase
+    let query = getSupabaseClient()
       .from('profiles')
       .select('id, full_name, phone, role, member_stage')
       .eq('church_id', context.churchId)
@@ -643,7 +649,7 @@ async function handleSendBulkWhatsApp(
     }
 
     // Get WhatsApp instance
-    const { data: instance } = await supabase
+    const { data: instance } = await getSupabaseClient()
       .from('whatsapp_instances')
       .select('*')
       .eq('church_id', context.churchId)
@@ -699,7 +705,7 @@ async function handleUpdateChurchConfig(
   if (args.description) updates.description = args.description;
   if (args.address) updates.address = args.address;
 
-  const { error } = await supabase
+  const { error } = await getSupabaseClient()
     .from('churches')
     .update(updates)
     .eq('id', context.churchId);
@@ -724,7 +730,7 @@ async function handleUpdateChurchConfig(
 async function handleGetChurchInfo(
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('churches')
     .select('id, name, slug, description, address, logo_url')
     .eq('id', context.churchId)
@@ -759,7 +765,7 @@ async function handleGetFinancialSummary(
     const endDate = new Date(year, month, 0).toISOString().split('T')[0];
 
     // Get all transactions for the month (if financial_transactions table exists)
-    const { data: transactions, error } = await supabase
+    const { data: transactions, error } = await getSupabaseClient()
       .from('financial_transactions')
       .select('amount, type')
       .eq('church_id', context.churchId)
@@ -842,7 +848,7 @@ async function handleCompleteOnboardingStep(
   args: any,
   context: ExecutionContext
 ): Promise<FunctionExecutionResult> {
-  const { error } = await supabase
+  const { error } = await getSupabaseClient()
     .from('whatsapp_agent_onboarding')
     .update({ [args.step]: true })
     .eq('pastor_id', context.pastorId);
@@ -873,7 +879,7 @@ async function createConfirmation(
   actionPayload: Record<string, any>,
   confirmationMessage: string
 ) {
-  await supabase.from('whatsapp_agent_confirmations').insert({
+  await getSupabaseClient().from('whatsapp_agent_confirmations').insert({
     conversation_id: context.conversationId,
     pastor_id: context.pastorId,
     action_type: actionType,

@@ -36,7 +36,6 @@ export function validateEnv() {
   }
 }
 
-// Validate on module import (will run when server starts)
-if (typeof window === 'undefined') {
-  validateEnv()
-}
+// Note: Validation is called explicitly where needed (e.g., in middleware)
+// instead of at module-level to avoid build-time failures when env vars
+// are only available at runtime (e.g., Railway deployment)

@@ -5,17 +5,26 @@
  * Handles incoming messages, maintains context, calls OpenAI, executes functions.
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { OpenAIService, ChatMessage } from '@/lib/openai';
 import { SYSTEM_PROMPT, getOnboardingPrompt } from './system-prompt-optimized'; // Using optimized prompt
 import { getAvailableFunctions } from './function-definitions';
 import { executeFunctionCall } from './function-executor';
 import { TwilioService } from '@/lib/twilio';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+/**
+ * Get Supabase client (lazy initialization to avoid build-time errors)
+ */
+function getSupabaseClient(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    throw new Error('Supabase configuration is missing');
+  }
+
+  return createClient(url, key);
+}
 
 /**
  * Input for processing incoming messages
@@ -97,7 +106,7 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
     // ========================================
     // 6. Get Profile for Role Check
     // ========================================
-    const { data: profile } = await supabase
+    const { data: profile } = await getSupabaseClient()
       .from('profiles')
       .select('role, full_name')
       .eq('id', pastorId)
@@ -158,7 +167,7 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
       // If function requires confirmation, send confirmation message
       if (functionResult.requiresConfirmation) {
         // Get the confirmation message from database
-        const { data: confirmation } = await supabase
+        const { data: confirmation } = await getSupabaseClient()
           .from('whatsapp_agent_confirmations')
           .select('confirmation_message')
           .eq('pastor_id', pastorId)
@@ -174,7 +183,7 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
           );
 
           // Update conversation
-          await supabase
+          await getSupabaseClient()
             .from('whatsapp_agent_conversations')
             .update({
               messages,
@@ -211,7 +220,7 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
       );
 
       // Update conversation
-      await supabase
+      await getSupabaseClient()
         .from('whatsapp_agent_conversations')
         .update({
           messages,
@@ -248,7 +257,7 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
       );
 
       // Update conversation
-      await supabase
+      await getSupabaseClient()
         .from('whatsapp_agent_conversations')
         .update({
           messages,
@@ -317,7 +326,7 @@ async function handleConfirmationResponse(
     );
 
     // Update confirmation status
-    await supabase
+    await getSupabaseClient()
       .from('whatsapp_agent_confirmations')
       .update({
         status: 'confirmed',
@@ -355,7 +364,7 @@ async function handleConfirmationResponse(
     console.log('[Message Processor] Confirmation rejected');
 
     // Cancel the action
-    await supabase
+    await getSupabaseClient()
       .from('whatsapp_agent_confirmations')
       .update({ status: 'rejected' })
       .eq('id', confirmation.id);
@@ -381,7 +390,7 @@ async function getOrCreateConversation(
   churchId: string,
   phoneNumber: string
 ) {
-  const { data: existing } = await supabase
+  const { data: existing } = await getSupabaseClient()
     .from('whatsapp_agent_conversations')
     .select('*')
     .eq('pastor_id', pastorId)
@@ -391,7 +400,7 @@ async function getOrCreateConversation(
     return existing;
   }
 
-  const { data: newConversation, error } = await supabase
+  const { data: newConversation, error } = await getSupabaseClient()
     .from('whatsapp_agent_conversations')
     .insert({
       church_id: churchId,
@@ -412,7 +421,7 @@ async function getOrCreateConversation(
  * Get pending confirmation
  */
 async function getPendingConfirmation(pastorId: string) {
-  const { data } = await supabase
+  const { data } = await getSupabaseClient()
     .from('whatsapp_agent_confirmations')
     .select('*')
     .eq('pastor_id', pastorId)
@@ -429,7 +438,7 @@ async function getPendingConfirmation(pastorId: string) {
  * Get or create onboarding
  */
 async function getOrCreateOnboarding(pastorId: string, churchId: string) {
-  const { data: existing } = await supabase
+  const { data: existing } = await getSupabaseClient()
     .from('whatsapp_agent_onboarding')
     .select('*')
     .eq('pastor_id', pastorId)
@@ -439,7 +448,7 @@ async function getOrCreateOnboarding(pastorId: string, churchId: string) {
     return existing;
   }
 
-  const { data: newOnboarding, error } = await supabase
+  const { data: newOnboarding, error } = await getSupabaseClient()
     .from('whatsapp_agent_onboarding')
     .insert({
       church_id: churchId,
@@ -471,7 +480,7 @@ async function logAuditTrail(data: {
   status: 'success' | 'error' | 'pending';
   errorMessage?: string;
 }) {
-  await supabase.from('whatsapp_agent_audit_log').insert({
+  await getSupabaseClient().from('whatsapp_agent_audit_log').insert({
     church_id: data.churchId,
     pastor_id: data.pastorId,
     conversation_id: data.conversationId || null,

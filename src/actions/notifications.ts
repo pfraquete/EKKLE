@@ -8,7 +8,16 @@ import { EvolutionService } from '@/lib/evolution'
 import { getWhatsAppInstance } from './whatsapp'
 import { escapeHtml } from '@/lib/sanitize'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+/**
+ * Get Resend client (lazy initialization to avoid build-time errors)
+ */
+function getResendClient() {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+        throw new Error('RESEND_API_KEY is not configured')
+    }
+    return new Resend(apiKey)
+}
 
 export async function sendTomorrowReminders() {
     const supabase = await createClient()
@@ -86,7 +95,7 @@ export async function sendTomorrowReminders() {
                     const safeAddress = escapeHtml(meeting.cell.address || 'Consultar com o líder')
                     const safeChurchName = escapeHtml(meeting.cell.church.name || '')
 
-                    await resend.emails.send({
+                    await getResendClient().emails.send({
                         from: 'Ekkle <contato@ekkle.com.br>',
                         to: recipient.email,
                         subject: `🙏 Lembrete: Reunião da ${safeCellName} Amanhã!`,

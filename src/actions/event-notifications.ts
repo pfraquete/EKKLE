@@ -6,9 +6,24 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { escapeHtml } from '@/lib/sanitize'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const fromEmail = process.env.FROM_EMAIL || 'Ekkle <eventos@resend.dev>'
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
+/**
+ * Get Resend client (lazy initialization to avoid build-time errors)
+ */
+function getResendClient() {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+        throw new Error('RESEND_API_KEY is not configured')
+    }
+    return new Resend(apiKey)
+}
+
+function getFromEmail() {
+    return process.env.FROM_EMAIL || 'Ekkle <eventos@resend.dev>'
+}
+
+function getAppUrl() {
+    return process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
+}
 
 /**
  * Send registration confirmation email
@@ -77,7 +92,7 @@ export async function sendRegistrationConfirmation(registrationId: string) {
                 </div>
             `
             actionButton = `
-                <a href="${appUrl}/site/${event.church_id}/eventos/${event.id}/checkout"
+                <a href="${getAppUrl()}/site/${event.church_id}/eventos/${event.id}/checkout"
                    style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
                     Realizar Pagamento
                 </a>
@@ -92,7 +107,7 @@ export async function sendRegistrationConfirmation(registrationId: string) {
                 </div>
             `
             actionButton = `
-                <a href="${appUrl}/site/${event.church_id}/membro/eventos"
+                <a href="${getAppUrl()}/site/${event.church_id}/membro/eventos"
                    style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
                     Ver Meus Eventos
                 </a>
@@ -104,8 +119,8 @@ export async function sendRegistrationConfirmation(registrationId: string) {
             ? `<p style="margin: 5px 0 0 0;"><strong>Convidados:</strong> ${registration.guest_count} pessoa(s)</p>`
             : ''
 
-        const { error: emailError } = await resend.emails.send({
-            from: fromEmail,
+        const { error: emailError } = await getResendClient().emails.send({
+            from: getFromEmail(),
             to: profile.email,
             subject: `Inscrição no Evento: ${safeEventTitle}`,
             html: `
@@ -208,8 +223,8 @@ export async function sendCancellationConfirmation(registrationId: string) {
             `
         }
 
-        const { error: emailError } = await resend.emails.send({
-            from: fromEmail,
+        const { error: emailError } = await getResendClient().emails.send({
+            from: getFromEmail(),
             to: profile.email,
             subject: `Cancelamento de Inscrição: ${safeEventTitle}`,
             html: `
@@ -235,7 +250,7 @@ export async function sendCancellationConfirmation(registrationId: string) {
                             Sentiremos sua falta! Esperamos vê-lo(a) em nossos próximos eventos.
                         </p>
 
-                        <a href="${appUrl}/site/${event.church_id}/eventos"
+                        <a href="${getAppUrl()}/site/${event.church_id}/eventos"
                            style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
                             Ver Próximos Eventos
                         </a>
@@ -313,7 +328,7 @@ export async function sendWaitlistPromotion(registrationId: string) {
                         Complete o pagamento de R$ ${((registration.payment_amount_cents || 0) / 100).toFixed(2)} nas próximas 48 horas para garantir sua vaga.
                     </p>
                 </div>
-                <a href="${appUrl}/site/${event.church_id}/eventos/${event.id}/checkout"
+                <a href="${getAppUrl()}/site/${event.church_id}/eventos/${event.id}/checkout"
                    style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
                     Realizar Pagamento
                 </a>
@@ -329,8 +344,8 @@ export async function sendWaitlistPromotion(registrationId: string) {
             `
         }
 
-        const { error: emailError } = await resend.emails.send({
-            from: fromEmail,
+        const { error: emailError } = await getResendClient().emails.send({
+            from: getFromEmail(),
             to: profile.email,
             subject: `🎉 Vaga Disponível: ${safeEventTitle}`,
             html: `
@@ -434,8 +449,8 @@ export async function sendEventReminder(eventId: string) {
             const profile = registration.profile as any
             const safeProfileName = escapeHtml(profile.full_name || '')
 
-            const { error: emailError } = await resend.emails.send({
-                from: fromEmail,
+            const { error: emailError } = await getResendClient().emails.send({
+                from: getFromEmail(),
                 to: profile.email,
                 subject: `⏰ Lembrete: ${safeEventTitle} é amanhã!`,
                 html: `
@@ -458,7 +473,7 @@ export async function sendEventReminder(eventId: string) {
 
                             <p style="margin-top: 20px;">Aguardamos você!</p>
 
-                            <a href="${appUrl}/site/${event.church_id}/membro/eventos"
+                            <a href="${getAppUrl()}/site/${event.church_id}/membro/eventos"
                                style="display: inline-block; background-color: #e11d48; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
                                 Ver Meus Eventos
                             </a>
