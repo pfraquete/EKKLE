@@ -248,10 +248,10 @@ export class OpenAIService {
 
     // Handle both Buffer and Blob
     if (audioBuffer instanceof Buffer) {
-      const blob = new Blob([audioBuffer], { type: 'audio/webm' });
+      const blob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
       formData.append('file', blob, filename);
     } else {
-      formData.append('file', audioBuffer, filename);
+      formData.append('file', audioBuffer as Blob, filename);
     }
 
     formData.append('model', 'whisper-1');

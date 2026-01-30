@@ -95,7 +95,7 @@ export class ZoomService {
     accessToken = data.access_token
     tokenExpiry = Date.now() + (data.expires_in * 1000)
 
-    return accessToken
+    return data.access_token as string
   }
 
   /**
