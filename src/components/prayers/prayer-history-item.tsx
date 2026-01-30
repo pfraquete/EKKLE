@@ -26,6 +26,7 @@ export function PrayerHistoryItem({ prayer, href }: PrayerHistoryItemProps) {
       label: 'Aguardando',
       color: 'text-muted-foreground',
       bgColor: 'bg-muted/50',
+      animate: false,
     },
     PROCESSING: {
       icon: Loader2,
@@ -39,12 +40,14 @@ export function PrayerHistoryItem({ prayer, href }: PrayerHistoryItemProps) {
       label: 'Concluido',
       color: 'text-emerald-500',
       bgColor: 'bg-emerald-500/10',
+      animate: false,
     },
     FAILED: {
       icon: AlertCircle,
       label: 'Erro',
       color: 'text-destructive',
       bgColor: 'bg-destructive/10',
+      animate: false,
     },
   }
 
