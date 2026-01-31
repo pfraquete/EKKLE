@@ -154,6 +154,7 @@ export function ProfilePhotoUpload({ currentPhotoUrl, userName }: ProfilePhotoUp
                                     <button
                                         onClick={handleCancel}
                                         className="absolute top-2 right-2 w-8 h-8 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
+                                        aria-label="Cancelar"
                                     >
                                         <X className="w-4 h-4 text-white" />
                                     </button>

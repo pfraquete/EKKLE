@@ -94,13 +94,14 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/dashboard/cursos" className="p-2 hover:bg-muted rounded-xl transition-colors">
+        <Link href="/dashboard/cursos" className="p-2 hover:bg-muted rounded-xl transition-colors" aria-label="Voltar">
           <ArrowLeft className="w-5 h-5 text-muted-foreground" />
         </Link>
         <h1 className="text-3xl font-black text-foreground flex-1 tracking-tight">{course.title}</h1>
         <button
           onClick={() => setEditMode(!editMode)}
           className="p-2 border border-border rounded-xl hover:bg-muted text-muted-foreground transition-all"
+          aria-label="Editar curso"
         >
           <Edit className="w-5 h-5" />
         </button>
@@ -108,6 +109,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
           <button
             onClick={handleDeleteCourse}
             className="p-2 border border-red-500/30 text-red-500 rounded-xl hover:bg-red-500/10 transition-all"
+            aria-label="Excluir curso"
           >
             <Trash2 className="w-5 h-5" />
           </button>

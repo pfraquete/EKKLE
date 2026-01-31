@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { rateLimiters } from '@/lib/rate-limiter'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -16,6 +17,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 { error: 'Não autenticado' },
                 { status: 401 }
+            )
+        }
+
+        // Rate limit: 10 uploads per hour per user
+        const rateLimitResult = await rateLimiters.photoUpload(user.id)
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                { error: 'Muitos uploads. Tente novamente mais tarde.' },
+                { status: 429 }
             )
         }
 

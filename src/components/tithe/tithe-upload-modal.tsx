@@ -159,6 +159,7 @@ export function TitheUploadModal({
                     <button
                         onClick={onClose}
                         className="p-2 rounded-xl hover:bg-muted transition-colors"
+                        aria-label="Fechar modal"
                     >
                         <X className="w-5 h-5 text-muted-foreground" />
                     </button>

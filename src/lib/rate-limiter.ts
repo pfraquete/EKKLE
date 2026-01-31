@@ -189,6 +189,13 @@ export const rateLimiters = {
   },
 
   /**
+   * Photo upload: 10 uploads per hour per user
+   */
+  photoUpload: async (key: string): Promise<RateLimitResult> => {
+    return checkLimit(`upload:photo:${key}`, 10, 60 * 60 * 1000);
+  },
+
+  /**
    * Custom rate limit
    */
   custom: async (
