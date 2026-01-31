@@ -131,6 +131,14 @@ export async function POST(req: NextRequest) {
             sanitizeWebhookPayload(event),
             async () => {
                 switch (event.type) {
+                    case 'checkout.session.completed':
+                        await handleCheckoutSessionCompleted(event.data.object)
+                        break
+
+                    case 'checkout.session.expired':
+                        await handleCheckoutSessionExpired(event.data.object)
+                        break
+
                     case 'invoice.paid':
                         await handleInvoicePaid(event.data.object)
                         break
@@ -359,4 +367,199 @@ async function handleSubscriptionCreated(subscription: any) {
     }
 
     logger.webhook('stripe', 'subscription.created', true, { subscriptionId: subscription.id, churchId })
+}
+
+/**
+ * Handle checkout.session.completed event
+ * Specifically for church creation flow
+ */
+async function handleCheckoutSessionCompleted(session: any) {
+    const supabase = createSupabaseClient()
+
+    // Check if this is a church creation checkout
+    if (session.metadata?.type !== 'church_creation') {
+        // Normal subscription checkout - subscription.created will handle it
+        logger.debug('[handleCheckoutSessionCompleted] Not a church creation checkout')
+        return
+    }
+
+    const pendingRequestId = session.metadata.pending_request_id
+    const userId = session.metadata.user_id
+    const churchName = session.metadata.church_name
+    const churchSlug = session.metadata.church_slug
+    const planId = session.metadata.plan_id
+
+    if (!pendingRequestId || !userId || !churchName || !churchSlug) {
+        logger.error('[handleCheckoutSessionCompleted] Missing required metadata', {
+            pendingRequestId,
+            userId,
+            churchName,
+            churchSlug
+        })
+        return
+    }
+
+    // Fetch pending request
+    const { data: pendingRequest, error: fetchError } = await supabase
+        .from('pending_church_requests')
+        .select('*')
+        .eq('id', pendingRequestId)
+        .single()
+
+    if (fetchError || !pendingRequest) {
+        logger.error('[handleCheckoutSessionCompleted] Pending request not found', { pendingRequestId })
+        return
+    }
+
+    // Idempotency check: already completed
+    if (pendingRequest.status === 'completed') {
+        logger.info('[handleCheckoutSessionCompleted] Already completed, skipping', { pendingRequestId })
+        return
+    }
+
+    // Mark as processing to prevent duplicate processing
+    await supabase
+        .from('pending_church_requests')
+        .update({ status: 'payment_processing' })
+        .eq('id', pendingRequestId)
+
+    try {
+        // 1. Create the church
+        const { data: newChurch, error: churchError } = await supabase
+            .from('churches')
+            .insert({
+                name: churchName,
+                slug: churchSlug,
+                website_settings: {},
+            })
+            .select()
+            .single()
+
+        if (churchError || !newChurch) {
+            throw new Error(`Failed to create church: ${churchError?.message}`)
+        }
+
+        logger.info('[handleCheckoutSessionCompleted] Church created', {
+            churchId: newChurch.id,
+            slug: churchSlug
+        })
+
+        // 2. Update user profile: upgrade to PASTOR, move to new church
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .update({
+                church_id: newChurch.id,
+                role: 'PASTOR',
+                member_stage: 'LEADER',
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', userId)
+
+        if (profileError) {
+            // Rollback church creation
+            logger.error('[handleCheckoutSessionCompleted] Profile update failed, rolling back church', profileError)
+            await supabase.from('churches').delete().eq('id', newChurch.id)
+            throw new Error(`Failed to update profile: ${profileError.message}`)
+        }
+
+        logger.info('[handleCheckoutSessionCompleted] Profile upgraded to PASTOR', { userId })
+
+        // 3. Create subscription record for the new church
+        const subscriptionId = session.subscription as string
+        const customerId = session.customer as string
+
+        // Get plan details
+        const { data: plan } = await supabase
+            .from('subscription_plans')
+            .select('id')
+            .eq('id', planId)
+            .single()
+
+        if (plan) {
+            const { error: subError } = await supabase
+                .from('subscriptions')
+                .insert({
+                    church_id: newChurch.id,
+                    plan_id: plan.id,
+                    stripe_subscription_id: subscriptionId,
+                    stripe_customer_id: customerId,
+                    status: 'active',
+                    current_period_start: new Date().toISOString(),
+                    current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                })
+
+            if (subError) {
+                logger.error('[handleCheckoutSessionCompleted] Subscription record error', subError)
+                // Don't rollback - church is created, subscription will sync via invoice.paid
+            }
+        }
+
+        // 4. Mark pending request as completed
+        await supabase
+            .from('pending_church_requests')
+            .update({
+                status: 'completed',
+                stripe_subscription_id: subscriptionId,
+                completed_at: new Date().toISOString(),
+            })
+            .eq('id', pendingRequestId)
+
+        logger.webhook('stripe', 'checkout.session.completed', true, {
+            type: 'church_creation',
+            churchId: newChurch.id,
+            userId,
+            subscriptionId,
+        })
+
+    } catch (error) {
+        logger.error('[handleCheckoutSessionCompleted] Error during church creation', error)
+
+        // Mark pending request as failed
+        await supabase
+            .from('pending_church_requests')
+            .update({
+                status: 'failed',
+                metadata: {
+                    ...pendingRequest.metadata,
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                    failed_at: new Date().toISOString(),
+                },
+            })
+            .eq('id', pendingRequestId)
+
+        throw error // Re-throw so webhook retry can handle it
+    }
+}
+
+/**
+ * Handle checkout.session.expired event
+ * Marks pending church requests as expired
+ */
+async function handleCheckoutSessionExpired(session: any) {
+    // Only handle church creation checkouts
+    if (session.metadata?.type !== 'church_creation') {
+        return
+    }
+
+    const supabase = createSupabaseClient()
+    const pendingRequestId = session.metadata.pending_request_id
+
+    if (!pendingRequestId) {
+        return
+    }
+
+    const { error } = await supabase
+        .from('pending_church_requests')
+        .update({ status: 'expired' })
+        .eq('id', pendingRequestId)
+        .eq('status', 'pending_payment')
+
+    if (error) {
+        logger.error('[handleCheckoutSessionExpired] Error', error)
+    }
+
+    logger.webhook('stripe', 'checkout.session.expired', true, {
+        type: 'church_creation',
+        pendingRequestId,
+    })
 }

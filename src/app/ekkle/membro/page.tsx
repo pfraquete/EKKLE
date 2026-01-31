@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, BookOpen, Radio, Church, ArrowRight } from 'lucide-react'
+import { Search, BookOpen, Radio, Church, ArrowRight, CreditCard, Sparkles } from 'lucide-react'
 
 export default async function EkkleMembroPage() {
   const supabase = await createClient()
@@ -43,7 +43,7 @@ export default async function EkkleMembroPage() {
             <div className="flex-1 space-y-2">
               <h2 className="text-xl font-black">Encontre sua Igreja</h2>
               <p className="text-muted-foreground">
-                Você ainda não está afiliado a nenhuma igreja. Explore igrejas cadastradas na plataforma e encontre sua comunidade!
+                Voce ainda nao esta afiliado a nenhuma igreja. Explore igrejas cadastradas na plataforma e encontre sua comunidade!
               </p>
             </div>
             <Link
@@ -52,6 +52,38 @@ export default async function EkkleMembroPage() {
             >
               <Search className="w-4 h-4" />
               Pesquisar
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* CTA Card - Open a Church */}
+      <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-amber-500/10 overflow-hidden">
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <div className="w-16 h-16 bg-amber-500/20 rounded-2xl flex items-center justify-center flex-shrink-0 relative">
+              <CreditCard className="w-8 h-8 text-amber-500" />
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
+                <Sparkles className="w-3 h-3 text-white" />
+              </div>
+            </div>
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-black">E pastor? Abra sua Igreja</h2>
+                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-500 text-xs font-bold rounded-full uppercase">
+                  R$ 57/mes
+                </span>
+              </div>
+              <p className="text-muted-foreground">
+                Crie sua igreja no Ekkle e gerencie celulas, membros, financas, site personalizado e muito mais!
+              </p>
+            </div>
+            <Link
+              href="/ekkle/membro/abrir-igreja"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-amber-500 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest hover:bg-amber-500/90 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-500/20"
+            >
+              Abrir Igreja
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

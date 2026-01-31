@@ -1,8 +1,58 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { extractSubdomain, resolveChurchFromSubdomain, isPublicWebsiteRoute, isAdminRoute } from '@/lib/tenant'
+import { EKKLE_HUB_ID } from '@/lib/ekkle-utils'
 
 type CookieOptions = Parameters<NextResponse['cookies']['set']>[2]
+
+// Routes that are ALWAYS accessible (even without subscription)
+const ALWAYS_ACCESSIBLE_ROUTES = [
+    '/membro/perfil',
+    '/membro/configuracoes',
+    '/ekkle/membro',
+    '/assinatura-expirada',
+    '/logout',
+    '/login',
+    '/forgot-password',
+    '/reset-password',
+    '/register',
+    '/registro',
+    '/cadastro',
+]
+
+// Church feature routes (blocked when subscription expired)
+const CHURCH_FEATURE_ROUTES = [
+    '/dashboard',
+    '/celulas',
+    '/minha-celula',
+    '/membros',
+    '/financeiro',
+    '/configuracoes/site',
+    '/configuracoes/whatsapp',
+    '/configuracoes/pix',
+    '/presenca-cultos',
+    '/importar',
+    '/calendario',
+    '/cursos',
+    '/eventos',
+    '/loja',
+    '/transmissao',
+    '/dizimos',
+    '/leitura-biblica',
+    '/pedidos-oracao',
+]
+
+/**
+ * Helper to redirect while preserving cookies
+ */
+function redirectWithCookies(url: URL, supabaseResponse: NextResponse, request: NextRequest): NextResponse {
+    const redirectResponse = NextResponse.redirect(url)
+    const allCookies = supabaseResponse.cookies.getAll()
+    allCookies.forEach(cookie => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    return redirectResponse
+}
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
@@ -58,63 +108,60 @@ export async function updateSession(request: NextRequest) {
     const isAdmin = isAdminRoute(pathname)
 
     // Rotas públicas (auth)
-    const authRoutes = ['/login', '/forgot-password', '/reset-password', '/register', '/registro']
+    const authRoutes = ['/login', '/forgot-password', '/reset-password', '/register', '/registro', '/cadastro']
     const isAuthRoute = authRoutes.some(route =>
         pathname.startsWith(route)
     )
     const isApiRoute = pathname.startsWith('/api')
 
     // =====================================================
-    // SUBSCRIPTION CHECK - Block access if subscription expired
+    // SUBSCRIPTION CHECK - Granular access control
     // =====================================================
-    if (church && !isApiRoute && !isAuthRoute) {
-        // Check if church has active subscription
-        const { data: hasSubscription } = await supabase
-            .rpc('has_active_subscription', { p_church_id: church.id })
-            .single()
-
-        const subscriptionActive = hasSubscription as boolean
-
-        // Routes that are always accessible (even without subscription)
-        const subscriptionExemptRoutes = [
-            '/assinatura-expirada',
-            '/logout',
-        ]
-
-        const isSubscriptionExempt = subscriptionExemptRoutes.some(route =>
+    // Skip for: API routes, auth routes, Ekkle Hub
+    if (church && church.id !== EKKLE_HUB_ID && !isApiRoute && !isAuthRoute) {
+        // Check if route is always accessible (profile, etc.)
+        const isAlwaysAccessible = ALWAYS_ACCESSIBLE_ROUTES.some(route =>
             pathname.startsWith(route)
         )
 
-        // If no active subscription and not exempt route
-        if (!subscriptionActive && !isSubscriptionExempt) {
-            // Get user profile to check if pastor
-            let isPastor = false
-            if (user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single()
+        // Check if route is a church feature
+        const isChurchFeature = CHURCH_FEATURE_ROUTES.some(route =>
+            pathname.startsWith(route)
+        )
 
-                isPastor = profile?.role === 'PASTOR'
-            }
+        // Only check subscription for church feature routes
+        if (isChurchFeature && !isAlwaysAccessible) {
+            // Use the new function that includes 3-day grace period
+            const { data: subStatus } = await supabase
+                .rpc('check_church_subscription_status', { p_church_id: church.id })
+                .single()
 
-            // Pastor can access billing page even without subscription
-            const isBillingPage = pathname.startsWith('/configuracoes/assinatura')
+            const status = subStatus as { is_active: boolean } | null
+            const isActive = status?.is_active ?? false
 
-            if (!isPastor || !isBillingPage) {
-                // Redirect to subscription expired page
-                const url = request.nextUrl.clone()
-                url.pathname = '/assinatura-expirada'
-                const redirectResponse = NextResponse.redirect(url)
+            // If subscription not active (and past grace period)
+            if (!isActive) {
+                // Check if user is pastor trying to access billing
+                let isPastor = false
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single()
 
-                // Copy cookies
-                const allCookies = supabaseResponse.cookies.getAll()
-                allCookies.forEach(cookie => {
-                    redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
-                })
+                    isPastor = profile?.role === 'PASTOR'
+                }
 
-                return redirectResponse
+                // Pastor can access billing page even without subscription
+                const isBillingPage = pathname.startsWith('/configuracoes/assinatura')
+
+                if (!isPastor || !isBillingPage) {
+                    // Redirect to subscription expired page
+                    const url = request.nextUrl.clone()
+                    url.pathname = '/assinatura-expirada'
+                    return redirectWithCookies(url, supabaseResponse, request)
+                }
             }
         }
     }

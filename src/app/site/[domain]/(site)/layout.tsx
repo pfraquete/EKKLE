@@ -1,9 +1,11 @@
 import { getChurch } from '@/lib/get-church'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Instagram, Youtube, MessageCircle } from 'lucide-react'
+import { Instagram, Youtube, MessageCircle, AlertTriangle } from 'lucide-react'
 import { BrandingSettings } from '@/actions/branding'
 import { SiteHeader } from '@/components/site/site-header'
+import { createClient } from '@/lib/supabase/server'
+import { EKKLE_HUB_ID } from '@/lib/ekkle-utils'
 
 export default async function SitePublicLayout({
   children,
@@ -14,6 +16,44 @@ export default async function SitePublicLayout({
 
   if (!church) {
     redirect('/dashboard')
+  }
+
+  // Check subscription status for non-Ekkle Hub churches
+  let isSubscriptionExpired = false
+  if (church.id !== EKKLE_HUB_ID) {
+    const supabase = await createClient()
+    const { data: subStatus } = await supabase
+      .rpc('check_church_subscription_status', { p_church_id: church.id })
+      .single()
+
+    const status = subStatus as { is_active: boolean } | null
+    isSubscriptionExpired = status ? !status.is_active : false
+  }
+
+  // If subscription expired, show message instead of site content
+  if (isSubscriptionExpired) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+        <div className="max-w-md w-full text-center space-y-6">
+          <div className="w-20 h-20 bg-amber-100 rounded-full mx-auto flex items-center justify-center">
+            <AlertTriangle className="w-10 h-10 text-amber-600" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Site Temporariamente Indisponivel
+            </h1>
+            <p className="text-gray-600">
+              Este site esta temporariamente fora do ar. Por favor, entre em contato com a administracao da igreja para mais informacoes.
+            </p>
+          </div>
+          <div className="pt-4 border-t">
+            <p className="text-sm text-gray-500">
+              Powered by <span className="font-semibold">Ekkle</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Parse branding settings from website_settings JSONB
