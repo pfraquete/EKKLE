@@ -149,7 +149,8 @@ export async function createFullMeetingReport(data: FullMeetingReportInput) {
     }))
 
     if (memberRecords.length > 0) {
-        await supabase.from('attendance').insert(memberRecords)
+        const { error: attendanceError } = await supabase.from('attendance').insert(memberRecords)
+        if (attendanceError) throw new Error(`Erro ao registrar presença: ${attendanceError.message}`)
 
         // Update last_attendance for present members
         const presentProfileIds = data.memberAttendance
@@ -178,7 +179,8 @@ export async function createFullMeetingReport(data: FullMeetingReportInput) {
     }))
 
     if (visitorRecords.length > 0) {
-        await supabase.from('attendance').insert(visitorRecords)
+        const { error: visitorError } = await supabase.from('attendance').insert(visitorRecords)
+        if (visitorError) throw new Error(`Erro ao registrar visitantes: ${visitorError.message}`)
     }
 
     revalidatePath('/minha-celula')

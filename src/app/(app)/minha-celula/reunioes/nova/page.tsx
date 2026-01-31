@@ -5,15 +5,16 @@ import { AttendanceForm } from '@/components/forms/attendance-form'
 
 export default async function NovaReuniaoPage() {
     const profile = await getProfile()
-    if (!profile || !profile.cell_id) redirect('/login')
+    if (!profile) redirect('/login')
 
+    // Busca os dados da célula que o usuário LIDERA (não a que ele é membro)
     const data = await getMyCellData()
     if (!data) redirect('/minha-celula')
 
     return (
         <AttendanceForm
             members={data.members}
-            cellId={profile.cell_id}
+            cellId={data.cell.id}
         />
     )
 }
