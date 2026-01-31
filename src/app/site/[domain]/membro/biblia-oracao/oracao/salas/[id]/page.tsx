@@ -29,6 +29,7 @@ import {
   Check,
   XCircle,
   LogOut,
+  VideoOff,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -38,7 +39,9 @@ import {
   endPrayerRoom,
   cancelPrayerRoom,
   PrayerRoom,
+  VideoProvider,
 } from '@/actions/prayer-rooms'
+import { DailyVideoCall } from '@/components/video/daily-video-call'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -60,11 +63,13 @@ export default function PrayerRoomDetailPage({
   const router = useRouter()
   const [room, setRoom] = useState<PrayerRoom | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
+  const [dailyToken, setDailyToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [joining, setJoining] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [ending, setEnding] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [isInCall, setIsInCall] = useState(false)
 
   useEffect(() => {
     loadRoom()
@@ -78,6 +83,9 @@ export default function PrayerRoomDetailPage({
     if (result.success && result.room) {
       setRoom(result.room)
       setParticipants(result.participants || [])
+      if (result.dailyToken) {
+        setDailyToken(result.dailyToken)
+      }
     }
     setLoading(false)
   }
@@ -87,7 +95,16 @@ export default function PrayerRoomDetailPage({
     const result = await joinPrayerRoom(id)
     if (result.success) {
       loadRoom()
-      if (result.joinUrl) {
+
+      // Handle based on video provider
+      if (result.videoProvider === 'daily' && result.dailyRoomUrl) {
+        // Daily.co: Show embedded video
+        if (result.dailyToken) {
+          setDailyToken(result.dailyToken)
+        }
+        setIsInCall(true)
+      } else if (result.joinUrl) {
+        // Zoom: Open external link
         window.open(result.joinUrl, '_blank')
       }
     } else {
@@ -99,6 +116,7 @@ export default function PrayerRoomDetailPage({
   async function handleLeave() {
     setLeaving(true)
     await leavePrayerRoom(id)
+    setIsInCall(false)
     loadRoom()
     setLeaving(false)
   }
@@ -164,7 +182,113 @@ export default function PrayerRoomDetailPage({
   }
 
   const isEnded = room.status === 'ENDED' || room.status === 'CANCELLED'
+  const isDaily = room.video_provider === 'daily' && room.daily_room_url
 
+  // Show embedded video call if using Daily and in call
+  if (isDaily && isInCall && !isEnded) {
+    return (
+      <div className="container max-w-6xl py-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={handleLeave}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold">{room.name}</h1>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-green-500">Ao Vivo</Badge>
+                <span className="text-sm text-muted-foreground">
+                  {participants.length} participante{participants.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <VideoOff className="h-4 w-4 mr-2" />
+                  Encerrar
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Encerrar sala de oração?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Isso encerrará a chamada de vídeo para todos os participantes.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleEnd} disabled={ending}>
+                    {ending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Encerrar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+
+        {/* Embedded Video Call */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <div className="lg:col-span-3">
+            <DailyVideoCall
+              roomUrl={room.daily_room_url!}
+              token={dailyToken || undefined}
+              onLeave={handleLeave}
+              onParticipantJoined={(count) => {
+                // Refresh participant list
+                loadRoom()
+              }}
+              onParticipantLeft={(count) => {
+                loadRoom()
+              }}
+              className="w-full aspect-video rounded-2xl"
+              showControls={true}
+            />
+          </div>
+
+          {/* Participants Sidebar */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Participantes
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {participants.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Aguardando participantes...
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {participants.map((p) => (
+                      <div key={p.id} className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={p.profile.photo_url || undefined} />
+                          <AvatarFallback className="text-xs">
+                            {p.profile.full_name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm truncate">{p.profile.full_name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Default view: Room info with join button
   return (
     <div className="container max-w-4xl py-8">
       {/* Header */}
@@ -231,7 +355,22 @@ export default function PrayerRoomDetailPage({
                 )}
               </div>
 
-              {room.zoom_password && !isEnded && (
+              {/* Video provider badge */}
+              {!isEnded && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    {isDaily ? '📹 Vídeo integrado' : room.video_provider === 'zoom' ? '🔗 Zoom' : '📺 Vídeo'}
+                  </Badge>
+                  {isDaily && (
+                    <span className="text-xs text-muted-foreground">
+                      A chamada acontece direto nesta página
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Zoom password (only for Zoom rooms) */}
+              {room.video_provider === 'zoom' && room.zoom_password && !isEnded && (
                 <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                   <span className="text-sm text-muted-foreground">Senha:</span>
                   <code className="font-mono">{room.zoom_password}</code>
@@ -252,7 +391,15 @@ export default function PrayerRoomDetailPage({
 
               {!isEnded && (
                 <div className="flex gap-2 pt-2">
-                  {room.zoom_join_url && (
+                  {isDaily ? (
+                    // Daily.co: Join embedded
+                    <Button className="flex-1" size="lg" onClick={handleJoin} disabled={joining}>
+                      {joining && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      <Video className="h-4 w-4 mr-2" />
+                      Entrar na Sala
+                    </Button>
+                  ) : room.zoom_join_url ? (
+                    // Zoom: External link
                     <a
                       href={room.zoom_join_url}
                       target="_blank"
@@ -262,9 +409,14 @@ export default function PrayerRoomDetailPage({
                       <Button className="w-full" size="lg" onClick={handleJoin}>
                         {joining && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                         <ExternalLink className="h-4 w-4 mr-2" />
-                        Entrar na Sala
+                        Entrar no Zoom
                       </Button>
                     </a>
+                  ) : (
+                    <Button className="flex-1" size="lg" disabled>
+                      <VideoOff className="h-4 w-4 mr-2" />
+                      Sala sem vídeo configurado
+                    </Button>
                   )}
                   <Button variant="outline" size="lg" onClick={handleLeave} disabled={leaving}>
                     {leaving ? (
@@ -296,7 +448,7 @@ export default function PrayerRoomDetailPage({
                     <AlertDialogHeader>
                       <AlertDialogTitle>Encerrar sala de oração?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Isso encerrará a reunião do Zoom e marcará a sala como
+                        Isso encerrará a {isDaily ? 'chamada de vídeo' : 'reunião do Zoom'} e marcará a sala como
                         finalizada. Todos os participantes serão desconectados.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -318,7 +470,7 @@ export default function PrayerRoomDetailPage({
                     <AlertDialogHeader>
                       <AlertDialogTitle>Cancelar sala de oração?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Isso cancelará a sala e excluirá a reunião do Zoom. Esta
+                        Isso cancelará a sala e excluirá a {isDaily ? 'chamada' : 'reunião do Zoom'}. Esta
                         ação não pode ser desfeita.
                       </AlertDialogDescription>
                     </AlertDialogHeader>

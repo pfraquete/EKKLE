@@ -4,17 +4,26 @@ import { createClient } from '@/lib/supabase/server'
 import { getProfile } from './auth'
 import { revalidatePath } from 'next/cache'
 import { ZoomService } from '@/lib/zoom'
+import { DailyService } from '@/lib/daily'
 
 // Types
+export type VideoProvider = 'daily' | 'zoom' | 'none'
+
 export interface PrayerRoom {
   id: string
   church_id: string
   name: string
   description: string | null
+  // Zoom fields (legacy)
   zoom_meeting_id: string | null
   zoom_password: string | null
   zoom_join_url: string | null
   zoom_host_url: string | null
+  // Daily.co fields (new - embedded video)
+  daily_room_name: string | null
+  daily_room_url: string | null
+  video_provider: VideoProvider
+  // Schedule
   scheduled_start: string | null
   scheduled_end: string | null
   is_recurring: boolean
@@ -42,6 +51,28 @@ export interface CreatePrayerRoomInput {
   recurrencePattern?: Record<string, unknown>
   maxParticipants?: number
   isPublic?: boolean
+  videoProvider?: VideoProvider // Default: 'daily'
+}
+
+// =====================================================
+// HELPER: Determine which video provider to use
+// =====================================================
+
+function getPreferredVideoProvider(requested?: VideoProvider): VideoProvider {
+  // If specifically requested 'none', respect that
+  if (requested === 'none') return 'none'
+
+  // Daily.co is preferred (embedded experience)
+  if (DailyService.isConfigured()) {
+    return requested === 'zoom' && ZoomService.isConfigured() ? 'zoom' : 'daily'
+  }
+
+  // Fallback to Zoom if Daily not configured
+  if (ZoomService.isConfigured()) {
+    return 'zoom'
+  }
+
+  return 'none'
 }
 
 // =====================================================
@@ -49,7 +80,8 @@ export interface CreatePrayerRoomInput {
 // =====================================================
 
 /**
- * Create a new prayer room with Zoom meeting
+ * Create a new prayer room with video call support
+ * Uses Daily.co by default (embedded) or Zoom as fallback
  */
 export async function createPrayerRoom(input: CreatePrayerRoomInput) {
   try {
@@ -65,9 +97,39 @@ export async function createPrayerRoom(input: CreatePrayerRoomInput) {
 
     const supabase = await createClient()
 
-    // Create Zoom meeting if configured
+    // Determine video provider
+    const videoProvider = getPreferredVideoProvider(input.videoProvider)
+
+    // Video call data
+    let dailyRoom = null
     let zoomMeeting = null
-    if (ZoomService.isConfigured()) {
+
+    // Try Daily.co first (preferred - embedded experience)
+    if (videoProvider === 'daily' && DailyService.isConfigured()) {
+      try {
+        const roomName = DailyService.generateRoomName('oracao')
+        const expiresAt = input.scheduledEnd
+          ? new Date(input.scheduledEnd)
+          : new Date(Date.now() + 4 * 60 * 60 * 1000) // 4 hours default
+
+        dailyRoom = await DailyService.createRoom({
+          name: roomName,
+          maxParticipants: input.maxParticipants || 100,
+          enableChat: true,
+          enableScreenshare: false, // Prayer rooms don't need screen share
+          enableRecording: false,
+          isPrivate: !input.isPublic,
+          startsAt: input.scheduledStart ? new Date(input.scheduledStart) : undefined,
+          expiresAt,
+        })
+      } catch (dailyError) {
+        console.error('Daily.co room creation failed:', dailyError)
+        // Will fallback to Zoom or none
+      }
+    }
+
+    // Fallback to Zoom if Daily failed or Zoom was requested
+    if (!dailyRoom && videoProvider === 'zoom' && ZoomService.isConfigured()) {
       try {
         zoomMeeting = await ZoomService.createMeeting({
           topic: `Sala de Oracao: ${input.name}`,
@@ -77,9 +139,11 @@ export async function createPrayerRoom(input: CreatePrayerRoomInput) {
         })
       } catch (zoomError) {
         console.error('Zoom meeting creation failed:', zoomError)
-        // Continue without Zoom - room can still be created
       }
     }
+
+    // Determine final provider
+    const finalProvider: VideoProvider = dailyRoom ? 'daily' : zoomMeeting ? 'zoom' : 'none'
 
     // Create prayer room
     const { data: room, error: createError } = await supabase
@@ -88,10 +152,16 @@ export async function createPrayerRoom(input: CreatePrayerRoomInput) {
         church_id: profile.church_id,
         name: input.name,
         description: input.description || null,
+        // Daily.co fields
+        daily_room_name: dailyRoom?.name || null,
+        daily_room_url: dailyRoom?.url || null,
+        video_provider: finalProvider,
+        // Zoom fields (legacy)
         zoom_meeting_id: zoomMeeting?.id?.toString() || null,
         zoom_password: zoomMeeting?.password || null,
         zoom_join_url: zoomMeeting?.join_url || null,
         zoom_host_url: zoomMeeting?.start_url || null,
+        // Schedule
         scheduled_start: input.scheduledStart || null,
         scheduled_end: input.scheduledEnd || null,
         is_recurring: input.isRecurring || false,
@@ -173,7 +243,7 @@ export async function getPrayerRooms() {
 }
 
 /**
- * Get prayer room detail
+ * Get prayer room detail with video call info
  */
 export async function getPrayerRoomDetail(roomId: string) {
   try {
@@ -213,10 +283,26 @@ export async function getPrayerRoomDetail(roomId: string) {
       .eq('prayer_room_id', roomId)
       .is('left_at', null)
 
+    // Generate Daily.co token if using Daily
+    let dailyToken = null
+    if (room.video_provider === 'daily' && room.daily_room_name && DailyService.isConfigured()) {
+      try {
+        dailyToken = await DailyService.createMeetingToken({
+          roomName: room.daily_room_name,
+          userName: profile.full_name,
+          odUserId: profile.id,
+          isOwner: room.created_by === profile.id || profile.role === 'PASTOR',
+        })
+      } catch (tokenError) {
+        console.error('Error creating Daily token:', tokenError)
+      }
+    }
+
     return {
       success: true,
       room: room as PrayerRoom,
       participants: participants || [],
+      dailyToken,
     }
   } catch (error) {
     console.error('Error in getPrayerRoomDetail:', error)
@@ -271,8 +357,35 @@ export async function joinPrayerRoom(roomId: string) {
 
     revalidatePath(`/membro/biblia-oracao/oracao/salas/${roomId}`)
 
+    // Return appropriate video call info based on provider
+    if (room.video_provider === 'daily' && room.daily_room_url) {
+      // Generate token for Daily.co
+      let dailyToken = null
+      if (DailyService.isConfigured() && room.daily_room_name) {
+        try {
+          dailyToken = await DailyService.createMeetingToken({
+            roomName: room.daily_room_name,
+            userName: profile.full_name,
+            odUserId: profile.id,
+            isOwner: room.created_by === profile.id || profile.role === 'PASTOR',
+          })
+        } catch (tokenError) {
+          console.error('Error creating Daily token:', tokenError)
+        }
+      }
+
+      return {
+        success: true,
+        videoProvider: 'daily' as VideoProvider,
+        dailyRoomUrl: room.daily_room_url,
+        dailyToken,
+      }
+    }
+
+    // Fallback to Zoom
     return {
       success: true,
+      videoProvider: (room.video_provider || 'zoom') as VideoProvider,
       joinUrl: room.zoom_join_url,
       password: room.zoom_password,
     }
@@ -355,8 +468,14 @@ export async function endPrayerRoom(roomId: string) {
       return { success: false, error: 'Permissao negada' }
     }
 
-    // End Zoom meeting if exists
-    if (room.zoom_meeting_id && ZoomService.isConfigured()) {
+    // End video call based on provider
+    if (room.video_provider === 'daily' && room.daily_room_name && DailyService.isConfigured()) {
+      try {
+        await DailyService.deleteRoom(room.daily_room_name)
+      } catch (dailyError) {
+        console.error('Error deleting Daily room:', dailyError)
+      }
+    } else if (room.zoom_meeting_id && ZoomService.isConfigured()) {
       try {
         await ZoomService.endMeeting(room.zoom_meeting_id)
       } catch (zoomError) {
@@ -414,8 +533,14 @@ export async function cancelPrayerRoom(roomId: string) {
       return { success: false, error: 'Permissao negada' }
     }
 
-    // Delete Zoom meeting if exists
-    if (room.zoom_meeting_id && ZoomService.isConfigured()) {
+    // Delete video call based on provider
+    if (room.video_provider === 'daily' && room.daily_room_name && DailyService.isConfigured()) {
+      try {
+        await DailyService.deleteRoom(room.daily_room_name)
+      } catch (dailyError) {
+        console.error('Error deleting Daily room:', dailyError)
+      }
+    } else if (room.zoom_meeting_id && ZoomService.isConfigured()) {
       try {
         await ZoomService.deleteMeeting(room.zoom_meeting_id)
       } catch (zoomError) {
