@@ -400,7 +400,10 @@ export async function getBiblePassage(
 }> {
     try {
         if (!ApiBibleService.isConfigured()) {
-            return { success: false, error: 'API.Bible nao configurada' }
+            return {
+                success: false,
+                error: 'Servico de Biblia temporariamente indisponivel. Tente novamente mais tarde.'
+            }
         }
 
         const passageId = ApiBibleService.buildPassageId({
@@ -419,8 +422,32 @@ export async function getBiblePassage(
             }
         }
     } catch (error) {
-        console.error('[Bible Reading] Error getting passage:', error)
-        return { success: false, error: 'Erro ao buscar passagem biblica' }
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        console.error('[Bible Reading] Error getting passage:', errorMessage)
+
+        // Return user-friendly messages based on error type
+        if (errorMessage === 'API_KEY_INVALID') {
+            return {
+                success: false,
+                error: 'Servico de Biblia temporariamente indisponivel. Contate o suporte.'
+            }
+        }
+
+        if (errorMessage === 'RATE_LIMIT_EXCEEDED') {
+            return {
+                success: false,
+                error: 'Muitas requisicoes. Aguarde alguns segundos e tente novamente.'
+            }
+        }
+
+        if (errorMessage.includes('timeout')) {
+            return {
+                success: false,
+                error: 'Conexao lenta. Tente novamente.'
+            }
+        }
+
+        return { success: false, error: 'Erro ao buscar passagem biblica. Tente novamente.' }
     }
 }
 

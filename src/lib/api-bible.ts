@@ -99,8 +99,20 @@ export class ApiBibleService {
             clearTimeout(timeoutId)
 
             if (!response.ok) {
-                const error = await response.json().catch(() => ({ message: 'Unknown error' }))
-                throw new Error(error.message || `API.Bible error: ${response.status}`)
+                const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
+
+                // Handle specific API errors
+                if (response.status === 401 || response.status === 403) {
+                    console.error('[API.Bible] Invalid API key - check API_BIBLE_KEY configuration')
+                    throw new Error('API_KEY_INVALID')
+                }
+
+                if (response.status === 429) {
+                    console.error('[API.Bible] Rate limit exceeded')
+                    throw new Error('RATE_LIMIT_EXCEEDED')
+                }
+
+                throw new Error(errorData.message || `API.Bible error: ${response.status}`)
             }
 
             const data = await response.json()
