@@ -50,7 +50,8 @@ function sanitizeWebhookPayload(event: Stripe.Event): Record<string, unknown> {
     }
 
     // Extract only safe, non-PII data from the event object
-    const obj = event.data.object as Record<string, unknown>
+    // Cast through unknown to satisfy TypeScript strict mode
+    const obj = event.data.object as unknown as Record<string, unknown>
     if (obj) {
         safePayload.object_id = obj.id
         safePayload.object_type = obj.object
