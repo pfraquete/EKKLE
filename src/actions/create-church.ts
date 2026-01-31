@@ -8,6 +8,7 @@ import crypto from 'crypto'
 
 interface CreateChurchCheckoutInput {
     churchName: string
+    planInterval?: 'month' | 'year'
 }
 
 interface CreateChurchCheckoutResult {
@@ -154,11 +155,12 @@ export async function createChurchCheckoutSession(input: CreateChurchCheckoutInp
         }
     }
 
-    // 7. Get monthly plan (R$57)
+    // 7. Get selected plan (monthly or annual)
+    const planInterval = input.planInterval || 'month'
     const { data: plan, error: planError } = await supabase
         .from('subscription_plans')
         .select('*')
-        .eq('interval', 'month')
+        .eq('interval', planInterval)
         .eq('is_active', true)
         .order('price_cents', { ascending: true })
         .limit(1)
