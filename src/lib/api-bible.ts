@@ -25,7 +25,7 @@ export {
 
 import { PORTUGUESE_BIBLES, buildPassageId, type PassageReference } from './bible-utils'
 
-const API_BIBLE_BASE_URL = 'https://api.scripture.api.bible/v1'
+const API_BIBLE_BASE_URL = 'https://rest.api.bible/v1'
 
 export interface BibleBook {
     id: string
