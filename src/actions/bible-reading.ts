@@ -447,6 +447,21 @@ export async function getBiblePassage(
             }
         }
 
+        if (errorMessage.includes('Could not find')) {
+            // Check if it's an Old Testament book
+            const otBooks = ['GEN', 'EXO', 'LEV', 'NUM', 'DEU', 'JOS', 'JDG', 'RUT', '1SA', '2SA', '1KI', '2KI', '1CH', '2CH', 'EZR', 'NEH', 'EST', 'JOB', 'PSA', 'PRO', 'ECC', 'SNG', 'ISA', 'JER', 'LAM', 'EZK', 'DAN', 'HOS', 'JOL', 'AMO', 'OBA', 'JON', 'MIC', 'NAM', 'HAB', 'ZEP', 'HAG', 'ZEC', 'MAL']
+            if (otBooks.includes(bookId)) {
+                return {
+                    success: false,
+                    error: 'No momento, apenas o Novo Testamento esta disponivel. Selecione um livro do NT (Mateus a Apocalipse).'
+                }
+            }
+            return {
+                success: false,
+                error: 'Passagem nao encontrada. Verifique o livro e capitulo selecionados.'
+            }
+        }
+
         return { success: false, error: 'Erro ao buscar passagem biblica. Tente novamente.' }
     }
 }
