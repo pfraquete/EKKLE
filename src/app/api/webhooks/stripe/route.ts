@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import Stripe from 'stripe'
+import { processWebhookWithRetry } from '@/lib/webhook-retry'
+import { logger } from '@/lib/logger'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -91,7 +93,7 @@ export async function POST(req: NextRequest) {
 
         // SECURITY: Always require webhook secret - no fallback allowed
         if (!webhookSecret) {
-            console.error('[Webhook] STRIPE_WEBHOOK_SECRET not configured')
+            logger.error('[Webhook] STRIPE_WEBHOOK_SECRET not configured')
             return NextResponse.json(
                 { error: 'Webhook not configured' },
                 { status: 500 }
@@ -103,7 +105,7 @@ export async function POST(req: NextRequest) {
             const stripe = getStripeClient()
             event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
         } catch (err) {
-            console.error('[Webhook] Signature verification failed')
+            logger.warn('[Webhook] Signature verification failed')
             return NextResponse.json(
                 { error: 'Invalid signature' },
                 { status: 401 }
@@ -120,41 +122,57 @@ export async function POST(req: NextRequest) {
             processed: false,
         })
 
-        // Handle different event types
-        switch (event.type) {
-            case 'invoice.paid':
-                await handleInvoicePaid(event.data.object)
-                break
+        // Handle different event types with retry support
+        const { success, error: processError } = await processWebhookWithRetry(
+            supabase,
+            'stripe',
+            event.id,
+            event.type,
+            sanitizeWebhookPayload(event),
+            async () => {
+                switch (event.type) {
+                    case 'invoice.paid':
+                        await handleInvoicePaid(event.data.object)
+                        break
 
-            case 'invoice.payment_failed':
-                await handleInvoicePaymentFailed(event.data.object)
-                break
+                    case 'invoice.payment_failed':
+                        await handleInvoicePaymentFailed(event.data.object)
+                        break
 
-            case 'customer.subscription.updated':
-                await handleSubscriptionUpdated(event.data.object)
-                break
+                    case 'customer.subscription.updated':
+                        await handleSubscriptionUpdated(event.data.object)
+                        break
 
-            case 'customer.subscription.deleted':
-                await handleSubscriptionDeleted(event.data.object)
-                break
+                    case 'customer.subscription.deleted':
+                        await handleSubscriptionDeleted(event.data.object)
+                        break
 
-            case 'customer.subscription.created':
-                await handleSubscriptionCreated(event.data.object)
-                break
+                    case 'customer.subscription.created':
+                        await handleSubscriptionCreated(event.data.object)
+                        break
 
-            default:
-                console.log(`[Webhook] Unhandled event type: ${event.type}`)
-        }
+                    default:
+                        logger.debug('[Webhook] Unhandled event type', { eventType: event.type })
+                }
+            }
+        )
 
-        // Mark webhook as processed
+        // Mark webhook as processed (or failed)
         await supabase
             .from('webhook_events')
-            .update({ processed: true, processed_at: new Date().toISOString() })
+            .update({
+                processed: success,
+                processed_at: new Date().toISOString(),
+            })
             .eq('stripe_event_id', event.id)
+
+        if (!success) {
+            logger.warn('[Webhook] Event queued for retry', { eventId: event.id })
+        }
 
         return NextResponse.json({ received: true })
     } catch (error) {
-        console.error('[Webhook] Error:', error)
+        logger.error('[Webhook] Error', error)
         return NextResponse.json(
             { error: 'Webhook handler failed' },
             { status: 500 }
@@ -183,7 +201,7 @@ async function handleInvoicePaid(invoice: any) {
         .eq('stripe_subscription_id', subscriptionId)
 
     if (subError) {
-        console.error('[handleInvoicePaid] Subscription update error:', subError)
+        logger.error('[handleInvoicePaid] Subscription update error', subError)
     }
 
     // Create invoice record
@@ -206,7 +224,7 @@ async function handleInvoicePaid(invoice: any) {
         })
     }
 
-    console.log(`[Webhook] Invoice paid for subscription ${subscriptionId}`)
+    logger.webhook('stripe', 'invoice.paid', true, { subscriptionId })
 }
 
 /**
@@ -225,7 +243,7 @@ async function handleInvoicePaymentFailed(invoice: any) {
         .eq('stripe_subscription_id', subscriptionId)
 
     if (error) {
-        console.error('[handleInvoicePaymentFailed] Error:', error)
+        logger.error('[handleInvoicePaymentFailed] Error', error)
     }
 
     // Create failed invoice record
@@ -246,7 +264,7 @@ async function handleInvoicePaymentFailed(invoice: any) {
         })
     }
 
-    console.log(`[Webhook] Payment failed for subscription ${subscriptionId}`)
+    logger.webhook('stripe', 'invoice.payment_failed', true, { subscriptionId })
 }
 
 /**
@@ -270,10 +288,10 @@ async function handleSubscriptionUpdated(subscription: any) {
         .eq('stripe_subscription_id', subscription.id)
 
     if (error) {
-        console.error('[handleSubscriptionUpdated] Error:', error)
+        logger.error('[handleSubscriptionUpdated] Error', error)
     }
 
-    console.log(`[Webhook] Subscription updated: ${subscription.id}`)
+    logger.webhook('stripe', 'subscription.updated', true, { subscriptionId: subscription.id })
 }
 
 /**
@@ -292,10 +310,10 @@ async function handleSubscriptionDeleted(subscription: any) {
         .eq('stripe_subscription_id', subscription.id)
 
     if (error) {
-        console.error('[handleSubscriptionDeleted] Error:', error)
+        logger.error('[handleSubscriptionDeleted] Error', error)
     }
 
-    console.log(`[Webhook] Subscription deleted: ${subscription.id}`)
+    logger.webhook('stripe', 'subscription.deleted', true, { subscriptionId: subscription.id })
 }
 
 /**
@@ -309,7 +327,7 @@ async function handleSubscriptionCreated(subscription: any) {
     const churchId = subscription.metadata?.church_id
 
     if (!churchId) {
-        console.error('[handleSubscriptionCreated] No church_id in metadata')
+        logger.error('[handleSubscriptionCreated] No church_id in metadata')
         return
     }
 
@@ -321,7 +339,7 @@ async function handleSubscriptionCreated(subscription: any) {
         .single()
 
     if (!plan) {
-        console.error('[handleSubscriptionCreated] Plan not found')
+        logger.error('[handleSubscriptionCreated] Plan not found')
         return
     }
 
@@ -337,8 +355,8 @@ async function handleSubscriptionCreated(subscription: any) {
     })
 
     if (error) {
-        console.error('[handleSubscriptionCreated] Error:', error)
+        logger.error('[handleSubscriptionCreated] Error', error)
     }
 
-    console.log(`[Webhook] Subscription created: ${subscription.id}`)
+    logger.webhook('stripe', 'subscription.created', true, { subscriptionId: subscription.id, churchId })
 }

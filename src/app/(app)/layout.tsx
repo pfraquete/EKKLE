@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { MobileNav } from '@/components/layout/mobile-nav'
 import { isEkkleHubUser } from '@/lib/ekkle-utils'
+import { logger } from '@/lib/logger'
 
 // Routes that LEADER role can access in the dashboard
 const LEADER_ALLOWED_ROUTES = [
@@ -20,7 +21,7 @@ export default async function AppLayout({
     const headersList = await headers()
     const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
 
-    console.log('[AppLayout] Profile:', profile?.email, 'Role:', profile?.role, 'Cell:', profile?.cell_id, 'Path:', pathname)
+    logger.debug('[AppLayout] Profile check', { role: profile?.role, hasCell: !!profile?.cell_id, path: pathname })
 
     if (!profile) {
         redirect('/login')
@@ -28,14 +29,14 @@ export default async function AppLayout({
 
     // Ekkle Hub users (unaffiliated) should use the Ekkle member area
     if (isEkkleHubUser(profile)) {
-        console.log('[AppLayout] Redirecting Ekkle Hub user to /ekkle/membro')
+        logger.debug('[AppLayout] Redirecting Ekkle Hub user to /ekkle/membro')
         redirect('/ekkle/membro')
     }
 
     // MEMBER role with a cell should use member area
     // MEMBER without cell needs dashboard access to choose a cell
     if (profile.role === 'MEMBER' && profile.cell_id) {
-        console.log('[AppLayout] Redirecting MEMBER to /membro')
+        logger.debug('[AppLayout] Redirecting MEMBER to /membro')
         redirect('/membro')
     }
 
@@ -43,7 +44,7 @@ export default async function AppLayout({
     if (profile.role === 'LEADER') {
         const isAllowedRoute = LEADER_ALLOWED_ROUTES.some(route => pathname.startsWith(route))
         if (!isAllowedRoute) {
-            console.log('[AppLayout] Redirecting LEADER to /membro')
+            logger.debug('[AppLayout] Redirecting LEADER to /membro')
             redirect('/membro')
         }
     }

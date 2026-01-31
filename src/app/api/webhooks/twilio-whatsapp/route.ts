@@ -21,6 +21,7 @@ import {
   getWelcomeMessage,
 } from '@/lib/ai-agent/system-prompt-optimized'; // Using optimized prompt
 import { whatsappRateLimiter } from '@/lib/rate-limiter';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,7 @@ function getSupabaseClient() {
  */
 export async function POST(request: NextRequest) {
   const supabase = getSupabaseClient();
-  console.log('[Twilio Webhook] Received POST request');
+  logger.info('[Twilio Webhook] Received POST request');
 
   try {
     // ========================================
@@ -57,7 +58,8 @@ export async function POST(request: NextRequest) {
       params[key] = value.toString();
     });
 
-    console.log('[Twilio Webhook] From:', params.From, 'Body:', params.Body);
+    // Log without exposing full phone/message (logger masks sensitive data)
+    logger.debug('[Twilio Webhook] Message received', { from: params.From, hasBody: !!params.Body });
 
     // ========================================
     // 2. Validate Twilio Signature
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     // SECURITY: Validate that request actually comes from Twilio
     if (!TwilioService.validateWebhookSignature(signature, url, params)) {
-      console.error('[Twilio Webhook] Invalid signature');
+      logger.warn('[Twilio Webhook] Invalid signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
@@ -79,7 +81,7 @@ export async function POST(request: NextRequest) {
     const messageSid = params.MessageSid; // Unique message ID
 
     if (!from || !body) {
-      console.error('[Twilio Webhook] Missing required fields');
+      logger.warn('[Twilio Webhook] Missing required fields');
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
@@ -87,7 +89,7 @@ export async function POST(request: NextRequest) {
     // 4. Find Pastor by Phone Number
     // ========================================
     const phoneNumber = from.replace('whatsapp:', '').replace('+', '');
-    console.log('[Twilio Webhook] Looking for pastor with phone:', phoneNumber);
+    logger.debug('[Twilio Webhook] Looking for pastor', { phoneLastDigits: phoneNumber.slice(-4) });
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -99,7 +101,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (profileError || !profile) {
-      console.log('[Twilio Webhook] Pastor not found for phone:', phoneNumber);
+      logger.info('[Twilio Webhook] Pastor not found', { phoneLastDigits: phoneNumber.slice(-4) });
 
       // Send help message to unknown number
       await TwilioService.sendWhatsAppMessage(
@@ -116,7 +118,7 @@ Em caso de dúvidas, entre em contato com o suporte.`
       return NextResponse.json({ status: 'unknown_user' });
     }
 
-    console.log('[Twilio Webhook] Found pastor:', profile.full_name, profile.id);
+    logger.info('[Twilio Webhook] Found pastor', { pastorId: profile.id });
 
     // ========================================
     // 5. Rate Limiting Check
@@ -125,9 +127,7 @@ Em caso de dúvidas, entre em contato com o suporte.`
 
     if (!allowed) {
       const remaining = whatsappRateLimiter.getRemaining(profile.id);
-      console.warn(
-        `[Twilio Webhook] Rate limit exceeded for pastor ${profile.id}`
-      );
+      logger.warn('[Twilio Webhook] Rate limit exceeded', { pastorId: profile.id });
 
       // Send rate limit message
       await TwilioService.sendWhatsAppMessage(
@@ -157,7 +157,7 @@ Por favor, aguarde alguns segundos antes de enviar mais mensagens.`
     // 6. Send Welcome Message (First Time Only)
     // ========================================
     if (isFirstMessage) {
-      console.log('[Twilio Webhook] First message from pastor, sending welcome');
+      logger.info('[Twilio Webhook] First message from pastor, sending welcome', { pastorId: profile.id });
 
       const welcomeMessage = getWelcomeMessage(profile.full_name.split(' ')[0]);
 
@@ -193,7 +193,7 @@ Por favor, aguarde alguns segundos antes de enviar mais mensagens.`
       message: body,
       messageSid,
     }).catch((error) => {
-      console.error('[Twilio Webhook] Error processing message:', error);
+      logger.error('[Twilio Webhook] Error processing message', error, { pastorId: profile.id });
     });
 
     // ========================================
@@ -201,7 +201,7 @@ Por favor, aguarde alguns segundos antes de enviar mais mensagens.`
     // ========================================
     return NextResponse.json({ status: 'processing' });
   } catch (error) {
-    console.error('[Twilio Webhook] Unexpected error:', error);
+    logger.error('[Twilio Webhook] Unexpected error', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
@@ -210,7 +210,7 @@ Por favor, aguarde alguns segundos antes de enviar mais mensagens.`
  * GET handler - Health check / verification endpoint
  */
 export async function GET(request: NextRequest) {
-  console.log('[Twilio Webhook] Health check');
+  logger.debug('[Twilio Webhook] Health check');
 
   const isConfigured =
     TwilioService.isConfigured() && OpenAIService.isConfigured();

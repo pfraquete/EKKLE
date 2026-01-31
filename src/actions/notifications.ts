@@ -7,6 +7,7 @@ import { ptBR } from 'date-fns/locale'
 import { EvolutionService } from '@/lib/evolution'
 import { getWhatsAppInstance } from './whatsapp'
 import { escapeHtml } from '@/lib/sanitize'
+import { logger } from '@/lib/logger'
 
 /**
  * Get Resend client (lazy initialization to avoid build-time errors)
@@ -41,7 +42,7 @@ export async function sendTomorrowReminders() {
         .eq('date', tomorrowStr)
 
     if (meetingsError || !meetings) {
-        console.error('[sendTomorrowReminders] Error fetching meetings:', meetingsError)
+        logger.error('[sendTomorrowReminders] Error fetching meetings', meetingsError)
         return { success: false, sent: 0 }
     }
 
@@ -82,7 +83,7 @@ export async function sendTomorrowReminders() {
                     sentViaWhatsapp = true
                     sentCount++
                 } catch (err) {
-                    console.error(`Failed to send WhatsApp to ${recipient.phone}:`, err)
+                    logger.error('[sendTomorrowReminders] Failed to send WhatsApp', err, { meetingId: meeting.id, cellId: meeting.cell_id })
                 }
             }
 
@@ -117,7 +118,7 @@ export async function sendTomorrowReminders() {
                     })
                     sentCount++
                 } catch (err) {
-                    console.error(`Failed to send email to ${recipient.email}:`, err)
+                    logger.error('[sendTomorrowReminders] Failed to send email', err, { meetingId: meeting.id, cellId: meeting.cell_id })
                 }
             }
         }

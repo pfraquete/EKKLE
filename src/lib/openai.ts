@@ -11,6 +11,7 @@
  * - Extract text responses
  * - Automatic retries with exponential backoff
  * - Request timeout protection
+ * - Graceful fallback when API is unavailable
  *
  * @see https://platform.openai.com/docs/api-reference/chat
  */
@@ -22,6 +23,33 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
 if (!OPENAI_API_KEY) {
   console.warn('⚠️ OpenAI API key is missing. WhatsApp AI Agent will not work.');
+}
+
+/**
+ * Fallback responses when OpenAI is unavailable
+ */
+export const FALLBACK_RESPONSES = {
+  default: 'Desculpe, estou com dificuldades técnicas no momento. Por favor, tente novamente em alguns minutos ou acesse o painel em app.ekkle.com.br',
+  greeting: 'Olá! Estou temporariamente indisponível, mas você pode acessar todas as funcionalidades pelo painel em app.ekkle.com.br',
+  help: 'No momento não consigo processar sua solicitação. Por favor, acesse o painel administrativo em app.ekkle.com.br para gerenciar sua igreja.',
+  unavailable: 'O serviço de IA está temporariamente indisponível. Tente novamente em alguns minutos.',
+};
+
+/**
+ * Check if error is a retryable OpenAI error
+ */
+function isRetryableError(error: unknown): boolean {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    return (
+      message.includes('rate limit') ||
+      message.includes('timeout') ||
+      message.includes('503') ||
+      message.includes('502') ||
+      message.includes('overloaded')
+    );
+  }
+  return false;
 }
 
 /**
@@ -150,6 +178,47 @@ export class OpenAIService {
     } catch (error) {
       console.error('Error calling OpenAI API:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Send chat completion with graceful fallback
+   * Returns a fallback response instead of throwing when API fails
+   *
+   * @param options - Chat completion options
+   * @returns OpenAI API response or fallback response
+   */
+  static async createChatCompletionWithFallback(options: ChatCompletionOptions): Promise<{
+    data: any | null;
+    fallback: boolean;
+    fallbackMessage: string | null;
+    error: Error | null;
+  }> {
+    try {
+      const data = await this.createChatCompletion(options);
+      return { data, fallback: false, fallbackMessage: null, error: null };
+    } catch (error) {
+      console.error('[OpenAI] API failed, using fallback:', error);
+
+      // Determine appropriate fallback message
+      const lastUserMessage = options.messages
+        .filter((m) => m.role === 'user')
+        .pop()?.content?.toLowerCase() || '';
+
+      let fallbackMessage = FALLBACK_RESPONSES.default;
+
+      if (lastUserMessage.includes('olá') || lastUserMessage.includes('oi') || lastUserMessage.includes('bom dia')) {
+        fallbackMessage = FALLBACK_RESPONSES.greeting;
+      } else if (lastUserMessage.includes('ajuda') || lastUserMessage.includes('help')) {
+        fallbackMessage = FALLBACK_RESPONSES.help;
+      }
+
+      return {
+        data: null,
+        fallback: true,
+        fallbackMessage,
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
     }
   }
 

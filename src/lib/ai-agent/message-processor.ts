@@ -118,7 +118,7 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
     });
 
     // ========================================
-    // 7. Call OpenAI
+    // 7. Call OpenAI (with fallback)
     // ========================================
     const openaiMessages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -126,11 +126,47 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
     ];
 
     console.log('[Message Processor] Calling OpenAI...');
-    const response = await OpenAIService.createChatCompletion({
+    const { data: response, fallback, fallbackMessage } = await OpenAIService.createChatCompletionWithFallback({
       messages: openaiMessages,
       functions: availableFunctions,
       temperature: 0.7,
     });
+
+    // Handle fallback case (OpenAI unavailable)
+    if (fallback && fallbackMessage) {
+      console.warn('[Message Processor] Using fallback response');
+
+      messages.push({
+        role: 'assistant',
+        content: fallbackMessage,
+      });
+
+      await TwilioService.sendWhatsAppMessage(
+        TwilioService.formatPhoneNumber(phoneNumber),
+        fallbackMessage
+      );
+
+      await getSupabaseClient()
+        .from('whatsapp_agent_conversations')
+        .update({
+          messages,
+          last_message_at: new Date().toISOString(),
+        })
+        .eq('id', conversation.id);
+
+      await logAuditTrail({
+        churchId,
+        pastorId,
+        conversationId: conversation.id,
+        actionType: 'fallback',
+        actionDescription: message,
+        inputData: { message },
+        outputData: { response: fallbackMessage, reason: 'openai_unavailable' },
+        status: 'success',
+      });
+
+      return;
+    }
 
     // ========================================
     // 8. Check for Function Call

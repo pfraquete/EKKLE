@@ -6,6 +6,7 @@ import { getWhatsAppInstance } from './whatsapp'
 import { format, subDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { getProfile } from './auth'
+import { logger } from '@/lib/logger'
 
 export async function checkLateReports() {
     const profile = await getProfile()
@@ -42,7 +43,7 @@ export async function checkLateReports() {
         .eq('church_id', churchId) // Redundant with RLS but good for clarity
 
     if (error || !lateMeetings) {
-        console.error('[checkLateReports] Error fetching late meetings:', error)
+        logger.error('[checkLateReports] Error fetching late meetings', error)
         return { success: false, reminded: 0 }
     }
 
@@ -63,7 +64,7 @@ export async function checkLateReports() {
                 await EvolutionService.sendText(whatsapp.instance_name, meeting.cell.leader.phone, message)
                 remindedCount++
             } catch (err) {
-                console.error(`Failed to send late report reminder to ${meeting.cell.leader.phone}:`, err)
+                logger.error('[checkLateReports] Failed to send reminder', err, { meetingId: meeting.id, cellId: meeting.cell.id })
             }
         }
     }

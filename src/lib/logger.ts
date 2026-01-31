@@ -45,27 +45,104 @@ function shouldLog(level: LogLevel): boolean {
 }
 
 /**
+ * Sensitive keys that should be fully masked
+ */
+const SENSITIVE_KEYS = [
+  'password', 'senha', 'token', 'secret', 'key', 'apiKey',
+  'api_key', 'authorization', 'auth', 'credit_card', 'cpf',
+  'cnpj', 'document', 'ssn', 'social_security', 'bearer',
+  'cookie', 'cvv', 'card_number', 'cardNumber',
+];
+
+/**
+ * Keys that should show only last 4 characters
+ */
+const PARTIAL_MASK_KEYS = [
+  'email', 'phone', 'telefone', 'whatsapp', 'celular',
+  'subscription_id', 'subscriptionId', 'customer_id', 'customerId',
+  'stripe_customer_id', 'stripeCustomerId', 'stripe_subscription_id',
+  'stripeSubscriptionId', 'invoice_id', 'invoiceId',
+];
+
+/**
+ * Patterns to detect and mask in string values
+ */
+const SENSITIVE_PATTERNS: Array<{
+  pattern: RegExp;
+  mask: (match: string) => string;
+}> = [
+  // Email addresses
+  {
+    pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
+    mask: (email) => {
+      const parts = email.split('@');
+      if (parts.length !== 2) return '***@***.***';
+      return `${parts[0][0]}***@***`;
+    },
+  },
+  // Brazilian phone numbers
+  {
+    pattern: /\+?55?\s*\(?\d{2}\)?\s*9?\d{4}[-.\s]?\d{4}/g,
+    mask: (phone) => {
+      const digits = phone.replace(/\D/g, '');
+      return digits.length >= 4 ? `***${digits.slice(-4)}` : '***';
+    },
+  },
+  // Generic phone patterns
+  {
+    pattern: /\(?\d{2,3}\)?[-.\s]?\d{4,5}[-.\s]?\d{4}/g,
+    mask: (phone) => {
+      const digits = phone.replace(/\D/g, '');
+      return digits.length >= 4 ? `***${digits.slice(-4)}` : '***';
+    },
+  },
+  // Credit card numbers
+  {
+    pattern: /\b\d{4}[-.\s]?\d{4}[-.\s]?\d{4}[-.\s]?\d{4}\b/g,
+    mask: (cc) => `****-****-****-${cc.replace(/\D/g, '').slice(-4)}`,
+  },
+  // CPF (Brazilian ID)
+  {
+    pattern: /\b\d{3}[.-]?\d{3}[.-]?\d{3}[.-]?\d{2}\b/g,
+    mask: () => '***.***.***-**',
+  },
+  // API keys/tokens (common prefixes)
+  {
+    pattern: /\b(sk_|pk_|key_|token_|Bearer\s+)[a-zA-Z0-9_-]{10,}\b/gi,
+    mask: (key) => `${key.slice(0, 7)}***`,
+  },
+];
+
+/**
+ * Mask sensitive patterns in a string
+ */
+function maskString(value: string): string {
+  let result = value;
+  for (const { pattern, mask } of SENSITIVE_PATTERNS) {
+    result = result.replace(pattern, mask);
+  }
+  return result;
+}
+
+/**
  * Mask sensitive data in context
  */
 function maskSensitiveData(context?: LogContext): LogContext | undefined {
   if (!context) return undefined;
 
-  const sensitiveKeys = [
-    'password', 'senha', 'token', 'secret', 'key', 'apiKey',
-    'api_key', 'authorization', 'auth', 'credit_card', 'cpf',
-    'cnpj', 'document', 'ssn', 'social_security',
-  ];
-
   const masked: LogContext = {};
 
   for (const [key, value] of Object.entries(context)) {
     const lowerKey = key.toLowerCase();
-    const isSensitive = sensitiveKeys.some((sk) => lowerKey.includes(sk));
+    const isFullySensitive = SENSITIVE_KEYS.some((sk) => lowerKey.includes(sk));
+    const isPartialMask = PARTIAL_MASK_KEYS.some((pk) => lowerKey.includes(pk));
 
-    if (isSensitive && typeof value === 'string') {
-      masked[key] = value.length > 4
-        ? `${value.slice(0, 2)}***${value.slice(-2)}`
-        : '***';
+    if (isFullySensitive && typeof value === 'string') {
+      masked[key] = '[REDACTED]';
+    } else if (isPartialMask && typeof value === 'string') {
+      masked[key] = value.length > 4 ? `***${value.slice(-4)}` : '***';
+    } else if (typeof value === 'string') {
+      masked[key] = maskString(value);
     } else if (typeof value === 'object' && value !== null) {
       masked[key] = maskSensitiveData(value as LogContext);
     } else {
