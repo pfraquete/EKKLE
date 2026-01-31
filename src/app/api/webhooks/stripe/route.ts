@@ -37,6 +37,37 @@ function createSupabaseClient() {
 }
 
 /**
+ * Sanitize webhook payload to remove PII before storing
+ * Only keeps essential fields for debugging/auditing
+ */
+function sanitizeWebhookPayload(event: Stripe.Event): Record<string, unknown> {
+    const safePayload: Record<string, unknown> = {
+        id: event.id,
+        type: event.type,
+        created: event.created,
+        livemode: event.livemode,
+        api_version: event.api_version,
+    }
+
+    // Extract only safe, non-PII data from the event object
+    const obj = event.data.object as Record<string, unknown>
+    if (obj) {
+        safePayload.object_id = obj.id
+        safePayload.object_type = obj.object
+
+        // For subscriptions/invoices, keep only IDs and status
+        if ('subscription' in obj) safePayload.subscription_id = obj.subscription
+        if ('customer' in obj) safePayload.customer_id = obj.customer
+        if ('status' in obj) safePayload.status = obj.status
+        if ('amount_paid' in obj) safePayload.amount_paid = obj.amount_paid
+        if ('amount_due' in obj) safePayload.amount_due = obj.amount_due
+        if ('currency' in obj) safePayload.currency = obj.currency
+    }
+
+    return safePayload
+}
+
+/**
  * Stripe Webhook Handler
  * Handles subscription events from Stripe
  */
@@ -80,11 +111,11 @@ export async function POST(req: NextRequest) {
 
         const supabase = createSupabaseClient()
 
-        // Log webhook event
+        // Log webhook event (sanitized to remove PII)
         await supabase.from('webhook_events').insert({
             event_type: event.type,
             stripe_event_id: event.id,
-            payload: event,
+            payload: sanitizeWebhookPayload(event),
             processed: false,
         })
 

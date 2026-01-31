@@ -95,32 +95,113 @@ export function sanitizeUrl(input: unknown): string | null {
 /**
  * Sanitize an email address
  * Returns null if not a valid email format
+ * Uses RFC 5322 compliant regex for better validation
  */
 export function sanitizeEmail(input: unknown): string | null {
   if (typeof input !== 'string') return null;
 
   const trimmed = input.trim().toLowerCase();
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Max length check (RFC 5321)
+  if (trimmed.length > 254) return null;
+
+  // RFC 5322 compliant email regex
+  const emailRegex = /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)])$/;
 
   if (!emailRegex.test(trimmed)) return null;
+
+  // Additional checks
+  const [localPart, domain] = trimmed.split('@');
+  if (!localPart || !domain) return null;
+  if (localPart.length > 64) return null; // RFC 5321
+  if (domain.length > 253) return null;
+
+  // Ensure domain has valid TLD (at least 2 chars)
+  const domainParts = domain.split('.');
+  const tld = domainParts[domainParts.length - 1];
+  if (!tld || tld.length < 2) return null;
 
   return trimmed;
 }
 
 /**
  * Sanitize a phone number (Brazilian format)
- * Returns cleaned number with only digits or null if invalid
+ * Returns cleaned number in E.164 format (+55...) or null if invalid
  */
 export function sanitizePhone(input: unknown): string | null {
   if (typeof input !== 'string') return null;
 
-  // Remove everything except digits
-  const digits = input.replace(/\D/g, '');
+  // Remove everything except digits and leading +
+  let cleaned = input.replace(/[^\d+]/g, '');
 
-  // Brazilian phone: 10-11 digits (with DDD)
+  // Remove leading + for processing
+  const hasPlus = cleaned.startsWith('+');
+  if (hasPlus) cleaned = cleaned.slice(1);
+
+  // Handle different input formats
+  let digits = cleaned;
+
+  // If starts with 55 (Brazil country code), normalize
+  if (digits.startsWith('55') && digits.length >= 12) {
+    digits = digits.slice(2); // Remove country code for validation
+  }
+
+  // Brazilian phone validation
+  // DDD (2 digits) + number (8-9 digits) = 10-11 digits
   if (digits.length < 10 || digits.length > 11) return null;
 
-  return digits;
+  // Validate DDD (11-99, excluding invalid ranges)
+  const ddd = parseInt(digits.slice(0, 2), 10);
+  const validDDDs = [
+    11, 12, 13, 14, 15, 16, 17, 18, 19, // SP
+    21, 22, 24, // RJ
+    27, 28, // ES
+    31, 32, 33, 34, 35, 37, 38, // MG
+    41, 42, 43, 44, 45, 46, // PR
+    47, 48, 49, // SC
+    51, 53, 54, 55, // RS
+    61, // DF
+    62, 64, // GO
+    63, // TO
+    65, 66, // MT
+    67, // MS
+    68, // AC
+    69, // RO
+    71, 73, 74, 75, 77, // BA
+    79, // SE
+    81, 82, 83, 84, 85, 86, 87, 88, 89, // NE
+    91, 92, 93, 94, 95, 96, 97, 98, 99, // N
+  ];
+  if (!validDDDs.includes(ddd)) return null;
+
+  // Mobile numbers (9 digits) must start with 9
+  if (digits.length === 11 && digits[2] !== '9') return null;
+
+  // Return in E.164 format
+  return `+55${digits}`;
+}
+
+/**
+ * Format phone for display (Brazilian format)
+ */
+export function formatPhoneDisplay(phone: string | null): string {
+  if (!phone) return '';
+
+  // Remove +55 if present
+  let digits = phone.replace(/\D/g, '');
+  if (digits.startsWith('55') && digits.length >= 12) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.length === 11) {
+    // Mobile: (XX) 9XXXX-XXXX
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  } else if (digits.length === 10) {
+    // Landline: (XX) XXXX-XXXX
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+
+  return phone;
 }
 
 /**
@@ -229,6 +310,7 @@ const sanitizeUtils = {
   sanitizeUrl,
   sanitizeEmail,
   sanitizePhone,
+  formatPhoneDisplay,
   sanitizeSettings,
   sanitizeWebsiteSettings,
 };
