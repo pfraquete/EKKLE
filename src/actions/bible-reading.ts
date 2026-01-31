@@ -8,7 +8,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { ApiBibleService, PORTUGUESE_BIBLES, formatReadingReference } from '@/lib/api-bible'
+import { ApiBibleService, DEFAULT_BIBLE, formatReadingReference } from '@/lib/api-bible'
 import { revalidatePath } from 'next/cache'
 
 // ============================================
@@ -389,7 +389,7 @@ export async function getBiblePassage(
     bookId: string,
     chapterStart: number,
     chapterEnd?: number | null,
-    bibleId: string = PORTUGUESE_BIBLES.ARC
+    bibleId: string = DEFAULT_BIBLE
 ): Promise<{
     success: boolean
     data?: {

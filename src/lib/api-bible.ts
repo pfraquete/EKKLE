@@ -15,6 +15,7 @@ import { createClient } from '@/lib/supabase/server'
 // Re-export client-safe utilities for backwards compatibility
 export {
     PORTUGUESE_BIBLES,
+    DEFAULT_BIBLE,
     BIBLE_BOOKS,
     getBookName,
     formatReadingReference,
@@ -23,7 +24,7 @@ export {
     type PassageReference
 } from './bible-utils'
 
-import { PORTUGUESE_BIBLES, buildPassageId, type PassageReference } from './bible-utils'
+import { DEFAULT_BIBLE, buildPassageId, type PassageReference } from './bible-utils'
 
 const API_BIBLE_BASE_URL = 'https://rest.api.bible/v1'
 
@@ -136,7 +137,7 @@ export class ApiBibleService {
     /**
      * Get books of a Bible
      */
-    static async getBooks(bibleId: string = PORTUGUESE_BIBLES.ARC): Promise<BibleBook[]> {
+    static async getBooks(bibleId: string = DEFAULT_BIBLE): Promise<BibleBook[]> {
         return this.request(`/bibles/${bibleId}/books`)
     }
 

@@ -5,11 +5,14 @@
  * These can be imported in both server and client components.
  */
 
-// Portuguese Bible versions
+// Portuguese Bible versions available with current API key
 export const PORTUGUESE_BIBLES = {
-    ARC: 'b9ce6f04aa8f6fb5-01',      // Almeida Revista e Corrigida
-    NVI: 'f72b840c855f362c-04',      // Nova Versao Internacional
+    BLT: 'd63894c8d9a7a503-01',      // Biblia Livre Para Todos
+    TFT: '90799bb5b996fddc-01',      // Translation for Translators (NT only)
 } as const
+
+// Default Bible for reading
+export const DEFAULT_BIBLE = PORTUGUESE_BIBLES.BLT
 
 export type BibleVersion = keyof typeof PORTUGUESE_BIBLES
 
