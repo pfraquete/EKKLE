@@ -220,6 +220,12 @@ async function handleInvoicePaid(invoice: any) {
         .single()
 
     if (subscription) {
+        // Safely handle paid_at - can be null/undefined for some invoice types
+        const paidAtTimestamp = invoice.status_transitions?.paid_at
+        const paidAt = paidAtTimestamp
+            ? new Date(paidAtTimestamp * 1000).toISOString()
+            : new Date().toISOString()
+
         await supabase.from('subscription_invoices').insert({
             subscription_id: subscription.id,
             church_id: subscription.church_id,
@@ -227,7 +233,7 @@ async function handleInvoicePaid(invoice: any) {
             stripe_payment_intent_id: invoice.payment_intent,
             amount_cents: invoice.amount_paid,
             status: 'paid',
-            paid_at: new Date(invoice.status_transitions.paid_at * 1000).toISOString(),
+            paid_at: paidAt,
             payment_method: invoice.payment_method_types?.[0] || 'card',
         })
     }
