@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: { plan?: string }
+  searchParams: Promise<{ plan?: string }>
 }) {
   const profile = await getProfile()
   if (!profile) redirect('/login')
@@ -17,7 +17,8 @@ export default async function CheckoutPage({
     redirect('/dashboard')
   }
 
-  const planId = searchParams.plan
+  const params = await searchParams
+  const planId = params.plan
   if (!planId) {
     redirect('/configuracoes/assinatura')
   }
