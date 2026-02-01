@@ -117,8 +117,8 @@ export async function updateSession(request: NextRequest) {
     // =====================================================
     // SUBSCRIPTION CHECK - Granular access control
     // =====================================================
-    // Skip for: API routes, auth routes, Ekkle Hub
-    if (church && church.id !== EKKLE_HUB_ID && !isApiRoute && !isAuthRoute) {
+    // Skip for: API routes, auth routes
+    if (!isApiRoute && !isAuthRoute) {
         // Check if route is always accessible (profile, etc.)
         const isAlwaysAccessible = ALWAYS_ACCESSIBLE_ROUTES.some(route =>
             pathname.startsWith(route)
@@ -131,36 +131,57 @@ export async function updateSession(request: NextRequest) {
 
         // Only check subscription for church feature routes
         if (isChurchFeature && !isAlwaysAccessible) {
-            // Use the new function that includes 3-day grace period
-            const { data: subStatus } = await supabase
-                .rpc('check_church_subscription_status', { p_church_id: church.id })
-                .single()
+            // Determine which church to check:
+            // 1. If accessing via subdomain, use the church from subdomain
+            // 2. If no subdomain but user is logged in, use their profile's church_id
+            let churchIdToCheck: string | null = null
+            let userRole: string | null = null
 
-            const status = subStatus as { is_active: boolean } | null
-            const isActive = status?.is_active ?? false
+            if (church && church.id !== EKKLE_HUB_ID) {
+                // Subdomain access - use church from subdomain
+                churchIdToCheck = church.id
+            }
 
-            // If subscription not active (and past grace period)
-            if (!isActive) {
-                // Check if user is pastor trying to access billing
-                let isPastor = false
-                if (user) {
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('role')
-                        .eq('id', user.id)
-                        .single()
+            // Get user profile if logged in (needed for church_id when no subdomain, and for role check)
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('church_id, role')
+                    .eq('id', user.id)
+                    .single()
 
-                    isPastor = profile?.role === 'PASTOR'
+                if (profile) {
+                    userRole = profile.role
+                    // If no subdomain, use church from profile
+                    if (!churchIdToCheck && profile.church_id && profile.church_id !== EKKLE_HUB_ID) {
+                        churchIdToCheck = profile.church_id
+                    }
                 }
+            }
 
-                // Pastor can access billing page even without subscription
-                const isBillingPage = pathname.startsWith('/configuracoes/assinatura')
+            // If we have a church to check, verify subscription
+            if (churchIdToCheck) {
+                // Use the function that includes 3-day grace period
+                const { data: subStatus } = await supabase
+                    .rpc('check_church_subscription_status', { p_church_id: churchIdToCheck })
+                    .single()
 
-                if (!isPastor || !isBillingPage) {
-                    // Redirect to subscription expired page
-                    const url = request.nextUrl.clone()
-                    url.pathname = '/assinatura-expirada'
-                    return redirectWithCookies(url, supabaseResponse, request)
+                const status = subStatus as { is_active: boolean } | null
+                const isActive = status?.is_active ?? false
+
+                // If subscription not active (and past grace period)
+                if (!isActive) {
+                    const isPastor = userRole === 'PASTOR'
+
+                    // Pastor can access billing page even without subscription
+                    const isBillingPage = pathname.startsWith('/configuracoes/assinatura')
+
+                    if (!isPastor || !isBillingPage) {
+                        // Redirect to subscription expired page
+                        const url = request.nextUrl.clone()
+                        url.pathname = '/assinatura-expirada'
+                        return redirectWithCookies(url, supabaseResponse, request)
+                    }
                 }
             }
         }
