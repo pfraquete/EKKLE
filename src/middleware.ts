@@ -40,6 +40,11 @@ export async function middleware(request: NextRequest) {
             // Note: /membro is NOT bypassed - it should rewrite to /site/[domain]/membro
 
             if (isBypassRoute) {
+                // Check if sessionResponse is a redirect (e.g., subscription expired)
+                if (sessionResponse.status >= 300 && sessionResponse.status < 400) {
+                    return sessionResponse
+                }
+
                 // Just inject headers for tenant context
                 const requestHeaders = new Headers(request.headers)
                 requestHeaders.set('x-church-slug', subdomain)
@@ -79,7 +84,13 @@ export async function middleware(request: NextRequest) {
             return response
         }
 
-        // Root domain - inject pathname header and return
+        // Root domain - check if sessionResponse is a redirect first
+        if (sessionResponse.status >= 300 && sessionResponse.status < 400) {
+            // sessionResponse is a redirect (e.g., subscription expired), return it as-is
+            return sessionResponse
+        }
+
+        // Not a redirect - inject pathname header and return
         const requestHeaders = new Headers(request.headers)
         requestHeaders.set('x-pathname', url.pathname)
 
