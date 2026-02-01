@@ -132,13 +132,16 @@ export default function IgrejasPage() {
               />
             </div>
             <div className="flex gap-2">
-              <Select value={selectedState} onValueChange={setSelectedState}>
+              <Select
+                value={selectedState || 'all'}
+                onValueChange={(value) => setSelectedState(value === 'all' ? '' : value)}
+              >
                 <SelectTrigger className="w-full sm:w-[180px] h-12 rounded-xl">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os estados</SelectItem>
+                  <SelectItem value="all">Todos os estados</SelectItem>
                   {states.map((state) => (
                     <SelectItem key={state} value={state}>
                       {state}
