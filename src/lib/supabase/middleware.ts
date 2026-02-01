@@ -9,6 +9,9 @@ type CookieOptions = Parameters<NextResponse['cookies']['set']>[2]
 const ALWAYS_ACCESSIBLE_ROUTES = [
     '/membro/perfil',
     '/membro/configuracoes',
+    '/membro/biblia-oracao',  // Bíblia e Oração - sempre acessível para membros
+    '/leitura-biblica',        // Leitura bíblica - sempre acessível
+    '/pedidos-oracao',         // Pedidos de oração - sempre acessível
     '/ekkle/membro',
     '/assinatura-expirada',
     '/logout',
@@ -21,6 +24,7 @@ const ALWAYS_ACCESSIBLE_ROUTES = [
 ]
 
 // Church feature routes (blocked when subscription expired)
+// Note: /leitura-biblica and /pedidos-oracao moved to ALWAYS_ACCESSIBLE_ROUTES
 const CHURCH_FEATURE_ROUTES = [
     '/dashboard',
     '/celulas',
@@ -38,8 +42,6 @@ const CHURCH_FEATURE_ROUTES = [
     '/loja',
     '/transmissao',
     '/dizimos',
-    '/leitura-biblica',
-    '/pedidos-oracao',
 ]
 
 /**
