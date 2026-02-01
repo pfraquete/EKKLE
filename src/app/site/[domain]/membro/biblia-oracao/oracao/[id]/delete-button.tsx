@@ -19,9 +19,10 @@ import { deletePrayer } from '@/actions/prayers'
 
 interface DeletePrayerButtonProps {
   prayerId: string
+  redirectPath?: string
 }
 
-export function DeletePrayerButton({ prayerId }: DeletePrayerButtonProps) {
+export function DeletePrayerButton({ prayerId, redirectPath = '/membro/biblia-oracao/oracao' }: DeletePrayerButtonProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -30,7 +31,7 @@ export function DeletePrayerButton({ prayerId }: DeletePrayerButtonProps) {
     try {
       const result = await deletePrayer(prayerId)
       if (result.success) {
-        router.push('/membro/biblia-oracao/oracao')
+        router.push(redirectPath)
       }
     } finally {
       setIsDeleting(false)

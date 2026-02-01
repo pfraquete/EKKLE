@@ -23,6 +23,7 @@ interface StartPlanDialogProps {
     planId: string
     planName: string
     durationDays: number
+    redirectPath?: string
 }
 
 export function StartPlanDialog({
@@ -30,7 +31,8 @@ export function StartPlanDialog({
     onOpenChange,
     planId,
     planName,
-    durationDays
+    durationDays,
+    redirectPath = '/membro/biblia-oracao/meu-plano'
 }: StartPlanDialogProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
@@ -63,7 +65,7 @@ export function StartPlanDialog({
             if (result.success) {
                 toast.success('Plano iniciado com sucesso!')
                 onOpenChange(false)
-                router.push('/membro/biblia-oracao/meu-plano')
+                router.push(redirectPath)
             } else {
                 toast.error(result.error || 'Erro ao iniciar plano')
             }
