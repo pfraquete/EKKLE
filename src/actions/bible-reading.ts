@@ -8,7 +8,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { ApiBibleService, DEFAULT_BIBLE, formatReadingReference } from '@/lib/api-bible'
+import { ABibliaDigitalService, DEFAULT_VERSION, formatReadingReference } from '@/lib/abibliadigital'
 import { revalidatePath } from 'next/cache'
 
 // ============================================
@@ -384,12 +384,13 @@ export async function getTodaysReading(): Promise<{
 
 /**
  * Get Bible passage content
+ * Now using A Bíblia Digital API which has complete Old and New Testament
  */
 export async function getBiblePassage(
     bookId: string,
     chapterStart: number,
     chapterEnd?: number | null,
-    bibleId: string = DEFAULT_BIBLE
+    version: string = DEFAULT_VERSION
 ): Promise<{
     success: boolean
     data?: {
@@ -399,20 +400,19 @@ export async function getBiblePassage(
     error?: string
 }> {
     try {
-        if (!ApiBibleService.isConfigured()) {
+        if (!ABibliaDigitalService.isConfigured()) {
             return {
                 success: false,
                 error: 'Servico de Biblia temporariamente indisponivel. Tente novamente mais tarde.'
             }
         }
 
-        const passageId = ApiBibleService.buildPassageId({
+        const passage = await ABibliaDigitalService.getPassage(
             bookId,
             chapterStart,
-            chapterEnd: chapterEnd || undefined,
-        })
-
-        const passage = await ApiBibleService.getPassage(bibleId, passageId)
+            chapterEnd,
+            version
+        )
 
         return {
             success: true,
@@ -426,13 +426,6 @@ export async function getBiblePassage(
         console.error('[Bible Reading] Error getting passage:', errorMessage)
 
         // Return user-friendly messages based on error type
-        if (errorMessage === 'API_KEY_INVALID') {
-            return {
-                success: false,
-                error: 'Servico de Biblia temporariamente indisponivel. Contate o suporte.'
-            }
-        }
-
         if (errorMessage === 'RATE_LIMIT_EXCEEDED') {
             return {
                 success: false,
@@ -447,15 +440,7 @@ export async function getBiblePassage(
             }
         }
 
-        if (errorMessage.includes('Could not find')) {
-            // Check if it's an Old Testament book
-            const otBooks = ['GEN', 'EXO', 'LEV', 'NUM', 'DEU', 'JOS', 'JDG', 'RUT', '1SA', '2SA', '1KI', '2KI', '1CH', '2CH', 'EZR', 'NEH', 'EST', 'JOB', 'PSA', 'PRO', 'ECC', 'SNG', 'ISA', 'JER', 'LAM', 'EZK', 'DAN', 'HOS', 'JOL', 'AMO', 'OBA', 'JON', 'MIC', 'NAM', 'HAB', 'ZEP', 'HAG', 'ZEC', 'MAL']
-            if (otBooks.includes(bookId)) {
-                return {
-                    success: false,
-                    error: 'No momento, apenas o Novo Testamento esta disponivel. Selecione um livro do NT (Mateus a Apocalipse).'
-                }
-            }
+        if (errorMessage === 'PASSAGE_NOT_FOUND') {
             return {
                 success: false,
                 error: 'Passagem nao encontrada. Verifique o livro e capitulo selecionados.'

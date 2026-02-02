@@ -3,16 +3,21 @@
  *
  * Client-safe utilities for Bible references and formatting.
  * These can be imported in both server and client components.
+ * 
+ * Updated to use A Bíblia Digital API which provides complete
+ * Old and New Testament in Portuguese (NVI, ACF, RA versions).
  */
 
-// Portuguese Bible versions available with current API key
+// Available Portuguese Bible versions from A Bíblia Digital
 export const PORTUGUESE_BIBLES = {
-    BLT: 'd63894c8d9a7a503-01',      // Biblia Livre Para Todos
-    TFT: '90799bb5b996fddc-01',      // Translation for Translators (NT only)
+    NVI: 'nvi',      // Nova Versão Internacional
+    ACF: 'acf',      // Almeida Corrigida Fiel
+    RA: 'ra',        // Revista e Atualizada
+    APEE: 'apee',    // Português Europeu
 } as const
 
 // Default Bible for reading
-export const DEFAULT_BIBLE = PORTUGUESE_BIBLES.BLT
+export const DEFAULT_BIBLE = PORTUGUESE_BIBLES.NVI
 
 export type BibleVersion = keyof typeof PORTUGUESE_BIBLES
 
@@ -20,70 +25,72 @@ export type BibleVersion = keyof typeof PORTUGUESE_BIBLES
  * Bible book mapping (English ID to Portuguese name)
  */
 export const BIBLE_BOOKS: Record<string, string> = {
-    GEN: 'Genesis',
-    EXO: 'Exodo',
-    LEV: 'Levitico',
-    NUM: 'Numeros',
-    DEU: 'Deuteronomio',
-    JOS: 'Josue',
-    JDG: 'Juizes',
+    // Old Testament
+    GEN: 'Gênesis',
+    EXO: 'Êxodo',
+    LEV: 'Levítico',
+    NUM: 'Números',
+    DEU: 'Deuteronômio',
+    JOS: 'Josué',
+    JDG: 'Juízes',
     RUT: 'Rute',
     '1SA': '1 Samuel',
     '2SA': '2 Samuel',
     '1KI': '1 Reis',
     '2KI': '2 Reis',
-    '1CH': '1 Cronicas',
-    '2CH': '2 Cronicas',
+    '1CH': '1 Crônicas',
+    '2CH': '2 Crônicas',
     EZR: 'Esdras',
     NEH: 'Neemias',
     EST: 'Ester',
     JOB: 'Jó',
     PSA: 'Salmos',
-    PRO: 'Proverbios',
+    PRO: 'Provérbios',
     ECC: 'Eclesiastes',
-    SNG: 'Canticos',
-    ISA: 'Isaias',
+    SNG: 'Cânticos',
+    ISA: 'Isaías',
     JER: 'Jeremias',
-    LAM: 'Lamentacoes',
+    LAM: 'Lamentações',
     EZK: 'Ezequiel',
     DAN: 'Daniel',
-    HOS: 'Oseias',
+    HOS: 'Oséias',
     JOL: 'Joel',
-    AMO: 'Amos',
+    AMO: 'Amós',
     OBA: 'Obadias',
     JON: 'Jonas',
-    MIC: 'Miqueias',
+    MIC: 'Miquéias',
     NAM: 'Naum',
     HAB: 'Habacuque',
     ZEP: 'Sofonias',
     HAG: 'Ageu',
     ZEC: 'Zacarias',
     MAL: 'Malaquias',
+    // New Testament
     MAT: 'Mateus',
     MRK: 'Marcos',
     LUK: 'Lucas',
-    JHN: 'Joao',
+    JHN: 'João',
     ACT: 'Atos',
     ROM: 'Romanos',
-    '1CO': '1 Corintios',
-    '2CO': '2 Corintios',
-    GAL: 'Galatas',
-    EPH: 'Efesios',
+    '1CO': '1 Coríntios',
+    '2CO': '2 Coríntios',
+    GAL: 'Gálatas',
+    EPH: 'Efésios',
     PHP: 'Filipenses',
     COL: 'Colossenses',
     '1TH': '1 Tessalonicenses',
     '2TH': '2 Tessalonicenses',
-    '1TI': '1 Timoteo',
-    '2TI': '2 Timoteo',
+    '1TI': '1 Timóteo',
+    '2TI': '2 Timóteo',
     TIT: 'Tito',
     PHM: 'Filemom',
     HEB: 'Hebreus',
     JAS: 'Tiago',
     '1PE': '1 Pedro',
     '2PE': '2 Pedro',
-    '1JN': '1 Joao',
-    '2JN': '2 Joao',
-    '3JN': '3 Joao',
+    '1JN': '1 João',
+    '2JN': '2 João',
+    '3JN': '3 João',
     JUD: 'Judas',
     REV: 'Apocalipse',
 }
