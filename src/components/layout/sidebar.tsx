@@ -18,7 +18,10 @@ import {
     Video,
     Radio,
     GraduationCap,
-    Landmark
+    Landmark,
+    Shield,
+    UserCheck,
+    FileText
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -33,6 +36,7 @@ export function Sidebar({ profile }: SidebarProps) {
     const pathname = usePathname()
 
     const isPastor = profile.role === 'PASTOR'
+    const isDiscipulador = profile.role === 'DISCIPULADOR'
 
     const routes = [
         {
@@ -48,6 +52,28 @@ export function Sidebar({ profile }: SidebarProps) {
             href: '/dashboard/mensagens',
             active: pathname.startsWith('/dashboard/mensagens'),
             show: true
+        },
+        // Discipulador Routes
+        {
+            label: 'Supervisão',
+            icon: Shield,
+            href: '/supervisao',
+            active: pathname === '/supervisao',
+            show: isDiscipulador
+        },
+        {
+            label: 'Meus Líderes',
+            icon: UserCheck,
+            href: '/supervisao/lideres',
+            active: pathname.startsWith('/supervisao/lideres'),
+            show: isDiscipulador
+        },
+        {
+            label: 'Relatórios',
+            icon: FileText,
+            href: '/supervisao/relatorios',
+            active: pathname.startsWith('/supervisao/relatorios'),
+            show: isDiscipulador
         },
         {
             label: 'Minha Célula',
@@ -68,6 +94,13 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: Users,
             href: '/membros',
             active: pathname.startsWith('/membros'),
+            show: isPastor
+        },
+        {
+            label: 'Discipuladores',
+            icon: Shield,
+            href: '/dashboard/discipuladores',
+            active: pathname.startsWith('/dashboard/discipuladores'),
             show: isPastor
         },
         {

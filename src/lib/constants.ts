@@ -5,12 +5,13 @@
  * This ensures type safety and makes refactoring easier.
  */
 
-// User roles in the system
+// User roles in the system (hierarchy: PASTOR > DISCIPULADOR > LEADER > MEMBER)
+// Note: Must match the CHECK constraint in profiles table
 export const ROLES = {
   PASTOR: 'PASTOR',
+  DISCIPULADOR: 'DISCIPULADOR',
   LEADER: 'LEADER',
   MEMBER: 'MEMBER',
-  TEACHER: 'TEACHER',
 } as const
 
 export type Role = typeof ROLES[keyof typeof ROLES]
@@ -94,14 +95,31 @@ export function isPastor(role: string | undefined): boolean {
   return role === ROLES.PASTOR
 }
 
+export function isDiscipulador(role: string | undefined): boolean {
+  return role === ROLES.DISCIPULADOR
+}
+
 export function isLeader(role: string | undefined): boolean {
   return role === ROLES.LEADER
+}
+
+export function isPastorOrDiscipulador(role: string | undefined): boolean {
+  return role === ROLES.PASTOR || role === ROLES.DISCIPULADOR
 }
 
 export function isPastorOrLeader(role: string | undefined): boolean {
   return role === ROLES.PASTOR || role === ROLES.LEADER
 }
 
+export function hasSupervisionAccess(role: string | undefined): boolean {
+  return role === ROLES.PASTOR || role === ROLES.DISCIPULADOR
+}
+
 export function hasAdminAccess(role: string | undefined): boolean {
   return role === ROLES.PASTOR
 }
+
+// Discipulador constants
+export const MAX_CELLS_PER_DISCIPULADOR = 5
+export const MIN_ATTENDANCE_THRESHOLD = 60
+export const MAX_NOTE_LENGTH = 2000

@@ -13,7 +13,7 @@ export interface Profile {
     phone: string | null
     photo_url: string | null
     member_stage: 'VISITOR' | 'REGULAR_VISITOR' | 'MEMBER' | 'LEADER'
-    role: 'PASTOR' | 'LEADER' | 'MEMBER'
+    role: 'PASTOR' | 'DISCIPULADOR' | 'LEADER' | 'MEMBER'
     cell_id: string | null
     is_active: boolean
     is_teacher: boolean
