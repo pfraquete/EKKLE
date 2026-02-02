@@ -172,64 +172,46 @@ export async function getMemberDetails(id: string) {
 
     const supabase = await createClient()
 
-    // 1. Get profile/member info - first try with church_id filter
-    let { data: member, error: memberError } = await supabase
+    // 1. Get profile/member info
+    console.log('getMemberDetails - Searching for member:', { id, churchId })
+
+    const { data: member, error: memberError } = await supabase
         .from('profiles')
         .select(`
             *,
-            cell:cells (
-                id,
-                name
-            )
+            cell:cells!profiles_cell_id_fkey(id, name)
         `)
         .eq('id', id)
         .eq('church_id', churchId)
-        .single()
+        .maybeSingle()
 
-    // If not found with church_id filter, try without (user might have incorrect church_id)
-    if (memberError || !member) {
-        console.log('Member not found with church_id filter, trying without...')
-        const { data: memberNoChurch, error: errorNoChurch } = await supabase
+    if (memberError) {
+        console.error('getMemberDetails - Query error:', memberError)
+        return { member: null, attendance: [] }
+    }
+
+    if (!member) {
+        // Try without is_active filter - maybe member was deactivated
+        console.log('getMemberDetails - Member not found, trying without filters...')
+        const { data: anyMember } = await supabase
             .from('profiles')
-            .select(`
-                *,
-                cell:cells (
-                    id,
-                    name
-                )
-            `)
+            .select('id, church_id, is_active, full_name')
             .eq('id', id)
-            .single()
+            .maybeSingle()
 
-        if (errorNoChurch || !memberNoChurch) {
-            // Try 'members' table as last resort
-            const { data: m, error: mError } = await supabase
-                .from('members')
-                .select(`
-                    *,
-                    cell:cells (
-                        id,
-                        name
-                    )
-                `)
-                .eq('id', id)
-                .single()
-
-            // Return null member if not found in either table
-            if (mError || !m) {
-                console.error('Member not found in any table:', id)
-                return { member: null, attendance: [] }
-            }
-            return { member: m, attendance: [] }
+        if (anyMember) {
+            console.log('getMemberDetails - Found member with different filters:', {
+                id: anyMember.id,
+                church_id: anyMember.church_id,
+                is_active: anyMember.is_active,
+                full_name: anyMember.full_name,
+                expected_church_id: churchId
+            })
+        } else {
+            console.log('getMemberDetails - Member ID does not exist in profiles table')
         }
 
-        // Check if member belongs to same church (security check)
-        if (memberNoChurch.church_id !== churchId) {
-            console.error('Member belongs to different church')
-            return { member: null, attendance: [] }
-        }
-
-        member = memberNoChurch
+        return { member: null, attendance: [] }
     }
 
     // 2. Get attendance history
