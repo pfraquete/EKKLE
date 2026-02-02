@@ -34,6 +34,25 @@ export async function getLiveKitBroadcasterToken(liveStreamId: string): Promise<
       return { success: false, error: 'Apenas pastores podem transmitir' }
     }
 
+    // Check LiveKit config first
+    const livekitUrl = process.env.LIVEKIT_URL
+    const livekitApiKey = process.env.LIVEKIT_API_KEY
+    const livekitApiSecret = process.env.LIVEKIT_API_SECRET
+
+    console.log('LiveKit Config Check:', {
+      hasUrl: !!livekitUrl,
+      hasApiKey: !!livekitApiKey,
+      hasApiSecret: !!livekitApiSecret,
+      url: livekitUrl?.substring(0, 20) + '...',
+    })
+
+    if (!livekitUrl || !livekitApiKey || !livekitApiSecret) {
+      return {
+        success: false,
+        error: 'LiveKit não configurado. Configure LIVEKIT_URL, LIVEKIT_API_KEY e LIVEKIT_API_SECRET.'
+      }
+    }
+
     const supabase = await createClient()
 
     // Get live stream
@@ -52,13 +71,26 @@ export async function getLiveKitBroadcasterToken(liveStreamId: string): Promise<
       return { success: false, error: 'Esta live não é do tipo browser' }
     }
 
-    if (!stream.livekit_room_name) {
-      return { success: false, error: 'Room não configurada' }
+    // If room not created yet, create it now
+    let roomName = stream.livekit_room_name
+    if (!roomName) {
+      roomName = `live-${liveStreamId}`
+      const created = await createRoom(roomName)
+
+      if (!created) {
+        return { success: false, error: 'Erro ao criar sala no LiveKit. Verifique as credenciais.' }
+      }
+
+      // Save room name to database
+      await supabase
+        .from('live_streams')
+        .update({ livekit_room_name: roomName })
+        .eq('id', liveStreamId)
     }
 
     // Generate token
     const token = await generateBroadcasterToken(
-      stream.livekit_room_name,
+      roomName,
       profile.id,
       profile.full_name || 'Broadcaster'
     )
@@ -70,12 +102,12 @@ export async function getLiveKitBroadcasterToken(liveStreamId: string): Promise<
     return {
       success: true,
       token,
-      wsUrl: LIVEKIT_WS_URL,
-      roomName: stream.livekit_room_name,
+      wsUrl: livekitUrl,
+      roomName,
     }
   } catch (error) {
     console.error('Error getting LiveKit token:', error)
-    return { success: false, error: 'Erro ao obter token' }
+    return { success: false, error: 'Erro ao obter token: ' + (error instanceof Error ? error.message : 'Erro desconhecido') }
   }
 }
 
