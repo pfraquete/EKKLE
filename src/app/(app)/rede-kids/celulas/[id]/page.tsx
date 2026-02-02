@@ -2,6 +2,8 @@ import { redirect, notFound } from 'next/navigation'
 import { getProfile } from '@/actions/auth'
 import { getKidsCell, getCellSupervision, getAvailableDiscipuladorasKids, AvailableDiscipuladora } from '@/actions/kids-cells'
 import { getKidsNetworkMembers } from '@/actions/kids-network'
+import { getUpcomingKidsMeetings, getKidsMeetingsStats } from '@/actions/kids-meetings'
+import { getKidsChildren } from '@/actions/kids-children'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -11,7 +13,12 @@ import {
   Baby,
   Shield,
   Edit,
-  Trash2
+  Trash2,
+  Calendar,
+  ChevronRight,
+  Plus,
+  BookOpen,
+  CheckCircle
 } from 'lucide-react'
 import { EditCellDialog } from './edit-cell-dialog'
 import { DeleteCellDialog } from './delete-cell-dialog'
@@ -41,13 +48,21 @@ export default async function CelulaKidsDetailPage({ params }: Props) {
     notFound()
   }
 
-  const supervision = await getCellSupervision(id)
-  const allMembers = await getKidsNetworkMembers()
+  const [supervision, allMembers, upcomingMeetings, meetingsStats, cellChildren] = await Promise.all([
+    getCellSupervision(id),
+    getKidsNetworkMembers(),
+    getUpcomingKidsMeetings(id, 3),
+    getKidsMeetingsStats(id),
+    getKidsChildren({ cellId: id })
+  ])
   const cellMembers = allMembers.filter(m => m.kids_cell_id === id)
 
   const isPastor = profile.role === 'PASTOR'
   const isPastoraKids = profile.kids_role === 'PASTORA_KIDS'
+  const isDiscipuladoraKids = profile.kids_role === 'DISCIPULADORA_KIDS'
+  const isLeaderKids = profile.kids_role === 'LEADER_KIDS'
   const canEdit = isPastor || isPastoraKids
+  const canManageMeetings = isPastor || isPastoraKids || isDiscipuladoraKids || isLeaderKids
 
   // Get available discipuladoras for supervision
   const availableDiscipuladoras = canEdit ? await getAvailableDiscipuladorasKids() : []
@@ -175,13 +190,99 @@ export default async function CelulaKidsDetailPage({ params }: Props) {
               <p className="text-2xl font-bold">{cellMembers.length}</p>
               <p className="text-xs text-muted-foreground">Membros</p>
             </div>
+            <Link href={`/rede-kids/celulas/${id}/reunioes`} className="p-3 bg-green-500/10 rounded-lg text-center hover:bg-green-500/20 transition-colors">
+              <Calendar className="h-6 w-6 text-green-500 mx-auto mb-1" />
+              <p className="text-2xl font-bold">{meetingsStats?.completed || 0}</p>
+              <p className="text-xs text-muted-foreground">Reunioes</p>
+            </Link>
             <div className="p-3 bg-amber-500/10 rounded-lg text-center">
               <Baby className="h-6 w-6 text-amber-500 mx-auto mb-1" />
-              <p className="text-2xl font-bold">0</p>
-              <p className="text-xs text-muted-foreground">Crianças</p>
+              <p className="text-2xl font-bold">{cellChildren.length}</p>
+              <p className="text-xs text-muted-foreground">Criancas</p>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Upcoming Meetings */}
+      <div className="bg-card border rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold">Proximas Reunioes</h2>
+          <Link
+            href={`/rede-kids/celulas/${id}/reunioes`}
+            className="text-sm text-primary hover:underline flex items-center gap-1"
+          >
+            Ver todas
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+        {upcomingMeetings.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p>Nenhuma reuniao agendada</p>
+            {canManageMeetings && (
+              <Link
+                href={`/rede-kids/celulas/${id}/reunioes/nova`}
+                className="mt-2 inline-flex items-center gap-2 text-sm text-primary hover:underline"
+              >
+                <Plus className="h-4 w-4" />
+                Agendar primeira reuniao
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {upcomingMeetings.map((meeting) => (
+              <Link
+                key={meeting.id}
+                href={`/rede-kids/celulas/${id}/reunioes/${meeting.id}`}
+                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    meeting.status === 'IN_PROGRESS' ? 'bg-amber-500/10' : 'bg-blue-500/10'
+                  }`}>
+                    <Calendar className={`h-5 w-5 ${
+                      meeting.status === 'IN_PROGRESS' ? 'text-amber-500' : 'text-blue-500'
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="font-medium">
+                      {new Date(meeting.meeting_date + 'T00:00:00').toLocaleDateString('pt-BR', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short'
+                      })}
+                      {meeting.meeting_time && ` às ${meeting.meeting_time.slice(0, 5)}`}
+                    </p>
+                    {meeting.theme && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <BookOpen className="h-3 w-3" />
+                        {meeting.theme}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <span className={`px-2 py-1 text-xs font-medium rounded ${
+                  meeting.status === 'IN_PROGRESS'
+                    ? 'bg-amber-500/10 text-amber-600'
+                    : 'bg-blue-500/10 text-blue-600'
+                }`}>
+                  {meeting.status === 'IN_PROGRESS' ? 'Em andamento' : 'Agendada'}
+                </span>
+              </Link>
+            ))}
+            {canManageMeetings && (
+              <Link
+                href={`/rede-kids/celulas/${id}/reunioes/nova`}
+                className="flex items-center justify-center gap-2 p-3 border-2 border-dashed rounded-lg text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Agendar nova reuniao
+              </Link>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Members */}

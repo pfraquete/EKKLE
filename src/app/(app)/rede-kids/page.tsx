@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { getProfile } from '@/actions/auth'
 import { getKidsNetworkStats } from '@/actions/kids-network'
 import { getKidsCellsWithStats } from '@/actions/kids-cells'
+import { getKidsChildrenStats, getKidsBirthdaysThisMonth } from '@/actions/kids-children'
+import { getUpcomingKidsMeetings } from '@/actions/kids-meetings'
 import Link from 'next/link'
 import {
   Users,
@@ -11,8 +13,12 @@ import {
   Shield,
   Crown,
   Plus,
-  ChevronRight
+  ChevronRight,
+  AlertTriangle
 } from 'lucide-react'
+import { BirthdayWidget } from '@/components/rede-kids/birthday-widget'
+import { UpcomingMeetingsWidget } from '@/components/rede-kids/upcoming-meetings-widget'
+import { GenderStatsWidget } from '@/components/rede-kids/gender-stats-widget'
 
 export default async function RedeKidsPage() {
   const profile = await getProfile()
@@ -28,6 +34,9 @@ export default async function RedeKidsPage() {
 
   const stats = await getKidsNetworkStats()
   const cells = await getKidsCellsWithStats()
+  const childrenStats = await getKidsChildrenStats()
+  const birthdays = await getKidsBirthdaysThisMonth()
+  const upcomingMeetings = await getUpcomingKidsMeetings(5)
 
   const isPastor = profile.role === 'PASTOR'
   const isPastoraKids = profile.kids_role === 'PASTORA_KIDS'
@@ -44,25 +53,71 @@ export default async function RedeKidsPage() {
             Gerencie a rede de células kids da sua igreja
           </p>
         </div>
-        {(isPastor || isPastoraKids) && (
-          <div className="flex gap-2">
+        {canManage && (
+          <div className="flex flex-wrap gap-2">
             <Link
-              href="/rede-kids/equipe"
+              href="/rede-kids/criancas"
               className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
             >
-              <Users className="h-4 w-4" />
-              Equipe
+              <Baby className="h-4 w-4" />
+              Crianças
             </Link>
-            <Link
-              href="/rede-kids/celulas/nova"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Nova Célula
-            </Link>
+            {isDiscipuladoraKids && !isPastoraKids && !isPastor && (
+              <Link
+                href="/rede-kids/supervisao"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+              >
+                <Shield className="h-4 w-4" />
+                Minha Supervisao
+              </Link>
+            )}
+            {(isPastor || isPastoraKids) && (
+              <>
+                <Link
+                  href="/rede-kids/equipe"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+                >
+                  <Users className="h-4 w-4" />
+                  Equipe
+                </Link>
+                <Link
+                  href="/rede-kids/celulas/nova"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  Nova Célula
+                </Link>
+              </>
+            )}
           </div>
         )}
       </div>
+
+      {/* Alert: Children without cell */}
+      {childrenStats.withoutCell > 0 && canManage && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-amber-500/20 rounded-lg shrink-0">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-amber-800 dark:text-amber-200">
+                {childrenStats.withoutCell} {childrenStats.withoutCell === 1 ? 'criança sem célula' : 'crianças sem célula'}
+              </p>
+              <p className="text-sm text-amber-700 dark:text-amber-300 mt-0.5">
+                Existem crianças cadastradas que ainda não foram atribuídas a uma célula.
+              </p>
+              <Link
+                href="/rede-kids/criancas?filter=sem-celula"
+                className="inline-flex items-center gap-1 text-sm font-medium text-amber-700 dark:text-amber-300 hover:underline mt-2"
+              >
+                Ver crianças sem célula
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -90,7 +145,7 @@ export default async function RedeKidsPage() {
           </div>
         </div>
 
-        <div className="bg-card border rounded-xl p-4">
+        <Link href="/rede-kids/criancas" className="bg-card border rounded-xl p-4 hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-amber-500/10 rounded-lg">
               <Baby className="h-5 w-5 text-amber-500" />
@@ -100,7 +155,7 @@ export default async function RedeKidsPage() {
               <p className="text-xs text-muted-foreground">Crianças</p>
             </div>
           </div>
-        </div>
+        </Link>
 
         <div className="bg-card border rounded-xl p-4">
           <div className="flex items-center gap-3">
@@ -113,6 +168,20 @@ export default async function RedeKidsPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Gender distribution */}
+      {(childrenStats.maleCount > 0 || childrenStats.femaleCount > 0) && (
+        <GenderStatsWidget
+          maleCount={childrenStats.maleCount}
+          femaleCount={childrenStats.femaleCount}
+        />
+      )}
+
+      {/* Birthdays and Upcoming Meetings */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <BirthdayWidget birthdays={birthdays} />
+        <UpcomingMeetingsWidget meetings={upcomingMeetings} />
       </div>
 
       {/* Role breakdown */}
