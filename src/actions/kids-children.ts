@@ -425,12 +425,44 @@ export async function getKidsChildrenStats() {
         return {
             total: total || 0,
             genderStats,
+            maleCount: genderStats.M,
+            femaleCount: genderStats.F,
             withoutCell: withoutCell || 0,
             birthdaysThisMonth,
         }
     } catch (error) {
         console.error('Error in getKidsChildrenStats:', error)
         return null
+    }
+}
+
+// =====================================================
+// GET BIRTHDAYS THIS MONTH
+// =====================================================
+
+export async function getKidsBirthdaysThisMonth(): Promise<{ id: string; full_name: string; birth_date: string }[]> {
+    try {
+        const profile = await getProfile()
+        if (!profile) return []
+
+        const supabase = await createClient()
+        const currentMonth = new Date().getMonth() + 1
+
+        const { data: birthdays } = await supabase
+            .from('kids_children')
+            .select('id, full_name, birth_date')
+            .eq('church_id', profile.church_id)
+            .eq('is_active', true)
+            .not('birth_date', 'is', null)
+
+        return birthdays?.filter(c => {
+            if (!c.birth_date) return false
+            const month = new Date(c.birth_date).getMonth() + 1
+            return month === currentMonth
+        }) || []
+    } catch (error) {
+        console.error('Error in getKidsBirthdaysThisMonth:', error)
+        return []
     }
 }
 
