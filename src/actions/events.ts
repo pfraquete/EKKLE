@@ -88,6 +88,7 @@ export async function createEvent(event: Omit<EventData, 'id'>) {
       ...insertData,
       church_id: churchId,
       created_by: profile.id,
+      is_published: true, // Publicar por padrão
       // end_date logic: if end_time exists, we could combine it with start_date, 
       // but for now let's just ensure we don't send end_time which doesn't exist
       end_date: end_time ? `${event.start_date.split('T')[0]}T${end_time}` : null
