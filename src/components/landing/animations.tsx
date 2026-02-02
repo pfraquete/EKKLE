@@ -49,7 +49,8 @@ export const AnimatedSection = memo(function AnimatedSection({
   className = '',
 }: AnimatedSectionProps) {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+  // Reduced margin and added amount for less aggressive triggering
+  const isInView = useInView(ref, { once: true, margin: '-50px', amount: 0.1 })
 
   return (
     <motion.div

@@ -186,11 +186,13 @@ export const ScreenshotsSection = memo(function ScreenshotsSection() {
                 </div>
               </div>
               <Image
-                src="/images/landing/dashboard-example.png"
+                src="/images/landing/dashboard-example.jpg"
                 alt="Dashboard do Ekkle"
                 width={1200}
                 height={800}
                 className="w-full h-auto"
+                loading="lazy"
+                priority={false}
               />
             </div>
           </motion.div>
@@ -234,32 +236,29 @@ export const CommunitySection = memo(function CommunitySection() {
             <div className="grid grid-cols-2 gap-4">
               <motion.div variants={fadeInUp} className="space-y-4">
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <Image src="/images/landing/small-group.jpeg" alt="Célula em reunião" width={300} height={200} className="w-full h-48 object-cover" />
+                  <Image src="/images/landing/small-group.jpeg" alt="Célula em reunião" width={300} height={200} className="w-full h-48 object-cover" loading="lazy" />
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <Image src="/images/landing/bible-study.jpg" alt="Estudo bíblico" width={300} height={200} className="w-full h-48 object-cover" />
+                  <Image src="/images/landing/bible-study.jpg" alt="Estudo bíblico" width={300} height={200} className="w-full h-48 object-cover" loading="lazy" />
                 </div>
               </motion.div>
               <motion.div variants={fadeInUp} className="space-y-4 pt-8">
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <Image src="/images/landing/youth-worship.jpg" alt="Jovens em adoração" width={300} height={200} className="w-full h-48 object-cover" />
+                  <Image src="/images/landing/youth-worship.jpg" alt="Jovens em adoração" width={300} height={200} className="w-full h-48 object-cover" loading="lazy" />
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <Image src="/images/landing/church-worship.jpg" alt="Culto de celebração" width={300} height={200} className="w-full h-48 object-cover" />
+                  <Image src="/images/landing/church-worship.jpg" alt="Culto de celebração" width={300} height={200} className="w-full h-48 object-cover" loading="lazy" />
                 </div>
               </motion.div>
             </div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
+            <div
               className="absolute -bottom-4 -right-4 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-2xl p-4 shadow-xl"
             >
               <div className="text-center">
                 <div className="text-3xl font-bold text-white">+100</div>
                 <div className="text-sm text-white/80">Igrejas</div>
               </div>
-            </motion.div>
+            </div>
           </AnimatedSection>
 
           <AnimatedSection>
@@ -397,11 +396,8 @@ export const BenefitsSection = memo(function BenefitsSection() {
             <motion.div variants={scaleIn} className="relative bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
               <div className="space-y-6">
                 {NOTIFICATION_ITEMS.map((item, i) => (
-                  <motion.div
+                  <div
                     key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.2 }}
                     className="flex items-center gap-4 p-4 bg-zinc-800/50 rounded-xl"
                   >
                     <div className={`w-10 h-10 ${item.iconBg} rounded-full flex items-center justify-center`}>
@@ -411,7 +407,7 @@ export const BenefitsSection = memo(function BenefitsSection() {
                       <div className="text-white font-medium">{item.title}</div>
                       <div className="text-sm text-zinc-400">{item.desc}</div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </motion.div>
