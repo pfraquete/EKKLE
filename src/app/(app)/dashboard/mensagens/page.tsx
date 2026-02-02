@@ -20,8 +20,8 @@ export default async function DashboardMensagensPage() {
         <UserSearch basePath="/dashboard/mensagens" />
       </div>
 
-      <ChatList 
-        conversations={conversations} 
+      <ChatList
+        initialConversations={conversations}
         currentUserId={profile.id}
         basePath="/dashboard/mensagens"
       />
