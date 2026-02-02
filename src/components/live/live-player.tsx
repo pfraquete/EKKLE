@@ -270,6 +270,7 @@ export function LivePlayer({ stream, isPastor = false, onViewerCountChange }: Li
                 </div>
                 <WebBroadcaster
                   streamKey={stream.mux_stream_key}
+                  liveStreamId={stream.id}
                   onStatusChange={setBroadcastStatus}
                 />
               </div>

@@ -14,26 +14,25 @@ import {
   Loader2,
   AlertCircle,
   RefreshCw,
-  Info
+  CheckCircle2,
+  Info,
+  ExternalLink
 } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface WebBroadcasterProps {
   streamKey: string
-  rtmpUrl?: string
+  liveStreamId: string
   onStatusChange?: (status: 'idle' | 'connecting' | 'live' | 'error') => void
 }
 
 export function WebBroadcaster({
   streamKey,
-  rtmpUrl = 'rtmps://global-live.mux.com:443/app',
+  liveStreamId,
   onStatusChange
 }: WebBroadcasterProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const pcRef = useRef<RTCPeerConnection | null>(null)
 
   const [status, setStatus] = useState<'idle' | 'connecting' | 'live' | 'error'>('idle')
   const [videoEnabled, setVideoEnabled] = useState(true)
@@ -47,7 +46,6 @@ export function WebBroadcaster({
   const [showSettings, setShowSettings] = useState(false)
   const [sourceType, setSourceType] = useState<'camera' | 'screen'>('camera')
   const [permissionError, setPermissionError] = useState<string | null>(null)
-  const [connectionAttempt, setConnectionAttempt] = useState(0)
 
   // Update parent status
   useEffect(() => {
@@ -207,156 +205,26 @@ export function WebBroadcaster({
     setAudioEnabled(!audioEnabled)
   }, [audioEnabled])
 
-  // Start broadcasting via WHIP (WebRTC-HTTP Ingestion Protocol)
-  const startBroadcast = useCallback(async () => {
-    if (!streamRef.current) {
-      toast.error('Nenhum stream de vídeo disponível')
-      return
-    }
-
-    setStatus('connecting')
-    setConnectionAttempt(prev => prev + 1)
-
-    try {
-      // Close existing connection if any
-      if (pcRef.current) {
-        pcRef.current.close()
-        pcRef.current = null
-      }
-
-      // Create peer connection with multiple STUN/TURN servers for better connectivity
-      const pc = new RTCPeerConnection({
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' },
-        ],
-        iceCandidatePoolSize: 10,
-      })
-      pcRef.current = pc
-
-      // Add tracks from our stream
-      streamRef.current.getTracks().forEach(track => {
-        pc.addTrack(track, streamRef.current!)
-      })
-
-      // Create offer with specific options
-      const offer = await pc.createOffer({
-        offerToReceiveAudio: false,
-        offerToReceiveVideo: false,
-      })
-      await pc.setLocalDescription(offer)
-
-      // Wait for ICE gathering to complete with timeout
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          resolve() // Continue even if not all candidates gathered
-        }, 5000)
-
-        if (pc.iceGatheringState === 'complete') {
-          clearTimeout(timeout)
-          resolve()
-        } else {
-          pc.onicegatheringstatechange = () => {
-            if (pc.iceGatheringState === 'complete') {
-              clearTimeout(timeout)
-              resolve()
-            }
-          }
-        }
-      })
-
-      // Try Mux WHIP endpoint
-      const whipUrl = `https://global-live.mux.com/v1/whip/${streamKey}`
-
-      console.log('Attempting WHIP connection to:', whipUrl)
-
-      const response = await fetch(whipUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/sdp',
-        },
-        body: pc.localDescription?.sdp,
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('WHIP response error:', response.status, errorText)
-
-        // Check for common errors
-        if (response.status === 404 || response.status === 405) {
-          throw new Error('O Mux não suporta transmissão pelo navegador (WHIP) para Live Streams. Use a opção "Software Externo (OBS)" para transmitir.')
-        }
-        throw new Error(`Erro de conexão: ${response.status}`)
-      }
-
-      const answerSdp = await response.text()
-      await pc.setRemoteDescription({
-        type: 'answer',
-        sdp: answerSdp,
-      })
-
-      // Monitor connection state
-      pc.onconnectionstatechange = () => {
-        console.log('Connection state:', pc.connectionState)
-        if (pc.connectionState === 'connected') {
-          setStatus('live')
-          toast.success('Transmissão ao vivo iniciada!')
-        } else if (pc.connectionState === 'failed') {
-          setStatus('error')
-          toast.error('Falha na conexão. Tente usar Software Externo (OBS).')
-        } else if (pc.connectionState === 'disconnected') {
-          // Try to reconnect
-          setTimeout(() => {
-            if (pc.connectionState === 'disconnected') {
-              setStatus('error')
-              toast.error('Conexão perdida')
-            }
-          }, 3000)
-        }
-      }
-
-      pc.oniceconnectionstatechange = () => {
-        console.log('ICE connection state:', pc.iceConnectionState)
-      }
-
-    } catch (error) {
-      console.error('Error starting broadcast:', error)
-      setStatus('error')
-
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-
-      // Show helpful error message
-      if (errorMessage.includes('WHIP') || errorMessage.includes('Software Externo')) {
-        toast.error(errorMessage, { duration: 8000 })
-      } else {
-        toast.error('Erro ao conectar. Recomendamos usar a opção "Software Externo (OBS)" para transmitir.', { duration: 6000 })
-      }
-    }
-  }, [streamKey])
-
-  // Stop broadcasting
-  const stopBroadcast = useCallback(() => {
-    if (pcRef.current) {
-      pcRef.current.close()
-      pcRef.current = null
-    }
-
-    setStatus('idle')
-    toast.info('Transmissão encerrada')
-  }, [])
-
   return (
     <div className="flex flex-col gap-4">
-      {/* Beta Notice */}
-      <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400">
+      {/* Info Notice */}
+      <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
         <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
         <div className="text-sm">
-          <p className="font-semibold mb-1">Recurso em desenvolvimento</p>
-          <p className="text-amber-600/80 dark:text-amber-400/80">
-            A transmissão pelo navegador pode não funcionar em todos os casos.
-            Se tiver problemas, use a opção <strong>"Software Externo (OBS)"</strong> que é mais estável.
+          <p className="font-semibold mb-1">Preview da Câmera</p>
+          <p className="text-blue-600/80 dark:text-blue-400/80">
+            Use este preview para testar sua câmera e microfone. Para transmitir, você precisa usar
+            um software como <strong>OBS Studio</strong> (gratuito) com as configurações RTMP abaixo.
           </p>
+          <a
+            href="https://obsproject.com/download"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 mt-2 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            Baixar OBS Studio
+          </a>
         </div>
       </div>
 
@@ -383,22 +251,12 @@ export function WebBroadcaster({
           playsInline
           className="w-full h-full object-cover"
         />
-        <canvas ref={canvasRef} className="hidden" />
 
-        {/* Status Badge */}
-        {status === 'live' && (
-          <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-bold">
-            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            AO VIVO
-          </div>
-        )}
-
-        {status === 'connecting' && (
-          <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-yellow-600 text-white rounded-lg text-sm font-bold">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Conectando...
-          </div>
-        )}
+        {/* Preview Label */}
+        <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white rounded-lg text-sm font-medium">
+          <Video className="w-4 h-4" />
+          Preview
+        </div>
 
         {/* No Video Overlay */}
         {!videoEnabled && (
@@ -441,12 +299,11 @@ export function WebBroadcaster({
           {/* Source Toggle */}
           <button
             onClick={() => setSourceType(sourceType === 'camera' ? 'screen' : 'camera')}
-            disabled={status === 'live'}
             className={`p-3 rounded-xl transition-colors ${
               sourceType === 'screen'
                 ? 'bg-primary/20 text-primary'
                 : 'bg-muted hover:bg-muted/80 text-foreground'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            }`}
             title={sourceType === 'camera' ? 'Compartilhar tela' : 'Usar câmera'}
           >
             {sourceType === 'camera' ? <Camera className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
@@ -454,42 +311,19 @@ export function WebBroadcaster({
 
           <button
             onClick={() => setShowSettings(!showSettings)}
-            disabled={status === 'live'}
-            className="p-3 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-3 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-colors"
             title="Configurações"
           >
             <Settings className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Broadcast Controls */}
-        <div className="flex items-center gap-2">
-          {status === 'idle' || status === 'error' ? (
-            <button
-              onClick={startBroadcast}
-              disabled={!streamRef.current || !!permissionError}
-              className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Radio className="w-5 h-5" />
-              Iniciar Transmissão
-            </button>
-          ) : status === 'connecting' ? (
-            <button
-              disabled
-              className="flex items-center gap-2 px-6 py-3 bg-yellow-600 text-white rounded-xl font-bold opacity-80 cursor-not-allowed"
-            >
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Conectando...
-            </button>
-          ) : (
-            <button
-              onClick={stopBroadcast}
-              className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors"
-            >
-              <Square className="w-5 h-5" />
-              Encerrar Transmissão
-            </button>
-          )}
+        {/* Status indicator */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-xl">
+          <div className={`w-2 h-2 rounded-full ${streamRef.current ? 'bg-green-500' : 'bg-gray-400'}`} />
+          <span className="text-sm font-medium text-muted-foreground">
+            {streamRef.current ? 'Câmera ativa' : 'Câmera inativa'}
+          </span>
         </div>
       </div>
 
@@ -506,8 +340,7 @@ export function WebBroadcaster({
             <select
               value={selectedVideoDevice}
               onChange={(e) => setSelectedVideoDevice(e.target.value)}
-              disabled={status === 'live'}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm disabled:opacity-50"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
             >
               {devices.videoDevices.map((device) => (
                 <option key={device.deviceId} value={device.deviceId}>
@@ -523,8 +356,7 @@ export function WebBroadcaster({
             <select
               value={selectedAudioDevice}
               onChange={(e) => setSelectedAudioDevice(e.target.value)}
-              disabled={status === 'live'}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm disabled:opacity-50"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
             >
               {devices.audioDevices.map((device) => (
                 <option key={device.deviceId} value={device.deviceId}>
@@ -533,6 +365,16 @@ export function WebBroadcaster({
               ))}
             </select>
           </div>
+        </div>
+      )}
+
+      {/* Audio Level Indicator */}
+      {streamRef.current && audioEnabled && (
+        <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-600">
+          <CheckCircle2 className="w-5 h-5" />
+          <span className="text-sm font-medium">
+            Sua câmera e microfone estão funcionando! Use o OBS para iniciar a transmissão.
+          </span>
         </div>
       )}
     </div>
