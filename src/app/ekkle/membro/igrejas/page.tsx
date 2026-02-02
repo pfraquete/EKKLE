@@ -91,9 +91,11 @@ export default function IgrejasPage() {
       try {
         const result = await joinChurch(selectedChurch.id)
 
-        if (result.success) {
-          // Redirect to church member area
-          router.push('/membro')
+        if (result.success && result.churchSlug) {
+          // Redirect to church subdomain member area
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.com.br'
+          const churchUrl = baseUrl.replace('www.', '').replace('ekkle.com.br', `${result.churchSlug}.ekkle.com.br`)
+          window.location.href = `${churchUrl}/membro`
         } else {
           setError(result.error || 'Erro ao entrar na igreja')
         }
