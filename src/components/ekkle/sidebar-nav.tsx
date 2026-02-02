@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
-import { BookOpen, User, LogOut, Search, Radio, BookMarked } from 'lucide-react'
+import { BookOpen, User, LogOut, Search, Radio, BookMarked, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface EkkleSidebarNavProps {
@@ -18,6 +18,7 @@ export function EkkleSidebarNav({ profile }: EkkleSidebarNavProps) {
 
     const navItems = [
         { href: '/ekkle/membro', label: 'Meu Perfil', icon: User },
+        { href: '/ekkle/membro/mensagens', label: 'Mensagens', icon: MessageCircle },
         { href: '/ekkle/membro/igrejas', label: 'Pesquisar Igreja', icon: Search, highlight: true },
         { href: '/ekkle/membro/cursos', label: 'Cursos Ekkle', icon: BookOpen },
         { href: '/ekkle/membro/lives', label: 'Lives', icon: Radio },

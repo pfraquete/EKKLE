@@ -17,7 +17,8 @@ import {
     BookMarked,
     Calendar,
     Package,
-    LogOut
+    LogOut,
+    MessageCircle
 } from 'lucide-react'
 
 interface MobileNavProps {
@@ -78,6 +79,13 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             label: 'Meu Perfil',
             href: '/membro',
             active: pathname === '/membro',
+            show: true
+        },
+        {
+            icon: MessageCircle,
+            label: 'Mensagens',
+            href: '/membro/mensagens',
+            active: pathname.startsWith('/membro/mensagens'),
             show: true
         },
         {

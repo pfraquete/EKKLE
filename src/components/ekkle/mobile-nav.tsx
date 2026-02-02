@@ -9,6 +9,7 @@ import {
     BookOpen,
     Radio,
     BookMarked,
+    MessageCircle,
 } from 'lucide-react'
 
 export function EkkleMobileNav() {
@@ -20,6 +21,12 @@ export function EkkleMobileNav() {
             label: 'Perfil',
             href: '/ekkle/membro',
             active: pathname === '/ekkle/membro',
+        },
+        {
+            icon: MessageCircle,
+            label: 'Chat',
+            href: '/ekkle/membro/mensagens',
+            active: pathname.startsWith('/ekkle/membro/mensagens'),
         },
         {
             icon: Search,
@@ -39,12 +46,6 @@ export function EkkleMobileNav() {
             label: 'Lives',
             href: '/ekkle/membro/lives',
             active: pathname.startsWith('/ekkle/membro/lives'),
-        },
-        {
-            icon: BookMarked,
-            label: 'Oração',
-            href: '/ekkle/membro/biblia-oracao',
-            active: pathname.startsWith('/ekkle/membro/biblia-oracao'),
         },
     ]
 
