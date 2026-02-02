@@ -10,7 +10,7 @@ type PageProps = {
 export default async function DashboardConversationPage({ params }: PageProps) {
   const { conversationId } = await params
   const profile = await getProfile()
-  
+
   if (!profile) redirect('/login')
 
   const conversation = await getConversation(conversationId)
@@ -18,18 +18,12 @@ export default async function DashboardConversationPage({ params }: PageProps) {
 
   const messages = await getMessages(conversationId)
 
-  // Find the other participant
-  const otherParticipant = conversation.participants.find(
-    (p: any) => p.profile_id !== profile.id
-  )
-
   return (
     <div className="max-w-4xl mx-auto h-[calc(100vh-12rem)] animate-in fade-in slide-in-from-bottom-4 duration-700">
       <ChatConversation
         conversation={conversation}
         initialMessages={messages}
         currentUserId={profile.id}
-        otherParticipant={otherParticipant}
         basePath="/dashboard/mensagens"
       />
     </div>
