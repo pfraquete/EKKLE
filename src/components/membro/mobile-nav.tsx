@@ -65,10 +65,10 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             show: true
         },
         {
-            icon: BookOpen,
-            label: 'Cursos',
-            href: '/membro/cursos',
-            active: pathname.startsWith('/membro/cursos'),
+            icon: MessageCircle,
+            label: 'Chat',
+            href: '/membro/mensagens',
+            active: pathname.startsWith('/membro/mensagens'),
             show: true
         },
     ]
@@ -84,7 +84,7 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
         },
         {
             icon: MessageCircle,
-            label: 'Mensagens',
+            label: 'Chat',
             href: '/membro/mensagens',
             active: pathname.startsWith('/membro/mensagens'),
             show: true

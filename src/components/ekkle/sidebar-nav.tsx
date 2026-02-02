@@ -18,7 +18,7 @@ export function EkkleSidebarNav({ profile }: EkkleSidebarNavProps) {
 
     const navItems = [
         { href: '/ekkle/membro', label: 'Meu Perfil', icon: User },
-        { href: '/ekkle/membro/mensagens', label: 'Mensagens', icon: MessageCircle },
+        { href: '/ekkle/membro/mensagens', label: 'Chat', icon: MessageCircle },
         { href: '/ekkle/membro/igrejas', label: 'Pesquisar Igreja', icon: Search, highlight: true },
         { href: '/ekkle/membro/cursos', label: 'Cursos Ekkle', icon: BookOpen },
         { href: '/ekkle/membro/lives', label: 'Lives', icon: Radio },

@@ -44,7 +44,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
     const mainNavItems = [
         { href: '/membro', label: 'Meu Perfil', icon: User },
-        { href: '/membro/mensagens', label: 'Mensagens', icon: MessageCircle },
+        { href: '/membro/mensagens', label: 'Chat', icon: MessageCircle },
         { href: '/membro/lives', label: 'Lives', icon: Radio },
         { href: '/membro/cursos', label: 'Meus Cursos', icon: BookOpen },
         { href: '/membro/biblia-oracao', label: 'Bíblia e Oração', icon: BookMarked },
