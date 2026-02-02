@@ -26,7 +26,7 @@ interface BibleReaderProps {
 export function BibleReader({ 
   initialBook = 'GEN', 
   initialChapter = 1,
-  initialVersion = 'nvi'
+  initialVersion = 'almeida'
 }: BibleReaderProps) {
   const router = useRouter()
   const searchParams = useSearchParams()

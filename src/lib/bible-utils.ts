@@ -4,20 +4,21 @@
  * Client-safe utilities for Bible references and formatting.
  * These can be imported in both server and client components.
  * 
- * Updated to use A Bíblia Digital API which provides complete
- * Old and New Testament in Portuguese (NVI, ACF, RA versions).
+ * Updated to use bible-api.com which provides complete
+ * Old and New Testament in Portuguese (João Ferreira de Almeida).
  */
 
-// Available Portuguese Bible versions from A Bíblia Digital
+// Available Bible versions from bible-api.com
 export const PORTUGUESE_BIBLES = {
-    NVI: 'nvi',      // Nova Versão Internacional
-    ACF: 'acf',      // Almeida Corrigida Fiel
-    RA: 'ra',        // Revista e Atualizada
-    APEE: 'apee',    // Português Europeu
+    ALMEIDA: 'almeida',  // João Ferreira de Almeida (Portuguese)
+    KJV: 'kjv',          // King James Version
+    ASV: 'asv',          // American Standard Version
+    BBE: 'bbe',          // Bible in Basic English
+    WEB: 'web',          // World English Bible
 } as const
 
-// Default Bible for reading
-export const DEFAULT_BIBLE = PORTUGUESE_BIBLES.NVI
+// Default Bible for reading - Almeida is the only Portuguese version with complete OT+NT
+export const DEFAULT_BIBLE = PORTUGUESE_BIBLES.ALMEIDA
 
 export type BibleVersion = keyof typeof PORTUGUESE_BIBLES
 
