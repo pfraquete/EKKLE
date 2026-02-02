@@ -106,6 +106,59 @@ export async function updateSession(request: NextRequest) {
     }
 
     const pathname = request.nextUrl.pathname
+
+    // =====================================================
+    // AUTO-REDIRECT TO CHURCH SUBDOMAIN
+    // =====================================================
+    // If user is logged in, has a church, and is accessing main domain,
+    // redirect them to their church's subdomain
+    if (!subdomain && user) {
+        // Rotas que NÃO devem redirecionar
+        const noRedirectRoutes = [
+            '/login', '/logout', '/cadastro', '/registro', '/register',
+            '/forgot-password', '/reset-password',
+            '/api/', '/ekkle/', '/_next/', '/favicon', '/manifest'
+        ]
+        const shouldNotRedirect = noRedirectRoutes.some(route => pathname.startsWith(route))
+
+        if (!shouldNotRedirect) {
+            // Buscar perfil do usuário para pegar church_id
+            const { data: userProfile } = await supabase
+                .from('profiles')
+                .select('church_id')
+                .eq('id', user.id)
+                .single()
+
+            // Se tem church_id e não é Ekkle Hub, redirecionar para subdomínio
+            if (userProfile?.church_id && userProfile.church_id !== EKKLE_HUB_ID) {
+                // Buscar slug da igreja
+                const { data: userChurch } = await supabase
+                    .from('churches')
+                    .select('slug')
+                    .eq('id', userProfile.church_id)
+                    .single()
+
+                if (userChurch?.slug) {
+                    // Construir URL de redirecionamento
+                    const redirectUrl = new URL(request.url)
+                    // Substituir o host pelo subdomínio da igreja
+                    const baseHost = redirectUrl.host
+                        .replace('www.', '')
+                        .replace('app.', '')
+                        .replace('localhost:3000', 'localhost:3000') // Dev
+
+                    if (baseHost.includes('localhost')) {
+                        // Dev: não redirecionar (subdomínios não funcionam em localhost)
+                        // Apenas injetar headers
+                    } else {
+                        // Prod: redirecionar para subdomínio
+                        redirectUrl.host = `${userChurch.slug}.${baseHost}`
+                        return redirectWithCookies(redirectUrl, supabaseResponse, request)
+                    }
+                }
+            }
+        }
+    }
     const isPublicWebsite = isPublicWebsiteRoute(pathname)
     const isAdmin = isAdminRoute(pathname)
 
