@@ -337,7 +337,22 @@ export async function getConversation(conversationId: string): Promise<Conversat
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) return null
+    if (!user) {
+        console.error('getConversation: No authenticated user')
+        return null
+    }
+
+    console.log('getConversation: START', { conversationId, userId: user.id })
+
+    // First, check if user is a participant (debug)
+    const { data: participation, error: partError } = await supabase
+        .from('conversation_participants')
+        .select('id, conversation_id, profile_id')
+        .eq('conversation_id', conversationId)
+        .eq('profile_id', user.id)
+        .single()
+
+    console.log('getConversation: User participation check:', { participation, partError: partError?.message })
 
     const { data, error } = await supabase
         .from('conversations')
@@ -365,10 +380,11 @@ export async function getConversation(conversationId: string): Promise<Conversat
         .single()
 
     if (error) {
-        console.error('Error fetching conversation:', error)
+        console.error('getConversation: Error fetching conversation:', error.message, error.code, error.details, error.hint)
         return null
     }
 
+    console.log('getConversation: Success, participants:', data?.participants?.length)
     return transformConversation(data)
 }
 
