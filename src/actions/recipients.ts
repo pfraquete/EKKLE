@@ -112,6 +112,26 @@ export async function createChurchRecipient(input: RecipientInput) {
     const documentType = cleanDocument.length <= 11 ? 'individual' : 'company';
     const holderType = cleanHolderDocument.length <= 11 ? 'individual' : 'company';
 
+    // Build transfer settings based on interval
+    // daily: no transfer_day needed
+    // weekly: transfer_day 1-5 (1=Monday, 5=Friday)
+    // monthly: transfer_day 1-31
+    const transferSettings: {
+      transfer_enabled: boolean;
+      transfer_interval: 'daily' | 'weekly' | 'monthly';
+      transfer_day?: number;
+    } = {
+      transfer_enabled: true,
+      transfer_interval: validated.transfer_interval,
+    };
+
+    // Add transfer_day for weekly and monthly
+    if (validated.transfer_interval === 'weekly') {
+      transferSettings.transfer_day = 5; // Friday
+    } else if (validated.transfer_interval === 'monthly') {
+      transferSettings.transfer_day = 15; // Day 15 of month
+    }
+
     // Create recipient in Pagar.me
     const pagarmeRecipient: PagarmeRecipient = {
       name: validated.name,
@@ -130,10 +150,7 @@ export async function createChurchRecipient(input: RecipientInput) {
         account_check_digit: validated.account_digit,
         type: validated.account_type,
       },
-      transfer_settings: {
-        transfer_enabled: true,
-        transfer_interval: validated.transfer_interval,
-      },
+      transfer_settings: transferSettings,
       metadata: {
         church_id: profile.church_id,
         church_name: church.name,

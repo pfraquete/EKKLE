@@ -195,7 +195,7 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
               value={formData.transfer_interval}
               onChange={(e) => setFormData({ ...formData, transfer_interval: e.target.value })}
               disabled={loading}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
             >
               <option value="daily">Diária</option>
               <option value="weekly">Semanal</option>
@@ -219,7 +219,7 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
                 value={formData.bank_code}
                 onChange={(e) => setFormData({ ...formData, bank_code: e.target.value })}
                 disabled={loading}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
               >
                 <option value="">Selecione o banco</option>
                 {BANKS.map((bank) => (
@@ -238,7 +238,7 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
                 value={formData.account_type}
                 onChange={(e) => setFormData({ ...formData, account_type: e.target.value })}
                 disabled={loading}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
               >
                 <option value="checking">Corrente</option>
                 <option value="savings">Poupança</option>
