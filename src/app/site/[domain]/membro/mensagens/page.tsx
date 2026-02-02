@@ -26,7 +26,7 @@ export default async function SiteMensagensPage({ params }: MensagensPageProps) 
             <ChatList
                 initialConversations={conversations}
                 currentUserId={user.id}
-                basePath={`/site/${domain}/membro/mensagens`}
+                basePath="/membro/mensagens"
             />
         </div>
     )

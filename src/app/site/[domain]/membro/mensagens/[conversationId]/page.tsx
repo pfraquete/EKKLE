@@ -32,7 +32,7 @@ export default async function SiteConversationPage({ params }: ConversationPageP
     )
 
     if (!isParticipant) {
-        redirect(`/site/${domain}/membro/mensagens`)
+        redirect('/membro/mensagens')
     }
 
     const messages = await getMessages(conversationId)
@@ -43,7 +43,7 @@ export default async function SiteConversationPage({ params }: ConversationPageP
                 conversation={conversation}
                 initialMessages={messages}
                 currentUserId={user.id}
-                basePath={`/site/${domain}/membro/mensagens`}
+                basePath="/membro/mensagens"
             />
         </div>
     )
