@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { signOut } from '@/actions/auth'
 import {
     User,
     Sparkles,
@@ -254,7 +255,7 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
                         <LogOut className="h-5 w-5 rotate-180" />
                         Voltar ao Site
                     </Link>
-                    <form action="/api/auth/signout" method="post">
+                    <form action={signOut}>
                         <button
                             type="submit"
                             className="flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-destructive rounded-xl hover:bg-destructive/10 transition-colors"
