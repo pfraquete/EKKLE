@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { fullName, email, phone, password } = body
+    const { fullName, email, phone, nickname, password } = body
 
     // Validate required fields
     if (!fullName || !email || !password) {
@@ -85,6 +85,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate nickname if provided
+    if (nickname) {
+      const nicknameRegex = /^[a-zA-Z0-9_]{3,20}$/
+      if (!nicknameRegex.test(nickname)) {
+        return NextResponse.json(
+          { error: 'Nickname deve ter 3-20 caracteres (apenas letras, números e _)' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Create Supabase client with service role (bypasses RLS)
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -109,6 +120,22 @@ export async function POST(request: NextRequest) {
         { error: 'Este email já está cadastrado. Se esqueceu sua senha, use a opção "Esqueci minha senha" no login.' },
         { status: 400 }
       )
+    }
+
+    // Check if nickname is already taken (if provided)
+    if (nickname) {
+      const { data: existingNickname } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('nickname', nickname.toLowerCase())
+        .single()
+
+      if (existingNickname) {
+        return NextResponse.json(
+          { error: 'Este nickname já está em uso. Escolha outro.' },
+          { status: 400 }
+        )
+      }
     }
 
     // 1. Create user in Supabase Auth with user's chosen password
@@ -139,6 +166,7 @@ export async function POST(request: NextRequest) {
         full_name: fullName.trim(),
         email,
         phone: phone || null,
+        nickname: nickname ? nickname.toLowerCase() : null,
         member_stage: 'VISITOR',
         role: 'MEMBER',
         cell_id: null,

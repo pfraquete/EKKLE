@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Loader2, Church, Users, Search } from 'lucide-react'
+import { Loader2, Church, Users, Search, AtSign } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,14 +17,27 @@ export default function CadastroEkklePage() {
     fullName: '',
     email: '',
     phone: '',
+    nickname: '',
     password: '',
     confirmPassword: '',
   })
+  const [nicknameError, setNicknameError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setNicknameError('')
+
+    // Validate nickname if provided
+    if (formData.nickname) {
+      const nicknameRegex = /^[a-zA-Z0-9_]{3,20}$/
+      if (!nicknameRegex.test(formData.nickname)) {
+        setNicknameError('Nickname deve ter 3-20 caracteres (letras, números e _)')
+        setLoading(false)
+        return
+      }
+    }
 
     // Validate password
     if (formData.password.length < 8) {
@@ -65,6 +78,7 @@ export default function CadastroEkklePage() {
           fullName: formData.fullName,
           email: formData.email,
           phone: formData.phone,
+          nickname: formData.nickname || null,
           password: formData.password,
         }),
       })
@@ -225,6 +239,31 @@ export default function CadastroEkklePage() {
                   placeholder="(00) 00000-0000"
                   className="h-12 rounded-xl bg-background border-border"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nickname" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                  <AtSign className="w-3 h-3" /> Nickname (Opcional)
+                </Label>
+                <Input
+                  id="nickname"
+                  type="text"
+                  value={formData.nickname}
+                  onChange={(e) => {
+                    setFormData({ ...formData, nickname: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })
+                    setNicknameError('')
+                  }}
+                  placeholder="seu_nickname"
+                  maxLength={20}
+                  className={`h-12 rounded-xl bg-background border-border ${nicknameError ? 'border-red-500' : ''}`}
+                />
+                {nicknameError ? (
+                  <p className="text-xs text-red-500 ml-1">{nicknameError}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground ml-1">
+                    Usado para mensagens privadas. Pode definir depois.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">

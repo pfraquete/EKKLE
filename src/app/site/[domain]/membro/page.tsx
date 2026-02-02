@@ -1,8 +1,9 @@
 import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { User, Mail, Phone, Calendar } from 'lucide-react'
+import { User, Mail, Phone, Calendar, AtSign } from 'lucide-react'
 import { ProfilePhotoUpload } from '@/components/profile/profile-photo-upload'
+import { NicknameForm } from '@/components/chat'
 
 export default async function MembroPage() {
   try {
@@ -46,6 +47,11 @@ export default async function MembroPage() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight truncate">
               {profile?.full_name || 'Meu Perfil'}
             </h1>
+            {profile?.nickname && (
+              <p className="text-sm sm:text-base text-primary font-bold mt-0.5">
+                @{profile.nickname}
+              </p>
+            )}
             <p className="text-sm sm:text-base text-muted-foreground font-medium mt-1">
               Gerencie suas informações e acompanhe seu crescimento
             </p>
@@ -92,6 +98,25 @@ export default async function MembroPage() {
                   Nome Completo
                 </div>
                 <div className="text-base sm:text-lg lg:text-xl font-bold text-foreground truncate">{profile?.full_name || '-'}</div>
+              </div>
+            </div>
+
+            {/* Nickname Section */}
+            <div className="flex items-start gap-3 sm:gap-4 lg:gap-5">
+              <div className="p-2 sm:p-2.5 lg:p-3 bg-primary/10 rounded-xl sm:rounded-2xl flex-shrink-0">
+                <AtSign className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs sm:text-xs font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-2">
+                  Nickname (para mensagens)
+                </div>
+                {profile?.nickname ? (
+                  <div className="text-base sm:text-lg lg:text-xl font-bold text-primary">@{profile.nickname}</div>
+                ) : (
+                  <div className="max-w-sm">
+                    <NicknameForm currentNickname={profile?.nickname} />
+                  </div>
+                )}
               </div>
             </div>
 

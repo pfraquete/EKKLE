@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, BookOpen, Radio, Church, ArrowRight, CreditCard, Sparkles } from 'lucide-react'
+import { Search, BookOpen, Radio, Church, ArrowRight, CreditCard, Sparkles, AtSign } from 'lucide-react'
+import { NicknameForm } from '@/components/chat'
 
 export default async function EkkleMembroPage() {
   const supabase = await createClient()
@@ -28,6 +29,9 @@ export default async function EkkleMembroPage() {
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
           Olá, {profile?.full_name?.split(' ')[0] || 'Visitante'}!
         </h1>
+        {profile?.nickname && (
+          <p className="text-primary font-bold">@{profile.nickname}</p>
+        )}
         <p className="text-muted-foreground text-lg">
           Bem-vindo ao Ekkle. Encontre sua comunidade de fé.
         </p>
@@ -116,6 +120,27 @@ export default async function EkkleMembroPage() {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-amber-500 rounded-full" />
                 <p className="font-bold text-amber-500">Procurando Igreja</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Nickname Section */}
+          <div className="pt-4 border-t border-border">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-primary/10 rounded-xl flex-shrink-0">
+                <AtSign className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
+                  Nickname (para mensagens)
+                </p>
+                {profile?.nickname ? (
+                  <p className="font-bold text-primary">@{profile.nickname}</p>
+                ) : (
+                  <div className="max-w-sm">
+                    <NicknameForm currentNickname={profile?.nickname} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
