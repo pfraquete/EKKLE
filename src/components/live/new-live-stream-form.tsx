@@ -1,15 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Radio, Youtube, Link as LinkIcon, Loader2, Globe, Lock } from 'lucide-react'
-import { createLiveStream, LiveStreamProvider } from '@/actions/live-streams'
+import { Radio, Youtube, Link as LinkIcon, Loader2, Globe, Lock, Camera, Monitor } from 'lucide-react'
+import { createLiveStream, LiveStreamProvider, BroadcastType } from '@/actions/live-streams'
+import { checkLiveKitConfig } from '@/actions/livekit'
 import { toast } from 'sonner'
 
 export function NewLiveStreamForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [provider, setProvider] = useState<LiveStreamProvider>('YOUTUBE')
+  const [broadcastType, setBroadcastType] = useState<BroadcastType>('rtmp')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [scheduledStart, setScheduledStart] = useState('')
@@ -17,6 +19,16 @@ export function NewLiveStreamForm() {
   const [customEmbedUrl, setCustomEmbedUrl] = useState('')
   const [chatEnabled, setChatEnabled] = useState(true)
   const [isPublic, setIsPublic] = useState(false)
+  const [liveKitConfigured, setLiveKitConfigured] = useState(false)
+
+  // Check if LiveKit is configured
+  useEffect(() => {
+    async function checkConfig() {
+      const result = await checkLiveKitConfig()
+      setLiveKitConfigured(result.configured)
+    }
+    checkConfig()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,6 +54,7 @@ export function NewLiveStreamForm() {
       title: title.trim(),
       description: description.trim() || undefined,
       provider,
+      broadcast_type: provider === 'MUX' ? broadcastType : 'rtmp',
       scheduled_start: scheduledStart || undefined,
       youtube_url: provider === 'YOUTUBE' ? youtubeUrl.trim() : undefined,
       custom_embed_url: provider === 'CUSTOM' ? customEmbedUrl.trim() : undefined,
@@ -188,15 +201,74 @@ export function NewLiveStreamForm() {
         </div>
       )}
 
-      {/* Mux Info */}
+      {/* Mux Broadcast Type Selection */}
       {provider === 'MUX' && (
-        <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl">
-          <h4 className="font-bold text-sm text-purple-500 mb-2">Transmissao via RTMP</h4>
-          <p className="text-sm text-muted-foreground">
-            Apos criar a transmissao, voce recebera uma chave de stream para usar no OBS Studio,
-            Streamlabs ou outro software de transmissao. As credenciais do Mux precisam estar
-            configuradas nas variaveis de ambiente.
-          </p>
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-foreground">
+            Como voce quer transmitir?
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Browser Option */}
+            <button
+              type="button"
+              onClick={() => setBroadcastType('browser')}
+              disabled={!liveKitConfigured}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                broadcastType === 'browser'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-border/80 hover:bg-muted/50'
+              } ${!liveKitConfigured ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Camera className={`w-6 h-6 mb-2 ${broadcastType === 'browser' ? 'text-primary' : 'text-green-500'}`} />
+              <h3 className="font-bold text-sm">Pelo Navegador</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Use sua camera ou compartilhe sua tela direto do navegador
+              </p>
+              {!liveKitConfigured && (
+                <p className="text-xs text-yellow-500 mt-2">
+                  LiveKit nao configurado
+                </p>
+              )}
+            </button>
+
+            {/* RTMP Option */}
+            <button
+              type="button"
+              onClick={() => setBroadcastType('rtmp')}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                broadcastType === 'rtmp'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-border/80 hover:bg-muted/50'
+              }`}
+            >
+              <Monitor className={`w-6 h-6 mb-2 ${broadcastType === 'rtmp' ? 'text-primary' : 'text-purple-500'}`} />
+              <h3 className="font-bold text-sm">OBS / Software Externo</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Use OBS Studio, Streamlabs ou outro software RTMP
+              </p>
+            </button>
+          </div>
+
+          {/* Info based on selection */}
+          {broadcastType === 'browser' && liveKitConfigured && (
+            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+              <h4 className="font-bold text-sm text-green-500 mb-2">Transmissao pelo Navegador</h4>
+              <p className="text-sm text-muted-foreground">
+                Apos criar a transmissao, voce podera usar sua camera ou compartilhar sua tela
+                diretamente do navegador. Nao e necessario nenhum software adicional.
+              </p>
+            </div>
+          )}
+
+          {broadcastType === 'rtmp' && (
+            <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+              <h4 className="font-bold text-sm text-purple-500 mb-2">Transmissao via RTMP</h4>
+              <p className="text-sm text-muted-foreground">
+                Apos criar a transmissao, voce recebera uma chave de stream para usar no OBS Studio,
+                Streamlabs ou outro software de transmissao.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

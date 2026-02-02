@@ -1,12 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Radio, Users, Copy, Check, ExternalLink, Settings, Video, Monitor } from 'lucide-react'
+import { Radio, Users, Copy, Check, ExternalLink, Settings } from 'lucide-react'
 import { LiveStream } from '@/actions/live-streams'
 import { joinLiveStream, leaveLiveStream, getViewerCount } from '@/actions/live-streams'
 import MuxPlayer from '@mux/mux-player-react'
 import Hls from 'hls.js'
-import { WebBroadcaster } from './web-broadcaster'
 
 type LivePlayerProps = {
   stream: LiveStream
@@ -14,13 +13,9 @@ type LivePlayerProps = {
   onViewerCountChange?: (count: number) => void
 }
 
-type BroadcastMode = 'browser' | 'external'
-
 export function LivePlayer({ stream, isPastor = false, onViewerCountChange }: LivePlayerProps) {
   const [viewerCount, setViewerCount] = useState(0)
   const [copied, setCopied] = useState(false)
-  const [broadcastMode, setBroadcastMode] = useState<BroadcastMode>('browser')
-  const [broadcastStatus, setBroadcastStatus] = useState<'idle' | 'connecting' | 'live' | 'error'>('idle')
   const videoRef = useRef<HTMLVideoElement>(null)
   const hlsRef = useRef<Hls | null>(null)
 
@@ -230,109 +225,61 @@ export function LivePlayer({ stream, isPastor = false, onViewerCountChange }: Li
           </p>
         )}
 
-        {/* Broadcast Options for Pastor (MUX only) */}
-        {isPastor && stream.provider === 'MUX' && stream.mux_stream_key && stream.status !== 'ENDED' && (
-          <div className="mt-8 space-y-6">
-            {/* Mode Selector */}
-            <div className="flex items-center gap-2 p-1 bg-muted rounded-xl w-fit">
-              <button
-                onClick={() => setBroadcastMode('browser')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-                  broadcastMode === 'browser'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Video className="w-4 h-4" />
-                Transmitir pelo Navegador
-              </button>
-              <button
-                onClick={() => setBroadcastMode('external')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-                  broadcastMode === 'external'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Monitor className="w-4 h-4" />
-                Software Externo (OBS)
-              </button>
+        {/* RTMP Config for Pastor (MUX RTMP only) */}
+        {isPastor && stream.provider === 'MUX' && stream.mux_stream_key && stream.broadcast_type === 'rtmp' && stream.status !== 'ENDED' && (
+          <div className="mt-8 p-6 bg-muted/50 rounded-2xl border border-border/50">
+            <div className="flex items-center gap-2 mb-4">
+              <Settings className="w-4 h-4 text-primary" />
+              <h3 className="font-black text-xs uppercase tracking-[0.2em] text-foreground">
+                Configuracoes de Transmissao
+              </h3>
             </div>
 
-            {/* Browser Broadcast */}
-            {broadcastMode === 'browser' && (
-              <div className="p-6 bg-muted/50 rounded-2xl border border-border/50">
-                <div className="flex items-center gap-2 mb-4">
-                  <Video className="w-4 h-4 text-primary" />
-                  <h3 className="font-black text-xs uppercase tracking-[0.2em] text-foreground">
-                    Transmissao pelo Navegador
-                  </h3>
-                </div>
-                <WebBroadcaster
-                  streamKey={stream.mux_stream_key}
-                  liveStreamId={stream.id}
-                  onStatusChange={setBroadcastStatus}
-                />
-              </div>
-            )}
-
-            {/* External Software Config */}
-            {broadcastMode === 'external' && (
-              <div className="p-6 bg-muted/50 rounded-2xl border border-border/50">
-                <div className="flex items-center gap-2 mb-4">
-                  <Settings className="w-4 h-4 text-primary" />
-                  <h3 className="font-black text-xs uppercase tracking-[0.2em] text-foreground">
-                    Configuracoes de Transmissao
-                  </h3>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">
-                      Servidor RTMP
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-background px-4 py-2 rounded-xl text-sm font-mono text-foreground border border-border/50">
-                        rtmps://global-live.mux.com:443/app
-                      </code>
-                      <button
-                        onClick={() => navigator.clipboard.writeText('rtmps://global-live.mux.com:443/app')}
-                        className="p-2 hover:bg-muted rounded-lg transition-colors"
-                        title="Copiar"
-                      >
-                        <Copy className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">
-                      Chave de Transmissao
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-background px-4 py-2 rounded-xl text-sm font-mono text-foreground border border-border/50 truncate">
-                        {stream.mux_stream_key}
-                      </code>
-                      <button
-                        onClick={copyStreamKey}
-                        className="p-2 hover:bg-muted rounded-lg transition-colors"
-                        title={copied ? 'Copiado!' : 'Copiar'}
-                      >
-                        {copied ? (
-                          <Check className="w-4 h-4 text-primary" />
-                        ) : (
-                          <Copy className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground">
-                    Use estas configuracoes no OBS Studio, Streamlabs ou outro software de transmissao.
-                  </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">
+                  Servidor RTMP
+                </label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-background px-4 py-2 rounded-xl text-sm font-mono text-foreground border border-border/50">
+                    rtmps://global-live.mux.com:443/app
+                  </code>
+                  <button
+                    onClick={() => navigator.clipboard.writeText('rtmps://global-live.mux.com:443/app')}
+                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                    title="Copiar"
+                  >
+                    <Copy className="w-4 h-4 text-muted-foreground" />
+                  </button>
                 </div>
               </div>
-            )}
+
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">
+                  Chave de Transmissao
+                </label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-background px-4 py-2 rounded-xl text-sm font-mono text-foreground border border-border/50 truncate">
+                    {stream.mux_stream_key}
+                  </code>
+                  <button
+                    onClick={copyStreamKey}
+                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                    title={copied ? 'Copiado!' : 'Copiar'}
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-primary" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Use estas configuracoes no OBS Studio, Streamlabs ou outro software de transmissao.
+              </p>
+            </div>
           </div>
         )}
 

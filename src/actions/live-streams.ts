@@ -9,6 +9,8 @@ import Mux from '@mux/mux-node'
 export type LiveStreamStatus = 'SCHEDULED' | 'LIVE' | 'ENDED' | 'CANCELLED'
 export type LiveStreamProvider = 'MUX' | 'YOUTUBE' | 'CUSTOM'
 
+export type BroadcastType = 'rtmp' | 'browser'
+
 export type LiveStream = {
   id: string
   church_id: string
@@ -20,9 +22,12 @@ export type LiveStream = {
   actual_start: string | null
   actual_end: string | null
   provider: LiveStreamProvider
+  broadcast_type: BroadcastType
   mux_stream_key: string | null
   mux_playback_id: string | null
   mux_live_stream_id: string | null
+  livekit_room_name: string | null
+  livekit_egress_id: string | null
   youtube_url: string | null
   custom_embed_url: string | null
   chat_enabled: boolean
@@ -81,6 +86,7 @@ export async function createLiveStream(input: {
   title: string
   description?: string
   provider: LiveStreamProvider
+  broadcast_type?: BroadcastType
   scheduled_start?: string
   youtube_url?: string
   custom_embed_url?: string
@@ -102,6 +108,9 @@ export async function createLiveStream(input: {
     let muxStreamKey: string | null = null
     let muxPlaybackId: string | null = null
     let muxLiveStreamId: string | null = null
+    let livekitRoomName: string | null = null
+
+    const broadcastType = input.broadcast_type || 'rtmp'
 
     // If using Mux, create a live stream
     if (input.provider === 'MUX') {
@@ -130,6 +139,7 @@ export async function createLiveStream(input: {
         title: input.title,
         description: input.description || null,
         provider: input.provider,
+        broadcast_type: broadcastType,
         scheduled_start: input.scheduled_start || null,
         youtube_url: input.youtube_url || null,
         custom_embed_url: input.custom_embed_url || null,
@@ -138,6 +148,7 @@ export async function createLiveStream(input: {
         mux_stream_key: muxStreamKey,
         mux_playback_id: muxPlaybackId,
         mux_live_stream_id: muxLiveStreamId,
+        livekit_room_name: livekitRoomName,
         created_by: profile.id,
         status: input.scheduled_start ? 'SCHEDULED' : 'SCHEDULED',
       })
@@ -149,9 +160,26 @@ export async function createLiveStream(input: {
       throw new Error('Erro ao criar transmissão')
     }
 
+    // If browser broadcast, prepare the LiveKit room
+    if (broadcastType === 'browser' && data) {
+      const { createRoom } = await import('@/lib/livekit')
+      const roomName = `live-${data.id}`
+      const created = await createRoom(roomName)
+
+      if (created) {
+        await supabase
+          .from('live_streams')
+          .update({ livekit_room_name: roomName })
+          .eq('id', data.id)
+
+        data.livekit_room_name = roomName
+      }
+    }
+
     revalidatePath('/pastor/lives')
     revalidatePath('/membro/lives')
     revalidatePath('/lider/lives')
+    revalidatePath('/dashboard/lives')
 
     return { success: true, data }
   } catch (error: unknown) {
@@ -306,11 +334,33 @@ export async function endLiveStream(streamId: string) {
       }
     }
 
+    // If browser broadcast, stop LiveKit egress and delete room
+    if (stream.broadcast_type === 'browser') {
+      const { stopEgress, deleteRoom } = await import('@/lib/livekit')
+
+      if (stream.livekit_egress_id) {
+        try {
+          await stopEgress(stream.livekit_egress_id)
+        } catch (egressError) {
+          console.error('Error stopping LiveKit egress:', egressError)
+        }
+      }
+
+      if (stream.livekit_room_name) {
+        try {
+          await deleteRoom(stream.livekit_room_name)
+        } catch (roomError) {
+          console.error('Error deleting LiveKit room:', roomError)
+        }
+      }
+    }
+
     const { data, error } = await supabase
       .from('live_streams')
       .update({
         status: 'ENDED',
         actual_end: new Date().toISOString(),
+        livekit_egress_id: null,
       })
       .eq('id', streamId)
       .eq('church_id', profile.church_id)
@@ -325,6 +375,8 @@ export async function endLiveStream(streamId: string) {
     revalidatePath(`/pastor/lives/${streamId}`)
     revalidatePath('/membro/lives')
     revalidatePath('/lider/lives')
+    revalidatePath('/dashboard/lives')
+    revalidatePath(`/dashboard/lives/${streamId}`)
 
     return { success: true, data }
   } catch (error: unknown) {

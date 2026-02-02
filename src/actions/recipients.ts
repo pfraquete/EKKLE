@@ -111,6 +111,30 @@ export async function createChurchRecipient(input: RecipientInput) {
     const documentType = cleanDocument.length <= 11 ? 'individual' : 'company';
     const holderType = cleanHolderDocument.length <= 11 ? 'individual' : 'company';
 
+    // Clean numeric fields
+    const cleanBranchNumber = validated.branch_number.replace(/\D/g, '');
+    const cleanAccountNumber = validated.account_number.replace(/\D/g, '');
+    const cleanAccountDigit = validated.account_digit.trim();
+
+    // Create bank account object - branch_check_digit is optional
+    // Some banks like Itaú (341) don't use branch check digit
+    const bankAccount: PagarmeRecipient['default_bank_account'] = {
+      holder_name: validated.holder_name,
+      holder_type: holderType,
+      holder_document: cleanHolderDocument,
+      bank: validated.bank_code,
+      branch_number: cleanBranchNumber,
+      account_number: cleanAccountNumber,
+      account_check_digit: cleanAccountDigit,
+      type: validated.account_type,
+    };
+
+    // Only add branch_check_digit if it has a valid value
+    // Pagar.me rejects empty string or undefined
+    if (validated.branch_digit && validated.branch_digit.trim() !== '') {
+      bankAccount.branch_check_digit = validated.branch_digit.trim();
+    }
+
     // Create recipient in Pagar.me
     const pagarmeRecipient: PagarmeRecipient = {
       name: validated.name,
@@ -118,17 +142,7 @@ export async function createChurchRecipient(input: RecipientInput) {
       document: cleanDocument,
       type: documentType,
       description: `Recebedor da igreja ${church.name}`,
-      default_bank_account: {
-        holder_name: validated.holder_name,
-        holder_type: holderType,
-        holder_document: cleanHolderDocument,
-        bank: validated.bank_code,
-        branch_number: validated.branch_number,
-        branch_check_digit: validated.branch_digit,
-        account_number: validated.account_number,
-        account_check_digit: validated.account_digit,
-        type: validated.account_type,
-      },
+      default_bank_account: bankAccount,
       transfer_settings: {
         transfer_enabled: true,
         transfer_interval: 'daily',
