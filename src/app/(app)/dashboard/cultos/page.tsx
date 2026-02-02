@@ -39,17 +39,17 @@ export default async function CultosAdminPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service) => {
             const typeBadgeMap: Record<string, { label: string; class: string }> = {
-              PRESENCIAL: { label: 'Presencial', class: 'bg-purple-100 text-purple-800' },
-              ONLINE: { label: 'Online', class: 'bg-red-100 text-red-800' },
-              HIBRIDO: { label: 'Híbrido', class: 'bg-blue-100 text-blue-800' }
+              PRESENCIAL: { label: 'Presencial', class: 'bg-purple-500/20 text-purple-400' },
+              ONLINE: { label: 'Online', class: 'bg-red-500/20 text-red-400' },
+              HIBRIDO: { label: 'Híbrido', class: 'bg-blue-500/20 text-blue-400' }
             }
-            const typeBadge = typeBadgeMap[service.type] || { label: service.type, class: 'bg-gray-100 text-gray-800' }
+            const typeBadge = typeBadgeMap[service.type] || { label: service.type, class: 'bg-muted text-muted-foreground' }
 
             return (
-              <div key={service.id} className="bg-white rounded-lg shadow-md p-6 border">
+              <div key={service.id} className="bg-card rounded-lg shadow-md p-6 border border-border">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="font-bold text-lg flex-1 line-clamp-2">{service.title}</h3>
-                  {service.is_published ? <Eye className="w-5 h-5 text-green-600 flex-shrink-0 ml-2" /> : <EyeOff className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />}
+                  {service.is_published ? <Eye className="w-5 h-5 text-emerald-500 flex-shrink-0 ml-2" /> : <EyeOff className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />}
                 </div>
 
                 <div className="space-y-2 mb-4">
