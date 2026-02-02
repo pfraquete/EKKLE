@@ -23,12 +23,17 @@ export default async function EkkleMembroLayout({
     redirect('/login')
   }
 
-  // Get user profile
-  const { data: profile } = await supabase
+  // Get user profile - use maybeSingle to avoid PGRST116 error when profile doesn't exist
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  if (profileError) {
+    console.error('[EkkleMembroLayout] Error fetching profile:', profileError)
+    redirect('/login')
+  }
 
   // If user is NOT an Ekkle Hub user, redirect to their church's member area
   if (profile && !isEkkleHubUser(profile)) {

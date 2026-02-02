@@ -26,12 +26,22 @@ export default async function MembroPage() {
       redirect('/login')
     }
 
-    // Get user profile
-    const { data: profile } = await supabase
+    // Get user profile - use maybeSingle to avoid PGRST116 error when profile doesn't exist
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
+
+    if (profileError) {
+      console.error('[MembroPage] Error fetching profile:', profileError)
+      redirect('/login')
+    }
+
+    if (!profile) {
+      console.error('[MembroPage] Profile not found for user:', user.id)
+      redirect('/login')
+    }
 
     // Get member stats
     const statsResult = await getMemberStats()

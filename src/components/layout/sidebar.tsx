@@ -176,7 +176,7 @@ export function Sidebar({ profile }: SidebarProps) {
     ]
 
     return (
-        <aside className="hidden md:flex flex-col w-64 bg-sidebar border-r border-sidebar-border">
+        <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-sidebar border-r border-sidebar-border">
             <div className="p-6 flex items-center gap-3">
                 <div className="relative w-10 h-10">
                     <Image
@@ -192,7 +192,7 @@ export function Sidebar({ profile }: SidebarProps) {
                 </div>
             </div>
 
-            <nav className="flex-1 px-4 space-y-1">
+            <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
                 {routes.filter(r => r.show).map((route) => (
                     <Link
                         key={route.href}

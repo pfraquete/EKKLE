@@ -16,11 +16,16 @@ export default async function EkkleMembroPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  if (profileError) {
+    console.error('[EkkleMembroPage] Error fetching profile:', profileError)
+    redirect('/login')
+  }
 
   return (
     <div className="space-y-8">
