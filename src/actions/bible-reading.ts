@@ -8,7 +8,16 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { ABibliaDigitalService, DEFAULT_VERSION, formatReadingReference } from '@/lib/abibliadigital'
+import { BibleApiService, DEFAULT_VERSION, BOOK_NAMES } from '@/lib/bible-api-service'
+
+// Helper to format reference
+function formatReadingReference(bookId: string, chapterStart: number, chapterEnd?: number | null): string {
+    const bookName = BOOK_NAMES[bookId.toUpperCase()] || bookId
+    if (chapterEnd && chapterEnd !== chapterStart) {
+        return `${bookName} ${chapterStart}-${chapterEnd}`
+    }
+    return `${bookName} ${chapterStart}`
+}
 import { revalidatePath } from 'next/cache'
 
 // ============================================
@@ -384,7 +393,7 @@ export async function getTodaysReading(): Promise<{
 
 /**
  * Get Bible passage content
- * Now using A Bíblia Digital API which has complete Old and New Testament
+ * Using bible-api.com with João Ferreira de Almeida (complete Old and New Testament)
  */
 export async function getBiblePassage(
     bookId: string,
@@ -400,18 +409,12 @@ export async function getBiblePassage(
     error?: string
 }> {
     try {
-        if (!ABibliaDigitalService.isConfigured()) {
-            return {
-                success: false,
-                error: 'Servico de Biblia temporariamente indisponivel. Tente novamente mais tarde.'
-            }
-        }
-
-        const passage = await ABibliaDigitalService.getPassage(
+        const bibleService = new BibleApiService(version as any)
+        
+        const passage = await bibleService.getPassage(
             bookId,
             chapterStart,
-            chapterEnd,
-            version
+            chapterEnd || undefined
         )
 
         return {
@@ -426,21 +429,21 @@ export async function getBiblePassage(
         console.error('[Bible Reading] Error getting passage:', errorMessage)
 
         // Return user-friendly messages based on error type
-        if (errorMessage === 'RATE_LIMIT_EXCEEDED') {
+        if (errorMessage.includes('429') || errorMessage.includes('rate')) {
             return {
                 success: false,
                 error: 'Muitas requisicoes. Aguarde alguns segundos e tente novamente.'
             }
         }
 
-        if (errorMessage.includes('timeout')) {
+        if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
             return {
                 success: false,
                 error: 'Conexao lenta. Tente novamente.'
             }
         }
 
-        if (errorMessage === 'PASSAGE_NOT_FOUND') {
+        if (errorMessage.includes('No verses') || errorMessage.includes('not found')) {
             return {
                 success: false,
                 error: 'Passagem nao encontrada. Verifique o livro e capitulo selecionados.'

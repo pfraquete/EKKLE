@@ -10,13 +10,14 @@ import {
 import { Book } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+// Available versions from bible-api.com
+// Almeida is the only complete Portuguese version with Old and New Testament
 export const BIBLE_VERSIONS = [
-  { id: 'nvi', name: 'NVI', fullName: 'Nova Versão Internacional' },
-  { id: 'acf', name: 'ACF', fullName: 'Almeida Corrigida Fiel' },
-  { id: 'ra', name: 'RA', fullName: 'Revista e Atualizada' },
+  { id: 'almeida', name: 'Almeida', fullName: 'João Ferreira de Almeida' },
   { id: 'kjv', name: 'KJV', fullName: 'King James Version' },
+  { id: 'asv', name: 'ASV', fullName: 'American Standard Version' },
   { id: 'bbe', name: 'BBE', fullName: 'Bible in Basic English' },
-  { id: 'apee', name: 'APEE', fullName: 'Português Europeu' },
+  { id: 'web', name: 'WEB', fullName: 'World English Bible' },
 ] as const
 
 export type BibleVersionId = typeof BIBLE_VERSIONS[number]['id']
@@ -62,10 +63,10 @@ export function VersionSelector({
 
 export function getVersionName(versionId: string): string {
   const version = BIBLE_VERSIONS.find(v => v.id === versionId)
-  return version?.name || 'NVI'
+  return version?.name || 'Almeida'
 }
 
 export function getVersionFullName(versionId: string): string {
   const version = BIBLE_VERSIONS.find(v => v.id === versionId)
-  return version?.fullName || 'Nova Versão Internacional'
+  return version?.fullName || 'João Ferreira de Almeida'
 }
