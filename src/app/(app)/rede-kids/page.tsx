@@ -36,7 +36,7 @@ export default async function RedeKidsPage() {
   const cells = await getKidsCellsWithStats()
   const childrenStats = await getKidsChildrenStats()
   const birthdays = await getKidsBirthdaysThisMonth()
-  const upcomingMeetings = await getUpcomingKidsMeetings(5)
+  const upcomingMeetings = await getUpcomingKidsMeetings(undefined, 5)
 
   const isPastor = profile.role === 'PASTOR'
   const isPastoraKids = profile.kids_role === 'PASTORA_KIDS'
