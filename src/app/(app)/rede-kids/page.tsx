@@ -94,7 +94,7 @@ export default async function RedeKidsPage() {
       </div>
 
       {/* Alert: Children without cell */}
-      {childrenStats.withoutCell > 0 && canManage && (
+      {childrenStats && childrenStats.withoutCell > 0 && canManage && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-amber-500/20 rounded-lg shrink-0">
@@ -171,7 +171,7 @@ export default async function RedeKidsPage() {
       </div>
 
       {/* Gender distribution */}
-      {(childrenStats.maleCount > 0 || childrenStats.femaleCount > 0) && (
+      {childrenStats && (childrenStats.maleCount > 0 || childrenStats.femaleCount > 0) && (
         <GenderStatsWidget
           maleCount={childrenStats.maleCount}
           femaleCount={childrenStats.femaleCount}
