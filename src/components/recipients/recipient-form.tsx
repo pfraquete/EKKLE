@@ -23,7 +23,6 @@ interface RecipientFormProps {
     branch_digit?: string;
     holder_name: string;
     holder_document: string;
-    transfer_interval: string;
   } | null;
 }
 
@@ -68,7 +67,6 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
     branch_digit: recipient?.branch_digit || '',
     holder_name: recipient?.holder_name || '',
     holder_document: recipient?.holder_document || '',
-    transfer_interval: recipient?.transfer_interval || 'daily',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,7 +81,6 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
         result = await updateChurchRecipient({
           name: formData.name,
           email: formData.email,
-          transfer_interval: formData.transfer_interval as 'daily' | 'weekly' | 'monthly',
         });
       } else {
         // Create
@@ -99,7 +96,6 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
           branch_digit: formData.branch_digit,
           holder_name: formData.holder_name,
           holder_document: formData.holder_document,
-          transfer_interval: formData.transfer_interval as 'daily' | 'weekly' | 'monthly',
         });
       }
 
@@ -188,20 +184,6 @@ export function RecipientForm({ recipient }: RecipientFormProps) {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="transfer_interval">Intervalo de Transferência *</Label>
-            <select
-              id="transfer_interval"
-              value={formData.transfer_interval}
-              onChange={(e) => setFormData({ ...formData, transfer_interval: e.target.value })}
-              disabled={loading}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
-            >
-              <option value="daily">Diária</option>
-              <option value="weekly">Semanal</option>
-              <option value="monthly">Mensal</option>
-            </select>
-          </div>
         </div>
       </div>
 
