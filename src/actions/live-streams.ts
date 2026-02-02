@@ -583,7 +583,7 @@ export async function getPublicChatMessages(streamId: string, churchId: string, 
       .from('live_chat_messages')
       .select(`
         *,
-        profile:profiles(id, full_name, photo_url, role)
+        profile:profiles!live_chat_messages_profile_id_fkey(id, full_name, photo_url, role)
       `)
       .eq('live_stream_id', streamId)
       .eq('church_id', churchId)
@@ -743,7 +743,7 @@ export async function sendChatMessage(streamId: string, message: string) {
       })
       .select(`
         *,
-        profile:profiles(id, full_name, photo_url, role)
+        profile:profiles!live_chat_messages_profile_id_fkey(id, full_name, photo_url, role)
       `)
       .single()
 
@@ -777,7 +777,7 @@ export async function getChatMessages(streamId: string, limit = 100) {
       .from('live_chat_messages')
       .select(`
         *,
-        profile:profiles(id, full_name, photo_url, role)
+        profile:profiles!live_chat_messages_profile_id_fkey(id, full_name, photo_url, role)
       `)
       .eq('live_stream_id', streamId)
       .eq('church_id', profile.church_id)
