@@ -106,10 +106,10 @@ export function TemplateEditor({ initialTemplates }: { initialTemplates: Message
                                 <div className="space-y-1">
                                     <p className="font-bold">Variáveis disponíveis:</p>
                                     <div className="flex flex-wrap gap-2">
-                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-[10px]">{'{nome}'}</code>
-                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-[10px]">{'{data}'}</code>
-                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-[10px]">{'{hora}'}</code>
-                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-[10px]">{'{local}'}</code>
+                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">{'{nome}'}</code>
+                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">{'{data}'}</code>
+                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">{'{hora}'}</code>
+                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">{'{local}'}</code>
                                     </div>
                                 </div>
                             </div>
@@ -122,7 +122,7 @@ export function TemplateEditor({ initialTemplates }: { initialTemplates: Message
                                     value={getCurrentTemplate(cat.value).content || ''}
                                     onChange={(e) => updateContent(cat.value, e.target.value)}
                                 />
-                                <p className="text-[10px] text-muted-foreground italic">
+                                <p className="text-xs text-muted-foreground italic">
                                     Dica: Use emojis para tornar a mensagem mais amigável! ✨
                                 </p>
                             </div>

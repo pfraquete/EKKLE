@@ -94,7 +94,7 @@ export default async function MembroCelulasPage() {
         {profile?.cell_id && (
           <div className="bg-primary/5 border border-primary/20 px-6 py-3 rounded-2xl flex items-center gap-3">
             <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-primary">
+            <p className="text-xs font-black uppercase tracking-widest text-primary">
               Membro Ativo de Célula
             </p>
           </div>
@@ -128,7 +128,7 @@ export default async function MembroCelulasPage() {
                   <div className="relative z-10">
                     <h3 className="text-2xl font-black tracking-tighter mb-2 italic drop-shadow-md">{cell.name}</h3>
                     {leader && (
-                      <div className="flex items-center gap-2 opacity-90 text-[10px] font-black uppercase tracking-widest">
+                      <div className="flex items-center gap-2 opacity-90 text-xs font-black uppercase tracking-widest">
                         <Users className="w-3.5 h-3.5" />
                         <span>Líder {leader.full_name}</span>
                       </div>
@@ -145,7 +145,7 @@ export default async function MembroCelulasPage() {
                           <Clock className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Encontro</p>
+                          <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-0.5">Encontro</p>
                           <p className="text-sm font-bold text-foreground">
                             {DAYS[cell.day_of_week]}
                             {cell.meeting_time && ` às ${cell.meeting_time.slice(0, 5)}`}
@@ -160,7 +160,7 @@ export default async function MembroCelulasPage() {
                           <MapPin className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Localização</p>
+                          <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-0.5">Localização</p>
                           <p className="text-sm font-bold text-foreground leading-tight">
                             {cell.neighborhood || 'Endereço Disponível'}
                           </p>
@@ -178,7 +178,7 @@ export default async function MembroCelulasPage() {
                         <Users className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Membros</p>
+                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-0.5">Membros</p>
                         <p className="text-sm font-bold text-foreground">{cell.membersCount} Pessoas</p>
                       </div>
                     </div>
@@ -188,18 +188,18 @@ export default async function MembroCelulasPage() {
                     {isUserInCell ? (
                       <Link
                         href="/membro/minha-celula"
-                        className="flex flex-col items-center bg-primary text-primary-foreground border border-primary/20 px-4 py-6 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                        className="flex flex-col items-center bg-primary text-primary-foreground border border-primary/20 px-4 py-6 rounded-2xl text-center text-xs font-black uppercase tracking-widest shadow-2xl shadow-primary/20 hover:scale-[1.02] transition-all"
                       >
                         <Sparkles className="w-5 h-5 mx-auto mb-3 animate-pulse" />
                         Acessar Painel da Minha Célula
                       </Link>
                     ) : hasPendingRequest ? (
-                      <div className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-4 py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/5">
+                      <div className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-4 py-4 rounded-2xl text-center text-xs font-black uppercase tracking-widest shadow-lg shadow-amber-500/5">
                         <Clock className="w-4 h-4 mx-auto mb-2" />
                         Solicitação em Análise
                       </div>
                     ) : profile?.cell_id ? (
-                      <div className="bg-muted px-4 py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border border-border/50">
+                      <div className="bg-muted px-4 py-4 rounded-2xl text-center text-xs font-black uppercase tracking-widest text-muted-foreground/60 border border-border/50">
                         Indisponível (Já vinculado)
                       </div>
                     ) : (

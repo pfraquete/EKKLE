@@ -51,7 +51,7 @@ export function CalendarView({ initialEvents }: CalendarViewProps) {
                 <div className="min-w-[320px]">
                     <div className="grid grid-cols-7 border-b bg-muted/30">
                         {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, i) => (
-                            <div key={i} className="py-2 text-center text-[10px] sm:text-xs uppercase font-black text-muted-foreground tracking-widest">
+                            <div key={i} className="py-2 text-center text-xs sm:text-xs uppercase font-black text-muted-foreground tracking-widest">
                                 <span className="sm:hidden">{day}</span>
                                 <span className="hidden sm:inline">{['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][i]}</span>
                             </div>
@@ -70,7 +70,7 @@ export function CalendarView({ initialEvents }: CalendarViewProps) {
                                     )}
                                 >
                                     <span className={cn(
-                                        "text-[10px] sm:text-xs font-bold w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full mb-0.5 sm:mb-1",
+                                        "text-xs sm:text-xs font-bold w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full mb-0.5 sm:mb-1",
                                         isSameDay(day, new Date()) && "bg-blue-600 text-white"
                                     )}>
                                         {format(day, 'd')}
@@ -80,7 +80,7 @@ export function CalendarView({ initialEvents }: CalendarViewProps) {
                                             <div
                                                 key={event.id}
                                                 className={cn(
-                                                    "text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded-md font-bold truncate cursor-pointer transition-transform active:scale-95",
+                                                    "text-xs sm:text-xs px-1 sm:px-1.5 py-0.5 rounded-md font-bold truncate cursor-pointer transition-transform active:scale-95",
                                                     event.event_type === 'SERVICE' ? "bg-indigo-100 text-indigo-700 border-l-2 border-indigo-500" :
                                                         event.event_type === 'EVENT' ? "bg-emerald-100 text-emerald-700 border-l-2 border-emerald-500" :
                                                             "bg-amber-100 text-amber-700 border-l-2 border-amber-500"
@@ -90,7 +90,7 @@ export function CalendarView({ initialEvents }: CalendarViewProps) {
                                             </div>
                                         ))}
                                         {dayEvents.length > 2 && (
-                                            <div className="text-[8px] text-muted-foreground font-bold">+{dayEvents.length - 2}</div>
+                                            <div className="text-xs text-muted-foreground font-bold">+{dayEvents.length - 2}</div>
                                         )}
                                     </div>
                                 </div>

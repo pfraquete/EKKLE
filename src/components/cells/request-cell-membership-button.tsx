@@ -73,7 +73,7 @@ export function RequestCellMembershipButton({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="w-full h-14 rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300">
+                <Button className="w-full h-14 rounded-full font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300">
                     <Send className="w-4 h-4 mr-3" />
                     Solicitar Conexão
                 </Button>
@@ -100,7 +100,7 @@ export function RequestCellMembershipButton({
 
                         <div className="space-y-6 py-8">
                             <div className="space-y-3">
-                                <Label htmlFor="message" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                                <Label htmlFor="message" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
                                     Sua Mensagem (Opcional)
                                 </Label>
                                 <Textarea
@@ -124,7 +124,7 @@ export function RequestCellMembershipButton({
                             <Button
                                 onClick={handleSubmit}
                                 disabled={loading}
-                                className="w-full h-12 rounded-full font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/10"
+                                className="w-full h-12 rounded-full font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/10"
                             >
                                 {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-3.5 h-3.5 mr-2" />}
                                 Enviar Solicitação
@@ -133,7 +133,7 @@ export function RequestCellMembershipButton({
                                 variant="ghost"
                                 onClick={() => setOpen(false)}
                                 disabled={loading}
-                                className="w-full h-12 rounded-full font-black uppercase tracking-widest text-[10px] text-muted-foreground hover:bg-muted"
+                                className="w-full h-12 rounded-full font-black uppercase tracking-widest text-xs text-muted-foreground hover:bg-muted"
                             >
                                 Cancelar
                             </Button>

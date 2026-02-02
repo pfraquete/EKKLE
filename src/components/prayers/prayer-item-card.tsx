@@ -101,14 +101,14 @@ export function PrayerItemCard({ item, onAnswered }: PrayerItemCardProps) {
               <div className="flex items-center gap-2 mb-1">
                 <span
                   className={cn(
-                    'text-[10px] font-bold uppercase tracking-widest',
+                    'text-xs font-bold uppercase tracking-widest',
                     config.color
                   )}
                 >
                   {config.label}
                 </span>
                 {item.is_answered && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold uppercase">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold uppercase">
                     <Check className="w-3 h-3" />
                     Respondida
                   </span>
@@ -132,7 +132,7 @@ export function PrayerItemCard({ item, onAnswered }: PrayerItemCardProps) {
               {item.is_answered && item.answered_notes && (
                 <div className="mt-2 p-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10">
                   <p className="text-xs text-emerald-600">{item.answered_notes}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {item.answered_at &&
                       new Date(item.answered_at).toLocaleDateString('pt-BR')}
                   </p>

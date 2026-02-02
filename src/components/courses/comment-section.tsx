@@ -193,11 +193,11 @@ function CommentItem({
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-sm">
                                 {comment.profiles?.full_name}
-                                {comment.profiles?.role === 'PASTOR' && <span className="ml-1.5 px-1.5 py-0.5 bg-primary text-primary-foreground text-[10px] rounded uppercase font-bold tracking-wider">Pastor</span>}
+                                {comment.profiles?.role === 'PASTOR' && <span className="ml-1.5 px-1.5 py-0.5 bg-primary text-primary-foreground text-xs rounded uppercase font-bold tracking-wider">Pastor</span>}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">• {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: ptBR })}</span>
-                            {comment.is_pinned && <span className="flex items-center gap-1 text-[10px] text-primary font-bold bg-primary/10 px-1.5 py-0.5 rounded"><Pin className="w-3 h-3" /> Fixado</span>}
-                            {comment.is_answered && <span className="flex items-center gap-1 text-[10px] text-green-600 font-bold bg-green-100 px-1.5 py-0.5 rounded"><CheckCircle2 className="w-3 h-3" /> Respondido</span>}
+                            <span className="text-xs text-muted-foreground">• {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: ptBR })}</span>
+                            {comment.is_pinned && <span className="flex items-center gap-1 text-xs text-primary font-bold bg-primary/10 px-1.5 py-0.5 rounded"><Pin className="w-3 h-3" /> Fixado</span>}
+                            {comment.is_answered && <span className="flex items-center gap-1 text-xs text-green-600 font-bold bg-green-100 px-1.5 py-0.5 rounded"><CheckCircle2 className="w-3 h-3" /> Respondido</span>}
                         </div>
 
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -251,7 +251,7 @@ function CommentItem({
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold text-xs">{reply.profiles?.full_name}</span>
-                                        <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(reply.created_at), { addSuffix: true, locale: ptBR })}</span>
+                                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(reply.created_at), { addSuffix: true, locale: ptBR })}</span>
                                     </div>
                                     {(reply.profile_id === userId || isPastor) && (
                                         <button onClick={() => onDelete(reply.id)} className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-red-500">

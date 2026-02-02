@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                             <Users className="h-5 w-5" />
                         </div>
                         <p className="text-2xl font-black text-foreground leading-none">{stats.totalMembers}</p>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Membros</p>
+                        <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Membros</p>
                     </CardContent>
                 </Card>
 
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
                             <Home className="h-5 w-5" />
                         </div>
                         <p className="text-2xl font-black text-foreground leading-none">{stats.totalCells}</p>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Células</p>
+                        <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Células</p>
                     </CardContent>
                 </Card>
 
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
                             <TrendingUp className="h-5 w-5" />
                         </div>
                         <p className="text-2xl font-black text-foreground leading-none">{stats.overallAttendance}%</p>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Presença Global</p>
+                        <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Presença Global</p>
                     </CardContent>
                 </Card>
 
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
                             <AlertCircle className="h-5 w-5" />
                         </div>
                         <p className="text-2xl font-black text-foreground leading-none">{stats.cellsWithoutReports}</p>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Sem Relatório</p>
+                        <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Sem Relatório</p>
                     </CardContent>
                 </Card>
             </div>
@@ -144,8 +144,8 @@ export default async function DashboardPage() {
                                     <BookOpen className="h-5 w-5" />
                                 </div>
                                 <p className="text-2xl font-black text-foreground leading-none">{extendedStats.courses.totalEnrollments}</p>
-                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Matrículas</p>
-                                <p className="text-[10px] sm:text-xs text-muted-foreground">{extendedStats.courses.publishedCourses} cursos ativos</p>
+                                <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Matrículas</p>
+                                <p className="text-xs sm:text-xs text-muted-foreground">{extendedStats.courses.publishedCourses} cursos ativos</p>
                             </CardContent>
                         </Card>
                     </Link>
@@ -157,8 +157,8 @@ export default async function DashboardPage() {
                                     <ShoppingBag className="h-5 w-5" />
                                 </div>
                                 <p className="text-2xl font-black text-foreground leading-none">{extendedStats.orders.paidOrders}</p>
-                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pagos</p>
-                                <p className="text-[10px] sm:text-xs text-muted-foreground">{formatCurrency(extendedStats.orders.totalRevenueCents / 100)} em vendas</p>
+                                <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pagos</p>
+                                <p className="text-xs sm:text-xs text-muted-foreground">{formatCurrency(extendedStats.orders.totalRevenueCents / 100)} em vendas</p>
                             </CardContent>
                         </Card>
                     </Link>
@@ -170,8 +170,8 @@ export default async function DashboardPage() {
                                     <CalendarCheck className="h-5 w-5" />
                                 </div>
                                 <p className="text-2xl font-black text-foreground leading-none">{extendedStats.events.upcomingEvents}</p>
-                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Eventos Próximos</p>
-                                <p className="text-[10px] sm:text-xs text-muted-foreground">{extendedStats.events.totalRegistrations} inscrições</p>
+                                <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Eventos Próximos</p>
+                                <p className="text-xs sm:text-xs text-muted-foreground">{extendedStats.events.totalRegistrations} inscrições</p>
                             </CardContent>
                         </Card>
                     </Link>
@@ -184,8 +184,8 @@ export default async function DashboardPage() {
                                         <AlertCircle className="h-5 w-5" />
                                     </div>
                                     <p className="text-2xl font-black text-foreground leading-none">{extendedStats.orders.pendingOrders}</p>
-                                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pendentes</p>
-                                    <p className="text-[10px] sm:text-xs text-yellow-600">Aguardando pagamento</p>
+                                    <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pendentes</p>
+                                    <p className="text-xs sm:text-xs text-yellow-600">Aguardando pagamento</p>
                                 </CardContent>
                             </Card>
                         </Link>
@@ -204,19 +204,19 @@ export default async function DashboardPage() {
                             <div className="flex items-center justify-between mb-4">
                                 <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Próximos Eventos</p>
                                 <Link href="/calendario">
-                                    <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold uppercase tracking-wider text-blue-600">Ver Tudo</Button>
+                                    <Button variant="ghost" size="sm" className="h-7 text-xs font-bold uppercase tracking-wider text-blue-600">Ver Tudo</Button>
                                 </Link>
                             </div>
                             <div className="space-y-4">
                                 {upcomingEvents.length > 0 ? upcomingEvents.map(event => (
                                     <div key={event.id} className="flex gap-4">
                                         <div className="w-10 h-10 bg-muted rounded-xl flex flex-col items-center justify-center flex-shrink-0">
-                                            <span className="text-[10px] font-black uppercase leading-none">{format(new Date(event.start_date), 'MMM', { locale: ptBR })}</span>
+                                            <span className="text-xs font-black uppercase leading-none">{format(new Date(event.start_date), 'MMM', { locale: ptBR })}</span>
                                             <span className="text-md font-black leading-none">{format(new Date(event.start_date), 'dd')}</span>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-bold truncate">{event.title}</p>
-                                            <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                            <p className="text-xs text-muted-foreground flex items-center gap-1">
                                                 <Calendar className="h-3 w-3" />
                                                 {format(new Date(event.start_date), "EEEE 'às' HH:mm", { locale: ptBR })}
                                             </p>
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
 
             {/* Footer Info */}
             <div className="flex items-center justify-between px-2 opacity-40">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Ekkle</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Ekkle</p>
             </div>
         </div>
     )

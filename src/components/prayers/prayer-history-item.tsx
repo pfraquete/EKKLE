@@ -131,7 +131,7 @@ export function PrayerHistoryItem({ prayer, href }: PrayerHistoryItemProps) {
                 {prayer.blessing_received && (
                   <Badge
                     variant="outline"
-                    className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px]"
+                    className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-xs"
                   >
                     <Sparkles className="w-3 h-3 mr-1" />
                     Bencao Recebida
@@ -140,7 +140,7 @@ export function PrayerHistoryItem({ prayer, href }: PrayerHistoryItemProps) {
                 {prayer.session_type === 'GROUP' && (
                   <Badge
                     variant="outline"
-                    className="bg-primary/10 text-primary border-primary/20 text-[10px]"
+                    className="bg-primary/10 text-primary border-primary/20 text-xs"
                   >
                     Em Grupo
                   </Badge>

@@ -89,7 +89,7 @@ export function ImageUpload({
 
     return (
         <div className={cn("space-y-3", className)}>
-            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">
+            <label className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">
                 {label}
             </label>
 
@@ -123,7 +123,7 @@ export function ImageUpload({
                                 type="button"
                                 variant="secondary"
                                 size="sm"
-                                className="rounded-xl font-bold text-[10px] uppercase tracking-widest h-10 px-4"
+                                className="rounded-xl font-bold text-xs uppercase tracking-widest h-10 px-4"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isUploading}
                             >
@@ -133,7 +133,7 @@ export function ImageUpload({
                                 type="button"
                                 variant="destructive"
                                 size="sm"
-                                className="rounded-xl font-bold text-[10px] uppercase tracking-widest h-10 px-4"
+                                className="rounded-xl font-bold text-xs uppercase tracking-widest h-10 px-4"
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     handleRemove()
@@ -149,17 +149,17 @@ export function ImageUpload({
                         {isUploading ? (
                             <>
                                 <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-                                <p className="text-[10px] font-black uppercase tracking-widest text-primary">Enviando...</p>
+                                <p className="text-xs font-black uppercase tracking-widest text-primary">Enviando...</p>
                             </>
                         ) : (
                             <>
                                 <div className="w-16 h-16 bg-muted rounded-[1.5rem] flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
                                     <UploadCloud className="w-8 h-8 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                                 </div>
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest group-hover:text-primary transition-colors">
+                                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest group-hover:text-primary transition-colors">
                                     Clique para Escolher ou Arraste
                                 </p>
-                                <p className="text-[9px] text-muted-foreground/40 mt-2 font-bold group-hover:text-primary/40 transition-colors uppercase tracking-[0.1em]">
+                                <p className="text-xs text-muted-foreground/40 mt-2 font-bold group-hover:text-primary/40 transition-colors uppercase tracking-[0.1em]">
                                     PNG, JPG ou WEBP (Max. 5MB)
                                 </p>
                             </>

@@ -70,7 +70,7 @@ export function PrayerItemsList({ items, onItemAnswered }: PrayerItemsListProps)
             >
               {Icon && <Icon className={cn('w-3.5 h-3.5', tab.color)} />}
               <span>{tab.label}</span>
-              <span className="text-[10px] text-muted-foreground">({count})</span>
+              <span className="text-xs text-muted-foreground">({count})</span>
             </TabsTrigger>
           )
         })}

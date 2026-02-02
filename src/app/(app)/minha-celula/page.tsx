@@ -60,7 +60,7 @@ export default async function MinhaCelulaPage() {
                     <CardContent className="p-5 sm:p-8">
                         <div className="flex items-start justify-between mb-6 sm:mb-8">
                             <div className="space-y-2">
-                                <Badge className="bg-primary/20 text-primary border-primary/30 font-black text-[10px] tracking-[0.2em] px-3 py-1 rounded-full uppercase">
+                                <Badge className="bg-primary/20 text-primary border-primary/30 font-black text-xs tracking-[0.2em] px-3 py-1 rounded-full uppercase">
                                     Minha Célula
                                 </Badge>
                                 <h1 className="text-2xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
@@ -94,14 +94,14 @@ export default async function MinhaCelulaPage() {
                                 <p className="text-2xl sm:text-4xl font-black mb-1 group-hover/card:scale-110 transition-transform origin-left">{stats.membersCount}</p>
                                 <div className="flex items-center gap-1.5 opacity-60">
                                     <Users className="h-3 w-3" />
-                                    <p className="text-[10px] uppercase tracking-widest font-black">Membros</p>
+                                    <p className="text-xs uppercase tracking-widest font-black">Membros</p>
                                 </div>
                             </div>
                             <div className="bg-gradient-to-b from-white/10 to-transparent border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 transition-all hover:border-primary/50 group/card">
                                 <p className="text-2xl sm:text-4xl font-black mb-1 group-hover/card:scale-110 transition-transform origin-left">{stats.avgAttendance}%</p>
                                 <div className="flex items-center gap-1.5 opacity-60">
                                     <Activity className="h-3 w-3" />
-                                    <p className="text-[10px] uppercase tracking-widest font-black">Presença Média</p>
+                                    <p className="text-xs uppercase tracking-widest font-black">Presença Média</p>
                                 </div>
                             </div>
                         </div>
@@ -124,7 +124,7 @@ export default async function MinhaCelulaPage() {
                             </div>
                             <Link
                                 href="/minha-celula/reunioes"
-                                className="h-9 sm:h-10 px-3 sm:px-4 flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-black text-primary hover:bg-primary/5 rounded-full border border-primary/10 transition-colors uppercase tracking-wider sm:tracking-widest"
+                                className="h-9 sm:h-10 px-3 sm:px-4 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-xs font-black text-primary hover:bg-primary/5 rounded-full border border-primary/10 transition-colors uppercase tracking-wider sm:tracking-widest"
                             >
                                 <span className="hidden sm:inline">Ver todas</span>
                                 <span className="sm:hidden">Todas</span>
@@ -147,7 +147,7 @@ export default async function MinhaCelulaPage() {
                                     >
                                         <div className="flex items-center gap-3 sm:gap-6">
                                             <div className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-background border border-border flex flex-col items-center justify-center shrink-0">
-                                                <span className="text-[8px] sm:text-[10px] font-black uppercase text-muted-foreground leading-none mb-0.5">
+                                                <span className="text-xs sm:text-xs font-black uppercase text-muted-foreground leading-none mb-0.5">
                                                     {format(new Date(meeting.date), "MMM", { locale: ptBR })}
                                                 </span>
                                                 <span className="text-base sm:text-lg font-black text-foreground leading-none">
@@ -158,7 +158,7 @@ export default async function MinhaCelulaPage() {
                                                 <p className="font-black text-base sm:text-lg text-foreground tracking-tight">
                                                     Reunião
                                                 </p>
-                                                <p className="text-[10px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider sm:tracking-widest">
+                                                <p className="text-xs sm:text-xs text-muted-foreground font-bold uppercase tracking-wider sm:tracking-widest">
                                                     {meeting.presentCount} presentes
                                                 </p>
                                             </div>
@@ -187,7 +187,7 @@ export default async function MinhaCelulaPage() {
                             </div>
                             <Link
                                 href="/minha-celula/membros"
-                                className="h-9 sm:h-10 px-3 sm:px-4 flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-black text-primary hover:bg-primary/5 rounded-full border border-primary/10 transition-colors uppercase tracking-wider sm:tracking-widest"
+                                className="h-9 sm:h-10 px-3 sm:px-4 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-xs font-black text-primary hover:bg-primary/5 rounded-full border border-primary/10 transition-colors uppercase tracking-wider sm:tracking-widest"
                             >
                                 <span className="hidden sm:inline">Ver todos</span>
                                 <span className="sm:hidden">Todos</span>
@@ -210,7 +210,7 @@ export default async function MinhaCelulaPage() {
                                     </Avatar>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-black text-foreground text-sm sm:text-base tracking-tight truncate">{member.fullName}</p>
-                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Membro</p>
+                                        <p className="text-xs uppercase font-bold text-muted-foreground tracking-wider">Membro</p>
                                     </div>
                                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
                                         <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500" />
@@ -238,7 +238,7 @@ export default async function MinhaCelulaPage() {
                 </Link>
                 <div className="col-span-2">
                     <Link href="/minha-celula/solicitacoes" className="group">
-                        <div className="flex items-center justify-center gap-2 sm:gap-3 w-full h-12 sm:h-14 font-bold border border-border/50 rounded-xl sm:rounded-[1.5rem] bg-zinc-900/50 hover:bg-zinc-800 transition-all text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-widest text-zinc-400 hover:text-white">
+                        <div className="flex items-center justify-center gap-2 sm:gap-3 w-full h-12 sm:h-14 font-bold border border-border/50 rounded-xl sm:rounded-[1.5rem] bg-zinc-900/50 hover:bg-zinc-800 transition-all text-xs sm:text-xs uppercase tracking-wider sm:tracking-widest text-zinc-400 hover:text-white">
                             <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             <span className="hidden sm:inline">Ver Solicitações Pendentes</span>
                             <span className="sm:hidden">Solicitações</span>

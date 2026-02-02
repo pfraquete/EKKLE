@@ -66,7 +66,7 @@ export default async function MembroMinhaCelulaPage() {
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-8 mb-6 sm:mb-8 lg:mb-12">
                             <div className="space-y-3 sm:space-y-4">
                                 <div className="flex items-center gap-3">
-                                    <Badge className="bg-primary/20 text-primary border-primary/30 font-black text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] px-3 sm:px-4 py-1 sm:py-1.5 rounded-full uppercase">
+                                    <Badge className="bg-primary/20 text-primary border-primary/30 font-black text-xs sm:text-xs tracking-[0.15em] sm:tracking-[0.2em] px-3 sm:px-4 py-1 sm:py-1.5 rounded-full uppercase">
                                         Minha Família Ekkle
                                     </Badge>
                                 </div>
@@ -82,7 +82,7 @@ export default async function MembroMinhaCelulaPage() {
                                             </AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary/80">Liderança</p>
+                                            <p className="text-xs sm:text-xs font-black uppercase tracking-widest text-primary/80">Liderança</p>
                                             <p className="text-xs sm:text-sm font-bold">{leader.full_name}</p>
                                         </div>
                                     </div>
@@ -117,14 +117,14 @@ export default async function MembroMinhaCelulaPage() {
                                 <p className="text-3xl sm:text-5xl lg:text-6xl font-black mb-1 sm:mb-2 tracking-tighter italic group-hover/card:scale-105 transition-transform origin-left">{stats.membersCount}</p>
                                 <div className="flex items-center gap-1.5 sm:gap-2 opacity-60">
                                     <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                                    <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.2em] font-black">Membros</p>
+                                    <p className="text-xs sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.2em] font-black">Membros</p>
                                 </div>
                             </div>
                             <div className="bg-gradient-to-b from-white/10 to-transparent border border-white/10 rounded-xl sm:rounded-2xl lg:rounded-[2.5rem] p-4 sm:p-6 lg:p-10 transition-all hover:border-primary/50 group/card">
                                 <p className="text-3xl sm:text-5xl lg:text-6xl font-black mb-1 sm:mb-2 tracking-tighter italic group-hover/card:scale-105 transition-transform origin-left">{stats.avgAttendance}%</p>
                                 <div className="flex items-center gap-1.5 sm:gap-2 opacity-60">
                                     <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                                    <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.2em] font-black">Presença</p>
+                                    <p className="text-xs sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.2em] font-black">Presença</p>
                                 </div>
                             </div>
                         </div>
@@ -142,7 +142,7 @@ export default async function MembroMinhaCelulaPage() {
                             </div>
                             <div>
                                 <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground tracking-tighter italic uppercase">Comunidade</h3>
-                                <p className="text-[10px] sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest">Pessoas que caminham com você</p>
+                                <p className="text-xs sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest">Pessoas que caminham com você</p>
                             </div>
                         </div>
                     </div>
@@ -163,7 +163,7 @@ export default async function MembroMinhaCelulaPage() {
                                         <p className="font-black text-foreground text-sm sm:text-base lg:text-lg tracking-tight italic uppercase truncate">{member.fullName}</p>
                                         <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
                                             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0" />
-                                            <p className="text-[9px] sm:text-[10px] uppercase font-black text-muted-foreground tracking-wider sm:tracking-[0.2em]">Membro Ativo</p>
+                                            <p className="text-xs sm:text-xs uppercase font-black text-muted-foreground tracking-wider sm:tracking-[0.2em]">Membro Ativo</p>
                                         </div>
                                     </div>
                                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/5 flex items-center justify-center border border-primary/10 flex-shrink-0">
@@ -184,7 +184,7 @@ export default async function MembroMinhaCelulaPage() {
                             </div>
                             <div>
                                 <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground tracking-tighter italic uppercase">Histórico</h3>
-                                <p className="text-[10px] sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest">Nossos últimos encontros</p>
+                                <p className="text-xs sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest">Nossos últimos encontros</p>
                             </div>
                         </div>
                     </div>
@@ -202,7 +202,7 @@ export default async function MembroMinhaCelulaPage() {
                                     >
                                         <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
                                             <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-lg sm:rounded-xl lg:rounded-2xl bg-background border border-border flex flex-col items-center justify-center shrink-0 shadow-md sm:shadow-lg">
-                                                <span className="text-[8px] sm:text-[9px] lg:text-[10px] font-black uppercase text-primary leading-none mb-0.5 sm:mb-1">
+                                                <span className="text-xs sm:text-xs lg:text-xs font-black uppercase text-primary leading-none mb-0.5 sm:mb-1">
                                                     {format(new Date(meeting.date), "MMM", { locale: ptBR })}
                                                 </span>
                                                 <span className="text-base sm:text-lg lg:text-xl font-black text-foreground leading-none">
@@ -213,7 +213,7 @@ export default async function MembroMinhaCelulaPage() {
                                                 <p className="font-black text-sm sm:text-base lg:text-lg text-foreground tracking-tighter italic uppercase truncate">
                                                     Encontro de Célula
                                                 </p>
-                                                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest mt-0.5 sm:mt-1">
+                                                <p className="text-xs sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest mt-0.5 sm:mt-1">
                                                     {meeting.presentCount} pessoas presentes
                                                 </p>
                                             </div>
@@ -238,7 +238,7 @@ export default async function MembroMinhaCelulaPage() {
                         </div>
                         <div>
                             <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground tracking-tighter italic uppercase">Área do Líder</h3>
-                            <p className="text-[10px] sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest">Gerencie sua célula</p>
+                            <p className="text-xs sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest">Gerencie sua célula</p>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">

@@ -62,7 +62,7 @@ export default async function MembroLayout({
                 )}
                 <div className="flex flex-col min-w-0">
                   <span className="font-black text-base sm:text-xl tracking-tighter uppercase leading-none mb-0.5 truncate">{church.name}</span>
-                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-primary/80 hidden sm:block">Membro</span>
+                  <span className="text-xs sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-primary/80 hidden sm:block">Membro</span>
                 </div>
               </Link>
 
@@ -76,7 +76,7 @@ export default async function MembroLayout({
                     </p>
                     <div className="flex items-center justify-end gap-1.5 opacity-60">
                       <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
-                      <p className="text-[9px] uppercase font-black tracking-widest text-muted-foreground">Online</p>
+                      <p className="text-xs uppercase font-black tracking-widest text-muted-foreground">Online</p>
                     </div>
                   </div>
                   <Link

@@ -69,7 +69,7 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
                         <div className="flex-1 space-y-1 pb-1">
                             <div className="flex items-center gap-2 flex-wrap">
                                 <h2 className="text-2xl font-black">{member.full_name}</h2>
-                                <Badge variant="secondary" className="font-bold uppercase text-[10px] tracking-widest">
+                                <Badge variant="secondary" className="font-bold uppercase text-xs tracking-widest">
                                     {STAGE_LABELS[member.member_stage] || member.member_stage}
                                 </Badge>
                             </div>

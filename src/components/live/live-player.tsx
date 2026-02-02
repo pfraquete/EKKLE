@@ -211,7 +211,7 @@ export function LivePlayer({ stream, isPastor = false, onViewerCountChange }: Li
           <div className="flex items-center gap-4">
             {stream.total_views > 0 && (
               <div className="bg-muted px-4 py-2 rounded-2xl border border-border/50">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">
+                <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">
                   {stream.total_views} visualizacoes
                 </span>
               </div>
@@ -237,7 +237,7 @@ export function LivePlayer({ stream, isPastor = false, onViewerCountChange }: Li
 
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 block">
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">
                   Servidor RTMP
                 </label>
                 <div className="flex items-center gap-2">
@@ -255,7 +255,7 @@ export function LivePlayer({ stream, isPastor = false, onViewerCountChange }: Li
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 block">
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">
                   Chave de Transmissao
                 </label>
                 <div className="flex items-center gap-2">

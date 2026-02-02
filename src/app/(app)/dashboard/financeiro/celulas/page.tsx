@@ -33,7 +33,7 @@ export default async function DashboardCelulasFinanceiroPage() {
     const { cells, total_cents } = result.data!
 
     return (
-        <div className="space-y-8 p-6 animate-in fade-in duration-500">
+        <div className="space-y-8 p-4 md:p-6 animate-in fade-in duration-500">
             {/* Header */}
             <div>
                 <Link
@@ -67,7 +67,7 @@ export default async function DashboardCelulasFinanceiroPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                 <div className="bg-card border border-border rounded-xl p-5">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="p-2 rounded-lg bg-blue-500/10">
@@ -116,16 +116,17 @@ export default async function DashboardCelulasFinanceiroPage() {
                 </div>
             ) : (
                 <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
-                    <table className="w-full">
+                    <div className="overflow-x-auto">
+                    <table className="w-full min-w-[400px]">
                         <thead className="bg-muted/30">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <th className="px-3 md:px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     Célula
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <th className="px-3 md:px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     Líder
                                 </th>
-                                <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <th className="px-3 md:px-6 py-4 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     Saldo
                                 </th>
                             </tr>
@@ -133,7 +134,7 @@ export default async function DashboardCelulasFinanceiroPage() {
                         <tbody className="divide-y divide-border">
                             {cells.map((cellBalance: any) => (
                                 <tr key={cellBalance.id} className="hover:bg-muted/20 transition-colors">
-                                    <td className="px-6 py-4">
+                                    <td className="px-3 md:px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                                                 <Building2 className="w-5 h-5 text-primary" />
@@ -143,7 +144,7 @@ export default async function DashboardCelulasFinanceiroPage() {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-3 md:px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted/30 flex-shrink-0">
                                                 {cellBalance.cell?.leader?.photo_url ? (
@@ -176,6 +177,7 @@ export default async function DashboardCelulasFinanceiroPage() {
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             )}
         </div>

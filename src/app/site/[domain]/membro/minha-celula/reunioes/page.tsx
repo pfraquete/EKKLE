@@ -34,7 +34,7 @@ export default async function ReunioesPage() {
                     </Button>
                     <h1 className="text-xl sm:text-2xl font-black text-foreground">Reuniões</h1>
                 </div>
-                <Button size="sm" className="rounded-full font-black text-[9px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest px-3 sm:px-4 h-8 sm:h-9" asChild>
+                <Button size="sm" className="rounded-full font-black text-xs sm:text-xs uppercase tracking-wider sm:tracking-widest px-3 sm:px-4 h-8 sm:h-9" asChild>
                     <Link href="/membro/minha-celula/reunioes/nova">
                         <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                         <span className="hidden xs:inline">Nova </span>Reunião
@@ -64,7 +64,7 @@ export default async function ReunioesPage() {
                                     <div className="flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-3 sm:gap-5 min-w-0">
                                             <div className="relative w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center shrink-0">
-                                                <span className="text-[8px] sm:text-[10px] font-black uppercase text-primary leading-none mb-0.5 sm:mb-1">
+                                                <span className="text-xs sm:text-xs font-black uppercase text-primary leading-none mb-0.5 sm:mb-1">
                                                     {format(new Date(meeting.date), "MMM", { locale: ptBR })}
                                                 </span>
                                                 <span className="text-base sm:text-xl font-black text-primary leading-none">
@@ -74,12 +74,12 @@ export default async function ReunioesPage() {
                                             <div className="min-w-0">
                                                 <h3 className="font-black text-sm sm:text-lg text-foreground tracking-tight truncate">Reunião de Célula</h3>
                                                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
-                                                    <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-wider sm:tracking-widest">
+                                                    <div className="flex items-center gap-1 text-xs sm:text-xs font-bold text-muted-foreground uppercase tracking-wider sm:tracking-widest">
                                                         <Clock className="h-3 w-3" />
                                                         <span className="hidden xs:inline">{format(new Date(meeting.date), "EEEE", { locale: ptBR })}</span>
                                                         <span className="xs:hidden">{format(new Date(meeting.date), "EEE", { locale: ptBR })}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-emerald-500 uppercase tracking-wider sm:tracking-widest">
+                                                    <div className="flex items-center gap-1 text-xs sm:text-xs font-bold text-emerald-500 uppercase tracking-wider sm:tracking-widest">
                                                         <CheckCircle2 className="h-3 w-3" />
                                                         {meeting.presentCount} presentes
                                                     </div>
@@ -105,7 +105,7 @@ export default async function ReunioesPage() {
                     </div>
                     <div>
                         <h4 className="font-black text-primary text-xs sm:text-sm uppercase tracking-wider mb-0.5 sm:mb-1">Dica de Líder</h4>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold leading-relaxed">
+                        <p className="text-xs sm:text-xs text-muted-foreground font-semibold leading-relaxed">
                             Mantenha o histórico atualizado para que o seu pastor possa acompanhar o crescimento da sua célula em tempo real.
                         </p>
                     </div>

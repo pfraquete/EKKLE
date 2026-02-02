@@ -215,7 +215,7 @@ export function MemberPhotoSearch({ onFilterChange }: MemberPhotoSearchProps) {
 
                                 {/* Confidence badge */}
                                 {photo.confidence && (
-                                    <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 text-white text-[10px] font-bold rounded-full">
+                                    <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 text-white text-xs font-bold rounded-full">
                                         {Math.round(photo.confidence * 100)}%
                                     </div>
                                 )}

@@ -86,7 +86,7 @@ export default async function ProfessorDashboardPage() {
                     <div className="text-2xl sm:text-3xl font-black text-foreground">
                         {stats?.coursesCount || 0}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">
                         Cursos Criados
                     </div>
                 </div>
@@ -100,7 +100,7 @@ export default async function ProfessorDashboardPage() {
                     <div className="text-2xl sm:text-3xl font-black text-foreground">
                         {stats?.totalEnrollments || 0}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">
                         Alunos Inscritos
                     </div>
                 </div>
@@ -114,7 +114,7 @@ export default async function ProfessorDashboardPage() {
                     <div className="text-2xl sm:text-3xl font-black text-foreground">
                         {stats?.upcomingLessons?.length || 0}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">
                         Aulas Agendadas
                     </div>
                 </div>
@@ -128,7 +128,7 @@ export default async function ProfessorDashboardPage() {
                     <div className="text-2xl sm:text-3xl font-black text-foreground">
                         {stats?.currentLesson ? 'AO VIVO' : '-'}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">
                         Status da Live
                     </div>
                 </div>
@@ -207,7 +207,7 @@ export default async function ProfessorDashboardPage() {
                                             </div>
                                         )}
                                         <div className="absolute top-3 right-3">
-                                            <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                                            <span className={`px-2 py-1 rounded-lg text-xs font-black uppercase tracking-wider ${
                                                 course.is_published
                                                     ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                                                     : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'

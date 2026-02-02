@@ -65,7 +65,7 @@ export function ServiceProgrammingView({ service }: ServiceProgrammingViewProps)
                                         <item.icon className={cn("h-5 w-5", item.color)} />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground mb-0.5">
+                                        <p className="text-xs font-black uppercase tracking-tighter text-muted-foreground mb-0.5">
                                             {item.label}
                                         </p>
                                         <p className={cn(

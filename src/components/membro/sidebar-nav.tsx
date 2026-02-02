@@ -89,7 +89,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                    "flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 font-black text-[10px] uppercase tracking-[0.2em] group border",
+                    "flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 font-black text-xs uppercase tracking-[0.2em] group border",
                     isActive
                         ? 'bg-primary text-primary-foreground border-primary shadow-2xl shadow-primary/30 scale-[1.05]'
                         : 'bg-transparent text-muted-foreground border-transparent hover:bg-card hover:text-primary hover:border-border/50'
@@ -116,7 +116,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
                     <button
                         onClick={() => setCellExpanded(!cellExpanded)}
                         className={cn(
-                            "w-full flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 font-black text-[10px] uppercase tracking-[0.2em] group border",
+                            "w-full flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 font-black text-xs uppercase tracking-[0.2em] group border",
                             pathname === '/membro/minha-celula'
                                 ? 'bg-primary text-primary-foreground border-primary shadow-2xl shadow-primary/30 scale-[1.05]'
                                 : isCellSection
@@ -152,7 +152,7 @@ export function SidebarNav({ profile }: SidebarNavProps) {
                                         key={subitem.href}
                                         href={subitem.href}
                                         className={cn(
-                                            "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-bold text-[9px] uppercase tracking-[0.15em] group",
+                                            "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-bold text-xs uppercase tracking-[0.15em] group",
                                             isSubActive
                                                 ? 'bg-primary/15 text-primary border-l-2 border-primary'
                                                 : 'text-muted-foreground hover:bg-card hover:text-foreground border-l-2 border-transparent'

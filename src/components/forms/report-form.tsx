@@ -139,7 +139,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                     </Button>
                     <div>
                         <h1 className="font-bold text-foreground leading-none">{meeting.cell.name}</h1>
-                        <p className="text-[10px] text-primary uppercase tracking-wider font-bold mt-1">
+                        <p className="text-xs text-primary uppercase tracking-wider font-bold mt-1">
                             {format(new Date(meeting.date), "EEEE, dd/MM", { locale: ptBR })}
                         </p>
                     </div>
@@ -297,7 +297,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-foreground">{v.name}</p>
-                                        {v.phone && <p className="text-[10px] font-medium text-blue-400">{v.phone}</p>}
+                                        {v.phone && <p className="text-xs font-medium text-blue-400">{v.phone}</p>}
                                     </div>
                                 </div>
                                 <Button
@@ -327,7 +327,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                     <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border border-l-4 border-l-blue-400">
                         <div className="space-y-0.5">
                             <Label className="text-sm font-bold text-foreground">Visitantes (1ª Vez)</Label>
-                            <p className="text-[10px] text-muted-foreground">Pessoas novas na célula</p>
+                            <p className="text-xs text-muted-foreground">Pessoas novas na célula</p>
                         </div>
                         <div className="flex items-center gap-4">
                             <Button
@@ -353,7 +353,7 @@ export function ReportForm({ meeting, members, churchId }: Props) {
                     <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border border-l-4 border-l-amber-400">
                         <div className="space-y-0.5">
                             <Label className="text-sm font-bold text-foreground">Decisões por Cristo</Label>
-                            <p className="text-[10px] text-muted-foreground">Conversões ou reconciliações</p>
+                            <p className="text-xs text-muted-foreground">Conversões ou reconciliações</p>
                         </div>
                         <div className="flex items-center gap-4">
                             <Button

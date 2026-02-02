@@ -94,10 +94,10 @@ export function ServiceForm({ service }: { service?: Service }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard/cultos" className="p-2 hover:bg-muted rounded-lg transition-colors">
+        <Link href="/dashboard/cultos" className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-muted rounded-lg transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-3xl font-black">{service ? 'Editar Culto' : 'Novo Culto'}</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-black">{service ? 'Editar Culto' : 'Novo Culto'}</h1>
       </div>
 
       {error && (
@@ -117,7 +117,7 @@ export function ServiceForm({ service }: { service?: Service }) {
           <textarea id="description" rows={4} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none outline-none transition-all" placeholder="Descreva o culto..." />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label htmlFor="service_date" className="block text-sm font-semibold mb-2">Data *</label>
             <input id="service_date" type="date" required value={formData.service_date} onChange={(e) => setFormData({ ...formData, service_date: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" />
@@ -150,7 +150,7 @@ export function ServiceForm({ service }: { service?: Service }) {
               <input id="youtube_url" type="url" value={formData.youtube_url} onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="https://youtube.com/watch?v=..." />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label htmlFor="zoom_meeting_id" className="block text-sm font-semibold mb-2">Zoom Meeting ID</label>
                 <input id="zoom_meeting_id" type="text" value={formData.zoom_meeting_id} onChange={(e) => setFormData({ ...formData, zoom_meeting_id: e.target.value })} className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="123 456 7890" />
@@ -176,7 +176,7 @@ export function ServiceForm({ service }: { service?: Service }) {
           <h2 className="text-xl font-bold">Programação e Escala</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
             <h3 className="font-bold text-sm text-primary uppercase tracking-wider">Palavra e Altar</h3>
 
@@ -309,12 +309,12 @@ export function ServiceForm({ service }: { service?: Service }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <button type="submit" disabled={loading} className="bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-black uppercase tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-xl shadow-primary/20">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+        <button type="submit" disabled={loading} className="bg-primary text-primary-foreground px-6 py-3 min-h-[44px] rounded-2xl font-black uppercase tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xl shadow-primary/20">
           {loading && <Loader2 className="w-5 h-5 animate-spin" />}
           {loading ? 'Salvando...' : service ? 'Atualizar Culto' : 'Criar Culto'}
         </button>
-        <Link href="/dashboard/cultos" className="px-6 py-3 border border-border rounded-xl font-bold hover:bg-muted transition-colors">Cancelar</Link>
+        <Link href="/dashboard/cultos" className="px-6 py-3 min-h-[44px] border border-border rounded-xl font-bold hover:bg-muted transition-colors text-center flex items-center justify-center">Cancelar</Link>
       </div>
     </form>
   )

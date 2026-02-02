@@ -20,8 +20,8 @@ export const HeroSection = memo(function HeroSection() {
     <section className="pt-32 md:pt-40 pb-20 relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#1C2E4A]/20 to-transparent" />
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#66A5AD]/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#B89A5F]/10 rounded-full blur-[120px]" />
+      <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] bg-[#66A5AD]/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] bg-[#B89A5F]/10 rounded-full blur-[120px]" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -149,7 +149,7 @@ export const HeroSection = memo(function HeroSection() {
                       <div className={`text-xl sm:text-2xl font-bold ${stat.color}`}>
                         {stat.value}
                       </div>
-                      <div className="text-[10px] sm:text-xs text-zinc-400">{stat.label}</div>
+                      <div className="text-xs text-zinc-400">{stat.label}</div>
                     </div>
                   ))}
                 </div>

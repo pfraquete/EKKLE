@@ -243,7 +243,7 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] border border-border/50 shadow-xl">
                 <div>
                     <h3 className="text-lg sm:text-xl font-black text-foreground tracking-tight italic uppercase">Álbum da Célula</h3>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">Eternize os melhores momentos</p>
+                    <p className="text-xs sm:text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">Eternize os melhores momentos</p>
                 </div>
 
                 <div className="relative">
@@ -259,7 +259,7 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
                         <Button
                             asChild
                             variant="default"
-                            className="w-full sm:w-auto rounded-xl sm:rounded-2xl font-black text-[10px] uppercase tracking-widest h-11 sm:h-12 px-4 sm:px-6 shadow-xl shadow-primary/20 cursor-pointer"
+                            className="w-full sm:w-auto rounded-xl sm:rounded-2xl font-black text-xs uppercase tracking-widest h-11 sm:h-12 px-4 sm:px-6 shadow-xl shadow-primary/20 cursor-pointer"
                             disabled={isUploading}
                         >
                             <span>
@@ -293,7 +293,7 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
                             {photo.face_processed && photo.face_count !== undefined && photo.face_count > 0 && (
                                 <div className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded-full flex items-center gap-1">
                                     <Users className="w-3 h-3 text-white" />
-                                    <span className="text-[10px] sm:text-xs font-bold text-white">{photo.face_count}</span>
+                                    <span className="text-xs sm:text-xs font-bold text-white">{photo.face_count}</span>
                                 </div>
                             )}
 
@@ -315,13 +315,13 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
                             {(photo.description || photo.photo_date) && (
                                 <div className="absolute inset-x-0 bottom-0 p-2 sm:p-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
                                     {photo.photo_date && (
-                                        <div className="flex items-center gap-1 text-white/80 text-[9px] sm:text-[10px] font-bold mb-0.5 sm:mb-1">
+                                        <div className="flex items-center gap-1 text-white/80 text-xs sm:text-xs font-bold mb-0.5 sm:mb-1">
                                             <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                             {formatDate(photo.photo_date)}
                                         </div>
                                     )}
                                     {photo.description && (
-                                        <p className="text-white text-[10px] sm:text-xs font-medium line-clamp-2">{photo.description}</p>
+                                        <p className="text-white text-xs sm:text-xs font-medium line-clamp-2">{photo.description}</p>
                                     )}
                                 </div>
                             )}
@@ -407,7 +407,7 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
                                 className="min-h-[80px] rounded-xl resize-none"
                                 maxLength={500}
                             />
-                            <p className="text-[10px] text-muted-foreground text-right">
+                            <p className="text-xs text-muted-foreground text-right">
                                 {uploadDescription.length}/500
                             </p>
                         </div>
@@ -498,7 +498,7 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
                                 className="min-h-[80px] rounded-xl resize-none"
                                 maxLength={500}
                             />
-                            <p className="text-[10px] text-muted-foreground text-right">
+                            <p className="text-xs text-muted-foreground text-right">
                                 {editDescription.length}/500
                             </p>
                         </div>

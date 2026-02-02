@@ -111,11 +111,11 @@ export default async function CellDetailsPage({ params }: CellDetailsPageProps) 
                         </div>
                         <div className="rounded-2xl border border-border bg-card p-4 text-center">
                             <p className="text-3xl font-black text-foreground">{stats.membersCount}</p>
-                            <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Membros</p>
+                            <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Membros</p>
                         </div>
                         <div className="rounded-2xl border border-border bg-card p-4 text-center">
                             <p className="text-3xl font-black text-foreground">{stats.avgAttendance}%</p>
-                            <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Frequência média</p>
+                            <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Frequência média</p>
                         </div>
                     </div>
                 </CardContent>

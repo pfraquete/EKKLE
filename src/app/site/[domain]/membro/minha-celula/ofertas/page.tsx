@@ -150,7 +150,7 @@ export default async function CellOfferingsPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold ${status.color}`}>
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs sm:text-xs font-bold ${status.color}`}>
                                                 <StatusIcon className="w-3.5 h-3.5" />
                                                 {status.label}
                                             </span>

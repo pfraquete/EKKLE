@@ -77,7 +77,7 @@ export default async function DizimosPage() {
                             <div className="bg-card/80 backdrop-blur-sm border border-border rounded-xl p-4">
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                                        <p className="text-xs sm:text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">
                                             Chave {pixInfo.pixKeyType?.toUpperCase()}
                                         </p>
                                         <p className="font-mono text-sm sm:text-base font-bold text-foreground truncate">

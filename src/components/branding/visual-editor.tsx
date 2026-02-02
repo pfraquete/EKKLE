@@ -156,7 +156,7 @@ export function VisualEditor() {
                                             onChange={(e) => setBranding({ ...branding, colors: { ...branding.colors, primary: e.target.value } })}
                                             className="w-full h-10 rounded-md cursor-pointer"
                                         />
-                                        <span className="text-[10px] text-gray-500">Primária</span>
+                                        <span className="text-xs text-gray-500">Primária</span>
                                     </div>
                                     <div className="flex flex-col items-center gap-1 flex-1">
                                         <input
@@ -165,7 +165,7 @@ export function VisualEditor() {
                                             onChange={(e) => setBranding({ ...branding, colors: { ...branding.colors, secondary: e.target.value } })}
                                             className="w-full h-10 rounded-md cursor-pointer"
                                         />
-                                        <span className="text-[10px] text-gray-500">Secundária</span>
+                                        <span className="text-xs text-gray-500">Secundária</span>
                                     </div>
                                 </div>
                             </div>
@@ -190,7 +190,7 @@ export function VisualEditor() {
 
                             <div className="space-y-2">
                                 <Label>Arredondamento (Border Radius)</Label>
-                                <div className="grid grid-cols-3 gap-2 text-[10px]">
+                                <div className="grid grid-cols-3 gap-2 text-xs">
                                     {themeOptions.radius.map((r) => (
                                         <button
                                             key={r.value}

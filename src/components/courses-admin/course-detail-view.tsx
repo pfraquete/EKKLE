@@ -121,7 +121,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
           <CardContent className="p-8 space-y-8">
             <div className="grid grid-cols-1 gap-6">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título do Curso</Label>
+                <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título do Curso</Label>
                 <Input
                   value={courseData.title}
                   onChange={(e) => setCourseData({ ...courseData, title: e.target.value })}
@@ -131,7 +131,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
               </div>
 
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição</Label>
+                <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição</Label>
                 <Textarea
                   value={courseData.description || ''}
                   onChange={(e) => setCourseData({ ...courseData, description: e.target.value })}
@@ -153,7 +153,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Módulos</Label>
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Módulos</Label>
                   <Input
                     type="number"
                     min={0}
@@ -163,7 +163,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Início das Inscrições</Label>
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Início das Inscrições</Label>
                   <Input
                     type="date"
                     value={enrollmentStartDate}
@@ -186,7 +186,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
 
                 {courseData.is_paid && (
                   <div className="space-y-3 pl-10 animate-in slide-in-from-left-4 duration-500">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Preço (R$)</Label>
+                    <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Preço (R$)</Label>
                     <Input
                       type="text"
                       value={priceInput}
@@ -246,15 +246,15 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-muted/30 rounded-2xl p-6 border border-border">
             <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Módulos</span>
+              <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Módulos</span>
               <p className="text-lg font-bold text-foreground">{course.modules_count}</p>
             </div>
             <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Inscrições</span>
+              <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Inscrições</span>
               <p className="text-lg font-bold text-foreground">{formatDate(course.enrollment_start_date)}</p>
             </div>
             <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Investimento</span>
+              <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Investimento</span>
               <p className="text-lg font-bold text-primary">{course.is_paid ? formatCurrency(course.price_cents) : 'Gratuito'}</p>
             </div>
           </div>
@@ -278,17 +278,17 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
             <CardContent className="p-8 space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título da Aula</Label>
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título da Aula</Label>
                   <Input value={videoData.title} onChange={(e) => setVideoData({ ...videoData, title: e.target.value })} className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-base" placeholder="Título do vídeo" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição</Label>
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição</Label>
                   <Textarea value={videoData.description || ''} onChange={(e) => setVideoData({ ...videoData, description: e.target.value })} rows={2} className="bg-muted/30 border-border/40 rounded-xl p-4 font-bold transition-all resize-none text-base" placeholder="O que será ensinado nesta aula?" />
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between px-1">
-                    <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                    <Label className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
                       <UploadCloud className="w-4 h-4" />
                       Arquivo de Vídeo
                     </Label>
@@ -306,14 +306,14 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
                     />
                     <div className="flex flex-col items-center gap-2">
                       <UploadCloud className="w-8 h-8 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-foreground">Clique ou arraste o vídeo aqui</p>
-                      <p className="text-[9px] text-muted-foreground/40 font-bold uppercase tracking-widest">MP4, WebM ou Ogg</p>
+                      <p className="text-xs font-black uppercase tracking-widest text-foreground">Clique ou arraste o vídeo aqui</p>
+                      <p className="text-xs text-muted-foreground/40 font-bold uppercase tracking-widest">MP4, WebM ou Ogg</p>
                     </div>
                   </div>
                   {videoUploadError && <p className="text-xs text-red-500 font-bold px-1">{videoUploadError}</p>}
 
                   <div className="pt-2 space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">URL Alternativa / Caminho</Label>
+                    <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">URL Alternativa / Caminho</Label>
                     <Input
                       type="text"
                       value={videoData.video_url}
@@ -326,11 +326,11 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Duração (segundos)</Label>
+                    <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Duração (segundos)</Label>
                     <Input type="number" value={videoData.duration_seconds} onChange={(e) => setVideoData({ ...videoData, duration_seconds: parseInt(e.target.value) })} className="h-12 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-sm" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Ordem</Label>
+                    <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Ordem</Label>
                     <Input type="number" value={videoData.order_index} onChange={(e) => setVideoData({ ...videoData, order_index: parseInt(e.target.value) })} className="h-12 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-sm" />
                   </div>
                 </div>
@@ -342,15 +342,15 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
                     onCheckedChange={(checked) => setVideoData({ ...videoData, is_published: !!checked })}
                     className="w-5 h-5 border-border/50 rounded-md data-[state=checked]:bg-primary"
                   />
-                  <Label htmlFor="pub_video" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none">Vídeo disponível para alunos</Label>
+                  <Label htmlFor="pub_video" className="text-xs font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none">Vídeo disponível para alunos</Label>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border/40">
-                <Button onClick={handleSaveVideo} className="flex-1 h-14 bg-primary text-primary-foreground rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 transition-all">
+                <Button onClick={handleSaveVideo} className="flex-1 h-14 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 transition-all">
                   Salvar Aula
                 </Button>
-                <Button variant="ghost" onClick={() => { setVideoForm(false); setEditingVideo(null) }} className="h-14 border border-border/50 bg-muted/20 rounded-xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-muted/40 transition-all">
+                <Button variant="ghost" onClick={() => { setVideoForm(false); setEditingVideo(null) }} className="h-14 border border-border/50 bg-muted/20 rounded-xl font-black text-xs uppercase tracking-widest text-muted-foreground hover:bg-muted/40 transition-all">
                   Cancelar
                 </Button>
               </div>
@@ -372,11 +372,11 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-foreground truncate">{video.title}</h3>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-muted px-1.5 py-0.5 rounded">
+                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-muted px-1.5 py-0.5 rounded">
                       {Math.floor(video.duration_seconds / 60)}:{(video.duration_seconds % 60).toString().padStart(2, '0')}
                     </p>
                     {!video.is_published && (
-                      <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                      <span className="text-xs font-black text-amber-500 uppercase tracking-widest bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
                         Rascunho
                       </span>
                     )}

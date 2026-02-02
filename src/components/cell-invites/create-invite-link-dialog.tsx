@@ -149,7 +149,7 @@ export function CreateInviteLinkDialog({ cellId, churchSlug }: CreateInviteLinkD
                                     >
                                         {option.label}
                                         {option.recommended && (
-                                            <span className="block text-[10px] font-normal text-muted-foreground mt-0.5">
+                                            <span className="block text-xs font-normal text-muted-foreground mt-0.5">
                                                 Recomendado
                                             </span>
                                         )}

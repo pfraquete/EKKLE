@@ -124,19 +124,19 @@ function PrayerRequestCard({
                 {isOwn ? 'Voce' : request.sender_name}
               </span>
               {request.is_urgent && (
-                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                <Badge variant="destructive" className="text-xs px-1.5 py-0">
                   <AlertTriangle className="w-3 h-3 mr-1" />
                   Urgente
                 </Badge>
               )}
               {request.is_answered && (
-                <Badge className="text-[10px] px-1.5 py-0 bg-emerald-500">
+                <Badge className="text-xs px-1.5 py-0 bg-emerald-500">
                   <Sparkles className="w-3 h-3 mr-1" />
                   Respondido
                 </Badge>
               )}
               {request.is_prayed && !request.is_answered && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                <Badge variant="secondary" className="text-xs px-1.5 py-0">
                   <Check className="w-3 h-3 mr-1" />
                   Orado
                 </Badge>

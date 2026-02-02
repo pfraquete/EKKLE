@@ -158,19 +158,19 @@ export default function CadastroEkklePage() {
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
                   <Search className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Encontre Igrejas</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Encontre Igrejas</span>
               </div>
               <div className="flex flex-col items-center text-center p-2">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
                   <Church className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Afilie-se</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Afilie-se</span>
               </div>
               <div className="flex flex-col items-center text-center p-2">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
                   <Users className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Conecte-se</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Conecte-se</span>
               </div>
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function CadastroEkklePage() {
                   placeholder="Mínimo 8 caracteres"
                   className="h-12 rounded-xl bg-background border-border"
                 />
-                <p className="text-[10px] text-muted-foreground ml-1">
+                <p className="text-xs text-muted-foreground ml-1">
                   Deve conter: maiúscula, minúscula e número
                 </p>
               </div>

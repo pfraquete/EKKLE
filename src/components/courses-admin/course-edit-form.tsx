@@ -80,7 +80,7 @@ export function CourseEditForm() {
 
         <div className="grid grid-cols-1 gap-8 relative z-10">
           <div className="space-y-3">
-            <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Título do Curso *</Label>
+            <Label className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Título do Curso *</Label>
             <Input
               required
               value={formData.title}
@@ -91,7 +91,7 @@ export function CourseEditForm() {
           </div>
 
           <div className="space-y-3">
-            <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Descrição Detalhada</Label>
+            <Label className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Descrição Detalhada</Label>
             <Textarea
               rows={5}
               value={formData.description}
@@ -113,7 +113,7 @@ export function CourseEditForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3">
-              <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Qtd. de Módulos</Label>
+              <Label className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Qtd. de Módulos</Label>
               <Input
                 type="number"
                 min={0}
@@ -123,7 +123,7 @@ export function CourseEditForm() {
               />
             </div>
             <div className="space-y-3">
-              <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Início das Inscrições</Label>
+              <Label className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Início das Inscrições</Label>
               <Input
                 type="date"
                 value={formData.enrollment_start_date}
@@ -146,7 +146,7 @@ export function CourseEditForm() {
 
             {formData.is_paid && (
               <div className="space-y-3 pl-10 animate-in slide-in-from-left-4 duration-500">
-                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Valor (R$)</Label>
+                <Label className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] ml-2">Valor (R$)</Label>
                 <Input
                   type="text"
                   value={formData.price}

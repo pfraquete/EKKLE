@@ -29,7 +29,7 @@ export default async function ReunioesPage() {
                     </Button>
                     <h1 className="text-2xl font-black text-foreground">Reuniões</h1>
                 </div>
-                <Button size="sm" className="rounded-full font-black text-[10px] uppercase tracking-widest px-4" asChild>
+                <Button size="sm" className="rounded-full font-black text-xs uppercase tracking-widest px-4" asChild>
                     <Link href="/minha-celula/reunioes/nova">
                         <Plus className="h-4 w-4 mr-2" />
                         Nova Reunião
@@ -59,7 +59,7 @@ export default async function ReunioesPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-5">
                                             <div className="relative w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center shrink-0">
-                                                <span className="text-[10px] font-black uppercase text-primary leading-none mb-1">
+                                                <span className="text-xs font-black uppercase text-primary leading-none mb-1">
                                                     {format(new Date(meeting.date), "MMM", { locale: ptBR })}
                                                 </span>
                                                 <span className="text-xl font-black text-primary leading-none">
@@ -69,11 +69,11 @@ export default async function ReunioesPage() {
                                             <div>
                                                 <h3 className="font-black text-lg text-foreground tracking-tight">Reunião de Célula</h3>
                                                 <div className="flex items-center gap-3 mt-1">
-                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                                    <div className="flex items-center gap-1 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                                                         <Clock className="h-3 w-3" />
                                                         {format(new Date(meeting.date), "EEEE", { locale: ptBR })}
                                                     </div>
-                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+                                                    <div className="flex items-center gap-1 text-xs font-bold text-emerald-500 uppercase tracking-widest">
                                                         <CheckCircle2 className="h-3 w-3" />
                                                         {meeting.presentCount} presentes
                                                     </div>

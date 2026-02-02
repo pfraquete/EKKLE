@@ -56,7 +56,7 @@ export default async function DashboardDizimosPage({ searchParams }: PageProps) 
     } as const
 
     return (
-        <div className="space-y-8 p-6 animate-in fade-in duration-500">
+        <div className="space-y-8 p-4 md:p-6 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -75,7 +75,7 @@ export default async function DashboardDizimosPage({ searchParams }: PageProps) 
             </div>
 
             {/* Summary Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-200/50 rounded-xl p-5">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="p-2 rounded-lg bg-emerald-500/10">
@@ -192,22 +192,23 @@ export default async function DashboardDizimosPage({ searchParams }: PageProps) 
                 </div>
             ) : (
                 <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
-                    <table className="w-full">
+                    <div className="overflow-x-auto">
+                    <table className="w-full min-w-[600px]">
                         <thead className="bg-muted/30">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <th className="px-3 md:px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     Membro
                                 </th>
-                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <th className="px-3 md:px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     Valor
                                 </th>
-                                <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <th className="px-3 md:px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     Status
                                 </th>
-                                <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <th className="px-3 md:px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     Comprovante
                                 </th>
-                                <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <th className="px-3 md:px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     Ação
                                 </th>
                             </tr>
@@ -215,7 +216,7 @@ export default async function DashboardDizimosPage({ searchParams }: PageProps) 
                         <tbody className="divide-y divide-border">
                             {tithes.map((tithe: any) => (
                                 <tr key={tithe.id} className="hover:bg-muted/20 transition-colors">
-                                    <td className="px-6 py-4">
+                                    <td className="px-3 md:px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted/30 flex-shrink-0">
                                                 {tithe.profile?.photo_url ? (
@@ -242,7 +243,7 @@ export default async function DashboardDizimosPage({ searchParams }: PageProps) 
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-3 md:px-6 py-4">
                                         <span className="font-bold text-foreground">
                                             {formatCurrency(tithe.amount_cents / 100)}
                                         </span>
@@ -284,6 +285,7 @@ export default async function DashboardDizimosPage({ searchParams }: PageProps) 
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             )}
         </div>

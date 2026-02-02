@@ -157,7 +157,7 @@ export function WhatsAppConfig({ initialInstance }: WhatsAppConfigProps) {
                             <div className="flex items-center justify-between p-4 bg-green-500/5 rounded-2xl border border-green-500/10 mb-4">
                                 <div className="space-y-0.5">
                                     <p className="text-sm font-bold text-green-700">Automações Ativas</p>
-                                    <p className="text-[10px] text-green-600/70">As mensagens automáticas estão configuradas.</p>
+                                    <p className="text-xs text-green-600/70">As mensagens automáticas estão configuradas.</p>
                                 </div>
                                 <Link href="/configuracoes/whatsapp/templates">
                                     <Button variant="outline" size="sm" className="bg-white hover:bg-green-50 border-green-200 text-green-600 font-bold h-8">

@@ -163,11 +163,11 @@ export default function ImportPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-muted/30 rounded-2xl p-4">
                                         <p className="text-2xl font-black text-emerald-500">{stats.success}</p>
-                                        <p className="text-[10px] font-bold uppercase text-muted-foreground">Sucesso</p>
+                                        <p className="text-xs font-bold uppercase text-muted-foreground">Sucesso</p>
                                     </div>
                                     <div className="bg-muted/30 rounded-2xl p-4">
                                         <p className="text-2xl font-black text-red-500">{stats.errors}</p>
-                                        <p className="text-[10px] font-bold uppercase text-muted-foreground">Erros</p>
+                                        <p className="text-xs font-bold uppercase text-muted-foreground">Erros</p>
                                     </div>
                                 </div>
                                 <Button
@@ -216,15 +216,15 @@ export default function ImportPage() {
                         </CardHeader>
                         <CardContent className="pt-4 space-y-4">
                             <div className="flex gap-3">
-                                <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0">1</div>
+                                <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</div>
                                 <p className="text-xs text-muted-foreground">As células inexistentes serão criadas automaticamente.</p>
                             </div>
                             <div className="flex gap-3">
-                                <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0">2</div>
+                                <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</div>
                                 <p className="text-xs text-muted-foreground">O estágio deve ser: VISITOR, MEMBER ou LEADER.</p>
                             </div>
                             <div className="flex gap-3">
-                                <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0">3</div>
+                                <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</div>
                                 <p className="text-xs text-muted-foreground">Evite duplicatas limpando dados antes do upload.</p>
                             </div>
                         </CardContent>

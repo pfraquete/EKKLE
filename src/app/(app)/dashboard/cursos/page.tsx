@@ -74,12 +74,12 @@ export default async function CursosAdminPage() {
                     {course.is_published ? (
                       <div className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-2">
                         <Eye className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Publicado</span>
+                        <span className="text-xs font-black uppercase tracking-widest">Publicado</span>
                       </div>
                     ) : (
                       <div className="bg-amber-500/10 text-amber-500 border border-amber-500/20 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-2">
                         <EyeOff className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Rascunho</span>
+                        <span className="text-xs font-black uppercase tracking-widest">Rascunho</span>
                       </div>
                     )}
                   </div>

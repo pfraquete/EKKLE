@@ -119,13 +119,13 @@ export function StoreCatalog({ products, categories }: StoreCatalogProps) {
                     </div>
                   )}
                   {product.is_featured && (
-                    <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
+                    <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
                       Destaque
                     </div>
                   )}
                   {isOutOfStock && (
                     <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
-                      <span className="bg-destructive text-destructive-foreground px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl">
+                      <span className="bg-destructive text-destructive-foreground px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-2xl">
                         Esgotado
                       </span>
                     </div>
@@ -143,7 +143,7 @@ export function StoreCatalog({ products, categories }: StoreCatalogProps) {
                     </Link>
 
                     {product.category && (
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">{product.category.name}</p>
+                      <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">{product.category.name}</p>
                     )}
 
                     {product.short_description && (

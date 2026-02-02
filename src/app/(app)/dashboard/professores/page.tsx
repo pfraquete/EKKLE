@@ -144,7 +144,7 @@ export default function ProfessoresPage() {
                                         </p>
                                         <div className="mt-2 inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-lg">
                                             <GraduationCap className="w-3 h-3" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">Professor</span>
+                                            <span className="text-xs font-black uppercase tracking-widest">Professor</span>
                                         </div>
                                     </div>
                                 </div>

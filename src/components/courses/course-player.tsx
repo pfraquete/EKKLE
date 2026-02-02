@@ -185,12 +185,12 @@ export function CoursePlayer({
                 <h1 className="text-3xl font-black text-foreground tracking-tighter leading-tight mb-2">{currentVideo.title}</h1>
                 <div className="flex items-center gap-4">
                   {currentProgress?.completed ? (
-                    <div className="flex items-center gap-2 text-primary font-black uppercase tracking-widest text-[10px]">
+                    <div className="flex items-center gap-2 text-primary font-black uppercase tracking-widest text-xs">
                       <CheckCircle className="w-4 h-4" />
                       <span>Concluído</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-muted-foreground font-black uppercase tracking-widest text-[10px]">
+                    <div className="flex items-center gap-2 text-muted-foreground font-black uppercase tracking-widest text-xs">
                       <Clock className="w-4 h-4 text-primary" />
                       <span>
                         {currentProgress
@@ -201,7 +201,7 @@ export function CoursePlayer({
                   )}
                   <div className="w-px h-3 bg-border" />
                   {currentVideo.duration_seconds > 0 && (
-                    <span className="text-muted-foreground/60 font-black uppercase tracking-widest text-[10px]">
+                    <span className="text-muted-foreground/60 font-black uppercase tracking-widest text-xs">
                       Duração: {formatDuration(currentVideo.duration_seconds)}
                     </span>
                   )}
@@ -210,7 +210,7 @@ export function CoursePlayer({
 
               <div className="flex-shrink-0">
                 <div className="bg-muted px-4 py-2 rounded-2xl border border-border/50">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Aula {currentVideo.order_index + 1} de {videos.length}</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Aula {currentVideo.order_index + 1} de {videos.length}</span>
                 </div>
               </div>
             </div>
@@ -239,7 +239,7 @@ export function CoursePlayer({
           <div className="p-8 border-b border-border/50">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-black text-xs uppercase tracking-[0.2em] text-foreground">Conteúdo</h2>
-              <div className="text-[10px] font-black text-primary uppercase tracking-widest">
+              <div className="text-xs font-black text-primary uppercase tracking-widest">
                 {enrollment.progress_percentage}%
               </div>
             </div>
@@ -266,7 +266,7 @@ export function CoursePlayer({
                 >
                   <div className="flex items-start gap-4">
                     <div
-                      className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black tracking-widest transition-all duration-500 ${isCompleted
+                      className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black tracking-widest transition-all duration-500 ${isCompleted
                         ? 'bg-primary/10 text-primary border border-primary/20'
                         : isActive
                           ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110'
@@ -286,7 +286,7 @@ export function CoursePlayer({
                       >
                         {video.title}
                       </h3>
-                      <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground/60">
                         {video.duration_seconds > 0 && (
                           <span>{formatDuration(video.duration_seconds)}</span>
                         )}

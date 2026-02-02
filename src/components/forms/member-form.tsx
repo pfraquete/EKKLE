@@ -76,7 +76,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
     }
 
     return (
-        <div className="space-y-6 pb-20 w-full max-w-lg mx-auto bg-zinc-950 min-h-screen p-4 sm:rounded-[2.5rem]">
+        <div className="space-y-6 pb-24 w-full max-w-lg mx-auto bg-zinc-950 min-h-screen p-4 sm:rounded-[2.5rem]">
             {/* Dynamic Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -121,7 +121,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
                             <Camera className="h-4 w-4" />
                         </button>
                     </div>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Toque para adicionar foto</p>
+                    <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Toque para adicionar foto</p>
                 </div>
 
                 <Card className="border-none bg-zinc-900 shadow-2xl rounded-[2rem] overflow-hidden">
@@ -201,7 +201,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
                                         <SelectItem value="PASTOR">Pastor (Acesso Total)</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <p className="text-[10px] text-zinc-500 px-1">
+                                <p className="text-xs text-zinc-500 px-1">
                                     Define o nível de acesso ao sistema. Só altere se souber o que está fazendo.
                                 </p>
                             </div>
@@ -224,21 +224,23 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
                 </Card>
 
                 {/* Floating Save Button */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none">
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full h-16 text-lg font-black shadow-2xl shadow-primary/40 rounded-3xl pointer-events-auto"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 className="h-6 w-6 mr-3 animate-spin" />
-                                SALVANDO...
-                            </>
-                        ) : (
-                            'SALVAR MEMBRO'
-                        )}
-                    </Button>
+                <div className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-gradient-to-t from-background to-transparent z-10 pointer-events-none">
+                    <div className="max-w-lg mx-auto">
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full h-14 text-base font-black shadow-2xl shadow-primary/40 rounded-3xl pointer-events-auto"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                    SALVANDO...
+                                </>
+                            ) : (
+                                'SALVAR MEMBRO'
+                            )}
+                        </Button>
+                    </div>
                 </div>
             </form>
 

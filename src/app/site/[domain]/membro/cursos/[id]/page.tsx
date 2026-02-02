@@ -85,7 +85,7 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
       <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
         <Link
           href="/membro/cursos"
-          className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
+          className="group flex items-center gap-3 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
         >
           <div className="w-8 h-8 rounded-full bg-card border border-border/50 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
             <ArrowLeft className="w-4 h-4" />
@@ -134,7 +134,7 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
       <div className="flex items-center justify-between">
         <Link
           href="/membro/cursos"
-          className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
+          className="group flex items-center gap-3 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
         >
           <div className="w-8 h-8 rounded-full bg-card border border-border/50 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
             <ArrowLeft className="w-4 h-4" />
@@ -144,7 +144,7 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
 
         <div className="hidden md:flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Ambiente de Aprendizado</span>
+          <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Ambiente de Aprendizado</span>
         </div>
       </div>
 

@@ -120,17 +120,17 @@ export function EventForm({ initialData }: EventFormProps) {
           <Card className="border-border/40 shadow-xl bg-card rounded-[2rem] overflow-hidden">
             <CardContent className="p-8 space-y-6">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título do Evento</Label>
+                <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título do Evento</Label>
                 <Input
                   {...form.register('title')}
                   placeholder="Ex: Culto da Família, Curso de Liderança..."
                   className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30 text-base"
                 />
-                {form.formState.errors.title && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-2">{form.formState.errors.title.message}</p>}
+                {form.formState.errors.title && <p className="text-red-500 text-xs font-bold uppercase tracking-wider ml-2">{form.formState.errors.title.message}</p>}
               </div>
 
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição</Label>
+                <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição</Label>
                 <Textarea
                   {...form.register('description')}
                   placeholder="Detalhes sobre o evento..."
@@ -140,7 +140,7 @@ export function EventForm({ initialData }: EventFormProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Data e Hora de Início</Label>
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Data e Hora de Início</Label>
                   <div className="relative">
                     <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50" />
                     <Input
@@ -149,10 +149,10 @@ export function EventForm({ initialData }: EventFormProps) {
                       className="pl-14 h-16 bg-muted/30 border-border/40 rounded-2xl font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all block"
                     />
                   </div>
-                  {form.formState.errors.start_date && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-2">{form.formState.errors.start_date.message}</p>}
+                  {form.formState.errors.start_date && <p className="text-red-500 text-xs font-bold uppercase tracking-wider ml-2">{form.formState.errors.start_date.message}</p>}
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Hora de Término (Opcional)</Label>
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Hora de Término (Opcional)</Label>
                   <Input
                     {...form.register('end_time')}
                     type="time"
@@ -181,7 +181,7 @@ export function EventForm({ initialData }: EventFormProps) {
 
               {isOnline ? (
                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Link da Transmissão/Reunião</Label>
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Link da Transmissão/Reunião</Label>
                   <div className="relative">
                     <LinkIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50" />
                     <Input
@@ -193,7 +193,7 @@ export function EventForm({ initialData }: EventFormProps) {
                 </div>
               ) : (
                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Endereço / Local</Label>
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Endereço / Local</Label>
                   <Input
                     {...form.register('location')}
                     placeholder="Ex: Auditório Principal"
@@ -210,7 +210,7 @@ export function EventForm({ initialData }: EventFormProps) {
           <Card className="border-border/40 shadow-xl bg-card rounded-[2rem] overflow-hidden">
             <CardContent className="p-8 space-y-8">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Categoria</Label>
+                <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Categoria</Label>
                 <Select value={category} onValueChange={(v) => form.setValue('category', v as EventFormValues['category'])}>
                   <SelectTrigger className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all">
                     <SelectValue />
@@ -257,7 +257,7 @@ export function EventForm({ initialData }: EventFormProps) {
               {requiresRegistration && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-top-2">
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Capacidade (Opcional)</Label>
+                    <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Capacidade (Opcional)</Label>
                     <Input
                       {...form.register('capacity')}
                       type="number"
@@ -267,7 +267,7 @@ export function EventForm({ initialData }: EventFormProps) {
                   </div>
 
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Link Externo (Opcional)</Label>
+                    <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Link Externo (Opcional)</Label>
                     <Input
                       {...form.register('registration_link')}
                       placeholder="Se vazio, usa inscrição interna"
@@ -286,7 +286,7 @@ export function EventForm({ initialData }: EventFormProps) {
 
                   {isPaid && (
                     <div className="space-y-3 pl-2 animate-in fade-in slide-in-from-top-2">
-                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Valor (R$)</Label>
+                      <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Valor (R$)</Label>
                       <div className="relative">
                         <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50" />
                         <Input

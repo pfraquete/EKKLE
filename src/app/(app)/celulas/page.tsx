@@ -53,7 +53,7 @@ export default async function CellsPage() {
                                         </div>
                                         <div className="min-w-0">
                                             <h4 className="font-bold text-foreground text-sm sm:text-base truncate">{cell.name}</h4>
-                                            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-0.5 truncate">Líder: {cell.leaderName}</p>
+                                            <p className="text-xs sm:text-xs text-muted-foreground font-medium mt-0.5 truncate">Líder: {cell.leaderName}</p>
                                         </div>
                                     </div>
 
@@ -61,7 +61,7 @@ export default async function CellsPage() {
                                         <div className="hidden sm:block text-right">
                                             <p className="text-sm font-bold text-foreground">{cell.membersCount} membros</p>
                                             {cell.lastMeetingDate && (
-                                                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5">
+                                                <p className="text-xs text-muted-foreground uppercase font-black tracking-widest mt-0.5">
                                                     {format(new Date(cell.lastMeetingDate), "dd MMM", { locale: ptBR })}
                                                 </p>
                                             )}

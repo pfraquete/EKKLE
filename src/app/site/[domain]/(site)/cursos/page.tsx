@@ -32,7 +32,7 @@ export default async function CursosPage() {
             <div className="w-8 h-1 bg-primary rounded-full" />
             <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Academy</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tighter italic">Nossos Cursos</h1>
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black text-foreground tracking-tighter italic">Nossos Cursos</h1>
           <p className="text-xl text-muted-foreground max-w-2xl font-medium tracking-tight">
             Cresça espiritualmente com nossos cursos e trilhas de conhecimento fundamentadas na Palavra.
           </p>
@@ -40,7 +40,7 @@ export default async function CursosPage() {
 
         {/* Courses Grid */}
         {courses && courses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {courses.map((course) => {
               const videoCount = Array.isArray(course.course_videos)
                 ? course.course_videos.length
@@ -59,7 +59,7 @@ export default async function CursosPage() {
                   href={`/cursos/${course.id}`}
                   className="group bg-card border border-border/40 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:border-primary/20 transition-all duration-500"
                 >
-                  <div className="relative h-56 w-full overflow-hidden">
+                  <div className="relative h-40 sm:h-48 md:h-56 w-full overflow-hidden">
                     {course.thumbnail_url ? (
                       <Image
                         src={course.thumbnail_url}
@@ -75,12 +75,12 @@ export default async function CursosPage() {
                     <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-card to-transparent opacity-80" />
                   </div>
 
-                  <div className="p-10">
+                  <div className="p-5 sm:p-8 md:p-10">
                     <div className="flex justify-between items-start mb-4">
-                      <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest">
+                      <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-black uppercase tracking-widest">
                         {priceLabel}
                       </span>
-                      <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                      <div className="flex items-center gap-2 text-xs font-black uppercase text-muted-foreground tracking-widest">
                         <Video className="w-3.5 h-3.5 text-primary" />
                         {videoCount} aulas
                       </div>
@@ -92,7 +92,7 @@ export default async function CursosPage() {
                     </p>
 
                     <div className="flex items-center justify-between pt-6 border-t border-border/50">
-                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground/60">
                         <CalendarClock className="w-3.5 h-3.5" />
                         <span>{enrollmentLabel}</span>
                       </div>
@@ -116,12 +116,12 @@ export default async function CursosPage() {
         )}
 
         {/* CTA Section */}
-        <div className="mt-24 bg-primary/5 border border-primary/20 rounded-[3rem] p-12 md:p-20 text-center overflow-hidden relative">
+        <div className="mt-16 sm:mt-24 bg-primary/5 border border-primary/20 rounded-2xl sm:rounded-[3rem] p-6 sm:p-12 md:p-20 text-center overflow-hidden relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
 
           <div className="relative z-10 space-y-8">
-            <h2 className="text-4xl md:text-5xl font-black text-foreground tracking-tighter italic">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground tracking-tighter italic">
               Cresça conosco em comunidade
             </h2>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto font-medium leading-relaxed">

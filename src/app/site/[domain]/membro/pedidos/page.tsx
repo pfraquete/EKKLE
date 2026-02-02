@@ -87,10 +87,10 @@ export default async function OrdersListPage() {
                       <div className="flex flex-wrap items-center gap-3 mb-6">
                         <h3 className="font-black text-xl text-foreground">Pedido #{order.order_number}</h3>
                         <div className="flex gap-2">
-                          <Badge className={`${getStatusColor(order.status)} border-none font-black uppercase tracking-[0.05em] text-[10px] px-3 py-1 rounded-full`}>
+                          <Badge className={`${getStatusColor(order.status)} border-none font-black uppercase tracking-[0.05em] text-xs px-3 py-1 rounded-full`}>
                             {getOrderStatusLabel(order.status)}
                           </Badge>
-                          <Badge className={`${getPaymentStatusColor(order.payment_status)} border-none font-black uppercase tracking-[0.05em] text-[10px] px-3 py-1 rounded-full`}>
+                          <Badge className={`${getPaymentStatusColor(order.payment_status)} border-none font-black uppercase tracking-[0.05em] text-xs px-3 py-1 rounded-full`}>
                             {order.payment_status === 'paid'
                               ? 'Pago'
                               : order.payment_status === 'pending'
@@ -129,7 +129,7 @@ export default async function OrdersListPage() {
                         </div>
 
                         <div className="md:text-right">
-                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Total Investido</p>
+                          <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Total Investido</p>
                           <p className="text-3xl font-black text-foreground">
                             {new Intl.NumberFormat('pt-BR', {
                               style: 'currency',

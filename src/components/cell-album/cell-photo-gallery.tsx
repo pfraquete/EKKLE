@@ -69,7 +69,7 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                 </div>
                 <div>
                     <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tighter italic uppercase">Álbum de Momentos</h3>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground font-black uppercase tracking-widest">Nossa história registrada em fotos</p>
+                    <p className="text-xs sm:text-xs text-muted-foreground font-black uppercase tracking-widest">Nossa história registrada em fotos</p>
                 </div>
             </div>
 
@@ -98,7 +98,7 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                         {photo.face_processed && photo.face_count !== undefined && photo.face_count > 0 && (
                             <div className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded-full flex items-center gap-1 z-10">
                                 <Users className="w-3 h-3 text-white" />
-                                <span className="text-[10px] sm:text-xs font-bold text-white">{photo.face_count}</span>
+                                <span className="text-xs sm:text-xs font-bold text-white">{photo.face_count}</span>
                             </div>
                         )}
 
@@ -106,13 +106,13 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                         {(photo.description || photo.photo_date) && (
                             <div className="absolute inset-x-0 bottom-0 p-2 sm:p-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
                                 {photo.photo_date && (
-                                    <div className="flex items-center gap-1 text-white/80 text-[9px] sm:text-[10px] font-bold mb-0.5 sm:mb-1">
+                                    <div className="flex items-center gap-1 text-white/80 text-xs sm:text-xs font-bold mb-0.5 sm:mb-1">
                                         <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                         {formatDate(photo.photo_date)}
                                     </div>
                                 )}
                                 {photo.description && (
-                                    <p className="text-white text-[10px] sm:text-xs font-medium line-clamp-2">{photo.description}</p>
+                                    <p className="text-white text-xs sm:text-xs font-medium line-clamp-2">{photo.description}</p>
                                 )}
                             </div>
                         )}
@@ -155,7 +155,7 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                                             {/* Name tag */}
                                             {face.fullName && (
                                                 <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                                                    <div className="px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full shadow-lg">
+                                                    <div className="px-2 py-0.5 bg-primary text-primary-foreground text-xs font-bold rounded-full shadow-lg">
                                                         {face.fullName}
                                                     </div>
                                                 </div>
@@ -163,7 +163,7 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                                             {/* Unknown face indicator */}
                                             {!face.profileId && (
                                                 <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                                                    <div className="px-2 py-0.5 bg-white/80 text-black/80 text-[10px] font-bold rounded-full shadow-lg">
+                                                    <div className="px-2 py-0.5 bg-white/80 text-black/80 text-xs font-bold rounded-full shadow-lg">
                                                         Desconhecido
                                                     </div>
                                                 </div>

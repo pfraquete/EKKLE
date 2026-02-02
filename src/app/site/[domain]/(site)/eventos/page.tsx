@@ -53,7 +53,7 @@ export default async function EventosPage() {
               <div className="flex-1 h-px bg-border/50" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {upcomingEvents.map((event) => (
                 <Link
                   key={event.id}
@@ -80,7 +80,7 @@ export default async function EventosPage() {
                     <h3 className="font-black text-xl sm:text-2xl mb-4 sm:mb-5 text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">{event.title}</h3>
 
                     <div className="space-y-3 sm:space-y-4 mb-4">
-                      <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-primary">
+                      <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-primary">
                         <Calendar className="w-4 h-4" />
                         <span>
                           {new Date(event.start_date).toLocaleDateString('pt-BR', {
@@ -92,7 +92,7 @@ export default async function EventosPage() {
                       </div>
 
                       {event.location && (
-                        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-muted-foreground">
                           <MapPin className="w-4 h-4" />
                           <span className="line-clamp-1">{event.location}</span>
                         </div>
@@ -127,7 +127,7 @@ export default async function EventosPage() {
               <div className="flex-1 h-px bg-border/50" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {pastEvents.map((event) => (
                 <Link
                   key={event.id}
@@ -150,7 +150,7 @@ export default async function EventosPage() {
                   </div>
                   <div className="p-6">
                     <h3 className="font-bold text-lg mb-3 text-foreground line-clamp-1">{event.title}</h3>
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
                       <Calendar className="w-3.5 h-3.5" />
                       {new Date(event.start_date).toLocaleDateString('pt-BR', {
                         day: '2-digit',

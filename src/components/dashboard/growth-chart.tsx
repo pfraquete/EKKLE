@@ -79,7 +79,7 @@ export function GrowthChart({ data }: GrowthChartProps) {
                 </div>
 
                 {/* Month label */}
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   {item.month}
                 </span>
               </div>

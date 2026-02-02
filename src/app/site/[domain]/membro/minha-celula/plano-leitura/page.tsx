@@ -265,7 +265,7 @@ export default function PlanoLeituraGrupoPage() {
         <div className="bg-card border border-border/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+              <p className="text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">
                 Seu Progresso
               </p>
               <h2 className="text-lg sm:text-xl font-bold text-foreground">

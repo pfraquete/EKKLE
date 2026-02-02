@@ -84,7 +84,7 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
                         key={link.href}
                         href={link.href}
                         className={cn(
-                            "flex flex-col items-center justify-center gap-1 flex-1 h-full text-[10px] font-bold transition-all duration-200",
+                            "flex flex-col items-center justify-center gap-1 flex-1 h-full text-xs font-bold transition-all duration-200",
                             link.active
                                 ? "text-primary"
                                 : "text-muted-foreground hover:text-foreground"

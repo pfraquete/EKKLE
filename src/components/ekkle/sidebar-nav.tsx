@@ -34,7 +34,7 @@ export function EkkleSidebarNav({ profile }: EkkleSidebarNavProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                    "flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 font-black text-[10px] uppercase tracking-[0.2em] group border",
+                    "flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-500 font-black text-xs uppercase tracking-[0.2em] group border",
                     isActive
                         ? 'bg-primary text-primary-foreground border-primary shadow-2xl shadow-primary/30 scale-[1.05]'
                         : item.highlight
@@ -59,7 +59,7 @@ export function EkkleSidebarNav({ profile }: EkkleSidebarNavProps) {
                 <p className="text-lg font-black text-foreground">
                     {profile?.full_name?.split(' ')[0] || 'Visitante'}
                 </p>
-                <p className="text-[10px] text-primary font-bold uppercase tracking-wider mt-1">
+                <p className="text-xs text-primary font-bold uppercase tracking-wider mt-1">
                     Encontre sua comunidade
                 </p>
             </div>

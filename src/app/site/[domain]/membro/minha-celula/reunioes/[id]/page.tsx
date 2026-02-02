@@ -49,11 +49,11 @@ export default async function MeetingSummaryPage({
             <div className="grid grid-cols-2 gap-4">
                 <Card className="border-none bg-zinc-900 rounded-[2rem] p-6 text-center">
                     <p className="text-3xl font-black text-white mb-1">{presentMembers.length}</p>
-                    <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Presentes</p>
+                    <p className="text-xs uppercase font-black text-zinc-500 tracking-widest">Presentes</p>
                 </Card>
                 <Card className="border-none bg-zinc-900 rounded-[2rem] p-6 text-center">
                     <p className="text-3xl font-black text-primary mb-1">{visitors.length}</p>
-                    <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Visitantes</p>
+                    <p className="text-xs uppercase font-black text-zinc-500 tracking-widest">Visitantes</p>
                 </Card>
             </div>
 
@@ -94,7 +94,7 @@ export default async function MeetingSummaryPage({
                         {visitors.map((v: { id: string, visitor_name: string, visitor_phone?: string }) => (
                             <div key={v.id} className="flex items-center justify-between p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
                                 <span className="text-sm font-bold text-white">{v.visitor_name}</span>
-                                {v.visitor_phone && <span className="text-[10px] font-black text-blue-400">{v.visitor_phone}</span>}
+                                {v.visitor_phone && <span className="text-xs font-black text-blue-400">{v.visitor_phone}</span>}
                             </div>
                         ))}
                     </CardContent>

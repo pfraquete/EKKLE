@@ -39,16 +39,16 @@ export function TitheTable({ monthsData, currentYear }: TitheTableProps) {
                     <table className="w-full">
                         <thead className="bg-muted/30">
                             <tr>
-                                <th className="px-4 sm:px-6 py-4 text-left text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
                                     Mês
                                 </th>
-                                <th className="px-4 sm:px-6 py-4 text-left text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
                                     Valor
                                 </th>
-                                <th className="px-4 sm:px-6 py-4 text-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                <th className="px-4 sm:px-6 py-4 text-center text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
                                     Status
                                 </th>
-                                <th className="px-4 sm:px-6 py-4 text-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                <th className="px-4 sm:px-6 py-4 text-center text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
                                     Comprovante
                                 </th>
                             </tr>
@@ -80,7 +80,7 @@ export function TitheTable({ monthsData, currentYear }: TitheTableProps) {
                                                 <div>
                                                     <p className="font-bold text-foreground">{name}</p>
                                                     {isCurrent && (
-                                                        <span className="text-[10px] font-bold uppercase text-primary">
+                                                        <span className="text-xs font-bold uppercase text-primary">
                                                             Mês atual
                                                         </span>
                                                     )}
@@ -98,12 +98,12 @@ export function TitheTable({ monthsData, currentYear }: TitheTableProps) {
                                         </td>
                                         <td className="px-4 sm:px-6 py-4 text-center">
                                             {tithe?.status === 'CONFIRMED' ? (
-                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg text-[10px] sm:text-xs font-bold">
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg text-xs sm:text-xs font-bold">
                                                     <CheckCircle className="w-3.5 h-3.5" />
                                                     Confirmado
                                                 </span>
                                             ) : tithe?.status === 'PENDING' ? (
-                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-[10px] sm:text-xs font-bold">
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-xs sm:text-xs font-bold">
                                                     <Clock className="w-3.5 h-3.5" />
                                                     Pendente
                                                 </span>
@@ -117,7 +117,7 @@ export function TitheTable({ monthsData, currentYear }: TitheTableProps) {
                                                     href={tithe.receipt_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] bg-primary/10 text-primary rounded-lg text-[10px] sm:text-xs font-bold hover:bg-primary/20 transition-colors"
+                                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] bg-primary/10 text-primary rounded-lg text-xs sm:text-xs font-bold hover:bg-primary/20 transition-colors"
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
                                                     <span className="hidden sm:inline">Ver</span>
@@ -125,7 +125,7 @@ export function TitheTable({ monthsData, currentYear }: TitheTableProps) {
                                             ) : tithe?.status !== 'CONFIRMED' ? (
                                                 <button
                                                     onClick={() => setSelectedMonth(monthData)}
-                                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] bg-muted text-muted-foreground rounded-lg text-[10px] sm:text-xs font-bold hover:bg-muted/80 hover:text-foreground transition-colors"
+                                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] bg-muted text-muted-foreground rounded-lg text-xs sm:text-xs font-bold hover:bg-muted/80 hover:text-foreground transition-colors"
                                                 >
                                                     <Upload className="w-3.5 h-3.5" />
                                                     <span className="hidden sm:inline">Enviar</span>

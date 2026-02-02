@@ -23,13 +23,13 @@ export function StreakDisplay({
       container: 'p-2',
       icon: 'w-4 h-4',
       number: 'text-lg',
-      label: 'text-[8px]',
+      label: 'text-xs',
     },
     md: {
       container: 'p-3',
       icon: 'w-6 h-6',
       number: 'text-2xl',
-      label: 'text-[10px]',
+      label: 'text-xs',
     },
     lg: {
       container: 'p-4',

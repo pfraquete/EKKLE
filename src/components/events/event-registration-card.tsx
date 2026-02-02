@@ -78,28 +78,28 @@ export function EventRegistrationCard({ registration, allowCancel }: EventRegist
     switch (status) {
       case 'CONFIRMED':
         return (
-          <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full">
+          <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">
             <CheckCircle2 className="w-3 h-3 mr-1.5" />
             Confirmado
           </Badge>
         )
       case 'WAITLIST':
         return (
-          <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full">
+          <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">
             <Clock className="w-3 h-3 mr-1.5" />
             Em Espera
           </Badge>
         )
       case 'CANCELLED':
         return (
-          <Badge className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full">
+          <Badge className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">
             <XCircle className="w-3 h-3 mr-1.5" />
             Cancelado
           </Badge>
         )
       case 'ATTENDED':
         return (
-          <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20 font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full">
+          <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20 font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">
             <CheckCircle2 className="w-3 h-3 mr-1.5" />
             Participou
           </Badge>
@@ -114,13 +114,13 @@ export function EventRegistrationCard({ registration, allowCancel }: EventRegist
 
     switch (payment_status) {
       case 'PAID':
-        return <Badge className="bg-green-500/10 text-green-500 border-green-500/20 font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full">Pago</Badge>
+        return <Badge className="bg-green-500/10 text-green-500 border-green-500/20 font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">Pago</Badge>
       case 'PENDING':
-        return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full">Pendente</Badge>
+        return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">Pendente</Badge>
       case 'REFUNDED':
-        return <Badge className="bg-muted text-muted-foreground border-border/50 font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full">Reembolsado</Badge>
+        return <Badge className="bg-muted text-muted-foreground border-border/50 font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">Reembolsado</Badge>
       case 'FAILED':
-        return <Badge className="bg-destructive/10 text-destructive border-destructive/20 font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full">Falhou</Badge>
+        return <Badge className="bg-destructive/10 text-destructive border-destructive/20 font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">Falhou</Badge>
       default:
         return null
     }
@@ -162,7 +162,7 @@ export function EventRegistrationCard({ registration, allowCancel }: EventRegist
             </Link>
           </div>
 
-          <div className="flex flex-wrap gap-x-8 gap-y-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-8">
+          <div className="flex flex-wrap gap-x-8 gap-y-3 text-xs font-black uppercase tracking-widest text-muted-foreground/60 mb-8">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary/50" />
               <span>{eventDate}</span>
@@ -189,7 +189,7 @@ export function EventRegistrationCard({ registration, allowCancel }: EventRegist
           <div className="flex flex-wrap items-center gap-4">
             <Button
               variant="outline"
-              className="rounded-full px-6 border-border/50 font-black uppercase tracking-widest text-[10px] h-10 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
+              className="rounded-full px-6 border-border/50 font-black uppercase tracking-widest text-xs h-10 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
               onClick={() => router.push(`/eventos/${event.id}`)}
             >
               Documentação
@@ -197,7 +197,7 @@ export function EventRegistrationCard({ registration, allowCancel }: EventRegist
 
             {payment_status === 'PENDING' && (
               <Button
-                className="rounded-full px-6 font-black uppercase tracking-widest text-[10px] h-10 shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 bg-amber-500 text-white hover:bg-amber-600 transition-all duration-300"
+                className="rounded-full px-6 font-black uppercase tracking-widest text-xs h-10 shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 bg-amber-500 text-white hover:bg-amber-600 transition-all duration-300"
                 onClick={() => router.push(`/eventos/${event.id}/checkout`)}
               >
                 <AlertCircle className="w-3.5 h-3.5 mr-2" />
@@ -208,7 +208,7 @@ export function EventRegistrationCard({ registration, allowCancel }: EventRegist
             {allowCancel && status !== 'CANCELLED' && status !== 'ATTENDED' && (
               <Button
                 variant="ghost"
-                className="rounded-full px-6 font-black uppercase tracking-widest text-[10px] h-10 text-destructive/40 hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
+                className="rounded-full px-6 font-black uppercase tracking-widest text-xs h-10 text-destructive/40 hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
                 onClick={() => setShowCancelDialog(true)}
               >
                 Anular
@@ -237,11 +237,11 @@ export function EventRegistrationCard({ registration, allowCancel }: EventRegist
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3">
-            <AlertDialogCancel disabled={isLoading} className="rounded-full px-8 font-black uppercase tracking-widest text-[10px] h-12 border-border/50">Fechar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isLoading} className="rounded-full px-8 font-black uppercase tracking-widest text-xs h-12 border-border/50">Fechar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancel}
               disabled={isLoading}
-              className="rounded-full px-8 font-black uppercase tracking-widest text-[10px] h-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
+              className="rounded-full px-8 font-black uppercase tracking-widest text-xs h-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirmar Anulação

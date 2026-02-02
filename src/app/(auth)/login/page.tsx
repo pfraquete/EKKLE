@@ -46,7 +46,7 @@ export default async function LoginPage({
                                     <CardTitle className="text-2xl font-black text-foreground tracking-tight">
                                         {church.name}
                                     </CardTitle>
-                                    <CardDescription className="text-muted-foreground font-medium uppercase tracking-widest text-[10px]">
+                                    <CardDescription className="text-muted-foreground font-medium uppercase tracking-widest text-xs">
                                         Painel de Membros
                                     </CardDescription>
                                 </div>

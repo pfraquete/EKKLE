@@ -136,7 +136,7 @@ export default async function MemberCelulasFinanceiroPage() {
                                                         unoptimized
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-[8px] font-bold">
+                                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-bold">
                                                         {(cellBalance.cell?.leader?.full_name || 'L')[0].toUpperCase()}
                                                     </div>
                                                 )}

@@ -113,7 +113,7 @@ export default async function SettingsPage() {
                             </div>
                             <Badge variant="outline" className="font-bold text-blue-300 bg-blue-500/10 border-blue-500/30">Online</Badge>
                         </div>
-                        <div className="pt-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest text-center">
+                        <div className="pt-2 text-xs text-muted-foreground font-bold uppercase tracking-widest text-center">
                             Entrou em: {profile.joined_at ? new Date(profile.joined_at).toLocaleDateString('pt-BR') : '—'}
                         </div>
                     </CardContent>
@@ -122,7 +122,7 @@ export default async function SettingsPage() {
 
             {/* Footer */}
             <div className="text-center pt-8 opacity-40">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Desenvolvido para Ekkle</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Desenvolvido para Ekkle</p>
             </div>
         </div>
     )

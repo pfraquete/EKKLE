@@ -130,7 +130,7 @@ export function PublicLiveChat({ streamId, churchId, chatEnabled, isLive }: Publ
               Chat ao Vivo
             </h2>
           </div>
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+          <div className="text-xs font-black text-muted-foreground uppercase tracking-widest">
             {visibleMessages.length} mensagens
           </div>
         </div>
@@ -141,7 +141,7 @@ export function PublicLiveChat({ streamId, churchId, chatEnabled, isLive }: Publ
         <div className="p-4 border-b border-border/50 bg-primary/5">
           <div className="flex items-center gap-2 mb-3">
             <Pin className="w-3 h-3 text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+            <span className="text-xs font-black uppercase tracking-widest text-primary">
               Fixadas
             </span>
           </div>
@@ -207,12 +207,12 @@ export function PublicLiveChat({ streamId, churchId, chatEnabled, isLive }: Publ
                       {msg.profile?.full_name || 'Anonimo'}
                     </span>
                     {msg.profile?.role === 'PASTOR' && (
-                      <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                      <span className="text-xs font-black uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                         Pastor
                       </span>
                     )}
                     {msg.profile?.role === 'LEADER' && (
-                      <span className="text-[9px] font-black uppercase tracking-widest text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                      <span className="text-xs font-black uppercase tracking-widest text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">
                         Lider
                       </span>
                     )}
@@ -224,7 +224,7 @@ export function PublicLiveChat({ streamId, churchId, chatEnabled, isLive }: Publ
                   </p>
 
                   {/* Time */}
-                  <span className="text-[9px] mt-1 block text-muted-foreground/60">
+                  <span className="text-xs mt-1 block text-muted-foreground/60">
                     {formatDistanceToNow(new Date(msg.created_at), {
                       addSuffix: true,
                       locale: ptBR,

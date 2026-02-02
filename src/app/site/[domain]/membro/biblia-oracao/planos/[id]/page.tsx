@@ -163,7 +163,7 @@ export default function PlanDetailsPage({ params }: PlanDetailsPageProps) {
           <div className="text-2xl sm:text-3xl font-black text-primary mb-1">
             {plan.duration_days}
           </div>
-          <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Dias
           </p>
         </div>
@@ -171,7 +171,7 @@ export default function PlanDetailsPage({ params }: PlanDetailsPageProps) {
           <div className="text-2xl sm:text-3xl font-black text-foreground mb-1">
             {plan.readings.length}
           </div>
-          <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Leituras
           </p>
         </div>
@@ -179,7 +179,7 @@ export default function PlanDetailsPage({ params }: PlanDetailsPageProps) {
           <div className="text-2xl sm:text-3xl font-black text-muted-foreground mb-1">
             ~10
           </div>
-          <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Min/dia
           </p>
         </div>

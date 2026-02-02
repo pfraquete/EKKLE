@@ -197,7 +197,7 @@ export function LiveChat({ streamId, churchId, chatEnabled, isLive, profile }: L
           <h2 className="font-black text-xs uppercase tracking-[0.2em] text-foreground">
             Chat ao Vivo
           </h2>
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+          <div className="text-xs font-black text-muted-foreground uppercase tracking-widest">
             {regularMessages.length} mensagens
           </div>
         </div>
@@ -208,7 +208,7 @@ export function LiveChat({ streamId, churchId, chatEnabled, isLive, profile }: L
         <div className="p-4 border-b border-border/50 bg-primary/5">
           <div className="flex items-center gap-2 mb-3">
             <Pin className="w-3 h-3 text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+            <span className="text-xs font-black uppercase tracking-widest text-primary">
               Fixadas
             </span>
           </div>
@@ -297,12 +297,12 @@ export function LiveChat({ streamId, churchId, chatEnabled, isLive, profile }: L
                       {msg.profile?.full_name || 'Anonimo'}
                     </span>
                     {msg.profile?.role === 'PASTOR' && msg.profile_id !== profile.id && (
-                      <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                      <span className="text-xs font-black uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                         Pastor
                       </span>
                     )}
                     {msg.profile?.role === 'LEADER' && msg.profile_id !== profile.id && (
-                      <span className="text-[9px] font-black uppercase tracking-widest text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                      <span className="text-xs font-black uppercase tracking-widest text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">
                         Lider
                       </span>
                     )}
@@ -321,7 +321,7 @@ export function LiveChat({ streamId, churchId, chatEnabled, isLive, profile }: L
 
                   {/* Time */}
                   <span
-                    className={`text-[9px] mt-1 block ${
+                    className={`text-xs mt-1 block ${
                       msg.profile_id === profile.id
                         ? 'text-primary-foreground/60 text-right'
                         : 'text-muted-foreground/60'

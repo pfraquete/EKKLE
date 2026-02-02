@@ -52,7 +52,7 @@ export function PhotoFaceOverlay({ photoId, photoUrl, className = '' }: PhotoFac
                     {/* Name tag */}
                     {showNames && face.fullName && (
                         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                            <div className="px-2 py-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full shadow-lg">
+                            <div className="px-2 py-0.5 bg-primary text-primary-foreground text-xs font-bold rounded-full shadow-lg">
                                 {face.fullName}
                             </div>
                         </div>
@@ -61,7 +61,7 @@ export function PhotoFaceOverlay({ photoId, photoUrl, className = '' }: PhotoFac
                     {/* Unknown face indicator */}
                     {showNames && !face.profileId && (
                         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                            <div className="px-2 py-0.5 bg-muted text-muted-foreground text-[10px] font-bold rounded-full shadow-lg">
+                            <div className="px-2 py-0.5 bg-muted text-muted-foreground text-xs font-bold rounded-full shadow-lg">
                                 Desconhecido
                             </div>
                         </div>
@@ -73,7 +73,7 @@ export function PhotoFaceOverlay({ photoId, photoUrl, className = '' }: PhotoFac
             {faces.length > 0 && (
                 <button
                     onClick={() => setShowNames(!showNames)}
-                    className="absolute top-2 right-2 px-2 py-1 bg-black/60 hover:bg-black/80 text-white text-[10px] font-bold rounded-full backdrop-blur-sm transition-colors"
+                    className="absolute top-2 right-2 px-2 py-1 bg-black/60 hover:bg-black/80 text-white text-xs font-bold rounded-full backdrop-blur-sm transition-colors"
                 >
                     {showNames ? 'Ocultar nomes' : 'Mostrar nomes'}
                 </button>

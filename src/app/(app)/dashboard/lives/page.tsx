@@ -209,11 +209,11 @@ function StreamCard({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${provider.class}`}>
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${provider.class}`}>
             {provider.label}
           </span>
           {stream.chat_enabled && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
               Chat Ativo
             </span>
           )}
@@ -239,7 +239,7 @@ function StreamCard({
       </div>
 
       {/* Created */}
-      <p className="text-[10px] text-muted-foreground mt-3">
+      <p className="text-xs text-muted-foreground mt-3">
         Criada{' '}
         {formatDistanceToNow(new Date(stream.created_at), {
           addSuffix: true,

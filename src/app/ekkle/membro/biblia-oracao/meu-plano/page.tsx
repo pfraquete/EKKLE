@@ -123,7 +123,7 @@ export default function EkkleMeuPlanoPage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div className="flex-1">
-          <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+          <p className="text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">
             Meu Plano
           </p>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
@@ -160,7 +160,7 @@ export default function EkkleMeuPlanoPage() {
         {/* Progress */}
         <div className="bg-muted/30 p-4 rounded-xl sm:rounded-2xl border border-border/50">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+            <span className="text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
               Progresso
             </span>
             <span className="text-sm font-black text-primary">
@@ -185,7 +185,7 @@ export default function EkkleMeuPlanoPage() {
           <div className="text-xl sm:text-2xl font-black text-primary mb-0.5">
             {userPlan.progress.length}
           </div>
-          <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Lidos
           </p>
         </div>
@@ -194,7 +194,7 @@ export default function EkkleMeuPlanoPage() {
             <Flame className="w-4 h-4 sm:w-5 sm:h-5 fill-orange-400" />
             {userPlan.current_streak}
           </div>
-          <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Sequencia
           </p>
         </div>
@@ -202,7 +202,7 @@ export default function EkkleMeuPlanoPage() {
           <div className="text-xl sm:text-2xl font-black text-muted-foreground mb-0.5">
             {userPlan.longest_streak}
           </div>
-          <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Recorde
           </p>
         </div>
@@ -210,7 +210,7 @@ export default function EkkleMeuPlanoPage() {
           <div className="text-xl sm:text-2xl font-black text-muted-foreground mb-0.5">
             {currentDay}
           </div>
-          <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Dia Atual
           </p>
         </div>

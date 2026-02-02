@@ -95,7 +95,7 @@ export function CellsList({ cells }: CellsListProps) {
                                 <div className="flex items-center gap-6">
                                     <div className="hidden sm:block text-right">
                                         <p className="text-sm font-bold text-foreground">{cell.membersCount} membros</p>
-                                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5">
+                                        <p className="text-xs text-muted-foreground uppercase font-black tracking-widest mt-0.5">
                                             {isMounted && cell.lastMeetingDate ? format(new Date(cell.lastMeetingDate), "dd MMM", { locale: ptBR }) : 'Sem reunião'}
                                         </p>
                                     </div>

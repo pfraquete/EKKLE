@@ -112,12 +112,12 @@ export default async function ProfessorCursosPage() {
                                         {course.is_published ? (
                                             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 backdrop-blur-md">
                                                 <Eye className="w-3.5 h-3.5" />
-                                                <span className="text-[10px] font-black uppercase tracking-wider">Publicado</span>
+                                                <span className="text-xs font-black uppercase tracking-wider">Publicado</span>
                                             </div>
                                         ) : (
                                             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 backdrop-blur-md">
                                                 <EyeOff className="w-3.5 h-3.5" />
-                                                <span className="text-[10px] font-black uppercase tracking-wider">Rascunho</span>
+                                                <span className="text-xs font-black uppercase tracking-wider">Rascunho</span>
                                             </div>
                                         )}
                                     </div>

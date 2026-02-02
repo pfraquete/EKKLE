@@ -53,21 +53,21 @@ export default async function EkkleLivesPage() {
     switch (status) {
       case 'live':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-wider rounded-full">
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-500 text-xs font-black uppercase tracking-wider rounded-full">
             <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
             Ao Vivo
           </span>
         )
       case 'scheduled':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase tracking-wider rounded-full">
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-500/10 text-amber-500 text-xs font-black uppercase tracking-wider rounded-full">
             <Calendar className="w-3 h-3" />
             Agendada
           </span>
         )
       case 'ended':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 bg-muted text-muted-foreground text-[10px] font-black uppercase tracking-wider rounded-full">
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-muted text-muted-foreground text-xs font-black uppercase tracking-wider rounded-full">
             Encerrada
           </span>
         )

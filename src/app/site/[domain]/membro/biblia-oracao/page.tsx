@@ -71,7 +71,7 @@ export default async function BibliaOracaoPage() {
       <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary/70 mb-1">
+            <p className="text-xs sm:text-xs font-black uppercase tracking-widest text-primary/70 mb-1">
               Oracao
             </p>
             <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground">
@@ -95,7 +95,7 @@ export default async function BibliaOracaoPage() {
                 <Calendar className="w-4 h-4" />
                 <span className="text-lg font-black">{weeklyStats.totalPrayers}</span>
               </div>
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Esta Semana
               </p>
             </div>
@@ -104,7 +104,7 @@ export default async function BibliaOracaoPage() {
                 <Clock className="w-4 h-4" />
                 <span className="text-lg font-black">{weeklyStats.totalMinutes}</span>
               </div>
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Minutos
               </p>
             </div>
@@ -113,7 +113,7 @@ export default async function BibliaOracaoPage() {
                 <Users className="w-4 h-4" />
                 <span className="text-lg font-black">{weeklyStats.peoplePrayed}</span>
               </div>
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Pessoas
               </p>
             </div>
@@ -163,7 +163,7 @@ export default async function BibliaOracaoPage() {
           <section className="bg-card border border-border/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                <p className="text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">
                   Plano Atual
                 </p>
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground">
@@ -180,7 +180,7 @@ export default async function BibliaOracaoPage() {
             {/* Progress */}
             <div className="bg-muted/30 p-4 rounded-xl sm:rounded-2xl border border-border/50 mb-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                <span className="text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
                   Progresso Geral
                 </span>
                 <span className="text-sm font-black text-primary">
@@ -289,7 +289,7 @@ export default async function BibliaOracaoPage() {
             <div className="text-2xl sm:text-3xl font-black text-primary mb-1">
               {activePlan.progress.length}
             </div>
-            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Dias Lidos
             </p>
           </div>
@@ -298,7 +298,7 @@ export default async function BibliaOracaoPage() {
               <Flame className="w-5 h-5 sm:w-6 sm:h-6 fill-orange-400" />
               {activePlan.current_streak}
             </div>
-            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Sequencia
             </p>
           </div>
@@ -306,7 +306,7 @@ export default async function BibliaOracaoPage() {
             <div className="text-2xl sm:text-3xl font-black text-muted-foreground mb-1">
               {activePlan.totalReadings - activePlan.progress.length}
             </div>
-            <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Restantes
             </p>
           </div>

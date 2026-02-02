@@ -77,7 +77,7 @@ export function PrayerStatsCard({ stats, period, className }: PrayerStatsCardPro
               >
                 <div className="flex items-center gap-2 mb-1">
                   <Icon className={cn('w-4 h-4', item.color)} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {item.label}
                   </span>
                 </div>

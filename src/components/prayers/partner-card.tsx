@@ -55,7 +55,7 @@ export function PartnerCard({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <Users className="w-4 h-4 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">
                 Seu Parceiro de Oracao
               </span>
             </div>

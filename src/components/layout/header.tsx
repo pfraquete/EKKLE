@@ -22,7 +22,7 @@ export function Header({ profile }: HeaderProps) {
 
             <div className="flex items-center gap-4">
                 <button
-                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent"
                     aria-label="Notificações"
                 >
                     <Bell className="h-5 w-5" />

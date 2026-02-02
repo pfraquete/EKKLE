@@ -120,7 +120,7 @@ export default async function MeusCursosPage() {
 
                       {/* Live Badge */}
                       {liveNow && (
-                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 bg-red-500 text-white rounded-lg text-[10px] font-black uppercase shadow-lg animate-pulse">
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 bg-red-500 text-white rounded-lg text-xs font-black uppercase shadow-lg animate-pulse">
                           <Radio className="w-3 h-3" />
                           AO VIVO
                         </div>
@@ -133,7 +133,7 @@ export default async function MeusCursosPage() {
                       {/* Progress Bar */}
                       <div className="mb-4 sm:mb-6 bg-muted/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-border/50">
                         <div className="flex items-center justify-between mb-2 sm:mb-3">
-                          <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Progresso</span>
+                          <span className="text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground">Progresso</span>
                           <span className="text-xs sm:text-sm font-black text-primary">
                             {enrollment.progress_percentage}%
                           </span>
@@ -147,17 +147,17 @@ export default async function MeusCursosPage() {
                       </div>
 
                       <div className="flex items-center justify-between pt-1 sm:pt-2">
-                        <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold text-muted-foreground">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-xs font-bold text-muted-foreground">
                           <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary/60" />
                           <span>{videoCount} aulas</span>
                         </div>
                         {enrollment.completed_at ? (
-                          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-500/10 text-emerald-500 rounded-full text-[9px] sm:text-[10px] font-black uppercase">
+                          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-500/10 text-emerald-500 rounded-full text-xs sm:text-xs font-black uppercase">
                             <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                             Concluído
                           </div>
                         ) : (
-                          <span className="text-primary text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest flex items-center gap-1.5 sm:gap-2 group-hover:gap-2 sm:group-hover:gap-3 transition-all">
+                          <span className="text-primary text-xs sm:text-xs font-black uppercase tracking-wider sm:tracking-widest flex items-center gap-1.5 sm:gap-2 group-hover:gap-2 sm:group-hover:gap-3 transition-all">
                             Continuar <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                           </span>
                         )}
@@ -185,7 +185,7 @@ export default async function MeusCursosPage() {
                       <Calendar className="w-4 h-4 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-xs truncate">{nextScheduled.title}</p>
-                        <p className="text-[10px] flex items-center gap-1 mt-0.5">
+                        <p className="text-xs flex items-center gap-1 mt-0.5">
                           <Clock className="w-3 h-3" />
                           {new Date(nextScheduled.scheduled_start).toLocaleDateString('pt-BR', {
                             day: '2-digit',
@@ -242,7 +242,7 @@ export default async function MeusCursosPage() {
                     <h3 className="font-bold text-sm sm:text-base lg:text-lg mb-2 sm:mb-3 text-foreground line-clamp-2 group-hover:text-primary transition-colors">
                       {course.title}
                     </h3>
-                    <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-black uppercase tracking-wider sm:tracking-widest text-muted-foreground">
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-xs font-black uppercase tracking-wider sm:tracking-widest text-muted-foreground">
                       <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       <span>{videoCount} vídeos</span>
                     </div>

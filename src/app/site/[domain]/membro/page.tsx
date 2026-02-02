@@ -58,21 +58,21 @@ export default async function MembroPage() {
             <div className="text-xl sm:text-2xl lg:text-3xl font-black text-primary mb-0.5 sm:mb-1">
               {enrollmentCount || 0}
             </div>
-            <div className="text-muted-foreground text-[8px] sm:text-[9px] lg:text-[10px] uppercase font-bold tracking-wider sm:tracking-widest">Cursos</div>
+            <div className="text-muted-foreground text-xs sm:text-xs lg:text-xs uppercase font-bold tracking-wider sm:tracking-widest">Cursos</div>
           </div>
 
           <div className="bg-card border border-border/50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-4 lg:p-6 shadow-sm hover:shadow-md transition-all">
             <div className="text-xl sm:text-2xl lg:text-3xl font-black text-primary mb-0.5 sm:mb-1 truncate">
               {profile?.member_stage || '-'}
             </div>
-            <div className="text-muted-foreground text-[8px] sm:text-[9px] lg:text-[10px] uppercase font-bold tracking-wider sm:tracking-widest">Status</div>
+            <div className="text-muted-foreground text-xs sm:text-xs lg:text-xs uppercase font-bold tracking-wider sm:tracking-widest">Status</div>
           </div>
 
           <div className="bg-card border border-border/50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-4 lg:p-6 shadow-sm hover:shadow-md transition-all">
             <div className="text-xl sm:text-2xl lg:text-3xl font-black text-primary mb-0.5 sm:mb-1 truncate">
               {profile?.role || '-'}
             </div>
-            <div className="text-muted-foreground text-[8px] sm:text-[9px] lg:text-[10px] uppercase font-bold tracking-wider sm:tracking-widest">Função</div>
+            <div className="text-muted-foreground text-xs sm:text-xs lg:text-xs uppercase font-bold tracking-wider sm:tracking-widest">Função</div>
           </div>
         </div>
 
@@ -88,7 +88,7 @@ export default async function MembroPage() {
                 <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">
+                <div className="text-xs sm:text-xs font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">
                   Nome Completo
                 </div>
                 <div className="text-base sm:text-lg lg:text-xl font-bold text-foreground truncate">{profile?.full_name || '-'}</div>
@@ -100,7 +100,7 @@ export default async function MembroPage() {
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">E-mail</div>
+                <div className="text-xs sm:text-xs font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">E-mail</div>
                 <div className="text-base sm:text-lg lg:text-xl font-bold text-foreground truncate">{profile?.email || user.email || '-'}</div>
               </div>
             </div>
@@ -111,7 +111,7 @@ export default async function MembroPage() {
                   <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">
+                  <div className="text-xs sm:text-xs font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">
                     Telefone / WhatsApp
                   </div>
                   <div className="text-base sm:text-lg lg:text-xl font-bold text-foreground">{profile.phone}</div>
@@ -124,7 +124,7 @@ export default async function MembroPage() {
                 <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">
+                <div className="text-xs sm:text-xs font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">
                   Membro desde
                 </div>
                 <div className="text-base sm:text-lg lg:text-xl font-bold text-foreground uppercase tracking-tight">
@@ -142,7 +142,7 @@ export default async function MembroPage() {
           </div>
 
           <div className="p-4 sm:p-6 lg:p-8 bg-muted/20 border-t border-border">
-            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium flex items-center gap-2">
+            <p className="text-xs sm:text-xs text-muted-foreground font-medium flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-pulse flex-shrink-0" />
               Clique na foto de perfil para alterá-la. Para outras informações, entre em contato com a secretaria.
             </p>
