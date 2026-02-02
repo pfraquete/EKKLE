@@ -236,8 +236,8 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
                     ))}
                 </nav>
 
-                {/* Footer - Back to Site */}
-                <div className="p-4 border-t border-border">
+                {/* Footer - Back to Site & Logout */}
+                <div className="p-4 border-t border-border space-y-2">
                     <Link
                         href="/"
                         onClick={() => setIsOpen(false)}
@@ -246,6 +246,15 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
                         <LogOut className="h-5 w-5 rotate-180" />
                         Voltar ao Site
                     </Link>
+                    <form action="/api/auth/signout" method="post">
+                        <button
+                            type="submit"
+                            className="flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-destructive rounded-xl hover:bg-destructive/10 transition-colors"
+                        >
+                            <LogOut className="h-5 w-5" />
+                            Sair da Conta
+                        </button>
+                    </form>
                 </div>
             </aside>
         </>
