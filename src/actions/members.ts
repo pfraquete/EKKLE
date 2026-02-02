@@ -167,7 +167,7 @@ export async function getMembers(cellId: string) {
 
 export async function getMemberDetails(id: string) {
     const profile = await getProfile()
-    if (!profile) throw new Error('Não autenticado')
+    if (!profile) return { member: null, attendance: [] }
     const churchId = profile.church_id
 
     const supabase = await createClient()
@@ -201,8 +201,12 @@ export async function getMemberDetails(id: string) {
             .eq('church_id', churchId)
             .single()
 
-        if (mError) throw mError
-        return { member: m, attendance: [] } // Members don't have attendance yet in the same way? Or they do?
+        // Return null member if not found in either table (instead of throwing)
+        if (mError) {
+            console.error('Member not found:', mError)
+            return { member: null, attendance: [] }
+        }
+        return { member: m, attendance: [] }
     }
 
     // 2. Get attendance history
