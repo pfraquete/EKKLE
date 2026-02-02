@@ -14,23 +14,31 @@ import {
 import { Loader2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, BookOpen } from 'lucide-react'
 import { getBiblePassage } from '@/actions/bible-reading'
 import { BookSelector, BIBLE_BOOKS_DATA, getBookChapters, getBookName } from './book-selector'
+import { VersionSelector, getVersionName } from './version-selector'
 import { cn } from '@/lib/utils'
 
 interface BibleReaderProps {
   initialBook?: string
   initialChapter?: number
+  initialVersion?: string
 }
 
-export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleReaderProps) {
+export function BibleReader({ 
+  initialBook = 'GEN', 
+  initialChapter = 1,
+  initialVersion = 'nvi'
+}: BibleReaderProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
   // Get initial values from URL or props
   const urlBook = searchParams.get('livro') || initialBook
   const urlChapter = parseInt(searchParams.get('capitulo') || String(initialChapter), 10)
+  const urlVersion = searchParams.get('versao') || initialVersion
 
   const [book, setBook] = useState(urlBook)
   const [chapter, setChapter] = useState(urlChapter)
+  const [version, setVersion] = useState(urlVersion)
   const [content, setContent] = useState<string | null>(null)
   const [reference, setReference] = useState('')
   const [loading, setLoading] = useState(true)
@@ -39,11 +47,12 @@ export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleRe
 
   const maxChapters = getBookChapters(book)
 
-  // Update URL when book/chapter changes
-  const updateUrl = useCallback((newBook: string, newChapter: number) => {
+  // Update URL when book/chapter/version changes
+  const updateUrl = useCallback((newBook: string, newChapter: number, newVersion: string) => {
     const params = new URLSearchParams()
     params.set('livro', newBook)
     params.set('capitulo', String(newChapter))
+    params.set('versao', newVersion)
     router.replace(`?${params.toString()}`, { scroll: false })
   }, [router])
 
@@ -52,7 +61,7 @@ export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleRe
     setLoading(true)
     setError(null)
 
-    const result = await getBiblePassage(book, chapter)
+    const result = await getBiblePassage(book, chapter, null, version)
 
     if (result.success && result.data) {
       setContent(result.data.content)
@@ -62,9 +71,9 @@ export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleRe
     }
 
     setLoading(false)
-  }, [book, chapter])
+  }, [book, chapter, version])
 
-  // Load on mount and when book/chapter changes
+  // Load on mount and when book/chapter/version changes
   useEffect(() => {
     loadPassage()
   }, [loadPassage])
@@ -73,15 +82,21 @@ export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleRe
   const handleBookChange = (newBook: string) => {
     setBook(newBook)
     setChapter(1) // Reset to chapter 1 when changing books
-    updateUrl(newBook, 1)
+    updateUrl(newBook, 1, version)
   }
 
   // Handle chapter change
   const handleChapterChange = (newChapter: number) => {
     if (newChapter >= 1 && newChapter <= maxChapters) {
       setChapter(newChapter)
-      updateUrl(book, newChapter)
+      updateUrl(book, newChapter, version)
     }
+  }
+
+  // Handle version change
+  const handleVersionChange = (newVersion: string) => {
+    setVersion(newVersion)
+    updateUrl(book, chapter, newVersion)
   }
 
   // Navigation
@@ -95,7 +110,7 @@ export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleRe
         const prevBook = BIBLE_BOOKS_DATA[currentIndex - 1]
         setBook(prevBook.id)
         setChapter(prevBook.chapters)
-        updateUrl(prevBook.id, prevBook.chapters)
+        updateUrl(prevBook.id, prevBook.chapters, version)
       }
     }
   }
@@ -110,7 +125,7 @@ export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleRe
         const nextBook = BIBLE_BOOKS_DATA[currentIndex + 1]
         setBook(nextBook.id)
         setChapter(1)
-        updateUrl(nextBook.id, 1)
+        updateUrl(nextBook.id, 1, version)
       }
     }
   }
@@ -155,6 +170,13 @@ export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleRe
               </SelectContent>
             </Select>
 
+            {/* Version Selector */}
+            <VersionSelector
+              selectedVersion={version}
+              onSelectVersion={handleVersionChange}
+              className="w-full sm:w-[140px]"
+            />
+
             {/* Spacer */}
             <div className="flex-1 hidden sm:block" />
 
@@ -194,6 +216,9 @@ export function BibleReader({ initialBook = 'GEN', initialChapter = 1 }: BibleRe
               <BookOpen className="h-5 w-5 text-primary" />
               {reference || `${getBookName(book)} ${chapter}`}
             </div>
+            <span className="text-xs text-muted-foreground font-medium px-2 py-1 bg-muted rounded">
+              {getVersionName(version)}
+            </span>
           </div>
         </CardHeader>
 

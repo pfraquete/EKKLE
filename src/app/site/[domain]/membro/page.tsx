@@ -1,9 +1,13 @@
 import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { User, Mail, Phone, Calendar, AtSign } from 'lucide-react'
+import { User, Mail, Phone, Calendar, AtSign, ChevronRight } from 'lucide-react'
 import { ProfilePhotoUpload } from '@/components/profile/profile-photo-upload'
 import { NicknameForm } from '@/components/chat'
+import { MemberDashboardStats } from '@/components/membro/member-dashboard-stats'
+import { getMemberStats } from '@/actions/member-stats'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export default async function MembroPage() {
   try {
@@ -29,11 +33,9 @@ export default async function MembroPage() {
       .eq('id', user.id)
       .single()
 
-    // Get enrollment count
-    const { count: enrollmentCount } = await supabase
-      .from('course_enrollments')
-      .select('*', { count: 'exact', head: true })
-      .eq('profile_id', user.id)
+    // Get member stats
+    const statsResult = await getMemberStats()
+    const stats = statsResult.success ? statsResult.stats : null
 
     return (
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -53,38 +55,35 @@ export default async function MembroPage() {
               </p>
             )}
             <p className="text-sm sm:text-base text-muted-foreground font-medium mt-1">
-              Gerencie suas informações e acompanhe seu crescimento
+              Acompanhe seu crescimento espiritual
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
-          {/* Stats Cards */}
-          <div className="bg-card border border-border/50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-4 lg:p-6 shadow-sm hover:shadow-md transition-all">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-primary mb-0.5 sm:mb-1">
-              {enrollmentCount || 0}
-            </div>
-            <div className="text-muted-foreground text-xs sm:text-xs lg:text-xs uppercase font-bold tracking-wider sm:tracking-widest">Cursos</div>
-          </div>
+        {/* Dashboard Stats */}
+        {stats && (
+          <MemberDashboardStats stats={stats} />
+        )}
 
-          <div className="bg-card border border-border/50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-4 lg:p-6 shadow-sm hover:shadow-md transition-all">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-primary mb-0.5 sm:mb-1 truncate">
-              {profile?.member_stage || '-'}
-            </div>
-            <div className="text-muted-foreground text-xs sm:text-xs lg:text-xs uppercase font-bold tracking-wider sm:tracking-widest">Status</div>
-          </div>
-
-          <div className="bg-card border border-border/50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-4 lg:p-6 shadow-sm hover:shadow-md transition-all">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-primary mb-0.5 sm:mb-1 truncate">
-              {profile?.role || '-'}
-            </div>
-            <div className="text-muted-foreground text-xs sm:text-xs lg:text-xs uppercase font-bold tracking-wider sm:tracking-widest">Função</div>
-          </div>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-3">
+          <Link href="/membro/biblia-oracao">
+            <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2 rounded-2xl">
+              <span className="text-2xl">📖</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Bíblia e Oração</span>
+            </Button>
+          </Link>
+          <Link href="/membro/cursos">
+            <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2 rounded-2xl">
+              <span className="text-2xl">🎓</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Meus Cursos</span>
+            </Button>
+          </Link>
         </div>
 
         {/* Profile Information */}
         <div className="bg-card border border-border rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg sm:shadow-xl">
-          <div className="bg-muted/30 border-b border-border p-4 sm:p-6 lg:p-8">
+          <div className="bg-muted/30 border-b border-border p-4 sm:p-6 lg:p-8 flex items-center justify-between">
             <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground uppercase tracking-tight">Informações Pessoais</h2>
           </div>
 
