@@ -19,7 +19,12 @@ import {
     Calendar,
     Package,
     LogOut,
-    MessageCircle
+    MessageCircle,
+    ClipboardList,
+    Users,
+    Image,
+    HandCoins,
+    Video
 } from 'lucide-react'
 
 interface MobileNavProps {
@@ -33,6 +38,7 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
     const hasCell = !!profile?.cell_id
+    const isLeader = profile?.role === 'LEADER'
 
     // Links para o bottom nav (4 principais + menu)
     const bottomLinks = [
@@ -93,8 +99,41 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             icon: Sparkles,
             label: 'Minha Célula',
             href: '/membro/minha-celula',
-            active: pathname.startsWith('/membro/minha-celula'),
+            active: pathname === '/membro/minha-celula',
             show: hasCell
+        },
+        // Sublinks da célula para líderes
+        {
+            icon: ClipboardList,
+            label: 'Reuniões',
+            href: '/membro/minha-celula/reunioes',
+            active: pathname.startsWith('/membro/minha-celula/reunioes'),
+            show: hasCell && isLeader,
+            indent: true
+        },
+        {
+            icon: Users,
+            label: 'Membros da Célula',
+            href: '/membro/minha-celula/membros',
+            active: pathname.startsWith('/membro/minha-celula/membros'),
+            show: hasCell && isLeader,
+            indent: true
+        },
+        {
+            icon: Image,
+            label: 'Álbum de Fotos',
+            href: '/membro/minha-celula/album',
+            active: pathname.startsWith('/membro/minha-celula/album'),
+            show: hasCell,
+            indent: true
+        },
+        {
+            icon: HandCoins,
+            label: 'Caixa da Célula',
+            href: '/membro/minha-celula/ofertas',
+            active: pathname.startsWith('/membro/minha-celula/ofertas'),
+            show: hasCell,
+            indent: true
         },
         {
             icon: Home,
@@ -102,6 +141,14 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             href: '/membro/celulas',
             active: pathname.startsWith('/membro/celulas'),
             show: !hasCell
+        },
+        // Link de Cultos para líderes
+        {
+            icon: Video,
+            label: 'Cultos',
+            href: '/membro/cultos',
+            active: pathname.startsWith('/membro/cultos'),
+            show: isLeader
         },
         {
             icon: Radio,
@@ -233,14 +280,17 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
                             href={link.href}
                             onClick={() => setIsOpen(false)}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                                "flex items-center gap-3 py-3 rounded-xl transition-all duration-200",
+                                link.indent ? "px-6 ml-3 border-l-2 border-border" : "px-3",
                                 link.active
-                                    ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
+                                    ? link.indent
+                                        ? 'bg-primary/10 text-primary font-semibold border-l-primary'
+                                        : 'bg-primary text-primary-foreground font-semibold shadow-sm'
                                     : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium'
                             )}
                         >
-                            <link.icon className="h-5 w-5" />
-                            {link.label}
+                            <link.icon className={cn("h-5 w-5", link.indent && "h-4 w-4")} />
+                            <span className={link.indent ? "text-sm" : ""}>{link.label}</span>
                         </Link>
                     ))}
                 </nav>
