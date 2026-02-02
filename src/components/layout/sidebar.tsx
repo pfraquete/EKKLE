@@ -13,6 +13,7 @@ import {
     BookOpen,
     Wallet,
     MessageSquare,
+    MessageCircle,
     Globe,
     Video,
     Radio,
@@ -40,6 +41,13 @@ export function Sidebar({ profile }: SidebarProps) {
             href: '/dashboard',
             active: pathname === '/dashboard',
             show: isPastor
+        },
+        {
+            label: 'Chat',
+            icon: MessageCircle,
+            href: '/dashboard/mensagens',
+            active: pathname.startsWith('/dashboard/mensagens'),
+            show: true
         },
         {
             label: 'Minha Célula',
