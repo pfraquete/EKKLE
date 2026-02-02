@@ -123,3 +123,78 @@ export function hasAdminAccess(role: string | undefined): boolean {
 export const MAX_CELLS_PER_DISCIPULADOR = 5
 export const MIN_ATTENDANCE_THRESHOLD = 60
 export const MAX_NOTE_LENGTH = 2000
+
+// =====================================================
+// REDE KIDS - Estrutura Paralela
+// =====================================================
+
+// Kids Network roles (hierarquia paralela à rede normal)
+// Uma pessoa pode ter role=MEMBER e kids_role=LEADER_KIDS simultaneamente
+export const KIDS_ROLES = {
+  PASTORA_KIDS: 'PASTORA_KIDS',
+  DISCIPULADORA_KIDS: 'DISCIPULADORA_KIDS',
+  LEADER_KIDS: 'LEADER_KIDS',
+  MEMBER_KIDS: 'MEMBER_KIDS',
+} as const
+
+export type KidsRole = typeof KIDS_ROLES[keyof typeof KIDS_ROLES]
+
+// Kids roles labels for UI display
+export const KIDS_ROLES_LABELS: Record<KidsRole, string> = {
+  PASTORA_KIDS: 'Pastora Kids',
+  DISCIPULADORA_KIDS: 'Discipuladora Kids',
+  LEADER_KIDS: 'Líder Kids',
+  MEMBER_KIDS: 'Membro Kids',
+}
+
+// Service categories (para filtrar cultos por público)
+export const SERVICE_CATEGORIES = {
+  GENERAL: 'GENERAL',
+  KIDS: 'KIDS',
+  YOUTH: 'YOUTH',
+  WOMEN: 'WOMEN',
+  MEN: 'MEN',
+} as const
+
+export type ServiceCategory = typeof SERVICE_CATEGORIES[keyof typeof SERVICE_CATEGORIES]
+
+// Kids Network constants
+export const MAX_KIDS_CELLS_PER_DISCIPULADORA = 5
+
+// Helper functions for Kids Network role checks
+export function isPastoraKids(kidsRole: string | null | undefined): boolean {
+  return kidsRole === KIDS_ROLES.PASTORA_KIDS
+}
+
+export function isDiscipuladoraKids(kidsRole: string | null | undefined): boolean {
+  return kidsRole === KIDS_ROLES.DISCIPULADORA_KIDS
+}
+
+export function isLeaderKids(kidsRole: string | null | undefined): boolean {
+  return kidsRole === KIDS_ROLES.LEADER_KIDS
+}
+
+export function isMemberKids(kidsRole: string | null | undefined): boolean {
+  return kidsRole === KIDS_ROLES.MEMBER_KIDS
+}
+
+export function hasKidsLeadershipAccess(kidsRole: string | null | undefined): boolean {
+  return kidsRole === KIDS_ROLES.PASTORA_KIDS ||
+         kidsRole === KIDS_ROLES.DISCIPULADORA_KIDS ||
+         kidsRole === KIDS_ROLES.LEADER_KIDS
+}
+
+export function hasKidsAdminAccess(kidsRole: string | null | undefined): boolean {
+  return kidsRole === KIDS_ROLES.PASTORA_KIDS
+}
+
+export function hasKidsSupervisionAccess(kidsRole: string | null | undefined): boolean {
+  return kidsRole === KIDS_ROLES.PASTORA_KIDS ||
+         kidsRole === KIDS_ROLES.DISCIPULADORA_KIDS
+}
+
+export function canManageKidsNetwork(role: string | undefined, kidsRole: string | null | undefined): boolean {
+  return role === ROLES.PASTOR ||
+         kidsRole === KIDS_ROLES.PASTORA_KIDS ||
+         kidsRole === KIDS_ROLES.DISCIPULADORA_KIDS
+}

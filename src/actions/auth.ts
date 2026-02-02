@@ -18,7 +18,10 @@ export interface Profile {
     is_active: boolean
     is_teacher: boolean
     is_finance_team: boolean
-    joined_at: string | null
+    // Rede Kids fields
+    is_kids_network: boolean
+    kids_role: 'PASTORA_KIDS' | 'DISCIPULADORA_KIDS' | 'LEADER_KIDS' | 'MEMBER_KIDS' | null
+    kids_cell_id: string | null
 }
 
 export async function getProfile(): Promise<Profile | null> {

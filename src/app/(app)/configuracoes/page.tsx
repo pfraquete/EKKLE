@@ -113,9 +113,6 @@ export default async function SettingsPage() {
                             </div>
                             <Badge variant="outline" className="font-bold text-blue-300 bg-blue-500/10 border-blue-500/30">Online</Badge>
                         </div>
-                        <div className="pt-2 text-xs text-muted-foreground font-bold uppercase tracking-widest text-center">
-                            Entrou em: {profile.joined_at ? new Date(profile.joined_at).toLocaleDateString('pt-BR') : '—'}
-                        </div>
                     </CardContent>
                 </Card>
             </div>

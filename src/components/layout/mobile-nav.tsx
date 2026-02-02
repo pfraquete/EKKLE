@@ -21,7 +21,8 @@ import {
     GraduationCap,
     Landmark,
     Settings,
-    LogOut
+    LogOut,
+    Baby
 } from 'lucide-react'
 import { Profile, signOut } from '@/actions/auth'
 
@@ -152,6 +153,13 @@ export function MobileNav({ profile }: MobileNavProps) {
             href: '/dashboard/financeiro',
             active: pathname.startsWith('/dashboard/financeiro'),
             show: isPastor || profile.is_finance_team
+        },
+        {
+            icon: Baby,
+            label: 'Rede Kids',
+            href: '/rede-kids',
+            active: pathname.startsWith('/rede-kids'),
+            show: isPastor || profile.is_kids_network
         },
         {
             icon: Settings,

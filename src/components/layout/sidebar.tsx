@@ -21,7 +21,8 @@ import {
     Landmark,
     Shield,
     UserCheck,
-    FileText
+    FileText,
+    Baby
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -165,6 +166,13 @@ export function Sidebar({ profile }: SidebarProps) {
             href: '/dashboard/financeiro',
             active: pathname.startsWith('/dashboard/financeiro'),
             show: isPastor || profile.is_finance_team
+        },
+        {
+            label: 'Rede Kids',
+            icon: Baby,
+            href: '/rede-kids',
+            active: pathname.startsWith('/rede-kids'),
+            show: isPastor || profile.is_kids_network
         },
         {
             label: 'Configurações',
