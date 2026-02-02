@@ -132,6 +132,7 @@ export async function createChurchRecipient(input: RecipientInput) {
       transfer_settings: {
         transfer_enabled: true,
         transfer_interval: 'daily',
+        transfer_day: 0,
       },
       metadata: {
         church_id: profile.church_id,
