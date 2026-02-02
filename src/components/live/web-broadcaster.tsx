@@ -13,7 +13,8 @@ import {
   Camera,
   Loader2,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Info
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -32,7 +33,7 @@ export function WebBroadcaster({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const wsRef = useRef<WebSocket | null>(null)
+  const pcRef = useRef<RTCPeerConnection | null>(null)
 
   const [status, setStatus] = useState<'idle' | 'connecting' | 'live' | 'error'>('idle')
   const [videoEnabled, setVideoEnabled] = useState(true)
@@ -46,6 +47,7 @@ export function WebBroadcaster({
   const [showSettings, setShowSettings] = useState(false)
   const [sourceType, setSourceType] = useState<'camera' | 'screen'>('camera')
   const [permissionError, setPermissionError] = useState<string | null>(null)
+  const [connectionAttempt, setConnectionAttempt] = useState(0)
 
   // Update parent status
   useEffect(() => {
@@ -213,37 +215,61 @@ export function WebBroadcaster({
     }
 
     setStatus('connecting')
+    setConnectionAttempt(prev => prev + 1)
 
     try {
-      // Create peer connection
+      // Close existing connection if any
+      if (pcRef.current) {
+        pcRef.current.close()
+        pcRef.current = null
+      }
+
+      // Create peer connection with multiple STUN/TURN servers for better connectivity
       const pc = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+        ],
+        iceCandidatePoolSize: 10,
       })
+      pcRef.current = pc
 
       // Add tracks from our stream
       streamRef.current.getTracks().forEach(track => {
         pc.addTrack(track, streamRef.current!)
       })
 
-      // Create and set local description
-      const offer = await pc.createOffer()
+      // Create offer with specific options
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: false,
+        offerToReceiveVideo: false,
+      })
       await pc.setLocalDescription(offer)
 
-      // Wait for ICE gathering to complete
-      await new Promise<void>((resolve) => {
+      // Wait for ICE gathering to complete with timeout
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          resolve() // Continue even if not all candidates gathered
+        }, 5000)
+
         if (pc.iceGatheringState === 'complete') {
+          clearTimeout(timeout)
           resolve()
         } else {
           pc.onicegatheringstatechange = () => {
             if (pc.iceGatheringState === 'complete') {
+              clearTimeout(timeout)
               resolve()
             }
           }
         }
       })
 
-      // Send offer to Mux WHIP endpoint
-      const whipUrl = `https://live.mux.com/video/v1/whip?stream_key=${streamKey}`
+      // Try Mux WHIP endpoint
+      const whipUrl = `https://global-live.mux.com/v1/whip/${streamKey}`
+
+      console.log('Attempting WHIP connection to:', whipUrl)
 
       const response = await fetch(whipUrl, {
         method: 'POST',
@@ -254,7 +280,14 @@ export function WebBroadcaster({
       })
 
       if (!response.ok) {
-        throw new Error(`WHIP error: ${response.status} ${response.statusText}`)
+        const errorText = await response.text()
+        console.error('WHIP response error:', response.status, errorText)
+
+        // Check for common errors
+        if (response.status === 404 || response.status === 405) {
+          throw new Error('O Mux não suporta transmissão pelo navegador (WHIP) para Live Streams. Use a opção "Software Externo (OBS)" para transmitir.')
+        }
+        throw new Error(`Erro de conexão: ${response.status}`)
       }
 
       const answerSdp = await response.text()
@@ -269,28 +302,44 @@ export function WebBroadcaster({
         if (pc.connectionState === 'connected') {
           setStatus('live')
           toast.success('Transmissão ao vivo iniciada!')
-        } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+        } else if (pc.connectionState === 'failed') {
           setStatus('error')
-          toast.error('Conexão perdida')
+          toast.error('Falha na conexão. Tente usar Software Externo (OBS).')
+        } else if (pc.connectionState === 'disconnected') {
+          // Try to reconnect
+          setTimeout(() => {
+            if (pc.connectionState === 'disconnected') {
+              setStatus('error')
+              toast.error('Conexão perdida')
+            }
+          }, 3000)
         }
       }
 
-      // Store reference for cleanup
-      ;(window as any).__muxPeerConnection = pc
+      pc.oniceconnectionstatechange = () => {
+        console.log('ICE connection state:', pc.iceConnectionState)
+      }
 
     } catch (error) {
       console.error('Error starting broadcast:', error)
       setStatus('error')
-      toast.error('Erro ao iniciar transmissão: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
+
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+
+      // Show helpful error message
+      if (errorMessage.includes('WHIP') || errorMessage.includes('Software Externo')) {
+        toast.error(errorMessage, { duration: 8000 })
+      } else {
+        toast.error('Erro ao conectar. Recomendamos usar a opção "Software Externo (OBS)" para transmitir.', { duration: 6000 })
+      }
     }
   }, [streamKey])
 
   // Stop broadcasting
   const stopBroadcast = useCallback(() => {
-    const pc = (window as any).__muxPeerConnection as RTCPeerConnection | undefined
-    if (pc) {
-      pc.close()
-      delete (window as any).__muxPeerConnection
+    if (pcRef.current) {
+      pcRef.current.close()
+      pcRef.current = null
     }
 
     setStatus('idle')
@@ -299,6 +348,18 @@ export function WebBroadcaster({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Beta Notice */}
+      <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400">
+        <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div className="text-sm">
+          <p className="font-semibold mb-1">Recurso em desenvolvimento</p>
+          <p className="text-amber-600/80 dark:text-amber-400/80">
+            A transmissão pelo navegador pode não funcionar em todos os casos.
+            Se tiver problemas, use a opção <strong>"Software Externo (OBS)"</strong> que é mais estável.
+          </p>
+        </div>
+      </div>
+
       {/* Permission Error */}
       {permissionError && (
         <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500">
