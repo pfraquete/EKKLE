@@ -574,3 +574,505 @@ export async function toggleMuteConversation(
 
     return true
 }
+
+// ============================================
+// REACTION ACTIONS
+// ============================================
+
+export type ReactionType = 'like' | 'love' | 'laugh' | 'sad' | 'wow' | 'pray'
+
+export interface Reaction {
+    id: string
+    message_id: string
+    user_id: string
+    reaction: ReactionType
+    created_at: string
+    user?: {
+        id: string
+        full_name: string
+        photo_url: string | null
+    }
+}
+
+/**
+ * Add a reaction to a message
+ */
+export async function addReaction(
+    messageId: string,
+    reaction: ReactionType
+): Promise<boolean> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    const { error } = await supabase
+        .from('message_reactions')
+        .upsert({
+            message_id: messageId,
+            user_id: user.id,
+            reaction,
+        })
+
+    if (error) {
+        console.error('Error adding reaction:', error)
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Remove a reaction from a message
+ */
+export async function removeReaction(
+    messageId: string,
+    reaction: ReactionType
+): Promise<boolean> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    const { error } = await supabase
+        .from('message_reactions')
+        .delete()
+        .eq('message_id', messageId)
+        .eq('user_id', user.id)
+        .eq('reaction', reaction)
+
+    if (error) {
+        console.error('Error removing reaction:', error)
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Get reactions for a message
+ */
+export async function getMessageReactions(messageId: string): Promise<Reaction[]> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return []
+
+    const { data, error } = await supabase
+        .from('message_reactions')
+        .select(`
+            id,
+            message_id,
+            user_id,
+            reaction,
+            created_at,
+            user:profiles!message_reactions_user_id_fkey(
+                id,
+                full_name,
+                photo_url
+            )
+        `)
+        .eq('message_id', messageId)
+
+    if (error) {
+        console.error('Error fetching reactions:', error)
+        return []
+    }
+
+    return data.map(r => ({
+        ...r,
+        user: Array.isArray(r.user) ? r.user[0] : r.user
+    })) as Reaction[]
+}
+
+// ============================================
+// REPLY ACTIONS
+// ============================================
+
+/**
+ * Send a message with a reply reference
+ */
+export async function sendMessageWithReply(
+    conversationId: string,
+    content: string,
+    replyToId: string
+): Promise<DirectMessage | null> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return null
+
+    const trimmedContent = content.trim()
+    if (!trimmedContent) return null
+
+    const { data, error } = await supabase
+        .from('direct_messages')
+        .insert({
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content: trimmedContent,
+            reply_to_id: replyToId
+        })
+        .select(`
+            id,
+            conversation_id,
+            sender_id,
+            content,
+            is_deleted,
+            created_at,
+            updated_at,
+            reply_to_id,
+            sender:profiles!direct_messages_sender_id_fkey(
+                id,
+                full_name,
+                nickname,
+                photo_url
+            )
+        `)
+        .single()
+
+    if (error) {
+        console.error('Error sending reply:', error)
+        return null
+    }
+
+    return transformMessage(data)
+}
+
+// ============================================
+// ATTACHMENT ACTIONS
+// ============================================
+
+export interface AttachmentData {
+    url: string
+    type: 'image' | 'document'
+    name: string
+    size: number
+}
+
+/**
+ * Send a message with an attachment
+ */
+export async function sendMessageWithAttachment(
+    conversationId: string,
+    content: string,
+    attachment: AttachmentData
+): Promise<DirectMessage | null> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return null
+
+    const { data, error } = await supabase
+        .from('direct_messages')
+        .insert({
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content: content.trim(),
+            attachment_url: attachment.url,
+            attachment_type: attachment.type,
+            attachment_name: attachment.name,
+            attachment_size: attachment.size
+        })
+        .select(`
+            id,
+            conversation_id,
+            sender_id,
+            content,
+            is_deleted,
+            created_at,
+            updated_at,
+            attachment_url,
+            attachment_type,
+            attachment_name,
+            attachment_size,
+            sender:profiles!direct_messages_sender_id_fkey(
+                id,
+                full_name,
+                nickname,
+                photo_url
+            )
+        `)
+        .single()
+
+    if (error) {
+        console.error('Error sending message with attachment:', error)
+        return null
+    }
+
+    return transformMessage(data)
+}
+
+// ============================================
+// PINNED MESSAGES ACTIONS
+// ============================================
+
+export interface PinnedMessage {
+    id: string
+    conversation_id: string
+    message_id: string
+    pinned_by: string
+    pinned_at: string
+    message?: DirectMessage
+}
+
+/**
+ * Pin a message
+ */
+export async function pinMessage(
+    conversationId: string,
+    messageId: string
+): Promise<boolean> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    const { error } = await supabase
+        .from('pinned_messages')
+        .insert({
+            conversation_id: conversationId,
+            message_id: messageId,
+            pinned_by: user.id
+        })
+
+    if (error) {
+        console.error('Error pinning message:', error)
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Unpin a message
+ */
+export async function unpinMessage(
+    conversationId: string,
+    messageId: string
+): Promise<boolean> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    const { error } = await supabase
+        .from('pinned_messages')
+        .delete()
+        .eq('conversation_id', conversationId)
+        .eq('message_id', messageId)
+
+    if (error) {
+        console.error('Error unpinning message:', error)
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Get pinned messages for a conversation
+ */
+export async function getPinnedMessages(conversationId: string): Promise<PinnedMessage[]> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return []
+
+    const { data, error } = await supabase
+        .from('pinned_messages')
+        .select(`
+            id,
+            conversation_id,
+            message_id,
+            pinned_by,
+            pinned_at,
+            message:direct_messages(
+                id,
+                content,
+                sender_id,
+                created_at,
+                sender:profiles!direct_messages_sender_id_fkey(
+                    id,
+                    full_name,
+                    photo_url
+                )
+            )
+        `)
+        .eq('conversation_id', conversationId)
+        .order('pinned_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching pinned messages:', error)
+        return []
+    }
+
+    return data.map(p => ({
+        ...p,
+        message: Array.isArray(p.message) ? transformMessage(p.message[0]) : transformMessage(p.message)
+    })) as PinnedMessage[]
+}
+
+// ============================================
+// TYPING INDICATOR ACTIONS
+// ============================================
+
+/**
+ * Set typing status for a conversation
+ */
+export async function setTyping(
+    conversationId: string,
+    isTyping: boolean
+): Promise<boolean> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    const { error } = await supabase
+        .rpc('set_typing_status', {
+            p_conversation_id: conversationId,
+            p_is_typing: isTyping
+        })
+
+    if (error) {
+        console.error('Error setting typing status:', error)
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Get typing users for a conversation
+ */
+export async function getTypingUsers(conversationId: string): Promise<{ id: string; name: string }[]> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return []
+
+    const { data, error } = await supabase
+        .from('typing_indicators')
+        .select(`
+            user_id,
+            user:profiles!typing_indicators_user_id_fkey(
+                id,
+                full_name
+            )
+        `)
+        .eq('conversation_id', conversationId)
+        .neq('user_id', user.id)
+        .gt('started_at', new Date(Date.now() - 5000).toISOString())
+
+    if (error) {
+        console.error('Error fetching typing users:', error)
+        return []
+    }
+
+    return data.map(t => {
+        const u = Array.isArray(t.user) ? t.user[0] : t.user
+        return {
+            id: t.user_id,
+            name: u?.full_name || 'Usuário'
+        }
+    })
+}
+
+// ============================================
+// PRESENCE ACTIONS
+// ============================================
+
+/**
+ * Update user's online presence
+ */
+export async function updatePresence(isOnline: boolean): Promise<boolean> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    const { error } = await supabase
+        .rpc('update_user_presence', { online: isOnline })
+
+    if (error) {
+        console.error('Error updating presence:', error)
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Get user's presence status
+ */
+export async function getUserPresence(userId: string): Promise<{ isOnline: boolean; lastSeenAt: string | null } | null> {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('is_online, last_seen_at')
+        .eq('id', userId)
+        .single()
+
+    if (error) {
+        console.error('Error fetching presence:', error)
+        return null
+    }
+
+    return {
+        isOnline: data.is_online || false,
+        lastSeenAt: data.last_seen_at
+    }
+}
+
+// ============================================
+// READ RECEIPT ACTIONS
+// ============================================
+
+/**
+ * Mark a specific message as read
+ */
+export async function markMessageAsRead(messageId: string): Promise<boolean> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    const { error } = await supabase
+        .from('message_read_receipts')
+        .upsert({
+            message_id: messageId,
+            user_id: user.id,
+            read_at: new Date().toISOString()
+        })
+
+    if (error) {
+        console.error('Error marking message as read:', error)
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Get read receipts for a message
+ */
+export async function getMessageReadReceipts(messageId: string): Promise<{ userId: string; readAt: string }[]> {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('message_read_receipts')
+        .select('user_id, read_at')
+        .eq('message_id', messageId)
+
+    if (error) {
+        console.error('Error fetching read receipts:', error)
+        return []
+    }
+
+    return data.map(r => ({
+        userId: r.user_id,
+        readAt: r.read_at
+    }))
+}

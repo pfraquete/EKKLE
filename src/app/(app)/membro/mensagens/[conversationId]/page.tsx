@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getConversation, getMessages } from '@/actions/direct-messages'
-import { ChatConversation } from '@/components/chat'
+import { getConversation, getConversations, getMessages } from '@/actions/direct-messages'
+import { ChatSplitLayout, ChatConversation } from '@/components/chat'
 
 interface ConversationPageProps {
     params: Promise<{
@@ -34,16 +34,25 @@ export default async function MembroConversationPage({ params }: ConversationPag
         redirect('/membro/mensagens')
     }
 
-    const messages = await getMessages(conversationId)
+    // Fetch conversations for split layout and messages
+    const [conversations, messages] = await Promise.all([
+        getConversations(),
+        getMessages(conversationId)
+    ])
 
     return (
-        <div className="h-[calc(100vh-8rem)] lg:h-[calc(100vh-12rem)] bg-card rounded-2xl border border-border/50 overflow-hidden">
+        <ChatSplitLayout
+            initialConversations={conversations}
+            currentUserId={user.id}
+            basePath="/membro/mensagens"
+            selectedConversationId={conversationId}
+        >
             <ChatConversation
                 conversation={conversation}
                 initialMessages={messages}
                 currentUserId={user.id}
                 basePath="/membro/mensagens"
             />
-        </div>
+        </ChatSplitLayout>
     )
 }

@@ -1,38 +1,39 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { MessageSquare, Plus, User, Search } from 'lucide-react'
+import { useRouter, usePathname } from 'next/navigation'
 import { Conversation, getConversations } from '@/actions/direct-messages'
 import { createClient } from '@/lib/supabase/client'
-import { formatDistanceToNow } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { UserSearch } from './user-search'
+import { useIsDesktop } from '@/hooks/use-media-query'
+import { ChatList } from './chat-list'
+import { MessageSquare } from 'lucide-react'
 
-interface ChatListProps {
+interface ChatSplitLayoutProps {
     initialConversations: Conversation[]
     currentUserId: string
     basePath: string
-    showSearchOnly?: boolean
-    onSearchClose?: () => void
+    selectedConversationId?: string
+    children?: React.ReactNode
 }
 
-export function ChatList({
+export function ChatSplitLayout({
     initialConversations,
     currentUserId,
     basePath,
-    showSearchOnly = false,
-    onSearchClose
-}: ChatListProps) {
+    selectedConversationId,
+    children,
+}: ChatSplitLayoutProps) {
     const [conversations, setConversations] = useState<Conversation[]>(initialConversations)
-    const [showSearch, setShowSearch] = useState(showSearchOnly)
+    const isDesktop = useIsDesktop()
+    const router = useRouter()
+    const pathname = usePathname()
 
-    // Subscribe to realtime updates
+    // Subscribe to realtime updates for conversations
     useEffect(() => {
         const supabase = createClient()
 
         const channel = supabase
-            .channel('dm-list-updates')
+            .channel('dm-split-updates')
             .on(
                 'postgres_changes',
                 {
@@ -41,7 +42,6 @@ export function ChatList({
                     table: 'direct_messages',
                 },
                 async () => {
-                    // Refresh conversations list when any message changes
                     const updated = await getConversations()
                     setConversations(updated)
                 }
@@ -53,7 +53,76 @@ export function ChatList({
         }
     }, [])
 
-    // Get other participant in 1-on-1 conversation
+    // Get other participant for displaying in the empty state
+    const getOtherParticipant = (conversation: Conversation) => {
+        return conversation.participants.find(p => p.profile_id !== currentUserId)?.profile
+    }
+
+    // Mobile: Show only list or conversation
+    if (!isDesktop) {
+        // If we have a selected conversation (children), show it
+        if (selectedConversationId && children) {
+            return (
+                <div className="h-[calc(100vh-8rem)] lg:h-[calc(100vh-12rem)] bg-card rounded-2xl border border-border/50 overflow-hidden">
+                    {children}
+                </div>
+            )
+        }
+
+        // Otherwise show the list
+        return (
+            <div className="h-[calc(100vh-8rem)] lg:h-[calc(100vh-12rem)] bg-card rounded-2xl border border-border/50 overflow-hidden">
+                <ChatList
+                    initialConversations={conversations}
+                    currentUserId={currentUserId}
+                    basePath={basePath}
+                />
+            </div>
+        )
+    }
+
+    // Desktop: Split view
+    return (
+        <div className="h-[calc(100vh-12rem)] bg-card rounded-2xl border border-border/50 overflow-hidden">
+            <div className="grid grid-cols-[360px_1fr] h-full">
+                {/* Left: Conversation List */}
+                <div className="border-r border-border/50 overflow-hidden">
+                    <ChatListDesktop
+                        conversations={conversations}
+                        currentUserId={currentUserId}
+                        basePath={basePath}
+                        selectedConversationId={selectedConversationId}
+                    />
+                </div>
+
+                {/* Right: Chat Area */}
+                <div className="overflow-hidden">
+                    {selectedConversationId && children ? (
+                        children
+                    ) : (
+                        <EmptyState />
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// Desktop version of ChatList with selected state
+function ChatListDesktop({
+    conversations,
+    currentUserId,
+    basePath,
+    selectedConversationId,
+}: {
+    conversations: Conversation[]
+    currentUserId: string
+    basePath: string
+    selectedConversationId?: string
+}) {
+    const [showSearch, setShowSearch] = useState(false)
+    const router = useRouter()
+
     const getOtherParticipant = (conversation: Conversation) => {
         return conversation.participants.find(p => p.profile_id !== currentUserId)?.profile
     }
@@ -72,14 +141,18 @@ export function ChatList({
                             {showSearch ? (
                                 <MessageSquare className="w-5 h-5 text-muted-foreground" />
                             ) : (
-                                <Search className="w-5 h-5 text-muted-foreground" />
+                                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
                             )}
                         </button>
                         <button
                             onClick={() => setShowSearch(true)}
                             className="p-2.5 bg-primary rounded-xl hover:bg-primary/90 transition-colors"
                         >
-                            <Plus className="w-5 h-5 text-primary-foreground" />
+                            <svg className="w-5 h-5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -87,19 +160,16 @@ export function ChatList({
 
             {/* Search Panel */}
             {showSearch && (
-                <div className={showSearchOnly ? '' : 'p-4 border-b border-border/50 bg-muted/30'}>
-                    <UserSearch
+                <div className="p-4 border-b border-border/50 bg-muted/30">
+                    <ChatList
+                        initialConversations={[]}
+                        currentUserId={currentUserId}
                         basePath={basePath}
-                        onClose={() => {
-                            setShowSearch(false)
-                            onSearchClose?.()
-                        }}
+                        showSearchOnly
+                        onSearchClose={() => setShowSearch(false)}
                     />
                 </div>
             )}
-
-            {/* If showSearchOnly, don't render the rest */}
-            {showSearchOnly && null}
 
             {/* Conversations List */}
             <div className="flex-1 overflow-y-auto">
@@ -122,14 +192,19 @@ export function ChatList({
                         {conversations.map((conversation) => {
                             const other = getOtherParticipant(conversation)
                             const hasUnread = (conversation.unread_count || 0) > 0
+                            const isSelected = selectedConversationId === conversation.id
 
                             return (
-                                <Link
+                                <button
                                     key={conversation.id}
-                                    href={`${basePath}/${conversation.id}`}
-                                    className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors"
+                                    onClick={() => router.push(`${basePath}/${conversation.id}`)}
+                                    className={`w-full flex items-center gap-3 p-4 transition-colors text-left ${
+                                        isSelected
+                                            ? 'bg-primary/10 border-l-2 border-l-primary'
+                                            : 'hover:bg-muted/50'
+                                    }`}
                                 >
-                                    {/* Avatar */}
+                                    {/* Avatar with online status */}
                                     <div className="relative flex-shrink-0">
                                         <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                                             {other?.photo_url ? (
@@ -139,7 +214,9 @@ export function ChatList({
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
-                                                <User className="w-6 h-6 text-muted-foreground" />
+                                                <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
                                             )}
                                         </div>
                                         {hasUnread && (
@@ -158,10 +235,7 @@ export function ChatList({
                                                 {other?.full_name || 'Utilizador'}
                                             </p>
                                             <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                                                {formatDistanceToNow(new Date(conversation.last_message_at), {
-                                                    addSuffix: false,
-                                                    locale: ptBR,
-                                                })}
+                                                {formatTimeAgo(conversation.last_message_at)}
                                             </span>
                                         </div>
                                         {other?.nickname && (
@@ -175,7 +249,7 @@ export function ChatList({
                                             </p>
                                         )}
                                     </div>
-                                </Link>
+                                </button>
                             )
                         })}
                     </div>
@@ -183,4 +257,38 @@ export function ChatList({
             </div>
         </div>
     )
+}
+
+// Empty state for when no conversation is selected
+function EmptyState() {
+    return (
+        <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+            <div className="w-24 h-24 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+                <MessageSquare className="w-12 h-12 text-muted-foreground/50" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground mb-2">
+                Selecione uma conversa
+            </h2>
+            <p className="text-muted-foreground max-w-sm">
+                Escolha uma conversa da lista ao lado ou inicie uma nova conversa buscando por alguém
+            </p>
+        </div>
+    )
+}
+
+// Helper function to format time ago
+function formatTimeAgo(dateString: string): string {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'agora'
+    if (diffMins < 60) return `${diffMins}min`
+    if (diffHours < 24) return `${diffHours}h`
+    if (diffDays < 7) return `${diffDays}d`
+
+    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 }

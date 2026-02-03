@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getConversations } from '@/actions/direct-messages'
-import { ChatList } from '@/components/chat'
+import { ChatSplitLayout } from '@/components/chat'
 
 export default async function MembroMensagensPage() {
     const supabase = await createClient()
@@ -15,12 +15,10 @@ export default async function MembroMensagensPage() {
     const conversations = await getConversations()
 
     return (
-        <div className="h-[calc(100vh-8rem)] lg:h-[calc(100vh-12rem)] bg-card rounded-2xl border border-border/50 overflow-hidden">
-            <ChatList
-                initialConversations={conversations}
-                currentUserId={user.id}
-                basePath="/membro/mensagens"
-            />
-        </div>
+        <ChatSplitLayout
+            initialConversations={conversations}
+            currentUserId={user.id}
+            basePath="/membro/mensagens"
+        />
     )
 }
