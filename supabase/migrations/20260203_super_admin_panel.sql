@@ -12,22 +12,32 @@
 -- ============================================
 
 -- ============================================
--- 1. Add SUPER_ADMIN to role constraint
+-- 1. Add SUPER_ADMIN and DISCIPULADOR to user_role enum
 -- ============================================
 
--- First, check if the constraint exists and what it looks like
--- Then update it to include SUPER_ADMIN
+-- Add new values to the user_role enum
+-- PostgreSQL requires adding enum values one at a time
 DO $$
 BEGIN
-    -- Drop existing constraint if it exists
-    ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
-
-    -- Add new constraint with SUPER_ADMIN
-    ALTER TABLE profiles ADD CONSTRAINT profiles_role_check
-        CHECK (role IS NULL OR role IN ('SUPER_ADMIN', 'PASTOR', 'DISCIPULADOR', 'LEADER', 'MEMBER'));
+    -- Add SUPER_ADMIN if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'SUPER_ADMIN' AND enumtypid = 'user_role'::regtype) THEN
+        ALTER TYPE user_role ADD VALUE 'SUPER_ADMIN';
+    END IF;
 EXCEPTION
-    WHEN others THEN
-        RAISE NOTICE 'Could not update profiles_role_check constraint: %', SQLERRM;
+    WHEN duplicate_object THEN
+        RAISE NOTICE 'SUPER_ADMIN already exists in user_role enum';
+END;
+$$;
+
+DO $$
+BEGIN
+    -- Add DISCIPULADOR if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'DISCIPULADOR' AND enumtypid = 'user_role'::regtype) THEN
+        ALTER TYPE user_role ADD VALUE 'DISCIPULADOR';
+    END IF;
+EXCEPTION
+    WHEN duplicate_object THEN
+        RAISE NOTICE 'DISCIPULADOR already exists in user_role enum';
 END;
 $$;
 
