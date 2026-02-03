@@ -1,5 +1,3 @@
-'use server'
-
 import { getProfile } from '@/actions/auth'
 import { getWhatsAppInstance } from '@/actions/whatsapp'
 import { getAgentConfig } from '@/actions/agent-config'
