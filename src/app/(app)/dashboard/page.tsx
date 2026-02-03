@@ -96,7 +96,7 @@ export default async function DashboardPage() {
 
             {/* KPI Grid - Primary Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card variant="interactive" className="group">
+                <Card className="group">
                     <CardContent className="p-5 flex flex-col items-center text-center">
                         <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-blue-500/20 transition-colors">
                             <Users className="h-6 w-6" />
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card variant="interactive" className="group">
+                <Card className="group">
                     <CardContent className="p-5 flex flex-col items-center text-center">
                         <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-indigo-500/20 transition-colors">
                             <Home className="h-6 w-6" />
@@ -116,7 +116,7 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card variant="interactive" className="group">
+                <Card className="group">
                     <CardContent className="p-5 flex flex-col items-center text-center">
                         <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-emerald-500/20 transition-colors">
                             <TrendingUp className="h-6 w-6" />
@@ -126,7 +126,7 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card variant="interactive" className="group">
+                <Card className="group">
                     <CardContent className="p-5 flex flex-col items-center text-center">
                         <div className="w-12 h-12 bg-red-500/10 text-red-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-red-500/20 transition-colors">
                             <AlertCircle className="h-6 w-6" />
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
             {extendedStats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Link href="/dashboard/cursos">
-                        <Card variant="interactive" className="group h-full">
+                        <Card className="group h-full">
                             <CardContent className="p-5 flex flex-col items-center text-center">
                                 <div className="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-purple-500/20 transition-colors">
                                     <BookOpen className="h-6 w-6" />
@@ -154,7 +154,7 @@ export default async function DashboardPage() {
                     </Link>
 
                     <Link href="/dashboard/loja">
-                        <Card variant="interactive" className="group h-full">
+                        <Card className="group h-full">
                             <CardContent className="p-5 flex flex-col items-center text-center">
                                 <div className="w-12 h-12 bg-orange-500/10 text-orange-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-orange-500/20 transition-colors">
                                     <ShoppingBag className="h-6 w-6" />
@@ -167,7 +167,7 @@ export default async function DashboardPage() {
                     </Link>
 
                     <Link href="/dashboard/eventos">
-                        <Card variant="interactive" className="group h-full">
+                        <Card className="group h-full">
                             <CardContent className="p-5 flex flex-col items-center text-center">
                                 <div className="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-cyan-500/20 transition-colors">
                                     <CalendarCheck className="h-6 w-6" />
