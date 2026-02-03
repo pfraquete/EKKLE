@@ -2,13 +2,12 @@
 
 import { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { LucideIcon } from 'lucide-react'
 
 interface StatCardProps {
   title: string
   value: string | number
   subtitle?: string
-  icon: LucideIcon
+  icon: ReactNode
   trend?: {
     value: number
     isPositive: boolean
@@ -88,7 +87,7 @@ export function StatCard({
   title,
   value,
   subtitle,
-  icon: Icon,
+  icon,
   trend,
   color,
   href,
@@ -133,7 +132,7 @@ export function StatCard({
           'transition-all duration-300 transform group-hover:scale-110',
           colors.icon
         )}>
-          <Icon className="h-7 w-7" />
+          {icon}
         </div>
         
         {/* Value */}

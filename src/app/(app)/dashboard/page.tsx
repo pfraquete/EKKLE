@@ -11,7 +11,8 @@ import {
     TrendingUp,
     BookOpen,
     ShoppingBag,
-    CalendarCheck
+    CalendarCheck,
+    CheckCircle2
 } from 'lucide-react'
 import { getEvents } from '@/actions/admin'
 import { formatCurrency } from '@/lib/utils'
@@ -70,26 +71,26 @@ export default async function DashboardPage() {
                 <StatCard
                     title="Membros"
                     value={stats.totalMembers}
-                    icon={Users}
+                    icon={<Users className="h-7 w-7" />}
                     color="blue"
                     trend={stats.totalMembers > 0 ? { value: 12, isPositive: true } : undefined}
                 />
                 <StatCard
                     title="Células"
                     value={stats.totalCells}
-                    icon={Home}
+                    icon={<Home className="h-7 w-7" />}
                     color="indigo"
                 />
                 <StatCard
                     title="Presença Global"
                     value={`${stats.overallAttendance}%`}
-                    icon={TrendingUp}
+                    icon={<TrendingUp className="h-7 w-7" />}
                     color="gold"
                 />
                 <StatCard
                     title="Sem Relatório"
                     value={stats.cellsWithoutReports}
-                    icon={AlertCircle}
+                    icon={stats.cellsWithoutReports > 0 ? <AlertCircle className="h-7 w-7" /> : <CheckCircle2 className="h-7 w-7" />}
                     color={stats.cellsWithoutReports > 0 ? 'red' : 'emerald'}
                     subtitle={stats.cellsWithoutReports > 0 ? 'Atenção necessária' : 'Tudo em dia!'}
                 />
@@ -102,7 +103,7 @@ export default async function DashboardPage() {
                         title="Matrículas"
                         value={extendedStats.courses.totalEnrollments}
                         subtitle={`${extendedStats.courses.publishedCourses} cursos ativos`}
-                        icon={BookOpen}
+                        icon={<BookOpen className="h-7 w-7" />}
                         color="purple"
                         href="/dashboard/cursos"
                     />
@@ -110,7 +111,7 @@ export default async function DashboardPage() {
                         title="Pedidos Pagos"
                         value={extendedStats.orders.paidOrders}
                         subtitle={formatCurrency(extendedStats.orders.totalRevenueCents / 100)}
-                        icon={ShoppingBag}
+                        icon={<ShoppingBag className="h-7 w-7" />}
                         color="orange"
                         href="/dashboard/loja"
                     />
@@ -118,7 +119,7 @@ export default async function DashboardPage() {
                         title="Eventos Próximos"
                         value={extendedStats.events.upcomingEvents}
                         subtitle={`${extendedStats.events.totalRegistrations} inscrições`}
-                        icon={CalendarCheck}
+                        icon={<CalendarCheck className="h-7 w-7" />}
                         color="cyan"
                         href="/dashboard/eventos"
                     />
@@ -127,7 +128,7 @@ export default async function DashboardPage() {
                             title="Pedidos Pendentes"
                             value={extendedStats.orders.pendingOrders}
                             subtitle="Aguardando pagamento"
-                            icon={AlertCircle}
+                            icon={<AlertCircle className="h-7 w-7" />}
                             color="amber"
                             href="/dashboard/loja"
                         />
