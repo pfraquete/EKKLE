@@ -50,16 +50,29 @@ export default async function AppLayout({
     }
 
     return (
-        <div className="flex h-screen bg-background text-foreground overflow-hidden dark">
+        <div className="flex h-screen bg-black-absolute text-white-primary overflow-hidden dark">
+            {/* Sidebar */}
             <Sidebar profile={profile} />
-            <div className="flex-1 flex flex-col overflow-hidden">
+            
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col overflow-hidden relative">
+                {/* Gold Light Effect at Top */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[300px] pointer-events-none z-0">
+                    <div className="w-full h-full bg-[radial-gradient(ellipse_at_center_top,rgba(212,175,55,0.12)_0%,rgba(212,175,55,0.04)_40%,transparent_70%)]" />
+                </div>
+                
+                {/* Header */}
                 <Header profile={profile} />
-                <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
-                    <div className="max-w-5xl mx-auto w-full">
+                
+                {/* Main Content */}
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6 custom-scrollbar relative z-10">
+                    <div className="max-w-6xl mx-auto w-full">
                         {children}
                     </div>
                 </main>
             </div>
+            
+            {/* Mobile Navigation */}
             <MobileNav profile={profile} />
         </div>
     )

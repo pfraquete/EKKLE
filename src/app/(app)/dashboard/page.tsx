@@ -58,18 +58,21 @@ export default async function DashboardPage() {
 
     return (
         <div className="space-y-6 pb-20">
+            {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-foreground">Visão Geral</h1>
-                    <p className="text-sm text-muted-foreground font-medium tracking-tight">Painel Pastoral • Ekkle</p>
+                    <h1 className="text-2xl font-black text-white-primary">Visão Geral</h1>
+                    <p className="text-sm text-gray-text-secondary font-medium tracking-tight">Painel Pastoral • Ekkle</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     <Link href="/configuracoes/whatsapp" className="hidden sm:block">
                         <Button
                             variant={whatsapp?.status === 'CONNECTED' ? 'secondary' : 'outline'}
                             className={cn(
-                                "rounded-2xl h-11 px-4 font-bold border-2",
-                                whatsapp?.status === 'CONNECTED' ? "bg-green-500/10 text-green-500 border-green-500/20" : "border-2"
+                                "rounded-2xl h-11 px-4 font-bold",
+                                whatsapp?.status === 'CONNECTED' 
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20" 
+                                    : ""
                             )}
                         >
                             <MessageSquare className="h-5 w-5 mr-2" />
@@ -77,13 +80,13 @@ export default async function DashboardPage() {
                         </Button>
                     </Link>
                     <Link href="/importar" className="hidden sm:block">
-                        <Button variant="outline" className="rounded-2xl h-11 px-4 font-bold border-2">
+                        <Button variant="outline" className="rounded-2xl h-11 px-4 font-bold">
                             <Download className="h-5 w-5 mr-2" />
                             Importar
                         </Button>
                     </Link>
                     <Link href="/celulas/nova" className="flex-1 sm:flex-none">
-                        <Button className="rounded-2xl shadow-lg h-11 px-6 font-bold w-full sm:w-auto">
+                        <Button className="rounded-2xl h-11 px-6 font-bold w-full sm:w-auto shadow-gold-glow hover:shadow-gold-glow-strong">
                             <Plus className="h-5 w-5 mr-2" />
                             Nova Célula
                         </Button>
@@ -93,43 +96,43 @@ export default async function DashboardPage() {
 
             {/* KPI Grid - Primary Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="border-none shadow-sm hover:shadow-md transition-all">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                        <div className="w-10 h-10 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center mb-3">
-                            <Users className="h-5 w-5" />
+                <Card variant="interactive" className="group">
+                    <CardContent className="p-5 flex flex-col items-center text-center">
+                        <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-blue-500/20 transition-colors">
+                            <Users className="h-6 w-6" />
                         </div>
-                        <p className="text-2xl font-black text-foreground leading-none">{stats.totalMembers}</p>
-                        <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Membros</p>
+                        <p className="text-3xl font-black text-white-primary leading-none">{stats.totalMembers}</p>
+                        <p className="text-xs uppercase tracking-wider font-bold text-gray-text-secondary mt-2">Membros</p>
                     </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm hover:shadow-md transition-all">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                        <div className="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center mb-3">
-                            <Home className="h-5 w-5" />
+                <Card variant="interactive" className="group">
+                    <CardContent className="p-5 flex flex-col items-center text-center">
+                        <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-indigo-500/20 transition-colors">
+                            <Home className="h-6 w-6" />
                         </div>
-                        <p className="text-2xl font-black text-foreground leading-none">{stats.totalCells}</p>
-                        <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Células</p>
+                        <p className="text-3xl font-black text-white-primary leading-none">{stats.totalCells}</p>
+                        <p className="text-xs uppercase tracking-wider font-bold text-gray-text-secondary mt-2">Células</p>
                     </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm hover:shadow-md transition-all">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                        <div className="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mb-3">
-                            <TrendingUp className="h-5 w-5" />
+                <Card variant="interactive" className="group">
+                    <CardContent className="p-5 flex flex-col items-center text-center">
+                        <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-emerald-500/20 transition-colors">
+                            <TrendingUp className="h-6 w-6" />
                         </div>
-                        <p className="text-2xl font-black text-foreground leading-none">{stats.overallAttendance}%</p>
-                        <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Presença Global</p>
+                        <p className="text-3xl font-black text-gold leading-none">{stats.overallAttendance}%</p>
+                        <p className="text-xs uppercase tracking-wider font-bold text-gray-text-secondary mt-2">Presença Global</p>
                     </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm hover:shadow-md transition-all">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                        <div className="w-10 h-10 bg-red-500/10 text-red-400 rounded-xl flex items-center justify-center mb-3">
-                            <AlertCircle className="h-5 w-5" />
+                <Card variant="interactive" className="group">
+                    <CardContent className="p-5 flex flex-col items-center text-center">
+                        <div className="w-12 h-12 bg-red-500/10 text-red-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-red-500/20 transition-colors">
+                            <AlertCircle className="h-6 w-6" />
                         </div>
-                        <p className="text-2xl font-black text-foreground leading-none">{stats.cellsWithoutReports}</p>
-                        <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Sem Relatório</p>
+                        <p className="text-3xl font-black text-white-primary leading-none">{stats.cellsWithoutReports}</p>
+                        <p className="text-xs uppercase tracking-wider font-bold text-gray-text-secondary mt-2">Sem Relatório</p>
                     </CardContent>
                 </Card>
             </div>
@@ -138,54 +141,54 @@ export default async function DashboardPage() {
             {extendedStats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Link href="/dashboard/cursos">
-                        <Card className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02]">
-                            <CardContent className="p-4 flex flex-col items-center text-center">
-                                <div className="w-10 h-10 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center mb-3">
-                                    <BookOpen className="h-5 w-5" />
+                        <Card variant="interactive" className="group h-full">
+                            <CardContent className="p-5 flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-purple-500/20 transition-colors">
+                                    <BookOpen className="h-6 w-6" />
                                 </div>
-                                <p className="text-2xl font-black text-foreground leading-none">{extendedStats.courses.totalEnrollments}</p>
-                                <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Matrículas</p>
-                                <p className="text-xs sm:text-xs text-muted-foreground">{extendedStats.courses.publishedCourses} cursos ativos</p>
+                                <p className="text-3xl font-black text-white-primary leading-none">{extendedStats.courses.totalEnrollments}</p>
+                                <p className="text-xs uppercase tracking-wider font-bold text-gray-text-secondary mt-2">Matrículas</p>
+                                <p className="text-xs text-gray-text-muted mt-1">{extendedStats.courses.publishedCourses} cursos ativos</p>
                             </CardContent>
                         </Card>
                     </Link>
 
                     <Link href="/dashboard/loja">
-                        <Card className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02]">
-                            <CardContent className="p-4 flex flex-col items-center text-center">
-                                <div className="w-10 h-10 bg-orange-500/10 text-orange-400 rounded-xl flex items-center justify-center mb-3">
-                                    <ShoppingBag className="h-5 w-5" />
+                        <Card variant="interactive" className="group h-full">
+                            <CardContent className="p-5 flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-orange-500/10 text-orange-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-orange-500/20 transition-colors">
+                                    <ShoppingBag className="h-6 w-6" />
                                 </div>
-                                <p className="text-2xl font-black text-foreground leading-none">{extendedStats.orders.paidOrders}</p>
-                                <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pagos</p>
-                                <p className="text-xs sm:text-xs text-muted-foreground">{formatCurrency(extendedStats.orders.totalRevenueCents / 100)} em vendas</p>
+                                <p className="text-3xl font-black text-white-primary leading-none">{extendedStats.orders.paidOrders}</p>
+                                <p className="text-xs uppercase tracking-wider font-bold text-gray-text-secondary mt-2">Pedidos Pagos</p>
+                                <p className="text-xs text-gold mt-1">{formatCurrency(extendedStats.orders.totalRevenueCents / 100)}</p>
                             </CardContent>
                         </Card>
                     </Link>
 
                     <Link href="/dashboard/eventos">
-                        <Card className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02]">
-                            <CardContent className="p-4 flex flex-col items-center text-center">
-                                <div className="w-10 h-10 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center mb-3">
-                                    <CalendarCheck className="h-5 w-5" />
+                        <Card variant="interactive" className="group h-full">
+                            <CardContent className="p-5 flex flex-col items-center text-center">
+                                <div className="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-cyan-500/20 transition-colors">
+                                    <CalendarCheck className="h-6 w-6" />
                                 </div>
-                                <p className="text-2xl font-black text-foreground leading-none">{extendedStats.events.upcomingEvents}</p>
-                                <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Eventos Próximos</p>
-                                <p className="text-xs sm:text-xs text-muted-foreground">{extendedStats.events.totalRegistrations} inscrições</p>
+                                <p className="text-3xl font-black text-white-primary leading-none">{extendedStats.events.upcomingEvents}</p>
+                                <p className="text-xs uppercase tracking-wider font-bold text-gray-text-secondary mt-2">Eventos Próximos</p>
+                                <p className="text-xs text-gray-text-muted mt-1">{extendedStats.events.totalRegistrations} inscrições</p>
                             </CardContent>
                         </Card>
                     </Link>
 
                     {extendedStats.orders.pendingOrders > 0 && (
                         <Link href="/dashboard/loja">
-                            <Card className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-[1.02] border-l-4 border-l-yellow-400">
-                                <CardContent className="p-4 flex flex-col items-center text-center">
-                                    <div className="w-10 h-10 bg-yellow-500/10 text-yellow-500 rounded-xl flex items-center justify-center mb-3">
-                                        <AlertCircle className="h-5 w-5" />
+                            <Card variant="gold" className="group h-full border-l-2 border-l-amber-500">
+                                <CardContent className="p-5 flex flex-col items-center text-center">
+                                    <div className="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors">
+                                        <AlertCircle className="h-6 w-6" />
                                     </div>
-                                    <p className="text-2xl font-black text-foreground leading-none">{extendedStats.orders.pendingOrders}</p>
-                                    <p className="text-xs uppercase tracking-wider font-bold text-muted-foreground mt-2">Pedidos Pendentes</p>
-                                    <p className="text-xs sm:text-xs text-yellow-600">Aguardando pagamento</p>
+                                    <p className="text-3xl font-black text-white-primary leading-none">{extendedStats.orders.pendingOrders}</p>
+                                    <p className="text-xs uppercase tracking-wider font-bold text-gray-text-secondary mt-2">Pedidos Pendentes</p>
+                                    <p className="text-xs text-amber-400 mt-1">Aguardando pagamento</p>
                                 </CardContent>
                             </Card>
                         </Link>
@@ -199,33 +202,35 @@ export default async function DashboardPage() {
                     <GrowthChart data={growthData} />
                 </div>
                 <div className="space-y-4">
-                    <Card className="border-none shadow-sm h-full">
-                        <CardContent className="p-4">
+                    <Card className="h-full">
+                        <CardContent className="p-5">
                             <div className="flex items-center justify-between mb-4">
-                                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Próximos Eventos</p>
+                                <p className="text-xs font-black uppercase tracking-widest text-gray-text-secondary">Próximos Eventos</p>
                                 <Link href="/calendario">
-                                    <Button variant="ghost" size="sm" className="h-7 text-xs font-bold uppercase tracking-wider text-blue-600">Ver Tudo</Button>
+                                    <Button variant="ghost" size="sm" className="h-7 text-xs font-bold uppercase tracking-wider text-gold hover:text-gold-light">Ver Tudo</Button>
                                 </Link>
                             </div>
                             <div className="space-y-4">
                                 {upcomingEvents.length > 0 ? upcomingEvents.map(event => (
-                                    <div key={event.id} className="flex gap-4">
-                                        <div className="w-10 h-10 bg-muted rounded-xl flex flex-col items-center justify-center flex-shrink-0">
-                                            <span className="text-xs font-black uppercase leading-none">{format(new Date(event.start_date), 'MMM', { locale: ptBR })}</span>
-                                            <span className="text-md font-black leading-none">{format(new Date(event.start_date), 'dd')}</span>
+                                    <div key={event.id} className="flex gap-4 p-3 rounded-xl hover:bg-black-elevated transition-colors">
+                                        <div className="w-12 h-12 bg-black-elevated rounded-xl flex flex-col items-center justify-center flex-shrink-0 border border-gray-border">
+                                            <span className="text-[10px] font-black uppercase leading-none text-gold">{format(new Date(event.start_date), 'MMM', { locale: ptBR })}</span>
+                                            <span className="text-lg font-black leading-none text-white-primary">{format(new Date(event.start_date), 'dd')}</span>
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold truncate">{event.title}</p>
-                                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                            <p className="text-sm font-bold text-white-primary truncate">{event.title}</p>
+                                            <p className="text-xs text-gray-text-muted flex items-center gap-1 mt-1">
                                                 <Calendar className="h-3 w-3" />
                                                 {format(new Date(event.start_date), "EEEE 'às' HH:mm", { locale: ptBR })}
                                             </p>
                                         </div>
                                     </div>
                                 )) : (
-                                    <div className="text-center py-6">
-                                        <Calendar className="h-8 w-8 text-muted/30 mx-auto mb-2" />
-                                        <p className="text-xs text-muted-foreground font-medium">Nenhum evento agendado</p>
+                                    <div className="text-center py-8">
+                                        <div className="w-16 h-16 bg-black-elevated rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                            <Calendar className="h-8 w-8 text-gray-text-muted" />
+                                        </div>
+                                        <p className="text-sm text-gray-text-secondary font-medium">Nenhum evento agendado</p>
                                     </div>
                                 )}
                             </div>
@@ -238,8 +243,8 @@ export default async function DashboardPage() {
             <CellsList cells={cells} />
 
             {/* Footer Info */}
-            <div className="flex items-center justify-between px-2 opacity-40">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-[2px]">MVP Célula v1.0 • Ekkle</p>
+            <div className="flex items-center justify-center px-2">
+                <p className="text-xs font-bold text-gray-text-muted uppercase tracking-[3px]">Ekkle • Sistema de Gestão de Igrejas</p>
             </div>
         </div>
     )

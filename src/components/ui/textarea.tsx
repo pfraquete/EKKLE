@@ -7,7 +7,24 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
     <textarea
       data-slot="textarea"
       className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex field-sizing-content min-h-16 w-full rounded-md border bg-background text-foreground px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        // Base styles
+        "flex field-sizing-content min-h-24 w-full rounded-xl border px-4 py-3 text-base transition-all duration-300 ease-out outline-none md:text-sm",
+        // Dark Premium colors
+        "bg-black-deep border-gray-border text-white-primary",
+        "placeholder:text-gray-text-muted",
+        // Selection
+        "selection:bg-gold/30 selection:text-white-primary",
+        // Shadow
+        "shadow-[inset_0_1px_2px_rgba(0,0,0,0.3)]",
+        // Focus state - Gold glow
+        "focus:border-gold focus:shadow-[inset_0_1px_2px_rgba(0,0,0,0.3),0_0_15px_rgba(212,175,55,0.08)]",
+        "focus-visible:ring-0",
+        // Disabled state
+        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-black-surface",
+        // Invalid state
+        "aria-invalid:border-destructive aria-invalid:shadow-[inset_0_1px_2px_rgba(0,0,0,0.3),0_0_15px_rgba(127,29,29,0.15)]",
+        // Resize
+        "resize-y",
         className
       )}
       {...props}

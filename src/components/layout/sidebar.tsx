@@ -192,7 +192,8 @@ export function Sidebar({ profile }: SidebarProps) {
     ]
 
     return (
-        <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-sidebar border-r border-sidebar-border">
+        <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-black-deep border-r border-gray-border-subtle">
+            {/* Logo Section */}
             <div className="p-6 flex items-center gap-3">
                 <div className="relative w-10 h-10">
                     <Image
@@ -204,33 +205,38 @@ export function Sidebar({ profile }: SidebarProps) {
                     />
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-black text-lg leading-none tracking-tighter text-sidebar-foreground uppercase">Ekkle</span>
+                    <span className="font-black text-lg leading-none tracking-tighter text-gold uppercase">Ekkle</span>
                 </div>
             </div>
 
-            <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+            {/* Navigation */}
+            <nav className="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
                 {routes.filter(r => r.show).map((route) => (
                     <Link
                         key={route.href}
                         href={route.href}
                         className={`
-                            flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group
+                            flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
                             ${route.active
-                                ? 'bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm'
-                                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium'
+                                ? 'bg-black-elevated text-gold font-semibold border-l-2 border-gold shadow-gold-glow-subtle'
+                                : 'text-gray-text-secondary hover:bg-black-elevated hover:text-white-soft font-medium'
                             }
                         `}
                     >
-                        <route.icon className="h-5 w-5" />
-                        {route.label}
+                        <route.icon className={`h-5 w-5 transition-colors ${route.active ? 'text-gold' : 'text-gray-text-muted group-hover:text-white-soft'}`} />
+                        <span>{route.label}</span>
+                        {route.active && (
+                            <div className="absolute inset-0 rounded-xl bg-gold/5 pointer-events-none" />
+                        )}
                     </Link>
                 ))}
             </nav>
 
-            <div className="p-4 border-t border-sidebar-border">
+            {/* Logout Section */}
+            <div className="p-4 border-t border-gray-border-subtle">
                 <button
                     onClick={() => signOut()}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-destructive rounded-lg hover:bg-destructive/10 transition-colors"
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-red-400 rounded-xl hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
                 >
                     <LogOut className="h-5 w-5" />
                     Sair

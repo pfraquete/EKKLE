@@ -189,26 +189,34 @@ export function MobileNav({ profile }: MobileNavProps) {
 
     return (
         <>
-            {/* Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background border-t border-border flex items-center justify-around px-2 z-50 safe-area-inset-bottom">
+            {/* Bottom Navigation - Dark Premium */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-black-deep/95 backdrop-blur-sm border-t border-gray-border-subtle flex items-center justify-around px-2 z-50 safe-area-inset-bottom">
                 {bottomLinks.map((link) => (
                     <Link
                         key={link.href}
                         href={link.href}
                         className={cn(
-                            "flex flex-col items-center justify-center gap-1 flex-1 h-full text-xs font-medium transition-colors",
-                            link.active ? "text-primary" : "text-muted-foreground"
+                            "flex flex-col items-center justify-center gap-1 flex-1 h-full text-xs font-medium transition-all duration-200",
+                            link.active 
+                                ? "text-gold" 
+                                : "text-gray-text-muted hover:text-white-soft"
                         )}
                     >
-                        <link.icon className={cn("h-5 w-5", link.active ? "text-primary" : "text-muted-foreground")} />
-                        {link.label}
+                        <link.icon className={cn(
+                            "h-5 w-5 transition-colors",
+                            link.active ? "text-gold" : "text-gray-text-muted"
+                        )} />
+                        <span>{link.label}</span>
+                        {link.active && (
+                            <span className="absolute bottom-1 w-1 h-1 bg-gold rounded-full" />
+                        )}
                     </Link>
                 ))}
 
                 {/* Menu Button */}
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="flex flex-col items-center justify-center gap-1 flex-1 h-full text-xs font-medium text-muted-foreground transition-colors"
+                    className="flex flex-col items-center justify-center gap-1 flex-1 h-full text-xs font-medium text-gray-text-muted hover:text-white-soft transition-colors"
                 >
                     <Menu className="h-5 w-5" />
                     Menu
@@ -218,20 +226,20 @@ export function MobileNav({ profile }: MobileNavProps) {
             {/* Drawer Overlay */}
             {isOpen && (
                 <div
-                    className="md:hidden fixed inset-0 bg-black/50 z-[60] transition-opacity"
+                    className="md:hidden fixed inset-0 bg-black-absolute/80 backdrop-blur-sm z-[60] transition-opacity"
                     onClick={() => setIsOpen(false)}
                 />
             )}
 
-            {/* Drawer Sidebar */}
+            {/* Drawer Sidebar - Dark Premium */}
             <aside
                 className={cn(
-                    "md:hidden fixed top-0 left-0 h-full w-72 bg-sidebar border-r border-sidebar-border z-[70] transform transition-transform duration-300 ease-in-out flex flex-col",
+                    "md:hidden fixed top-0 left-0 h-full w-72 bg-black-deep border-r border-gray-border-subtle z-[70] transform transition-transform duration-300 ease-in-out flex flex-col",
                     isOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
                 {/* Header */}
-                <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
+                <div className="p-4 flex items-center justify-between border-b border-gray-border-subtle">
                     <div className="flex items-center gap-3">
                         <div className="relative w-8 h-8">
                             <Image
@@ -242,41 +250,47 @@ export function MobileNav({ profile }: MobileNavProps) {
                                 priority
                             />
                         </div>
-                        <span className="font-black text-lg leading-none tracking-tighter text-sidebar-foreground uppercase">Ekkle</span>
+                        <span className="font-black text-lg leading-none tracking-tighter text-gold uppercase">Ekkle</span>
                     </div>
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="p-2 rounded-lg hover:bg-sidebar-accent transition-colors"
+                        className="p-2 rounded-xl text-gray-text-secondary hover:text-white-primary hover:bg-black-elevated transition-all duration-200"
                     >
-                        <X className="h-5 w-5 text-sidebar-foreground" />
+                        <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
                     {visibleLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
                             onClick={() => setIsOpen(false)}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                                "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 relative",
                                 link.active
-                                    ? 'bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm'
-                                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium'
+                                    ? 'bg-black-elevated text-gold font-semibold border-l-2 border-gold'
+                                    : 'text-gray-text-secondary hover:bg-black-elevated hover:text-white-soft font-medium'
                             )}
                         >
-                            <link.icon className="h-5 w-5" />
+                            <link.icon className={cn(
+                                "h-5 w-5 transition-colors",
+                                link.active ? "text-gold" : "text-gray-text-muted"
+                            )} />
                             {link.label}
+                            {link.active && (
+                                <div className="absolute inset-0 rounded-xl bg-gold/5 pointer-events-none" />
+                            )}
                         </Link>
                     ))}
                 </nav>
 
                 {/* Footer - Logout */}
-                <div className="p-4 border-t border-sidebar-border">
+                <div className="p-4 border-t border-gray-border-subtle">
                     <button
                         onClick={() => signOut()}
-                        className="flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-destructive rounded-xl hover:bg-destructive/10 transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-red-400 rounded-xl hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
                     >
                         <LogOut className="h-5 w-5" />
                         Sair
