@@ -1,48 +1,21 @@
 -- ============================================
--- Migration: Super Admin Panel
+-- Migration: Super Admin Panel (Part 2)
+-- ============================================
+-- PREREQUISITE: Run 20260203_01_add_enum_values.sql FIRST!
+-- That migration adds SUPER_ADMIN and DISCIPULADOR to the enum.
 -- ============================================
 -- This migration creates the Super Admin infrastructure:
--- - SUPER_ADMIN role
 -- - Admin settings table
 -- - Feature flags table
 -- - Admin audit logs table
 -- - Integration status table
 -- - System alerts table
 -- - Church status fields
+-- - RLS policies for SUPER_ADMIN
 -- ============================================
 
 -- ============================================
--- 1. Add SUPER_ADMIN and DISCIPULADOR to user_role enum
--- ============================================
-
--- Add new values to the user_role enum
--- PostgreSQL requires adding enum values one at a time
-DO $$
-BEGIN
-    -- Add SUPER_ADMIN if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'SUPER_ADMIN' AND enumtypid = 'user_role'::regtype) THEN
-        ALTER TYPE user_role ADD VALUE 'SUPER_ADMIN';
-    END IF;
-EXCEPTION
-    WHEN duplicate_object THEN
-        RAISE NOTICE 'SUPER_ADMIN already exists in user_role enum';
-END;
-$$;
-
-DO $$
-BEGIN
-    -- Add DISCIPULADOR if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'DISCIPULADOR' AND enumtypid = 'user_role'::regtype) THEN
-        ALTER TYPE user_role ADD VALUE 'DISCIPULADOR';
-    END IF;
-EXCEPTION
-    WHEN duplicate_object THEN
-        RAISE NOTICE 'DISCIPULADOR already exists in user_role enum';
-END;
-$$;
-
--- ============================================
--- 2. Admin Settings Table
+-- 1. Admin Settings Table
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS admin_settings (
@@ -72,7 +45,7 @@ CREATE TRIGGER trigger_admin_settings_updated_at
     EXECUTE FUNCTION update_admin_settings_updated_at();
 
 -- ============================================
--- 3. Feature Flags Table
+-- 2. Feature Flags Table
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS feature_flags (
@@ -105,7 +78,7 @@ CREATE TRIGGER trigger_feature_flags_updated_at
     EXECUTE FUNCTION update_feature_flags_updated_at();
 
 -- ============================================
--- 4. Admin Audit Logs Table
+-- 3. Admin Audit Logs Table
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS admin_audit_logs (
@@ -131,7 +104,7 @@ CREATE INDEX IF NOT EXISTS idx_admin_audit_church ON admin_audit_logs(church_id)
 CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit_logs(created_at DESC);
 
 -- ============================================
--- 5. Integration Status Table
+-- 4. Integration Status Table
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS integration_status (
@@ -174,7 +147,7 @@ INSERT INTO integration_status (provider, status) VALUES
 ON CONFLICT (provider) DO NOTHING;
 
 -- ============================================
--- 6. System Alerts Table
+-- 5. System Alerts Table
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS system_alerts (
@@ -196,7 +169,7 @@ CREATE INDEX IF NOT EXISTS idx_system_alerts_type ON system_alerts(alert_type);
 CREATE INDEX IF NOT EXISTS idx_system_alerts_category ON system_alerts(category);
 
 -- ============================================
--- 7. Add fields to churches table
+-- 6. Add fields to churches table
 -- ============================================
 
 ALTER TABLE churches ADD COLUMN IF NOT EXISTS
@@ -218,7 +191,7 @@ ALTER TABLE churches ADD COLUMN IF NOT EXISTS
 CREATE INDEX IF NOT EXISTS idx_churches_status ON churches(status);
 
 -- ============================================
--- 8. Enable RLS on new tables
+-- 7. Enable RLS on new tables
 -- ============================================
 
 ALTER TABLE admin_settings ENABLE ROW LEVEL SECURITY;
@@ -228,10 +201,11 @@ ALTER TABLE integration_status ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_alerts ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
--- 9. RLS Policies for SUPER_ADMIN
+-- 8. RLS Policies for SUPER_ADMIN
 -- ============================================
 
 -- Admin Settings: Only SUPER_ADMIN can access
+DROP POLICY IF EXISTS "super_admins_admin_settings" ON admin_settings;
 CREATE POLICY "super_admins_admin_settings" ON admin_settings
     FOR ALL USING (
         EXISTS (
@@ -242,6 +216,7 @@ CREATE POLICY "super_admins_admin_settings" ON admin_settings
     );
 
 -- Feature Flags: Only SUPER_ADMIN can manage
+DROP POLICY IF EXISTS "super_admins_feature_flags" ON feature_flags;
 CREATE POLICY "super_admins_feature_flags" ON feature_flags
     FOR ALL USING (
         EXISTS (
@@ -252,6 +227,7 @@ CREATE POLICY "super_admins_feature_flags" ON feature_flags
     );
 
 -- Admin Audit Logs: Only SUPER_ADMIN can view
+DROP POLICY IF EXISTS "super_admins_view_audit" ON admin_audit_logs;
 CREATE POLICY "super_admins_view_audit" ON admin_audit_logs
     FOR SELECT USING (
         EXISTS (
@@ -262,10 +238,12 @@ CREATE POLICY "super_admins_view_audit" ON admin_audit_logs
     );
 
 -- Admin Audit Logs: Service role can insert (for logging)
+DROP POLICY IF EXISTS "service_insert_audit" ON admin_audit_logs;
 CREATE POLICY "service_insert_audit" ON admin_audit_logs
     FOR INSERT WITH CHECK (true);
 
 -- Integration Status: Only SUPER_ADMIN can access
+DROP POLICY IF EXISTS "super_admins_integration_status" ON integration_status;
 CREATE POLICY "super_admins_integration_status" ON integration_status
     FOR ALL USING (
         EXISTS (
@@ -276,6 +254,7 @@ CREATE POLICY "super_admins_integration_status" ON integration_status
     );
 
 -- System Alerts: Only SUPER_ADMIN can access
+DROP POLICY IF EXISTS "super_admins_system_alerts" ON system_alerts;
 CREATE POLICY "super_admins_system_alerts" ON system_alerts
     FOR ALL USING (
         EXISTS (
@@ -286,6 +265,7 @@ CREATE POLICY "super_admins_system_alerts" ON system_alerts
     );
 
 -- Churches: SUPER_ADMIN can view all churches
+DROP POLICY IF EXISTS "super_admins_view_all_churches" ON churches;
 CREATE POLICY "super_admins_view_all_churches" ON churches
     FOR SELECT USING (
         EXISTS (
@@ -296,6 +276,7 @@ CREATE POLICY "super_admins_view_all_churches" ON churches
     );
 
 -- Churches: SUPER_ADMIN can update all churches
+DROP POLICY IF EXISTS "super_admins_update_all_churches" ON churches;
 CREATE POLICY "super_admins_update_all_churches" ON churches
     FOR UPDATE USING (
         EXISTS (
@@ -306,6 +287,7 @@ CREATE POLICY "super_admins_update_all_churches" ON churches
     );
 
 -- Subscriptions: SUPER_ADMIN can view all subscriptions
+DROP POLICY IF EXISTS "super_admins_view_all_subscriptions" ON subscriptions;
 CREATE POLICY "super_admins_view_all_subscriptions" ON subscriptions
     FOR SELECT USING (
         EXISTS (
@@ -316,6 +298,7 @@ CREATE POLICY "super_admins_view_all_subscriptions" ON subscriptions
     );
 
 -- Profiles: SUPER_ADMIN can view all profiles
+DROP POLICY IF EXISTS "super_admins_view_all_profiles" ON profiles;
 CREATE POLICY "super_admins_view_all_profiles" ON profiles
     FOR SELECT USING (
         EXISTS (
@@ -326,7 +309,7 @@ CREATE POLICY "super_admins_view_all_profiles" ON profiles
     );
 
 -- ============================================
--- 10. Helper function to check if user is SUPER_ADMIN
+-- 9. Helper function to check if user is SUPER_ADMIN
 -- ============================================
 
 CREATE OR REPLACE FUNCTION is_super_admin()
@@ -344,7 +327,7 @@ END;
 $$;
 
 -- ============================================
--- 11. Function to log admin actions
+-- 10. Function to log admin actions
 -- ============================================
 
 CREATE OR REPLACE FUNCTION log_admin_action(
@@ -389,7 +372,7 @@ END;
 $$;
 
 -- ============================================
--- 12. Comments for documentation
+-- 11. Comments for documentation
 -- ============================================
 
 COMMENT ON TABLE admin_settings IS 'Global system settings managed by super admins';
