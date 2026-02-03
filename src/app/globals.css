@@ -179,4 +179,12 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #d1d5db;
   }
+
+  .hub-body {
+    font-family: var(--font-hub-body);
+  }
+
+  .hub-heading {
+    font-family: var(--font-hub-display);
+  }
 }
