@@ -22,7 +22,8 @@ import {
     Shield,
     UserCheck,
     FileText,
-    Baby
+    Baby,
+    Newspaper
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -40,6 +41,13 @@ export function Sidebar({ profile }: SidebarProps) {
     const isDiscipulador = profile.role === 'DISCIPULADOR'
 
     const routes = [
+        {
+            label: 'Feed',
+            icon: Newspaper,
+            href: '/feed',
+            active: pathname === '/feed',
+            show: true
+        },
         {
             label: 'Dashboard',
             icon: LayoutDashboard,

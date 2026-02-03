@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ProfileForm } from '@/components/forms/profile-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Smartphone, Globe, MessageSquare, ChevronRight, Wallet, CreditCard } from 'lucide-react'
+import { Smartphone, Globe, MessageSquare, ChevronRight, Wallet, CreditCard, Newspaper } from 'lucide-react'
 
 export default async function SettingsPage() {
     const profile = await getProfile()
@@ -30,6 +30,20 @@ export default async function SettingsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
+                        <Link
+                            href="/configuracoes/feed"
+                            className="flex items-center justify-between p-4 bg-muted/40 rounded-2xl hover:bg-muted/60 transition-colors"
+                        >
+                            <div className="flex items-center gap-3">
+                                <Newspaper className="h-5 w-5 text-primary" />
+                                <div>
+                                    <p className="text-sm font-bold text-foreground">Feed Social</p>
+                                    <p className="text-xs text-muted-foreground">Permissões e moderação</p>
+                                </div>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </Link>
+
                         <Link
                             href="/configuracoes/site"
                             className="flex items-center justify-between p-4 bg-muted/40 rounded-2xl hover:bg-muted/60 transition-colors"

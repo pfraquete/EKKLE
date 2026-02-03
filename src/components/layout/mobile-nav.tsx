@@ -22,7 +22,8 @@ import {
     Landmark,
     Settings,
     LogOut,
-    Baby
+    Baby,
+    Newspaper
 } from 'lucide-react'
 import { Profile, signOut } from '@/actions/auth'
 
@@ -38,6 +39,13 @@ export function MobileNav({ profile }: MobileNavProps) {
 
     // Links para o bottom nav (apenas 4 principais)
     const bottomLinks = [
+        {
+            icon: Newspaper,
+            label: 'Feed',
+            href: '/feed',
+            active: pathname === '/feed',
+            show: true
+        },
         {
             icon: LayoutDashboard,
             label: 'Dash',
@@ -70,6 +78,13 @@ export function MobileNav({ profile }: MobileNavProps) {
 
     // Todos os links para o drawer (menu completo)
     const allLinks = [
+        {
+            icon: Newspaper,
+            label: 'Feed',
+            href: '/feed',
+            active: pathname === '/feed',
+            show: true
+        },
         {
             icon: LayoutDashboard,
             label: 'Dashboard',
