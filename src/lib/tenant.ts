@@ -154,3 +154,10 @@ export function isAdminRoute(pathname: string): boolean {
         pathname.startsWith('/importar') ||
         pathname.startsWith('/configuracoes')
 }
+
+/**
+ * Checks if the current route is a super admin route
+ */
+export function isSuperAdminRoute(pathname: string): boolean {
+    return pathname.startsWith('/admin')
+}

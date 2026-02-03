@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { extractSubdomain, resolveChurchFromSubdomain, isPublicWebsiteRoute, isAdminRoute } from '@/lib/tenant'
+import { extractSubdomain, resolveChurchFromSubdomain, isPublicWebsiteRoute, isAdminRoute, isSuperAdminRoute } from '@/lib/tenant'
 import { EKKLE_HUB_ID } from '@/lib/ekkle-utils'
 
 type CookieOptions = Parameters<NextResponse['cookies']['set']>[2]
@@ -161,6 +161,36 @@ export async function updateSession(request: NextRequest) {
     }
     const isPublicWebsite = isPublicWebsiteRoute(pathname)
     const isAdmin = isAdminRoute(pathname)
+    const isSuperAdmin = isSuperAdminRoute(pathname)
+
+    // =====================================================
+    // SUPER ADMIN ROUTE PROTECTION
+    // =====================================================
+    // Only users with SUPER_ADMIN role can access /admin routes
+    if (isSuperAdmin) {
+        if (!user) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/login'
+            return redirectWithCookies(url, supabaseResponse, request)
+        }
+
+        // Check if user has SUPER_ADMIN role
+        const { data: adminProfile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        if (adminProfile?.role !== 'SUPER_ADMIN') {
+            // Not a super admin - redirect to dashboard
+            const url = request.nextUrl.clone()
+            url.pathname = '/dashboard'
+            return redirectWithCookies(url, supabaseResponse, request)
+        }
+
+        // Super admin authenticated - allow access
+        return supabaseResponse
+    }
 
     // Rotas públicas (auth)
     const authRoutes = ['/login', '/forgot-password', '/reset-password', '/register', '/registro', '/cadastro']
