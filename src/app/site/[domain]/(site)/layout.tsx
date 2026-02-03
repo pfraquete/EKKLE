@@ -215,14 +215,7 @@ export default async function SitePublicLayout({
                         </span>
                       </li>
                     )}
-                    {church.city && church.state && (
-                      <li className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0 opacity-0" />
-                        <span className="opacity-70" style={{ color: theme.textColor }}>
-                          {church.city}, {church.state}
-                        </span>
-                      </li>
-                    )}
+
                   </ul>
                 </div>
               )}
