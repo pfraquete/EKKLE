@@ -49,111 +49,118 @@
 
 @layer base {
   :root {
-    /* Premium Dark Theme (Zinc) by Default */
-    --background: #09090b;
-    /* zinc-950 */
-    --foreground: #fafafa;
-    /* zinc-50 */
+    /* ========================================
+       EKKLE PREMIUM PALETTE
+       ========================================
+       Preto Principal:  #0B0B0B (background)
+       Preto Secundário: #141414 (cards, surfaces)
+       Branco:           #FFFFFF (textos principais)
+       Branco Suave:     #F5F5F5 (textos secundários)
+       Dourado Principal: #D4AF37 (primary, CTAs)
+       Dourado Claro:    #F2D675 (hover states)
+       Dourado Escuro:   #B8962E (active states)
+       ======================================== */
 
-    --card: #18181b;
-    /* zinc-900 */
-    --card-foreground: #fafafa;
-    /* zinc-50 */
+    /* Backgrounds */
+    --background: #0B0B0B;
+    --card: #141414;
+    --popover: #141414;
 
-    --popover: #18181b;
-    /* zinc-900 */
-    --popover-foreground: #fafafa;
-    /* zinc-50 */
+    /* Foregrounds */
+    --foreground: #FFFFFF;
+    --card-foreground: #FFFFFF;
+    --popover-foreground: #FFFFFF;
 
-    --primary: #fafafa;
-    /* zinc-50 */
-    --primary-foreground: #18181b;
-    /* zinc-900 */
+    /* Primary (Dourado) */
+    --primary: #D4AF37;
+    --primary-foreground: #0B0B0B;
 
-    --secondary: #27272a;
-    /* zinc-800 */
-    --secondary-foreground: #fafafa;
-    /* zinc-50 */
+    /* Secondary */
+    --secondary: #1A1A1A;
+    --secondary-foreground: #F5F5F5;
 
-    --muted: #27272a;
-    /* zinc-800 */
-    --muted-foreground: #a1a1aa;
-    /* zinc-400 */
+    /* Muted */
+    --muted: #1A1A1A;
+    --muted-foreground: #A0A0A0;
 
-    --accent: #27272a;
-    /* zinc-800 */
-    --accent-foreground: #fafafa;
-    /* zinc-50 */
+    /* Accent (Dourado) */
+    --accent: #D4AF37;
+    --accent-foreground: #0B0B0B;
 
-    --destructive: #7f1d1d;
-    /* red-900 */
-    --destructive-foreground: #fafafa;
-    /* zinc-50 */
+    /* Destructive */
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
 
-    --border: #27272a;
-    /* zinc-800 */
-    --input: #27272a;
-    /* zinc-800 */
-    --ring: #d4d4d8;
-    /* zinc-300 */
+    /* Borders & Inputs */
+    --border: #2A2A2A;
+    --input: #1A1A1A;
+    --ring: #D4AF37;
 
     --radius: 0.625rem;
 
-    /* Sidebar - Matching Dark Theme */
-    --sidebar-background: #09090b;
-    /* zinc-950 */
-    --sidebar-foreground: #fafafa;
-    /* zinc-50 */
-    --sidebar-primary: #18181b;
-    /* zinc-900 */
-    --sidebar-primary-foreground: #fafafa;
-    /* zinc-50 */
-    --sidebar-accent: #27272a;
-    /* zinc-800 */
-    --sidebar-accent-foreground: #fafafa;
-    /* zinc-50 */
-    --sidebar-border: #27272a;
-    /* zinc-800 */
-    --sidebar-ring: #d4d4d8;
-    /* zinc-300 */
+    /* Sidebar - Premium Dark */
+    --sidebar-background: #0B0B0B;
+    --sidebar-foreground: #FFFFFF;
+    --sidebar-primary: #D4AF37;
+    --sidebar-primary-foreground: #0B0B0B;
+    --sidebar-accent: #141414;
+    --sidebar-accent-foreground: #FFFFFF;
+    --sidebar-border: #2A2A2A;
+    --sidebar-ring: #D4AF37;
 
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Charts (Dourado em variações) */
+    --chart-1: 43 72% 52%;   /* Dourado principal */
+    --chart-2: 43 82% 70%;   /* Dourado claro */
+    --chart-3: 43 62% 42%;   /* Dourado escuro */
+    --chart-4: 0 0% 60%;     /* Cinza */
+    --chart-5: 0 0% 80%;     /* Cinza claro */
+
+    /* Estados extras do dourado */
+    --primary-hover: #F2D675;
+    --primary-active: #B8962E;
+
+    /* Overlay para modais */
+    --overlay: rgba(11, 11, 11, 0.8);
+
+    /* Success/Warning */
+    --success: #22C55E;
+    --warning: #F59E0B;
   }
 
-  /* Keep Light Mode as an option via class, but default is dark */
+  /* Light Mode (opcional) */
   .light {
-    --background: #ffffff;
-    --foreground: #09090b;
-    --card: #ffffff;
-    --card-foreground: #09090b;
-    --popover: #ffffff;
-    --popover-foreground: #09090b;
-    --primary: #18181b;
-    --primary-foreground: #fafafa;
-    --secondary: #f4f4f5;
-    --secondary-foreground: #18181b;
-    --muted: #f4f4f5;
-    --muted-foreground: #71717a;
-    --accent: #f4f4f5;
-    --accent-foreground: #18181b;
-    --destructive: #ef4444;
-    --destructive-foreground: #fafafa;
-    --border: #e4e4e7;
-    --input: #e4e4e7;
-    --ring: #18181b;
+    --background: #FFFFFF;
+    --foreground: #0B0B0B;
+    --card: #F5F5F5;
+    --card-foreground: #0B0B0B;
+    --popover: #FFFFFF;
+    --popover-foreground: #0B0B0B;
+    --primary: #B8962E;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F5F5F5;
+    --secondary-foreground: #0B0B0B;
+    --muted: #F5F5F5;
+    --muted-foreground: #6B6B6B;
+    --accent: #D4AF37;
+    --accent-foreground: #0B0B0B;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: #E5E5E5;
+    --input: #F5F5F5;
+    --ring: #D4AF37;
 
-    --sidebar-background: #f4f4f5;
-    --sidebar-foreground: #09090b;
-    --sidebar-primary: #18181b;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #f4f4f5;
-    --sidebar-accent-foreground: #09090b;
-    --sidebar-border: #e4e4e7;
-    --sidebar-ring: #18181b;
+    --sidebar-background: #F5F5F5;
+    --sidebar-foreground: #0B0B0B;
+    --sidebar-primary: #D4AF37;
+    --sidebar-primary-foreground: #0B0B0B;
+    --sidebar-accent: #FFFFFF;
+    --sidebar-accent-foreground: #0B0B0B;
+    --sidebar-border: #E5E5E5;
+    --sidebar-ring: #D4AF37;
+
+    --primary-hover: #D4AF37;
+    --primary-active: #9A7B24;
+    --overlay: rgba(0, 0, 0, 0.5);
   }
 
   * {
@@ -173,11 +180,11 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #e5e7eb;
+    background: #2A2A2A;
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #d1d5db;
+    background: #3A3A3A;
   }
 
   .hub-body {
@@ -186,5 +193,47 @@
 
   .hub-heading {
     font-family: var(--font-hub-display);
+  }
+
+  /* Utility classes para a paleta premium */
+  .text-gold {
+    color: #D4AF37;
+  }
+
+  .text-gold-light {
+    color: #F2D675;
+  }
+
+  .text-gold-dark {
+    color: #B8962E;
+  }
+
+  .bg-gold {
+    background-color: #D4AF37;
+  }
+
+  .bg-gold-light {
+    background-color: #F2D675;
+  }
+
+  .bg-gold-dark {
+    background-color: #B8962E;
+  }
+
+  .border-gold {
+    border-color: #D4AF37;
+  }
+
+  .ring-gold {
+    --tw-ring-color: #D4AF37;
+  }
+
+  /* Gradientes premium */
+  .gradient-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #F2D675 50%, #B8962E 100%);
+  }
+
+  .gradient-gold-subtle {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(242, 214, 117, 0.05) 100%);
   }
 }

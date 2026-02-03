@@ -54,7 +54,7 @@ const PROBLEMS = [
 
 export const ProblemsSection = memo(function ProblemsSection() {
   return (
-    <section className="py-20 bg-zinc-900/50">
+    <section className="py-20 bg-[#141414]/50">
       <div className="container mx-auto px-4">
         <AnimatedSection className="text-center mb-16">
           <motion.h2
@@ -63,7 +63,7 @@ export const ProblemsSection = memo(function ProblemsSection() {
           >
             Você enfrenta esses desafios?
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-xl text-zinc-400 max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
             A maioria das igrejas ainda usa métodos ultrapassados que consomem tempo e energia.
           </motion.p>
         </AnimatedSection>
@@ -73,13 +73,13 @@ export const ProblemsSection = memo(function ProblemsSection() {
             <motion.div
               key={index}
               variants={fadeInUp}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-red-500/30 transition-all"
+              className="bg-[#141414] border border-[#2A2A2A] rounded-2xl p-8 hover:border-red-500/30 transition-all"
             >
               <div className="w-14 h-14 bg-red-500/10 rounded-xl flex items-center justify-center mb-6">
                 <problem.icon className="w-7 h-7 text-red-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">{problem.title}</h3>
-              <p className="text-zinc-400">{problem.description}</p>
+              <p className="text-[#A0A0A0]">{problem.description}</p>
             </motion.div>
           ))}
         </AnimatedSection>
@@ -93,18 +93,18 @@ export const ProblemsSection = memo(function ProblemsSection() {
 // =====================================================
 
 const FEATURES = [
-  { icon: Home, title: 'Gestão de Células', description: 'Organize células, líderes e membros. Acompanhe reuniões, relatórios e crescimento de cada grupo.', color: 'from-[#1C2E4A] to-[#66A5AD]' },
-  { icon: Users, title: 'Gestão de Membros', description: 'Cadastro completo de membros com histórico, estágio espiritual, aniversários e muito mais.', color: 'from-[#66A5AD] to-[#B89A5F]' },
-  { icon: MessageSquare, title: 'Automação WhatsApp', description: 'Envie lembretes automáticos de reuniões, aniversários e avisos importantes direto no WhatsApp.', color: 'from-[#B89A5F] to-[#1C2E4A]' },
-  { icon: Globe, title: 'Site Personalizado', description: 'Sua igreja com presença online profissional. Eventos, cursos e informações sempre atualizados.', color: 'from-[#1C2E4A] to-[#B89A5F]' },
-  { icon: BookOpen, title: 'Cursos e Eventos', description: 'Crie cursos de discipulado, organize eventos e gerencie inscrições de forma simples.', color: 'from-[#66A5AD] to-[#1C2E4A]' },
-  { icon: BarChart3, title: 'Relatórios Completos', description: 'Dashboards com métricas de crescimento, frequência, engajamento e muito mais.', color: 'from-[#B89A5F] to-[#66A5AD]' },
-  { icon: ShoppingBag, title: 'Loja Virtual', description: 'Venda produtos, livros, camisetas e materiais da igreja com gestão completa de estoque e pagamentos.', color: 'from-[#1C2E4A] to-[#66A5AD]' },
-  { icon: Video, title: 'Gestão de Cultos', description: 'Organize cultos, escalas de ministério, pregações e acompanhe a frequência dos membros.', color: 'from-[#66A5AD] to-[#B89A5F]' },
-  { icon: DollarSign, title: 'Controle Financeiro', description: 'Gerencie entradas, saídas, dízimos e ofertas com relatórios detalhados e transparência total.', color: 'from-[#B89A5F] to-[#1C2E4A]' },
-  { icon: Calendar, title: 'Calendário Integrado', description: 'Visualize todos os eventos, cultos e reuniões em um calendário unificado e compartilhável.', color: 'from-[#1C2E4A] to-[#B89A5F]' },
-  { icon: Upload, title: 'Importação de Dados', description: 'Importe membros de planilhas Excel ou Google Sheets de forma rápida e sem complicação.', color: 'from-[#66A5AD] to-[#1C2E4A]' },
-  { icon: Bell, title: 'Comunicações em Massa', description: 'Envie avisos, convites e mensagens para grupos específicos ou toda a igreja de uma vez.', color: 'from-[#B89A5F] to-[#66A5AD]' },
+  { icon: Home, title: 'Gestão de Células', description: 'Organize células, líderes e membros. Acompanhe reuniões, relatórios e crescimento de cada grupo.', color: 'from-[#D4AF37] to-[#F2D675]' },
+  { icon: Users, title: 'Gestão de Membros', description: 'Cadastro completo de membros com histórico, estágio espiritual, aniversários e muito mais.', color: 'from-[#F2D675] to-[#B8962E]' },
+  { icon: MessageSquare, title: 'Automação WhatsApp', description: 'Envie lembretes automáticos de reuniões, aniversários e avisos importantes direto no WhatsApp.', color: 'from-[#B8962E] to-[#D4AF37]' },
+  { icon: Globe, title: 'Site Personalizado', description: 'Sua igreja com presença online profissional. Eventos, cursos e informações sempre atualizados.', color: 'from-[#D4AF37] to-[#B8962E]' },
+  { icon: BookOpen, title: 'Cursos e Eventos', description: 'Crie cursos de discipulado, organize eventos e gerencie inscrições de forma simples.', color: 'from-[#F2D675] to-[#D4AF37]' },
+  { icon: BarChart3, title: 'Relatórios Completos', description: 'Dashboards com métricas de crescimento, frequência, engajamento e muito mais.', color: 'from-[#B8962E] to-[#F2D675]' },
+  { icon: ShoppingBag, title: 'Loja Virtual', description: 'Venda produtos, livros, camisetas e materiais da igreja com gestão completa de estoque e pagamentos.', color: 'from-[#D4AF37] to-[#F2D675]' },
+  { icon: Video, title: 'Gestão de Cultos', description: 'Organize cultos, escalas de ministério, pregações e acompanhe a frequência dos membros.', color: 'from-[#F2D675] to-[#B8962E]' },
+  { icon: DollarSign, title: 'Controle Financeiro', description: 'Gerencie entradas, saídas, dízimos e ofertas com relatórios detalhados e transparência total.', color: 'from-[#B8962E] to-[#D4AF37]' },
+  { icon: Calendar, title: 'Calendário Integrado', description: 'Visualize todos os eventos, cultos e reuniões em um calendário unificado e compartilhável.', color: 'from-[#D4AF37] to-[#B8962E]' },
+  { icon: Upload, title: 'Importação de Dados', description: 'Importe membros de planilhas Excel ou Google Sheets de forma rápida e sem complicação.', color: 'from-[#F2D675] to-[#D4AF37]' },
+  { icon: Bell, title: 'Comunicações em Massa', description: 'Envie avisos, convites e mensagens para grupos específicos ou toda a igreja de uma vez.', color: 'from-[#B8962E] to-[#F2D675]' },
 ]
 
 export const FeaturesSection = memo(function FeaturesSection() {
@@ -112,13 +112,13 @@ export const FeaturesSection = memo(function FeaturesSection() {
     <section id="features" className="py-20">
       <div className="container mx-auto px-4">
         <AnimatedSection className="text-center mb-16">
-          <motion.span variants={fadeInUp} className="text-[#66A5AD] font-medium mb-4 block">
+          <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
             RECURSOS COMPLETOS
           </motion.span>
           <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
             Tudo que sua igreja precisa em um só lugar
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-xl text-zinc-400 max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
             Ferramentas poderosas e fáceis de usar para transformar a gestão da sua comunidade.
           </motion.p>
         </AnimatedSection>
@@ -128,13 +128,13 @@ export const FeaturesSection = memo(function FeaturesSection() {
             <motion.div
               key={index}
               variants={fadeInUp}
-              className="group bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20"
+              className="group bg-[#141414] border border-[#2A2A2A] rounded-2xl p-6 hover:border-[#2A2A2A] transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20"
             >
               <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
                 <feature.icon className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-              <p className="text-sm text-zinc-400">{feature.description}</p>
+              <p className="text-sm text-[#A0A0A0]">{feature.description}</p>
             </motion.div>
           ))}
         </AnimatedSection>
@@ -155,32 +155,32 @@ const SCREENSHOT_HIGHLIGHTS = [
 
 export const ScreenshotsSection = memo(function ScreenshotsSection() {
   return (
-    <section id="screenshots" className="py-20 bg-zinc-900/50">
+    <section id="screenshots" className="py-20 bg-[#141414]/50">
       <div className="container mx-auto px-4">
         <AnimatedSection className="text-center mb-16">
-          <motion.span variants={fadeInUp} className="text-[#B89A5F] font-medium mb-4 block">
+          <motion.span variants={fadeInUp} className="text-[#F2D675] font-medium mb-4 block">
             CONHEÇA O SISTEMA
           </motion.span>
           <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
             Interface moderna e intuitiva
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-xl text-zinc-400 max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
             Design dark mode elegante, fácil de usar e com todas as informações que você precisa.
           </motion.p>
         </AnimatedSection>
 
         <AnimatedSection>
           <motion.div variants={scaleIn} className="relative max-w-5xl mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1C2E4A]/30 to-[#66A5AD]/30 rounded-3xl blur-3xl" />
-            <div className="relative bg-zinc-900 border border-zinc-700 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="bg-zinc-800 px-4 py-3 flex items-center gap-2 border-b border-zinc-700">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 to-[#B8962E]/20 rounded-3xl blur-3xl" />
+            <div className="relative bg-[#141414] border border-[#2A2A2A] rounded-3xl overflow-hidden shadow-2xl">
+              <div className="bg-[#1A1A1A] px-4 py-3 flex items-center gap-2 border-b border-[#2A2A2A]">
                 <div className="flex gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-500" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                 </div>
                 <div className="flex-1 flex justify-center">
-                  <div className="bg-zinc-700 rounded-lg px-4 py-1 text-sm text-zinc-400">
+                  <div className="bg-[#2A2A2A] rounded-lg px-4 py-1 text-sm text-[#A0A0A0]">
                     ekkle.com.br/dashboard
                   </div>
                 </div>
@@ -201,11 +201,11 @@ export const ScreenshotsSection = memo(function ScreenshotsSection() {
         <AnimatedSection className="grid md:grid-cols-3 gap-8 mt-16">
           {SCREENSHOT_HIGHLIGHTS.map((item, index) => (
             <motion.div key={index} variants={fadeInUp} className="text-center">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-xl flex items-center justify-center mx-auto mb-4">
                 <item.icon className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-              <p className="text-zinc-400">{item.description}</p>
+              <p className="text-[#A0A0A0]">{item.description}</p>
             </motion.div>
           ))}
         </AnimatedSection>
@@ -252,7 +252,7 @@ export const CommunitySection = memo(function CommunitySection() {
               </motion.div>
             </div>
             <div
-              className="absolute -bottom-4 -right-4 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-2xl p-4 shadow-xl"
+              className="absolute -bottom-4 -right-4 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-2xl p-4 shadow-xl"
             >
               <div className="text-center">
                 <div className="text-3xl font-bold text-white">+100</div>
@@ -262,28 +262,28 @@ export const CommunitySection = memo(function CommunitySection() {
           </AnimatedSection>
 
           <AnimatedSection>
-            <motion.span variants={fadeInUp} className="text-[#66A5AD] font-medium mb-4 block">
+            <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
               COMUNIDADE
             </motion.span>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-6">
               Feito para igrejas que querem crescer
             </motion.h2>
-            <motion.p variants={fadeInUp} className="text-xl text-zinc-400 mb-8">
+            <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] mb-8">
               O Ekkle foi desenvolvido por quem entende as necessidades reais de uma igreja em crescimento.
               Cada funcionalidade foi pensada para facilitar o trabalho pastoral e fortalecer a comunidade.
             </motion.p>
             <motion.div variants={staggerContainer} className="space-y-4">
               {COMMUNITY_FEATURES.map((item, index) => (
                 <motion.div key={index} variants={fadeInUp} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#66A5AD] flex-shrink-0" />
-                  <span className="text-zinc-300">{item}</span>
+                  <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                  <span className="text-[#F5F5F5]">{item}</span>
                 </motion.div>
               ))}
             </motion.div>
             <motion.div variants={fadeInUp} className="mt-8">
               <Link
                 href="/registro"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#1C2E4A] to-[#66A5AD] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#F2D675] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
               >
                 Começar Agora
                 <ArrowRight className="w-5 h-5" />
@@ -308,16 +308,16 @@ const STEPS = [
 
 export const HowItWorksSection = memo(function HowItWorksSection() {
   return (
-    <section className="py-20 bg-zinc-900/50">
+    <section className="py-20 bg-[#141414]/50">
       <div className="container mx-auto px-4">
         <AnimatedSection className="text-center mb-16">
-          <motion.span variants={fadeInUp} className="text-[#B89A5F] font-medium mb-4 block">
+          <motion.span variants={fadeInUp} className="text-[#F2D675] font-medium mb-4 block">
             COMO FUNCIONA
           </motion.span>
           <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
             Comece em 3 passos simples
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-xl text-zinc-400 max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
             Não precisa ser especialista em tecnologia. O Ekkle foi feito para ser simples.
           </motion.p>
         </AnimatedSection>
@@ -326,14 +326,14 @@ export const HowItWorksSection = memo(function HowItWorksSection() {
           {STEPS.map((step, index) => (
             <motion.div key={index} variants={fadeInUp} className="relative">
               {index < STEPS.length - 1 && (
-                <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-[#66A5AD] to-transparent -translate-x-1/2" />
+                <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-[#D4AF37] to-transparent -translate-x-1/2" />
               )}
               <div className="text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[#66A5AD]/20">
+                <div className="w-24 h-24 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[#D4AF37]/20">
                   <span className="text-3xl font-bold text-white">{step.number}</span>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
-                <p className="text-zinc-400">{step.description}</p>
+                <p className="text-[#A0A0A0]">{step.description}</p>
               </div>
             </motion.div>
           ))}
@@ -356,8 +356,8 @@ const BENEFITS = [
 
 const NOTIFICATION_ITEMS = [
   { icon: CheckCircle2, iconBg: 'bg-green-500/20', iconColor: 'text-green-400', title: 'Lembrete enviado', desc: 'Reunião de célula amanhã às 20h' },
-  { icon: Star, iconBg: 'bg-[#B89A5F]/20', iconColor: 'text-[#B89A5F]', title: 'Novo membro!', desc: 'Maria Silva se cadastrou na célula Centro' },
-  { icon: BarChart3, iconBg: 'bg-[#66A5AD]/20', iconColor: 'text-[#66A5AD]', title: 'Crescimento de 15%', desc: 'Sua igreja cresceu este mês!' },
+  { icon: Star, iconBg: 'bg-[#D4AF37]/20', iconColor: 'text-[#F2D675]', title: 'Novo membro!', desc: 'Maria Silva se cadastrou na célula Centro' },
+  { icon: BarChart3, iconBg: 'bg-[#D4AF37]/20', iconColor: 'text-[#D4AF37]', title: 'Crescimento de 15%', desc: 'Sua igreja cresceu este mês!' },
   { icon: ShoppingBag, iconBg: 'bg-purple-500/20', iconColor: 'text-purple-400', title: 'Nova venda na loja', desc: 'Bíblia de Estudo - R$ 89,90' },
 ]
 
@@ -367,24 +367,24 @@ export const BenefitsSection = memo(function BenefitsSection() {
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <AnimatedSection>
-            <motion.span variants={fadeInUp} className="text-[#66A5AD] font-medium mb-4 block">
+            <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
               BENEFÍCIOS
             </motion.span>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-6">
               Por que pastores escolhem o Ekkle
             </motion.h2>
-            <motion.p variants={fadeInUp} className="text-xl text-zinc-400 mb-10">
+            <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] mb-10">
               Mais do que um software, uma ferramenta que entende as necessidades reais de uma igreja em crescimento.
             </motion.p>
             <motion.div variants={staggerContainer} className="grid sm:grid-cols-2 gap-6">
               {BENEFITS.map((benefit, index) => (
                 <motion.div key={index} variants={fadeInUp} className="flex gap-4">
-                  <div className="w-12 h-12 bg-[#1C2E4A]/50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <benefit.icon className="w-6 h-6 text-[#66A5AD]" />
+                  <div className="w-12 h-12 bg-[#D4AF37]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <benefit.icon className="w-6 h-6 text-[#D4AF37]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-white mb-1">{benefit.title}</h3>
-                    <p className="text-sm text-zinc-400">{benefit.description}</p>
+                    <p className="text-sm text-[#A0A0A0]">{benefit.description}</p>
                   </div>
                 </motion.div>
               ))}
@@ -392,20 +392,20 @@ export const BenefitsSection = memo(function BenefitsSection() {
           </AnimatedSection>
 
           <AnimatedSection className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1C2E4A]/20 to-[#66A5AD]/20 rounded-3xl blur-3xl" />
-            <motion.div variants={scaleIn} className="relative bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-[#B8962E]/10 rounded-3xl blur-3xl" />
+            <motion.div variants={scaleIn} className="relative bg-[#141414] border border-[#2A2A2A] rounded-3xl p-8">
               <div className="space-y-6">
                 {NOTIFICATION_ITEMS.map((item, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-4 p-4 bg-zinc-800/50 rounded-xl"
+                    className="flex items-center gap-4 p-4 bg-[#1A1A1A]/50 rounded-xl"
                   >
                     <div className={`w-10 h-10 ${item.iconBg} rounded-full flex items-center justify-center`}>
                       <item.icon className={`w-5 h-5 ${item.iconColor}`} />
                     </div>
                     <div>
                       <div className="text-white font-medium">{item.title}</div>
-                      <div className="text-sm text-zinc-400">{item.desc}</div>
+                      <div className="text-sm text-[#A0A0A0]">{item.desc}</div>
                     </div>
                   </div>
                 ))}

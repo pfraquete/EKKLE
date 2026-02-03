@@ -130,9 +130,9 @@ export function AdminSidebar({ profile, alertsCount }: AdminSidebarProps) {
     }
 
     return (
-        <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-zinc-900 border-r border-zinc-800">
+        <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-[#0B0B0B] border-r border-[#2A2A2A]">
             {/* Logo */}
-            <div className="p-6 flex items-center gap-3 border-b border-zinc-800">
+            <div className="p-6 flex items-center gap-3 border-b border-[#2A2A2A]">
                 <div className="relative w-10 h-10">
                     <Image
                         src="/logo.png"
@@ -146,7 +146,7 @@ export function AdminSidebar({ profile, alertsCount }: AdminSidebarProps) {
                     <span className="font-black text-lg leading-none tracking-tighter text-white uppercase">
                         Ekkle
                     </span>
-                    <span className="text-[10px] text-orange-500 font-semibold uppercase tracking-wider">
+                    <span className="text-[10px] text-[#D4AF37] font-semibold uppercase tracking-wider">
                         Admin Panel
                     </span>
                 </div>
@@ -156,7 +156,7 @@ export function AdminSidebar({ profile, alertsCount }: AdminSidebarProps) {
             <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
                 {navSections.map((section) => (
                     <div key={section.title}>
-                        <h3 className="px-3 mb-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        <h3 className="px-3 mb-2 text-xs font-semibold text-[#A0A0A0] uppercase tracking-wider">
                             {section.title}
                         </h3>
                         <div className="space-y-1">
@@ -169,8 +169,8 @@ export function AdminSidebar({ profile, alertsCount }: AdminSidebarProps) {
                                         className={cn(
                                             'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group',
                                             active
-                                                ? 'bg-orange-500/10 text-orange-500 font-medium'
-                                                : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+                                                ? 'bg-[#D4AF37]/10 text-[#D4AF37] font-medium'
+                                                : 'text-[#A0A0A0] hover:bg-[#141414] hover:text-white'
                                         )}
                                     >
                                         <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -188,7 +188,7 @@ export function AdminSidebar({ profile, alertsCount }: AdminSidebarProps) {
                                             </span>
                                         )}
                                         {active && (
-                                            <ChevronRight className="h-4 w-4 text-orange-500" />
+                                            <ChevronRight className="h-4 w-4 text-[#D4AF37]" />
                                         )}
                                     </Link>
                                 )
@@ -199,18 +199,18 @@ export function AdminSidebar({ profile, alertsCount }: AdminSidebarProps) {
             </nav>
 
             {/* User Profile & Logout */}
-            <div className="p-4 border-t border-zinc-800">
+            <div className="p-4 border-t border-[#2A2A2A]">
                 <div className="flex items-center gap-3 px-3 py-2 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-                        <span className="text-sm font-bold text-orange-500">
+                    <div className="w-8 h-8 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                        <span className="text-sm font-bold text-[#D4AF37]">
                             {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
                         </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-zinc-200 truncate">
+                        <p className="text-sm font-medium text-white truncate">
                             {profile.full_name || 'Super Admin'}
                         </p>
-                        <p className="text-xs text-zinc-500 truncate">
+                        <p className="text-xs text-[#A0A0A0] truncate">
                             {profile.email}
                         </p>
                     </div>

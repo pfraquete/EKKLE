@@ -12,6 +12,8 @@ const config: Config = {
                 primary: {
                     DEFAULT: "var(--primary)",
                     foreground: "var(--primary-foreground)",
+                    hover: "var(--primary-hover)",
+                    active: "var(--primary-active)",
                 },
                 background: "var(--background)",
                 foreground: "var(--foreground)",
@@ -39,9 +41,18 @@ const config: Config = {
                     DEFAULT: "var(--destructive)",
                     foreground: "var(--destructive-foreground)",
                 },
+                success: "var(--success)",
+                warning: "var(--warning)",
                 border: "var(--border)",
                 input: "var(--input)",
                 ring: "var(--ring)",
+                overlay: "var(--overlay)",
+                // Gold palette for direct access
+                gold: {
+                    DEFAULT: "#D4AF37",
+                    light: "#F2D675",
+                    dark: "#B8962E",
+                },
                 sidebar: {
                     DEFAULT: 'var(--sidebar-background)',
                     foreground: 'var(--sidebar-foreground)',

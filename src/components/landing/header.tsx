@@ -34,7 +34,7 @@ export const LandingHeader = memo(function LandingHeader() {
       transition={{ duration: 0.5 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#09090b]/95 backdrop-blur-lg border-b border-zinc-800'
+          ? 'bg-[#0B0B0B]/95 backdrop-blur-lg border-b border-[#2A2A2A]'
           : 'bg-transparent'
       }`}
     >
@@ -58,7 +58,7 @@ export const LandingHeader = memo(function LandingHeader() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-zinc-400 hover:text-white transition-colors text-sm font-medium"
+                className="text-[#A0A0A0] hover:text-[#D4AF37] transition-colors text-sm font-medium"
               >
                 {link.label}
               </a>
@@ -69,13 +69,13 @@ export const LandingHeader = memo(function LandingHeader() {
           <div className="hidden md:flex items-center gap-4">
             <Link
               href="/login"
-              className="text-zinc-400 hover:text-white transition-colors text-sm font-medium"
+              className="text-[#A0A0A0] hover:text-white transition-colors text-sm font-medium"
             >
               Entrar
             </Link>
             <Link
               href="/registro"
-              className="bg-gradient-to-r from-[#1C2E4A] to-[#66A5AD] text-white px-5 py-2.5 rounded-xl font-medium hover:opacity-90 transition-all hover:shadow-lg hover:shadow-[#66A5AD]/20 text-sm"
+              className="bg-gradient-to-r from-[#D4AF37] via-[#F2D675] to-[#D4AF37] text-[#0B0B0B] px-5 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-[#D4AF37]/30 transition-all text-sm"
             >
               Começar Grátis
             </Link>
@@ -97,29 +97,29 @@ export const LandingHeader = memo(function LandingHeader() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden py-4 border-t border-zinc-800"
+            className="md:hidden py-4 border-t border-[#2A2A2A]"
           >
             <nav className="flex flex-col gap-4">
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-zinc-400 hover:text-white transition-colors py-2"
+                  className="text-[#A0A0A0] hover:text-[#D4AF37] transition-colors py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
                 </a>
               ))}
-              <div className="flex flex-col gap-3 pt-4 border-t border-zinc-800">
+              <div className="flex flex-col gap-3 pt-4 border-t border-[#2A2A2A]">
                 <Link
                   href="/login"
-                  className="text-zinc-400 hover:text-white transition-colors py-2"
+                  className="text-[#A0A0A0] hover:text-white transition-colors py-2"
                 >
                   Entrar
                 </Link>
                 <Link
                   href="/registro"
-                  className="bg-gradient-to-r from-[#1C2E4A] to-[#66A5AD] text-white px-5 py-3 rounded-xl font-medium text-center"
+                  className="bg-gradient-to-r from-[#D4AF37] via-[#F2D675] to-[#D4AF37] text-[#0B0B0B] px-5 py-3 rounded-xl font-semibold text-center"
                 >
                   Começar Grátis
                 </Link>

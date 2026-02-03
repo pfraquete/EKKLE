@@ -33,38 +33,38 @@ const TESTIMONIALS = [
 
 export const TestimonialsSection = memo(function TestimonialsSection() {
   return (
-    <section id="testimonials" className="py-20 bg-zinc-900/50">
+    <section id="testimonials" className="py-20 bg-[#141414]/50">
       <div className="container mx-auto px-4">
         <AnimatedSection className="text-center mb-16">
-          <motion.span variants={fadeInUp} className="text-[#B89A5F] font-medium mb-4 block">
+          <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
             DEPOIMENTOS
           </motion.span>
           <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
             O que pastores dizem sobre o Ekkle
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-xl text-zinc-400 max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
             Histórias reais de igrejas que transformaram sua gestão.
           </motion.p>
         </AnimatedSection>
 
         <AnimatedSection className="grid md:grid-cols-3 gap-8">
           {TESTIMONIALS.map((testimonial, index) => (
-            <motion.div key={index} variants={fadeInUp} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+            <motion.div key={index} variants={fadeInUp} className="bg-[#141414] border border-[#2A2A2A] rounded-2xl p-8">
               <div className="flex gap-1 mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-[#B89A5F] text-[#B89A5F]" />
+                  <Star key={i} className="w-5 h-5 fill-[#D4AF37] text-[#D4AF37]" />
                 ))}
               </div>
-              <p className="text-zinc-300 mb-6 italic">&ldquo;{testimonial.content}&rdquo;</p>
+              <p className="text-[#F5F5F5] mb-6 italic">&ldquo;{testimonial.content}&rdquo;</p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#1C2E4A] to-[#66A5AD] rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-full flex items-center justify-center">
                   <span className="text-white font-semibold">
                     {testimonial.name.split(' ').map((n) => n[0]).join('')}
                   </span>
                 </div>
                 <div>
                   <div className="font-semibold text-white">{testimonial.name}</div>
-                  <div className="text-sm text-zinc-400">{testimonial.role}</div>
+                  <div className="text-sm text-[#A0A0A0]">{testimonial.role}</div>
                 </div>
               </div>
             </motion.div>
@@ -124,13 +124,13 @@ export const PricingSection = memo(function PricingSection() {
     <section id="pricing" className="py-20">
       <div className="container mx-auto px-4">
         <AnimatedSection className="text-center mb-16">
-          <motion.span variants={fadeInUp} className="text-[#66A5AD] font-medium mb-4 block">
+          <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
             PLANOS
           </motion.span>
           <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
             Investimento que se paga
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-xl text-zinc-400 max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
             Escolha o plano ideal para sua igreja. Sem taxas escondidas, sem surpresas.
           </motion.p>
         </AnimatedSection>
@@ -140,32 +140,32 @@ export const PricingSection = memo(function PricingSection() {
             <motion.div
               key={index}
               variants={fadeInUp}
-              className={`relative bg-zinc-900 border rounded-3xl p-8 ${
-                plan.popular ? 'border-[#66A5AD] shadow-xl shadow-[#66A5AD]/10' : 'border-zinc-800'
+              className={`relative bg-[#141414] border rounded-3xl p-8 ${
+                plan.popular ? 'border-[#D4AF37] shadow-xl shadow-[#D4AF37]/20' : 'border-[#2A2A2A]'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#1C2E4A] to-[#66A5AD] text-white text-sm font-medium px-4 py-1 rounded-full">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#D4AF37] to-[#F2D675] text-white text-sm font-medium px-4 py-1 rounded-full">
                   Mais Popular
                 </div>
               )}
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                <p className="text-zinc-400 mb-4">{plan.description}</p>
+                <p className="text-[#A0A0A0] mb-4">{plan.description}</p>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-sm text-zinc-400">R$</span>
+                  <span className="text-sm text-[#A0A0A0]">R$</span>
                   <span className="text-5xl font-bold text-white">{plan.price}</span>
-                  <span className="text-zinc-400">{plan.interval}</span>
+                  <span className="text-[#A0A0A0]">{plan.interval}</span>
                 </div>
                 {plan.originalPrice && (
-                  <div className="text-zinc-500 line-through mt-2">De R$ {plan.originalPrice}/ano</div>
+                  <div className="text-[#A0A0A0] line-through mt-2">De R$ {plan.originalPrice}/ano</div>
                 )}
               </div>
               <ul className="space-y-4 mb-8">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#66A5AD] flex-shrink-0" />
-                    <span className="text-zinc-300">{feature}</span>
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span className="text-[#F5F5F5]">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -173,8 +173,8 @@ export const PricingSection = memo(function PricingSection() {
                 href="/registro"
                 className={`block w-full py-4 rounded-xl font-semibold text-center transition-all ${
                   plan.popular
-                    ? 'bg-gradient-to-r from-[#1C2E4A] to-[#66A5AD] text-white hover:opacity-90 hover:shadow-lg hover:shadow-[#66A5AD]/20'
-                    : 'bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#F2D675] text-white hover:opacity-90 hover:shadow-lg hover:shadow-[#D4AF37]/20'
+                    : 'bg-[#1A1A1A] text-white hover:bg-[#2A2A2A] border border-[#2A2A2A]'
                 }`}
               >
                 {plan.cta}
@@ -183,7 +183,7 @@ export const PricingSection = memo(function PricingSection() {
           ))}
         </AnimatedSection>
 
-        <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-center text-zinc-500 mt-8">
+        <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-center text-[#A0A0A0] mt-8">
           Todos os planos incluem 7 dias de teste grátis. Cancele quando quiser.
         </motion.p>
       </div>
@@ -210,32 +210,32 @@ export const FAQSection = memo(function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
-    <section id="faq" className="py-20 bg-zinc-900/50">
+    <section id="faq" className="py-20 bg-[#141414]/50">
       <div className="container mx-auto px-4">
         <AnimatedSection className="text-center mb-16">
-          <motion.span variants={fadeInUp} className="text-[#B89A5F] font-medium mb-4 block">
+          <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
             FAQ
           </motion.span>
           <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
             Perguntas Frequentes
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-xl text-zinc-400 max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
             Tire suas dúvidas sobre o Ekkle.
           </motion.p>
         </AnimatedSection>
 
         <AnimatedSection className="max-w-3xl mx-auto space-y-4">
           {FAQS.map((faq, index) => (
-            <motion.div key={index} variants={fadeInUp} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <motion.div key={index} variants={fadeInUp} className="bg-[#141414] border border-[#2A2A2A] rounded-xl overflow-hidden">
               <button
-                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-zinc-800/50 transition-colors"
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-[#1A1A1A]/50 transition-colors"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
               >
                 <span className="font-semibold text-white pr-4">{faq.question}</span>
                 {openIndex === index ? (
-                  <ChevronUp className="w-5 h-5 text-zinc-400 flex-shrink-0" />
+                  <ChevronUp className="w-5 h-5 text-[#A0A0A0] flex-shrink-0" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-zinc-400 flex-shrink-0" />
+                  <ChevronDown className="w-5 h-5 text-[#A0A0A0] flex-shrink-0" />
                 )}
               </button>
               {openIndex === index && (
@@ -245,7 +245,7 @@ export const FAQSection = memo(function FAQSection() {
                   exit={{ height: 0, opacity: 0 }}
                   className="px-6 pb-5"
                 >
-                  <p className="text-zinc-400">{faq.answer}</p>
+                  <p className="text-[#A0A0A0]">{faq.answer}</p>
                 </motion.div>
               )}
             </motion.div>
