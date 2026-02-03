@@ -66,6 +66,7 @@ const PRODUCT_LINKS = [
   { href: '#features', label: 'Recursos' },
   { href: '#screenshots', label: 'Sistema' },
   { href: '#pricing', label: 'Planos' },
+  { href: '/hub', label: 'Ekkle Hub' },
   { href: '#faq', label: 'FAQ' },
 ]
 

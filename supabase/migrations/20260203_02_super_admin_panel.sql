@@ -201,7 +201,27 @@ ALTER TABLE integration_status ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_alerts ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
--- 8. RLS Policies for SUPER_ADMIN
+-- 8. Helper function to check if user is SUPER_ADMIN
+-- ============================================
+-- IMPORTANT: This function MUST be defined BEFORE the RLS policies
+-- because it uses SECURITY DEFINER to bypass RLS and prevent recursion
+
+CREATE OR REPLACE FUNCTION is_super_admin()
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM profiles
+        WHERE id = auth.uid()
+        AND role = 'SUPER_ADMIN'
+    );
+END;
+$$;
+
+-- ============================================
+-- 9. RLS Policies for SUPER_ADMIN
 -- ============================================
 
 -- Admin Settings: Only SUPER_ADMIN can access
@@ -298,33 +318,11 @@ CREATE POLICY "super_admins_view_all_subscriptions" ON subscriptions
     );
 
 -- Profiles: SUPER_ADMIN can view all profiles
+-- IMPORTANT: Uses is_super_admin() function to avoid infinite recursion
+-- because this policy is on the profiles table itself
 DROP POLICY IF EXISTS "super_admins_view_all_profiles" ON profiles;
 CREATE POLICY "super_admins_view_all_profiles" ON profiles
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM profiles
-            WHERE id = auth.uid()
-            AND role = 'SUPER_ADMIN'
-        )
-    );
-
--- ============================================
--- 9. Helper function to check if user is SUPER_ADMIN
--- ============================================
-
-CREATE OR REPLACE FUNCTION is_super_admin()
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-    RETURN EXISTS (
-        SELECT 1 FROM profiles
-        WHERE id = auth.uid()
-        AND role = 'SUPER_ADMIN'
-    );
-END;
-$$;
+    FOR SELECT USING (is_super_admin());
 
 -- ============================================
 -- 10. Function to log admin actions
@@ -387,5 +385,5 @@ COMMENT ON COLUMN churches.suspended_by IS 'Admin who suspended the church';
 COMMENT ON COLUMN churches.suspension_reason IS 'Reason for suspension';
 COMMENT ON COLUMN churches.admin_notes IS 'Internal notes from admins';
 
-COMMENT ON FUNCTION is_super_admin() IS 'Check if current user is a super admin';
+COMMENT ON FUNCTION is_super_admin() IS 'Check if current user is a super admin - uses SECURITY DEFINER to bypass RLS';
 COMMENT ON FUNCTION log_admin_action(TEXT, TEXT, UUID, UUID, JSONB, JSONB, TEXT) IS 'Log an admin action to audit trail';

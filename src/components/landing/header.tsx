@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: '#screenshots', label: 'Sistema' },
   { href: '#pricing', label: 'Planos' },
   { href: '#testimonials', label: 'Depoimentos' },
+  { href: '/hub', label: 'Ekkle Hub' },
   { href: '#faq', label: 'FAQ' },
 ]
 
