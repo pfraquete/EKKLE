@@ -3,8 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ProfileForm } from '@/components/forms/profile-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Smartphone, Globe, MessageSquare, ChevronRight, Wallet, CreditCard, Newspaper } from 'lucide-react'
+import { Globe, MessageSquare, ChevronRight, Wallet, CreditCard, Newspaper } from 'lucide-react'
 
 export default async function SettingsPage() {
     const profile = await getProfile()
@@ -102,34 +101,6 @@ export default async function SettingsPage() {
                     </CardContent>
                 </Card>
             )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* App Status Card */}
-                <Card className="border-none shadow-lg rounded-3xl md:max-w-md">
-                    <CardHeader>
-                        <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
-                            <Smartphone className="h-5 w-5 text-primary" />
-                            Aplicativo
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-3 bg-muted/40 rounded-2xl">
-                            <div>
-                                <p className="text-sm font-bold text-foreground">Versão</p>
-                                <p className="text-xs text-muted-foreground">v1.0.0-production</p>
-                            </div>
-                            <Badge variant="outline" className="font-bold text-emerald-300 bg-emerald-500/10 border-emerald-500/30">Atualizado</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-muted/40 rounded-2xl">
-                            <div>
-                                <p className="text-sm font-bold text-foreground">Servidor</p>
-                                <p className="text-xs text-muted-foreground">Região: US-East</p>
-                            </div>
-                            <Badge variant="outline" className="font-bold text-blue-300 bg-blue-500/10 border-blue-500/30">Online</Badge>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
 
             {/* Footer */}
             <div className="text-center pt-8 opacity-40">
