@@ -127,16 +127,28 @@ export default function SectionsConfigPage() {
     }))
   }
 
+  const getOrder = (key: SectionKey): number => {
+    const section = sections[key]
+    if ('order' in section && typeof section.order === 'number') {
+      return section.order
+    }
+    // Hero doesn't have order, return 0
+    return 0
+  }
+
   const moveSection = (key: SectionKey, direction: 'up' | 'down') => {
-    const currentOrder = sections[key].order
+    // Hero section doesn't have order property
+    if (key === 'hero') return
+
+    const currentOrder = getOrder(key)
     const newOrder = direction === 'up' ? currentOrder - 1 : currentOrder + 1
 
-    // Find section with the target order
+    // Find section with the target order (excluding hero)
     const otherKey = Object.keys(sections).find(
-      (k) => sections[k as SectionKey].order === newOrder
+      (k) => k !== 'hero' && getOrder(k as SectionKey) === newOrder
     ) as SectionKey | undefined
 
-    if (otherKey) {
+    if (otherKey && otherKey !== 'hero') {
       setSections((prev) => ({
         ...prev,
         [key]: { ...prev[key], order: newOrder },
@@ -145,10 +157,12 @@ export default function SectionsConfigPage() {
     }
   }
 
-  // Sort sections by order
-  const sortedSections = [...sectionsList].sort(
-    (a, b) => sections[a.key].order - sections[b.key].order
-  )
+  // Sort sections by order (hero always first)
+  const sortedSections = [...sectionsList].sort((a, b) => {
+    if (a.key === 'hero') return -1
+    if (b.key === 'hero') return 1
+    return getOrder(a.key) - getOrder(b.key)
+  })
 
   if (loading) {
     return (
