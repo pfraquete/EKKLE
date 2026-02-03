@@ -4,12 +4,23 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { getProfile } from './auth'
 
+export type TemplateCategory =
+    | 'BIRTHDAY'
+    | 'REMINDER'
+    | 'WELCOME'
+    | 'CUSTOM'
+    | 'FIRST_CONTACT'
+    | 'ABSENCE'
+    | 'EVENT_REMINDER'
+    | 'EVENT_THANKYOU'
+    | 'OUTSIDE_HOURS'
+
 export interface MessageTemplate {
     id: string
     church_id: string
     name: string
     content: string
-    category: 'REMINDER' | 'BIRTHDAY' | 'WELCOME' | 'CUSTOM'
+    category: TemplateCategory
     is_active: boolean
 }
 
@@ -57,4 +68,40 @@ export async function deleteTemplate(id: string) {
 
     revalidatePath('/configuracoes/whatsapp/templates')
     return { error }
+}
+
+/**
+ * Get a specific template by category for a church
+ */
+export async function getTemplateByCategory(category: TemplateCategory) {
+    const profile = await getProfile()
+    if (!profile) return { data: null, error: new Error('Não autenticado') }
+
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('message_templates')
+        .select('*')
+        .eq('church_id', profile.church_id)
+        .eq('category', category)
+        .eq('is_active', true)
+        .single()
+
+    return { data, error }
+}
+
+/**
+ * Get a template by category for a specific church (by church ID)
+ * Used internally by the agent without user authentication
+ */
+export async function getTemplateByChurchAndCategory(churchId: string, category: TemplateCategory) {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('message_templates')
+        .select('*')
+        .eq('church_id', churchId)
+        .eq('category', category)
+        .eq('is_active', true)
+        .single()
+
+    return { data, error }
 }

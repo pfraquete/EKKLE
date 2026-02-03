@@ -7,10 +7,11 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { OpenAIService, ChatMessage } from '@/lib/openai';
-import { SYSTEM_PROMPT, getOnboardingPrompt } from './system-prompt-optimized'; // Using optimized prompt
+import { SYSTEM_PROMPT, getOnboardingPrompt, buildDynamicSystemPrompt } from './system-prompt-optimized';
 import { getAvailableFunctions } from './function-definitions';
 import { executeFunctionCall } from './function-executor';
 import { TwilioService } from '@/lib/twilio';
+import type { AgentConfig } from '@/actions/agent-config';
 
 /**
  * Get Supabase client (lazy initialization to avoid build-time errors)
@@ -58,6 +59,38 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
 
   try {
     // ========================================
+    // 0. Load Agent Configuration
+    // ========================================
+    const agentConfig = await getAgentConfigByChurchId(churchId);
+
+    // ========================================
+    // 0.1. Check Working Hours
+    // ========================================
+    if (agentConfig?.working_hours_enabled) {
+      const isWithinHours = checkWorkingHours(agentConfig);
+      if (!isWithinHours) {
+        console.log('[Message Processor] Outside working hours, sending auto-response');
+        await TwilioService.sendWhatsAppMessage(
+          TwilioService.formatPhoneNumber(phoneNumber),
+          agentConfig.outside_hours_message
+        );
+
+        // Log audit trail
+        await logAuditTrail({
+          churchId,
+          pastorId,
+          actionType: 'outside_hours',
+          actionDescription: message,
+          inputData: { message },
+          outputData: { response: agentConfig.outside_hours_message },
+          status: 'success',
+        });
+
+        return;
+      }
+    }
+
+    // ========================================
     // 1. Get or Create Conversation
     // ========================================
     const conversation = await getOrCreateConversation(pastorId, churchId, phoneNumber);
@@ -96,9 +129,9 @@ export async function processIncomingMessage(input: ProcessMessageInput) {
     const isOnboardingComplete = onboarding?.is_completed || false;
 
     // ========================================
-    // 5. Build System Prompt
+    // 5. Build System Prompt (Dynamic based on config)
     // ========================================
-    let systemPrompt = SYSTEM_PROMPT;
+    let systemPrompt = buildDynamicSystemPrompt(agentConfig);
     if (!isOnboardingComplete && onboarding) {
       systemPrompt += getOnboardingPrompt(onboarding);
     }
@@ -527,4 +560,67 @@ async function logAuditTrail(data: {
     status: data.status,
     error_message: data.errorMessage || null,
   });
+}
+
+/**
+ * Get agent configuration by church ID (internal use)
+ */
+async function getAgentConfigByChurchId(churchId: string): Promise<AgentConfig | null> {
+  const { data: config, error } = await getSupabaseClient()
+    .from('church_agent_config')
+    .select('*')
+    .eq('church_id', churchId)
+    .single();
+
+  if (error || !config) {
+    return null;
+  }
+
+  return config as AgentConfig;
+}
+
+/**
+ * Check if current time is within working hours
+ */
+function checkWorkingHours(config: AgentConfig): boolean {
+  if (!config.working_hours_enabled) {
+    return true;
+  }
+
+  const now = new Date();
+
+  // Get current time in church's timezone
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: config.timezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    weekday: 'short',
+  });
+
+  const parts = formatter.formatToParts(now);
+  const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0');
+  const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0');
+  const weekday = parts.find(p => p.type === 'weekday')?.value || '';
+
+  // Map weekday to number (0 = Sunday, 1 = Monday, etc.)
+  const weekdayMap: Record<string, number> = {
+    'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6
+  };
+  const dayOfWeek = weekdayMap[weekday] ?? 0;
+
+  // Check if today is a working day
+  if (!config.working_days.includes(dayOfWeek)) {
+    return false;
+  }
+
+  // Parse working hours
+  const [startHour, startMinute] = config.working_hours_start.split(':').map(Number);
+  const [endHour, endMinute] = config.working_hours_end.split(':').map(Number);
+
+  const currentMinutes = hour * 60 + minute;
+  const startMinutes = startHour * 60 + startMinute;
+  const endMinutes = endHour * 60 + endMinute;
+
+  return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
 }

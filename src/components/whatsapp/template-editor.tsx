@@ -9,13 +9,79 @@ import { upsertTemplate, MessageTemplate } from '@/actions/templates'
 import { toast } from 'sonner'
 import { Loader2, Save, Info } from 'lucide-react'
 
-type TemplateCategory = 'BIRTHDAY' | 'REMINDER' | 'WELCOME' | 'CUSTOM'
+type TemplateCategory =
+    | 'BIRTHDAY'
+    | 'REMINDER'
+    | 'WELCOME'
+    | 'CUSTOM'
+    | 'FIRST_CONTACT'
+    | 'ABSENCE'
+    | 'EVENT_REMINDER'
+    | 'EVENT_THANKYOU'
+    | 'OUTSIDE_HOURS'
 
-const CATEGORIES: { value: TemplateCategory; label: string }[] = [
-    { value: 'BIRTHDAY', label: 'Aniversário' },
-    { value: 'REMINDER', label: 'Lembrete de Reunião' },
-    { value: 'WELCOME', label: 'Boas-vindas' },
-    { value: 'CUSTOM', label: 'Personalizado' },
+interface CategoryConfig {
+    value: TemplateCategory
+    label: string
+    variables: string[]
+    description: string
+}
+
+const CATEGORIES: CategoryConfig[] = [
+    {
+        value: 'BIRTHDAY',
+        label: 'Aniversário',
+        variables: ['nome', 'idade'],
+        description: 'Mensagem enviada automaticamente no aniversário do membro'
+    },
+    {
+        value: 'REMINDER',
+        label: 'Lembrete de Reunião',
+        variables: ['nome', 'celula', 'data', 'hora', 'local'],
+        description: 'Lembrete enviado antes das reuniões de célula'
+    },
+    {
+        value: 'WELCOME',
+        label: 'Boas-vindas',
+        variables: ['nome', 'igreja'],
+        description: 'Mensagem para novos membros cadastrados'
+    },
+    {
+        value: 'FIRST_CONTACT',
+        label: 'Primeiro Contato',
+        variables: ['nome'],
+        description: 'Primeira interação do agente com um novo contato'
+    },
+    {
+        value: 'ABSENCE',
+        label: 'Acompanhamento de Ausência',
+        variables: ['nome', 'dias_ausente'],
+        description: 'Mensagem para membros que não comparecem há alguns dias'
+    },
+    {
+        value: 'EVENT_REMINDER',
+        label: 'Lembrete de Evento',
+        variables: ['nome', 'evento', 'data', 'hora'],
+        description: 'Lembrete enviado antes de eventos especiais'
+    },
+    {
+        value: 'EVENT_THANKYOU',
+        label: 'Agradecimento pós-Evento',
+        variables: ['nome', 'evento'],
+        description: 'Mensagem de agradecimento após participação em evento'
+    },
+    {
+        value: 'OUTSIDE_HOURS',
+        label: 'Fora do Horário',
+        variables: ['horario_inicio', 'horario_fim'],
+        description: 'Resposta automática fora do horário de atendimento'
+    },
+    {
+        value: 'CUSTOM',
+        label: 'Personalizado',
+        variables: ['nome'],
+        description: 'Template customizado para outras situações'
+    },
 ]
 
 export function TemplateEditor({ initialTemplates }: { initialTemplates: MessageTemplate[] }) {
@@ -91,9 +157,9 @@ export function TemplateEditor({ initialTemplates }: { initialTemplates: Message
             </CardHeader>
             <CardContent>
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TemplateCategory)} className="space-y-6">
-                    <TabsList className="grid grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50">
+                    <TabsList className="flex flex-wrap h-auto p-1 bg-muted/50 gap-1">
                         {CATEGORIES.map(cat => (
-                            <TabsTrigger key={cat.value} value={cat.value} className="py-2 text-xs font-bold uppercase tracking-wider">
+                            <TabsTrigger key={cat.value} value={cat.value} className="py-2 px-3 text-xs font-bold tracking-wider">
                                 {cat.label}
                             </TabsTrigger>
                         ))}
@@ -103,13 +169,17 @@ export function TemplateEditor({ initialTemplates }: { initialTemplates: Message
                         <TabsContent key={cat.value} value={cat.value} className="space-y-4">
                             <div className="bg-blue-500/5 border border-blue-500/10 p-4 rounded-xl flex gap-3 text-sm text-blue-600">
                                 <Info className="h-5 w-5 flex-shrink-0" />
-                                <div className="space-y-1">
-                                    <p className="font-bold">Variáveis disponíveis:</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">{'{nome}'}</code>
-                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">{'{data}'}</code>
-                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">{'{hora}'}</code>
-                                        <code className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">{'{local}'}</code>
+                                <div className="space-y-2">
+                                    <p className="text-muted-foreground">{cat.description}</p>
+                                    <div>
+                                        <p className="font-bold">Variáveis disponíveis:</p>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                            {cat.variables.map(variable => (
+                                                <code key={variable} className="bg-blue-500/10 px-1.5 py-0.5 rounded text-xs">
+                                                    {`{${variable}}`}
+                                                </code>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

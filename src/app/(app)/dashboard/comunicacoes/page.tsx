@@ -2,11 +2,13 @@
 
 import { getProfile } from '@/actions/auth'
 import { getWhatsAppInstance } from '@/actions/whatsapp'
+import { getAgentConfig } from '@/actions/agent-config'
 import { redirect } from 'next/navigation'
 import { BulkMessagingForm } from '@/components/whatsapp/bulk-messaging-form'
 import { WhatsAppConfig } from '@/components/whatsapp/whatsapp-config'
+import { AgentConfigPanel } from '@/components/whatsapp/agent-config'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MessageSquare, Settings, Share2 } from 'lucide-react'
+import { MessageSquare, Settings, Share2, Bot } from 'lucide-react'
 
 export default async function ComunicacoesPage() {
     const profile = await getProfile()
@@ -16,6 +18,7 @@ export default async function ComunicacoesPage() {
     }
 
     const { data: instance } = await getWhatsAppInstance()
+    const agentConfig = await getAgentConfig()
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 pb-20">
@@ -42,6 +45,13 @@ export default async function ComunicacoesPage() {
                         <Settings className="h-4 w-4" />
                         Conexão WhatsApp
                     </TabsTrigger>
+                    <TabsTrigger
+                        value="agent"
+                        className="h-full gap-2 rounded-xl px-6 py-2 font-bold text-muted-foreground transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                    >
+                        <Bot className="h-4 w-4" />
+                        Agente IA
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="bulk" className="mt-0 outline-none">
@@ -64,6 +74,10 @@ export default async function ComunicacoesPage() {
 
                 <TabsContent value="config" className="mt-0 outline-none">
                     <WhatsAppConfig initialInstance={instance} />
+                </TabsContent>
+
+                <TabsContent value="agent" className="mt-0 outline-none">
+                    <AgentConfigPanel initialConfig={agentConfig} />
                 </TabsContent>
             </Tabs>
         </div>
