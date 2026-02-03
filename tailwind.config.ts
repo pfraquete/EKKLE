@@ -83,12 +83,6 @@ const config: Config = {
                 input: "var(--input)",
                 ring: "var(--ring)",
                 overlay: "var(--overlay)",
-                // Gold palette for direct access
-                gold: {
-                    DEFAULT: "#D4AF37",
-                    light: "#F2D675",
-                    dark: "#B8962E",
-                },
                 sidebar: {
                     DEFAULT: 'var(--sidebar-background)',
                     foreground: 'var(--sidebar-foreground)',
