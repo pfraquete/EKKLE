@@ -52,15 +52,7 @@ export default function PrivacyPolicyPage() {
                                 </ul>
                             </div>
                             <div>
-                                <h3 className="font-bold text-foreground mb-2">1.2 Dados Biométricos (mediante consentimento explícito)</h3>
-                                <ul className="list-disc list-inside space-y-1">
-                                    <li>Vetores de reconhecimento facial para identificação em fotos</li>
-                                    <li>Estes dados são processados localmente e apenas os vetores matemáticos são armazenados</li>
-                                    <li>Você pode optar por não usar este recurso ou excluir seus dados a qualquer momento</li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-foreground mb-2">1.3 Dados de Uso</h3>
+                                <h3 className="font-bold text-foreground mb-2">1.2 Dados de Uso</h3>
                                 <ul className="list-disc list-inside space-y-1">
                                     <li>Registros de presença em células e cultos</li>
                                     <li>Histórico de cursos e eventos</li>
@@ -82,7 +74,6 @@ export default function PrivacyPolicyPage() {
                                 <li>Comunicação sobre eventos, cursos e atividades da igreja</li>
                                 <li>Gestão de células e grupos pequenos</li>
                                 <li>Processamento de contribuições financeiras</li>
-                                <li>Identificação automática em fotos (quando consentido)</li>
                                 <li>Geração de relatórios para a liderança da igreja</li>
                             </ul>
                         </div>
@@ -96,7 +87,7 @@ export default function PrivacyPolicyPage() {
                         <div className="pl-10 space-y-2 text-muted-foreground">
                             <p>O tratamento de seus dados pessoais é realizado com base em:</p>
                             <ul className="list-disc list-inside space-y-1">
-                                <li><strong>Consentimento (Art. 7º, I):</strong> Para dados biométricos e comunicações de marketing</li>
+                                <li><strong>Consentimento (Art. 7º, I):</strong> Para comunicações de marketing</li>
                                 <li><strong>Execução de contrato (Art. 7º, V):</strong> Para prestação dos serviços da plataforma</li>
                                 <li><strong>Legítimo interesse (Art. 7º, IX):</strong> Para melhorias no serviço e segurança</li>
                             </ul>
@@ -158,7 +149,6 @@ export default function PrivacyPolicyPage() {
                         <div className="pl-10 space-y-2 text-muted-foreground">
                             <ul className="list-disc list-inside space-y-1">
                                 <li>Dados de cadastro: enquanto a conta estiver ativa</li>
-                                <li>Dados biométricos: até revogação do consentimento ou exclusão da conta</li>
                                 <li>Dados financeiros: 5 anos após a última transação (obrigação legal)</li>
                                 <li>Logs de acesso: 6 meses</li>
                             </ul>

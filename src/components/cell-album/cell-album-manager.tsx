@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { registerCellPhoto, deleteCellPhoto, updateCellPhoto } from '@/actions/cell-album'
 import { Button } from '@/components/ui/button'
@@ -14,10 +14,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { ImagePlus, Trash2, Loader2, Camera, X, Pencil, Calendar, MessageSquare, Scan, Users } from 'lucide-react'
+import { ImagePlus, Trash2, Loader2, Camera, X, Pencil, Calendar, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from 'sonner'
-import { useFaceRecognition } from '@/hooks/use-face-recognition'
 
 interface Photo {
     id: string
@@ -27,8 +26,6 @@ interface Photo {
     photo_date?: string | null
     created_at: string
     uploader?: { full_name: string }
-    face_processed?: boolean
-    face_count?: number
 }
 
 interface CellAlbumManagerProps {
@@ -55,21 +52,6 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
     const [editDescription, setEditDescription] = useState('')
     const [editDate, setEditDate] = useState('')
     const [isUpdating, setIsUpdating] = useState(false)
-
-    // Face recognition
-    const {
-        isProcessing: isProcessingFaces,
-        progress: faceProgress,
-        processAlbumPhoto,
-        loadModels,
-        modelsReady,
-    } = useFaceRecognition()
-    const [processingPhotoId, setProcessingPhotoId] = useState<string | null>(null)
-
-    // Preload face recognition models when component mounts
-    useEffect(() => {
-        loadModels()
-    }, [loadModels])
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -135,21 +117,6 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
             })
 
             if (!result.success) throw new Error(result.error)
-
-            setUploadProgress(70)
-
-            // 4. Process face recognition (async, don't block)
-            if (result.photoId && modelsReady) {
-                setProcessingPhotoId(result.photoId)
-                processAlbumPhoto(result.photoId, publicUrl)
-                    .then((faceResult) => {
-                        if (faceResult.success && faceResult.faceCount > 0) {
-                            toast.success(`${faceResult.faceCount} rosto(s) detectado(s), ${faceResult.matchedCount} identificado(s)`)
-                        }
-                    })
-                    .catch(console.error)
-                    .finally(() => setProcessingPhotoId(null))
-            }
 
             setUploadProgress(100)
             toast.success('Foto adicionada ao álbum!')
@@ -288,28 +255,6 @@ export function CellAlbumManager({ cellId, churchId, initialPhotos }: CellAlbumM
                                 fill
                                 className="object-cover group-hover:scale-110 transition-transform duration-700"
                             />
-
-                            {/* Face count badge */}
-                            {photo.face_processed && photo.face_count !== undefined && photo.face_count > 0 && (
-                                <div className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded-full flex items-center gap-1">
-                                    <Users className="w-3 h-3 text-white" />
-                                    <span className="text-xs sm:text-xs font-bold text-white">{photo.face_count}</span>
-                                </div>
-                            )}
-
-                            {/* Processing indicator */}
-                            {processingPhotoId === photo.id && (
-                                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2">
-                                    <Scan className="w-8 h-8 text-white animate-pulse" />
-                                    <span className="text-xs text-white font-bold">Detectando rostos...</span>
-                                    <div className="w-24 h-1 bg-white/30 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-white transition-all duration-300"
-                                            style={{ width: `${faceProgress}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Photo info overlay */}
                             {(photo.description || photo.photo_date) && (

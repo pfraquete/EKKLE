@@ -64,7 +64,6 @@ export default function TermsOfUsePage() {
                                 <li>Gerenciamento de cursos e eventos</li>
                                 <li>Processamento de dízimos e ofertas</li>
                                 <li>Loja virtual para produtos da igreja</li>
-                                <li>Reconhecimento facial para identificação em fotos (opcional)</li>
                                 <li>Comunicação via WhatsApp e e-mail</li>
                             </ul>
                         </div>
