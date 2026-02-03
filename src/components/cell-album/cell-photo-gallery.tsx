@@ -1,12 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
-import { X, Maximize2, ImageIcon, Calendar, MessageSquare, Users } from 'lucide-react'
+import { X, Maximize2, ImageIcon, Calendar, MessageSquare } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { MemberPhotoSearch } from '@/components/face-recognition/member-photo-search'
-import { PhotoFaceOverlay } from '@/components/face-recognition/photo-face-overlay'
-import { getPhotoDetections, PhotoFaceResult } from '@/actions/face-recognition'
 
 interface Photo {
     id: string
@@ -15,38 +12,14 @@ interface Photo {
     photo_date?: string | null
     created_at: string
     uploader?: { full_name: string }
-    face_processed?: boolean
-    face_count?: number
 }
 
 interface CellPhotoGalleryProps {
     photos: Photo[]
-    showFaceSearch?: boolean
 }
 
-export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGalleryProps) {
+export function CellPhotoGallery({ photos }: CellPhotoGalleryProps) {
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
-    const [filteredMemberId, setFilteredMemberId] = useState<string | null>(null)
-    const [photoFaces, setPhotoFaces] = useState<PhotoFaceResult[]>([])
-    const [showFaceOverlay, setShowFaceOverlay] = useState(true)
-
-    // Load faces when a photo is selected
-    useEffect(() => {
-        async function loadFaces() {
-            if (selectedPhoto) {
-                const result = await getPhotoDetections(selectedPhoto.id)
-                if (result.success && result.data) {
-                    setPhotoFaces(result.data)
-                } else {
-                    setPhotoFaces([])
-                }
-            } else {
-                setPhotoFaces([])
-            }
-        }
-
-        loadFaces()
-    }, [selectedPhoto])
 
     const formatDate = (dateStr: string) => {
         return new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', {
@@ -55,9 +28,6 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
             year: 'numeric'
         })
     }
-
-    // Check if any photo has face data
-    const hasFaceData = photos.some(p => p.face_processed && (p.face_count || 0) > 0)
 
     if (photos.length === 0) return null
 
@@ -73,13 +43,6 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                 </div>
             </div>
 
-            {/* Face search */}
-            {showFaceSearch && hasFaceData && (
-                <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-6">
-                    <MemberPhotoSearch onFilterChange={setFilteredMemberId} />
-                </div>
-            )}
-
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {photos.map((photo) => (
                     <div
@@ -93,14 +56,6 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                             fill
                             className="object-cover group-hover:scale-110 transition-transform duration-700"
                         />
-
-                        {/* Face count badge */}
-                        {photo.face_processed && photo.face_count !== undefined && photo.face_count > 0 && (
-                            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded-full flex items-center gap-1 z-10">
-                                <Users className="w-3 h-3 text-white" />
-                                <span className="text-xs sm:text-xs font-bold text-white">{photo.face_count}</span>
-                            </div>
-                        )}
 
                         {/* Photo info overlay */}
                         {(photo.description || photo.photo_date) && (
@@ -139,54 +94,10 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                                         className="object-contain"
                                         priority
                                     />
-
-                                    {/* Face detection overlay */}
-                                    {showFaceOverlay && photoFaces.map((face) => (
-                                        <div
-                                            key={face.detectionId}
-                                            className="absolute border-2 border-primary/80 rounded-lg transition-all hover:border-primary hover:bg-primary/10"
-                                            style={{
-                                                left: `${face.boxX * 100}%`,
-                                                top: `${face.boxY * 100}%`,
-                                                width: `${face.boxWidth * 100}%`,
-                                                height: `${face.boxHeight * 100}%`,
-                                            }}
-                                        >
-                                            {/* Name tag */}
-                                            {face.fullName && (
-                                                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                                                    <div className="px-2 py-0.5 bg-primary text-primary-foreground text-xs font-bold rounded-full shadow-lg">
-                                                        {face.fullName}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {/* Unknown face indicator */}
-                                            {!face.profileId && (
-                                                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                                                    <div className="px-2 py-0.5 bg-white/80 text-black/80 text-xs font-bold rounded-full shadow-lg">
-                                                        Desconhecido
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
                                 </div>
 
-                                {/* Controls */}
-                                <div className="absolute top-4 right-4 sm:top-8 sm:right-8 flex items-center gap-2">
-                                    {/* Toggle face overlay */}
-                                    {photoFaces.length > 0 && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setShowFaceOverlay(!showFaceOverlay)
-                                            }}
-                                            className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-full transition-all backdrop-blur-xl border border-white/10 shadow-2xl flex items-center gap-2"
-                                        >
-                                            <Users className="w-4 h-4" />
-                                            {showFaceOverlay ? 'Ocultar' : 'Mostrar'}
-                                        </button>
-                                    )}
+                                {/* Close button */}
+                                <div className="absolute top-4 right-4 sm:top-8 sm:right-8">
                                     <button
                                         onClick={() => setSelectedPhoto(null)}
                                         className="p-3 sm:p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all backdrop-blur-xl border border-white/10 shadow-2xl"
@@ -194,13 +105,6 @@ export function CellPhotoGallery({ photos, showFaceSearch = true }: CellPhotoGal
                                         <X className="w-5 h-5 sm:w-6 sm:h-6" />
                                     </button>
                                 </div>
-
-                                {/* Face count badge */}
-                                {photoFaces.length > 0 && (
-                                    <div className="absolute top-4 left-4 sm:top-8 sm:left-8 px-3 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-full">
-                                        {photoFaces.filter(f => f.profileId).length}/{photoFaces.length} identificados
-                                    </div>
-                                )}
                             </div>
 
                             {/* Photo details */}
