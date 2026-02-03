@@ -181,7 +181,7 @@ export default async function DashboardPage() {
 
                     {extendedStats.orders.pendingOrders > 0 && (
                         <Link href="/dashboard/loja">
-                            <Card variant="gold" className="group h-full border-l-2 border-l-amber-500">
+                            <Card className="group h-full border-l-2 border-l-amber-500">
                                 <CardContent className="p-5 flex flex-col items-center text-center">
                                     <div className="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-2xl flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors">
                                         <AlertCircle className="h-6 w-6" />
