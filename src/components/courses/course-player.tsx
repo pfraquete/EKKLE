@@ -77,7 +77,9 @@ export function CoursePlayer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [totalWatchedTime, setTotalWatchedTime] = useState(0) // Track actual time watched
   const progressUpdateInterval = useRef<NodeJS.Timeout | undefined>(undefined)
+  const watchTimeInterval = useRef<NodeJS.Timeout | undefined>(undefined)
 
   // Create progress map
   const progressMap = new Map(videoProgress.map((p) => [p.video_id, p]))
@@ -129,12 +131,38 @@ export function CoursePlayer({
     }
   }, [currentVideo.id])
 
-  // Save progress periodically
+  // Track actual watch time (increments only when playing)
+  useEffect(() => {
+    if (isPlaying) {
+      watchTimeInterval.current = setInterval(() => {
+        setTotalWatchedTime(prev => prev + 1)
+      }, 1000)
+    } else {
+      if (watchTimeInterval.current) {
+        clearInterval(watchTimeInterval.current)
+      }
+    }
+
+    return () => {
+      if (watchTimeInterval.current) {
+        clearInterval(watchTimeInterval.current)
+      }
+    }
+  }, [isPlaying])
+
+  // Reset total watched time when video changes
+  useEffect(() => {
+    setTotalWatchedTime(currentProgress?.watched_seconds || 0)
+  }, [currentVideo.id, currentProgress])
+
+  // Save progress periodically (every 15 seconds to reduce DB writes)
   useEffect(() => {
     if (isPlaying) {
       progressUpdateInterval.current = setInterval(() => {
-        const watchedSeconds = Math.floor(currentTime)
-        const completed = duration > 0 && currentTime / duration > 0.9 // 90% watched = completed
+        const watchedSeconds = Math.max(Math.floor(currentTime), totalWatchedTime)
+        // Mark as completed only if user actually watched 80% of the video time
+        const requiredWatchTime = duration * 0.8
+        const completed = duration > 0 && totalWatchedTime >= requiredWatchTime
 
         updateVideoProgress({
           enrollmentId: enrollment.id,
@@ -142,7 +170,7 @@ export function CoursePlayer({
           watchedSeconds,
           completed,
         })
-      }, 5000) // Save every 5 seconds
+      }, 15000) // Save every 15 seconds (was 5 seconds)
     } else {
       if (progressUpdateInterval.current) {
         clearInterval(progressUpdateInterval.current)
@@ -154,7 +182,7 @@ export function CoursePlayer({
         clearInterval(progressUpdateInterval.current)
       }
     }
-  }, [isPlaying, currentTime, duration, currentVideo.id, enrollment.id])
+  }, [isPlaying, currentTime, duration, totalWatchedTime, currentVideo.id, enrollment.id])
 
   const handleVideoSelect = (video: Video) => {
     push(`/membro/cursos/${course.id}?video=${video.id}`)

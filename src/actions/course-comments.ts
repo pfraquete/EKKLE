@@ -22,14 +22,28 @@ export interface CourseComment {
 }
 
 /**
- * Get all comments for a specific video
+ * Get comments for a specific video with pagination
  */
-export async function getLessonComments(videoId: string): Promise<CourseComment[]> {
+export async function getLessonComments(
+    videoId: string,
+    page: number = 1,
+    limit: number = 20
+): Promise<{ comments: CourseComment[], hasMore: boolean, total: number }> {
     try {
         const supabase = await createClient()
         const profile = await getProfile()
-        if (!profile) return []
+        if (!profile) return { comments: [], hasMore: false, total: 0 }
 
+        const offset = (page - 1) * limit
+
+        // Get total count
+        const { count } = await supabase
+            .from('course_lesson_comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('video_id', videoId)
+            .eq('church_id', profile.church_id)
+
+        // Get paginated comments
         const { data: comments, error } = await supabase
             .from('course_lesson_comments')
             .select('*, profiles(full_name, photo_url, role)')
@@ -37,16 +51,24 @@ export async function getLessonComments(videoId: string): Promise<CourseComment[
             .eq('church_id', profile.church_id)
             .order('is_pinned', { ascending: false })
             .order('created_at', { ascending: true })
+            .range(offset, offset + limit - 1)
 
         if (error) {
             console.error('Error fetching comments:', error)
-            return []
+            return { comments: [], hasMore: false, total: 0 }
         }
 
-        return comments as unknown as CourseComment[]
+        const total = count || 0
+        const hasMore = offset + (comments?.length || 0) < total
+
+        return {
+            comments: comments as unknown as CourseComment[],
+            hasMore,
+            total
+        }
     } catch (error) {
         console.error('Unexpected error fetching comments:', error)
-        return []
+        return { comments: [], hasMore: false, total: 0 }
     }
 }
 

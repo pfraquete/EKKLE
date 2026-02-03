@@ -35,16 +35,37 @@ export function CommentSection({ videoId, userId, userRole }: CommentSectionProp
     const [newComment, setNewComment] = useState('')
     const [replyTo, setReplyTo] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
     const [submitting, setSubmitting] = useState(false)
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState(false)
+    const [total, setTotal] = useState(0)
 
     const isPastor = userRole === 'PASTOR'
 
-    const loadComments = useCallback(async () => {
-        setLoading(true)
-        const data = await getLessonComments(videoId)
-        setComments(data)
+    const loadComments = useCallback(async (pageNum: number = 1, append: boolean = false) => {
+        if (pageNum === 1) setLoading(true)
+        else setLoadingMore(true)
+
+        const result = await getLessonComments(videoId, pageNum, 20)
+
+        if (append) {
+            setComments(prev => [...prev, ...result.comments])
+        } else {
+            setComments(result.comments)
+        }
+        setHasMore(result.hasMore)
+        setTotal(result.total)
+        setPage(pageNum)
         setLoading(false)
+        setLoadingMore(false)
     }, [videoId])
+
+    const loadMore = () => {
+        if (hasMore && !loadingMore) {
+            loadComments(page + 1, true)
+        }
+    }
 
     useEffect(() => {
         loadComments()
@@ -130,19 +151,33 @@ export function CommentSection({ videoId, userId, userRole }: CommentSectionProp
                         Nenhum comentário ainda. Seja o primeiro a perguntar!
                     </div>
                 ) : (
-                    rootComments.map((comment) => (
-                        <CommentItem
-                            key={comment.id}
-                            comment={comment}
-                            userId={userId}
-                            isPastor={isPastor}
-                            onReply={setReplyTo}
-                            onDelete={handleDelete}
-                            onPin={handleTogglePin}
-                            onAnswered={handleToggleAnswered}
-                            replies={getReplies(comment.id)}
-                        />
-                    ))
+                    <>
+                        {rootComments.map((comment) => (
+                            <CommentItem
+                                key={comment.id}
+                                comment={comment}
+                                userId={userId}
+                                isPastor={isPastor}
+                                onReply={setReplyTo}
+                                onDelete={handleDelete}
+                                onPin={handleTogglePin}
+                                onAnswered={handleToggleAnswered}
+                                replies={getReplies(comment.id)}
+                            />
+                        ))}
+                        {hasMore && (
+                            <div className="text-center pt-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={loadMore}
+                                    disabled={loadingMore}
+                                    className="rounded-xl"
+                                >
+                                    {loadingMore ? 'Carregando...' : `Carregar mais comentários (${comments.length}/${total})`}
+                                </Button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
