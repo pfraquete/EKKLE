@@ -940,7 +940,7 @@ export async function getFormationReportData() {
       birthDate: child.birth_date,
       gender: child.gender,
       parentName: child.parent_name,
-      cellName: child.kids_cell?.name || 'Sem célula',
+      cellName: (child.kids_cell as { name: string } | null)?.name || 'Sem célula',
       completedCount,
       totalStages: stages.length,
       progressPercentage,
