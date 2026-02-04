@@ -6,6 +6,7 @@ import { WhatsAppConfig } from '@/components/whatsapp/whatsapp-config'
 import { AgentConfigPanel } from '@/components/whatsapp/agent-config'
 import { AgentToggle } from '@/components/whatsapp/agent-toggle'
 import { AgentSetupWizard } from '@/components/whatsapp/agent-setup-wizard'
+import { StatsDashboard } from '@/components/whatsapp/stats-dashboard'
 import { WhatsAppChatLayout, WhatsAppContact } from '@/components/whatsapp-chat'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MessageSquare, Settings, Share2, Bot, MessagesSquare } from 'lucide-react'
@@ -36,11 +37,16 @@ export function ComunicacoesClient({
         !agentConfig.church_address
     )
     const [currentConfig, setCurrentConfig] = useState(agentConfig)
+    const [isAgentActive, setIsAgentActive] = useState(agentConfig?.is_active ?? false)
 
     const handleWizardComplete = () => {
         setShowWizard(false)
         // Refresh the page to get updated config
         window.location.reload()
+    }
+
+    const handleAgentToggle = (active: boolean) => {
+        setIsAgentActive(active)
     }
 
     // Show wizard for first-time setup
@@ -76,6 +82,15 @@ export function ComunicacoesClient({
                 <AgentToggle 
                     initialIsActive={currentConfig?.is_active ?? false}
                     churchName={churchName}
+                    onToggle={handleAgentToggle}
+                />
+            )}
+
+            {/* Stats Dashboard - Shows summary of today's activity */}
+            {instance?.status === 'CONNECTED' && (
+                <StatsDashboard 
+                    churchId={churchId}
+                    isAgentActive={isAgentActive}
                 />
             )}
 

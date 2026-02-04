@@ -11,9 +11,10 @@ import { cn } from '@/lib/utils'
 interface AgentToggleProps {
   initialIsActive: boolean
   churchName?: string
+  onToggle?: (active: boolean) => void
 }
 
-export function AgentToggle({ initialIsActive, churchName }: AgentToggleProps) {
+export function AgentToggle({ initialIsActive, churchName, onToggle }: AgentToggleProps) {
   const [isActive, setIsActive] = useState(initialIsActive)
   const [isPending, startTransition] = useTransition()
 
@@ -23,6 +24,7 @@ export function AgentToggle({ initialIsActive, churchName }: AgentToggleProps) {
       
       if (result.success) {
         setIsActive(checked)
+        onToggle?.(checked)
         toast.success(
           checked 
             ? 'Assistente ativado! Ele responderá automaticamente às mensagens.' 
