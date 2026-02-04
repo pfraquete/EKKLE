@@ -259,11 +259,11 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
     const churchId = instanceData.church_id
     const instancePhone = instanceData.phone_number || ''
 
-    // Store the message in the database with upsert (idempotency)
+    // Store the message in the database
+    // Note: We use in-memory idempotency check instead of database-level
     const { error: messageError } = await supabase
         .from('whatsapp_messages')
-        .upsert({
-            id: messageId, // Use Evolution message ID as primary key
+        .insert({
             church_id: churchId,
             instance_name: instance,
             direction,
@@ -275,7 +275,7 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
             sent_at: data.messageTimestamp
                 ? new Date(data.messageTimestamp * 1000).toISOString()
                 : new Date().toISOString()
-        }, { onConflict: 'id', ignoreDuplicates: true })
+        })
 
     if (messageError && !messageError.message.includes('duplicate')) {
         console.error('[Webhook] ❌ Error storing message:', messageError.message)

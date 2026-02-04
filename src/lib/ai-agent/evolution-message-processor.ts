@@ -65,6 +65,22 @@ interface ConversationMessage {
   content: string
 }
 
+interface UserProfile {
+  id: string
+  full_name: string
+  phone: string | null
+  email: string | null
+  role: string
+  member_stage: string | null
+  birth_date: string | null
+  cell_id: string | null
+  is_active: boolean
+  cell?: {
+    name: string
+    leader?: { full_name: string }
+  } | null
+}
+
 interface OpenAIFunctionCall {
   name: string
   arguments: string
@@ -216,9 +232,16 @@ function detectIntent(message: string): {
 }
 
 /**
- * Build system prompt based on agent configuration
+ * Build system prompt based on agent configuration and user profile
  */
-function buildSystemPrompt(config: AgentConfig, context: { isFirstContact: boolean; senderName: string }): string {
+function buildSystemPrompt(
+  config: AgentConfig, 
+  context: { 
+    isFirstContact: boolean; 
+    senderName: string;
+    userProfile?: UserProfile | null;
+  }
+): string {
   const toneMap: Record<string, string> = {
     formal: 'formal e respeitoso',
     casual: 'casual e descontraído',
@@ -299,11 +322,64 @@ REGRAS IMPORTANTES:
 - Para pedidos de oração, seja empático e acolhedor
 
 CONTEXTO DA CONVERSA:
-- Nome do contato: ${context.senderName || 'Visitante'}
-- Primeiro contato: ${context.isFirstContact ? 'Sim' : 'Não'}`
+- Nome do contato: ${context.userProfile?.full_name || context.senderName || 'Visitante'}
+- Primeiro contato: ${context.isFirstContact ? 'Sim' : 'Não'}
+- Membro cadastrado: ${context.userProfile ? 'SIM' : 'NÃO'}`
 
-  if (context.isFirstContact && config.first_contact_message) {
-    prompt += `\n\nPRIMEIRO CONTATO - Use esta mensagem de boas-vindas como base:\n"${config.first_contact_message}"`
+  // Add user profile information if available
+  if (context.userProfile) {
+    const profile = context.userProfile
+    const roleMap: Record<string, string> = {
+      'SUPER_ADMIN': 'Super Administrador',
+      'ADMIN': 'Administrador',
+      'PASTOR': 'Pastor',
+      'LEADER': 'Líder',
+      'MEMBER': 'Membro',
+      'VISITOR': 'Visitante'
+    }
+    const stageMap: Record<string, string> = {
+      'VISITOR': 'Visitante',
+      'REGULAR': 'Frequentador',
+      'MEMBER': 'Membro',
+      'LEADER': 'Líder',
+      'INACTIVE': 'Inativo'
+    }
+
+    prompt += `\n\n👤 PERFIL DO MEMBRO (CADASTRADO NO SISTEMA):
+- Nome completo: ${profile.full_name}
+- Função: ${roleMap[profile.role] || profile.role}
+- Estágio: ${stageMap[profile.member_stage || ''] || profile.member_stage || 'Não definido'}`
+
+    if (profile.cell) {
+      prompt += `\n- Célula: ${profile.cell.name}`
+      if (profile.cell.leader) {
+        prompt += ` (Líder: ${profile.cell.leader.full_name})`
+      }
+    }
+
+    if (profile.birth_date) {
+      const birthDate = new Date(profile.birth_date)
+      const today = new Date()
+      const isBirthdayToday = birthDate.getDate() === today.getDate() && birthDate.getMonth() === today.getMonth()
+      const isBirthdaySoon = !isBirthdayToday && (() => {
+        const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate())
+        if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1)
+        const daysUntil = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        return daysUntil <= 7
+      })()
+      
+      if (isBirthdayToday) {
+        prompt += `\n- 🎂 HOJE É ANIVERSÁRIO DELE(A)! Parabenize com carinho!`
+      } else if (isBirthdaySoon) {
+        prompt += `\n- 🎂 Aniversário em breve (${birthDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })})`
+      }
+    }
+
+    prompt += `\n\nIMPORTANTE: Esta pessoa é um membro cadastrado. Trate-a pelo nome e de forma personalizada.`
+  }
+
+  if (context.isFirstContact && config.first_contact_message && !context.userProfile) {
+    prompt += `\n\nPRIMEIRO CONTATO (VISITANTE) - Use esta mensagem de boas-vindas como base:\n"${config.first_contact_message}"`
   }
 
   return prompt
@@ -352,6 +428,59 @@ async function isFirstContact(
     .eq('from_number', phoneNumber)
 
   return (count || 0) <= 1
+}
+
+/**
+ * Find user profile by phone number
+ * Searches for the phone in multiple formats to ensure a match
+ */
+async function findUserByPhone(
+  supabase: SupabaseClient,
+  churchId: string,
+  phoneNumber: string
+): Promise<UserProfile | null> {
+  // Normalize phone number - remove all non-digits
+  const normalizedPhone = phoneNumber.replace(/\D/g, '')
+  
+  // Try different phone formats
+  const phoneVariants = [
+    normalizedPhone,                          // 5512997781488
+    normalizedPhone.slice(-11),               // 12997781488 (without country code)
+    normalizedPhone.slice(-10),               // 2997781488 (without country code and area code first digit)
+    normalizedPhone.slice(-9),                // 997781488 (just the number)
+    `+${normalizedPhone}`,                    // +5512997781488
+    `+55${normalizedPhone.slice(-11)}`,       // +5512997781488
+  ]
+
+  console.log(`[AI Agent] 🔍 Searching for user with phone variants:`, phoneVariants.slice(0, 3))
+
+  // Search for user with any of the phone variants
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select(`
+      id,
+      full_name,
+      phone,
+      email,
+      role,
+      member_stage,
+      birth_date,
+      cell_id,
+      is_active,
+      cell:cells(name, leader:profiles!cells_leader_id_fkey(full_name))
+    `)
+    .eq('church_id', churchId)
+    .eq('is_active', true)
+    .or(phoneVariants.map(p => `phone.ilike.%${p.slice(-9)}%`).join(','))
+    .single()
+
+  if (error || !profile) {
+    console.log(`[AI Agent] 👤 User not found for phone ${phoneNumber}`)
+    return null
+  }
+
+  console.log(`[AI Agent] ✅ Found user: ${profile.full_name} (${profile.role})`)
+  return profile as UserProfile
 }
 
 /**
@@ -663,14 +792,21 @@ export async function processEvolutionMessage(
     const firstContact = await isFirstContact(supabase, churchId, phoneNumber)
     console.log(`[AI Agent] 👋 First contact: ${firstContact}`)
 
+    // Find user profile by phone number
+    const userProfile = await findUserByPhone(supabase, churchId, phoneNumber)
+    if (userProfile) {
+      console.log(`[AI Agent] 👤 Recognized member: ${userProfile.full_name} (${userProfile.role})`)
+    }
+
     // Get conversation history
     const history = await getConversationHistory(supabase, churchId, phoneNumber)
     console.log(`[AI Agent] 📜 History: ${history.length} messages`)
 
-    // Build system prompt
+    // Build system prompt with user profile
     const systemPrompt = buildSystemPrompt(agentConfig, {
       isFirstContact: firstContact,
-      senderName: senderName || 'Visitante'
+      senderName: senderName || 'Visitante',
+      userProfile
     })
 
     // Add current message to history
