@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getProfile } from '@/actions/auth'
-import { PageHeader } from '@/components/page-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Settings, Award, BookOpen, Gamepad2, ArrowLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
@@ -37,7 +36,6 @@ const configOptions = [
     href: '/rede-kids/configuracoes/gamificacao',
     color: 'text-green-600',
     bgColor: 'bg-green-100',
-    comingSoon: true,
   },
 ]
 
@@ -66,11 +64,17 @@ export default async function ConfiguracoesKidsPage() {
       </div>
 
       {/* Page Header */}
-      <PageHeader
-        icon={Settings}
-        title="Configurações da Rede Kids"
-        description="Personalize o módulo Kids de acordo com as necessidades do seu ministério infantil"
-      />
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-primary/10 rounded-lg">
+          <Settings className="h-8 w-8 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold">Configurações da Rede Kids</h1>
+          <p className="text-muted-foreground">
+            Personalize o módulo Kids de acordo com as necessidades do seu ministério infantil
+          </p>
+        </div>
+      </div>
 
       {/* Config Options Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

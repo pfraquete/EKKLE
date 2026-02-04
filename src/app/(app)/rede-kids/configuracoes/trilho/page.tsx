@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { getProfile } from '@/actions/auth'
 import { getFormationStages } from '@/actions/kids-formation'
 import { FormationStageManager } from '@/components/rede-kids/formation'
-import { PageHeader } from '@/components/page-header'
 import { Award, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -40,11 +39,17 @@ export default async function TrilhoFormacaoPage() {
       </div>
 
       {/* Page Header */}
-      <PageHeader
-        icon={Award}
-        title="Trilho de Formação Kids"
-        description="Configure as etapas da jornada de desenvolvimento espiritual das crianças. Arraste para reordenar as etapas."
-      />
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-purple-100 rounded-lg">
+          <Award className="h-8 w-8 text-purple-600" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold">Trilho de Formação Kids</h1>
+          <p className="text-muted-foreground">
+            Configure as etapas da jornada de desenvolvimento espiritual das crianças. Arraste para reordenar as etapas.
+          </p>
+        </div>
+      </div>
 
       {/* Stage Manager */}
       <FormationStageManager initialStages={stages} />

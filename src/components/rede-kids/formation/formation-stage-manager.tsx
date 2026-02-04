@@ -43,25 +43,9 @@ import {
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import {
   Plus,
-  GripVertical,
+  ChevronUp,
+  ChevronDown,
   Pencil,
   Trash2,
   Loader2,
@@ -94,44 +78,41 @@ const colorOptions = [
   { value: '#6366F1', label: 'Índigo' },
 ]
 
-interface SortableStageItemProps {
+interface StageItemProps {
   stage: FormationStage
+  index: number
+  total: number
   onEdit: (stage: FormationStage) => void
   onDelete: (stage: FormationStage) => void
+  onMoveUp: (index: number) => void
+  onMoveDown: (index: number) => void
 }
 
-function SortableStageItem({ stage, onEdit, onDelete }: SortableStageItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: stage.id })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  }
-
+function StageItem({ stage, index, total, onEdit, onDelete, onMoveUp, onMoveDown }: StageItemProps) {
   const IconComponent = iconOptions.find((i) => i.value === stage.icon_name)?.icon || Star
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-center gap-3 p-4 bg-white border rounded-lg shadow-sm"
-    >
-      <button
-        type="button"
-        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
-        {...attributes}
-        {...listeners}
-      >
-        <GripVertical className="h-5 w-5" />
-      </button>
+    <div className="flex items-center gap-3 p-4 bg-white border rounded-lg shadow-sm">
+      <div className="flex flex-col gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6"
+          onClick={() => onMoveUp(index)}
+          disabled={index === 0}
+        >
+          <ChevronUp className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6"
+          onClick={() => onMoveDown(index)}
+          disabled={index === total - 1}
+        >
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+      </div>
 
       <div
         className="h-10 w-10 rounded-full flex items-center justify-center"
@@ -195,13 +176,6 @@ export function FormationStageManager({ initialStages }: FormationStageManagerPr
     color: '#3B82F6',
     is_active: true,
   })
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
 
   const resetForm = () => {
     setFormData({
@@ -326,28 +300,51 @@ export function FormationStageManager({ initialStages }: FormationStageManagerPr
     }
   }
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event
+  const handleMoveUp = async (index: number) => {
+    if (index === 0) return
+    
+    const newStages = [...stages]
+    const temp = newStages[index]
+    newStages[index] = newStages[index - 1]
+    newStages[index - 1] = temp
+    
+    setStages(newStages)
+    
+    // Save new order to database
+    const result = await reorderFormationStages(newStages.map((s) => s.id))
+    
+    if (!result.success) {
+      // Revert on error
+      setStages(stages)
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar a nova ordem',
+        variant: 'destructive',
+      })
+    }
+  }
 
-    if (over && active.id !== over.id) {
-      const oldIndex = stages.findIndex((s) => s.id === active.id)
-      const newIndex = stages.findIndex((s) => s.id === over.id)
-
-      const newStages = arrayMove(stages, oldIndex, newIndex)
-      setStages(newStages)
-
-      // Save new order to database
-      const result = await reorderFormationStages(newStages.map((s) => s.id))
-
-      if (!result.success) {
-        // Revert on error
-        setStages(stages)
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível salvar a nova ordem',
-          variant: 'destructive',
-        })
-      }
+  const handleMoveDown = async (index: number) => {
+    if (index === stages.length - 1) return
+    
+    const newStages = [...stages]
+    const temp = newStages[index]
+    newStages[index] = newStages[index + 1]
+    newStages[index + 1] = temp
+    
+    setStages(newStages)
+    
+    // Save new order to database
+    const result = await reorderFormationStages(newStages.map((s) => s.id))
+    
+    if (!result.success) {
+      // Revert on error
+      setStages(stages)
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar a nova ordem',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -398,98 +395,206 @@ export function FormationStageManager({ initialStages }: FormationStageManagerPr
     setIsDeleteDialogOpen(true)
   }
 
+  const selectedIcon = iconOptions.find((i) => i.value === formData.icon_name)?.icon || Star
+  const SelectedIconComponent = selectedIcon
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Etapas do Trilho de Formação</CardTitle>
-            <CardDescription>
-              Configure as etapas da jornada de desenvolvimento espiritual das crianças
-            </CardDescription>
-          </div>
-          <div className="flex gap-2">
-            {stages.length === 0 && (
-              <Button
-                variant="outline"
-                onClick={handleSeedDefaults}
-                disabled={isSeedingLoading}
-              >
-                {isSeedingLoading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Wand2 className="h-4 w-4 mr-2" />
-                )}
-                Criar Etapas Padrão
-              </Button>
-            )}
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={resetForm}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Etapa
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Nova Etapa</DialogTitle>
-                  <DialogDescription>
-                    Adicione uma nova etapa ao Trilho de Formação
-                  </DialogDescription>
-                </DialogHeader>
-                <StageForm formData={formData} setFormData={setFormData} />
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsCreateDialogOpen(false)}
-                    disabled={isLoading}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleCreate} disabled={isLoading || !formData.name}>
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : null}
-                    Criar Etapa
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+    <div className="space-y-6">
+      {/* Header Actions */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Etapas do Trilho</h3>
+          <p className="text-sm text-muted-foreground">
+            {stages.length} etapa(s) configurada(s)
+          </p>
         </div>
-      </CardHeader>
-      <CardContent>
-        {stages.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <p>Nenhuma etapa configurada ainda.</p>
-            <p className="text-sm mt-1">
-              Clique em "Criar Etapas Padrão" para começar rapidamente.
-            </p>
-          </div>
-        ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={stages.map((s) => s.id)}
-              strategy={verticalListSortingStrategy}
+        <div className="flex items-center gap-2">
+          {stages.length === 0 && (
+            <Button
+              variant="outline"
+              onClick={handleSeedDefaults}
+              disabled={isSeedingLoading}
             >
-              <div className="space-y-2">
-                {stages.map((stage) => (
-                  <SortableStageItem
-                    key={stage.id}
-                    stage={stage}
-                    onEdit={openEditDialog}
-                    onDelete={openDeleteDialog}
+              {isSeedingLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Wand2 className="h-4 w-4 mr-2" />
+              )}
+              Criar Etapas Padrão
+            </Button>
+          )}
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Etapa
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Criar Nova Etapa</DialogTitle>
+                <DialogDescription>
+                  Adicione uma nova etapa ao Trilho de Formação Kids
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nome da Etapa</Label>
+                  <Input
+                    id="name"
+                    placeholder="Ex: Evangelizado"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                   />
-                ))}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição (opcional)</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Descreva o que esta etapa representa..."
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Ícone</Label>
+                    <Select
+                      value={formData.icon_name}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, icon_name: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {iconOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center gap-2">
+                              <option.icon className="h-4 w-4" />
+                              {option.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Cor</Label>
+                    <Select
+                      value={formData.color}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, color: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {colorOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="h-4 w-4 rounded-full"
+                                style={{ backgroundColor: option.value }}
+                              />
+                              {option.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <Label className="text-xs text-muted-foreground mb-2 block">
+                    Pré-visualização
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-12 w-12 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: formData.color }}
+                    >
+                      <SelectedIconComponent className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {formData.name || 'Nome da Etapa'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {formData.description || 'Descrição da etapa'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </SortableContext>
-          </DndContext>
-        )}
-      </CardContent>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsCreateDialogOpen(false)
+                    resetForm()
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleCreate}
+                  disabled={isLoading || !formData.name}
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : null}
+                  Criar Etapa
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* Stages List */}
+      {stages.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Star className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Nenhuma etapa configurada</h3>
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Crie etapas para definir a jornada de formação das crianças
+            </p>
+            <Button onClick={handleSeedDefaults} disabled={isSeedingLoading}>
+              {isSeedingLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Wand2 className="h-4 w-4 mr-2" />
+              )}
+              Criar Etapas Padrão
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {stages.map((stage, index) => (
+            <StageItem
+              key={stage.id}
+              stage={stage}
+              index={index}
+              total={stages.length}
+              onEdit={openEditDialog}
+              onDelete={openDeleteDialog}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -500,12 +605,101 @@ export function FormationStageManager({ initialStages }: FormationStageManagerPr
               Atualize as informações da etapa
             </DialogDescription>
           </DialogHeader>
-          <StageForm formData={formData} setFormData={setFormData} showActiveSwitch />
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Nome da Etapa</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Descrição (opcional)</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Ícone</Label>
+                <Select
+                  value={formData.icon_name}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, icon_name: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {iconOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <option.icon className="h-4 w-4" />
+                          {option.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Cor</Label>
+                <Select
+                  value={formData.color}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, color: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {colorOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-4 w-4 rounded-full"
+                            style={{ backgroundColor: option.value }}
+                          />
+                          {option.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Etapa Ativa</Label>
+                <p className="text-sm text-muted-foreground">
+                  Etapas inativas não aparecem no trilho
+                </p>
+              </div>
+              <Switch
+                checked={formData.is_active}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, is_active: checked })
+                }
+              />
+            </div>
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
-              disabled={isLoading}
+              onClick={() => {
+                setIsEditDialogOpen(false)
+                setSelectedStage(null)
+                resetForm()
+              }}
             >
               Cancelar
             </Button>
@@ -519,21 +713,28 @@ export function FormationStageManager({ initialStages }: FormationStageManagerPr
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir Etapa</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir a etapa "{selectedStage?.name}"?
-              Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir a etapa &quot;{selectedStage?.name}&quot;?
+              Esta ação não pode ser desfeita e todo o progresso das crianças
+              nesta etapa será perdido.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel
+              onClick={() => {
+                setIsDeleteDialogOpen(false)
+                setSelectedStage(null)
+              }}
+            >
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={isLoading}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isLoading ? (
@@ -544,143 +745,6 @@ export function FormationStageManager({ initialStages }: FormationStageManagerPr
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
-  )
-}
-
-// Form component for create/edit
-interface StageFormProps {
-  formData: {
-    name: string
-    description: string
-    icon_name: string
-    color: string
-    is_active: boolean
-  }
-  setFormData: React.Dispatch<
-    React.SetStateAction<{
-      name: string
-      description: string
-      icon_name: string
-      color: string
-      is_active: boolean
-    }>
-  >
-  showActiveSwitch?: boolean
-}
-
-function StageForm({ formData, setFormData, showActiveSwitch = false }: StageFormProps) {
-  return (
-    <div className="space-y-4 py-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Nome da Etapa *</Label>
-        <Input
-          id="name"
-          placeholder="Ex: Encontro com Deus"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Descrição</Label>
-        <Textarea
-          id="description"
-          placeholder="Descreva o que esta etapa representa..."
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          rows={2}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Ícone</Label>
-          <Select
-            value={formData.icon_name}
-            onValueChange={(value) => setFormData({ ...formData, icon_name: value })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {iconOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  <div className="flex items-center gap-2">
-                    <option.icon className="h-4 w-4" />
-                    <span>{option.label}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Cor</Label>
-          <Select
-            value={formData.color}
-            onValueChange={(value) => setFormData({ ...formData, color: value })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {colorOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="h-4 w-4 rounded-full"
-                      style={{ backgroundColor: option.value }}
-                    />
-                    <span>{option.label}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {showActiveSwitch && (
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label>Etapa Ativa</Label>
-            <p className="text-sm text-muted-foreground">
-              Etapas inativas não aparecem no trilho
-            </p>
-          </div>
-          <Switch
-            checked={formData.is_active}
-            onCheckedChange={(checked) =>
-              setFormData({ ...formData, is_active: checked })
-            }
-          />
-        </div>
-      )}
-
-      {/* Preview */}
-      <div className="pt-4 border-t">
-        <Label className="text-muted-foreground">Prévia</Label>
-        <div className="flex items-center gap-3 mt-2 p-3 bg-muted rounded-lg">
-          <div
-            className="h-12 w-12 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: formData.color }}
-          >
-            {(() => {
-              const Icon =
-                iconOptions.find((i) => i.value === formData.icon_name)?.icon || Star
-              return <Icon className="h-6 w-6 text-white" />
-            })()}
-          </div>
-          <div>
-            <p className="font-medium">{formData.name || 'Nome da Etapa'}</p>
-            <p className="text-sm text-muted-foreground">
-              {formData.description || 'Descrição da etapa'}
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

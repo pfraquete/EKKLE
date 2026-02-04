@@ -22,7 +22,6 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Users, Loader2, CheckCircle2, XCircle, Search } from 'lucide-react'
@@ -206,7 +205,7 @@ export function BulkMarkStageDialog({ children, onSuccess }: BulkMarkStageDialog
                 />
               </div>
 
-              <ScrollArea className="h-48 border rounded-md p-2">
+              <div className="h-48 border rounded-md p-2 overflow-y-auto">
                 <div className="space-y-1">
                   {filteredChildren.map(child => (
                     <label
@@ -226,7 +225,7 @@ export function BulkMarkStageDialog({ children, onSuccess }: BulkMarkStageDialog
                     </p>
                   )}
                 </div>
-              </ScrollArea>
+              </div>
             </div>
 
             {/* Notes */}
@@ -259,7 +258,7 @@ export function BulkMarkStageDialog({ children, onSuccess }: BulkMarkStageDialog
         ) : (
           /* Results View */
           <div className="py-4">
-            <ScrollArea className="h-64">
+            <div className="h-64 overflow-y-auto">
               <div className="space-y-2">
                 {results.map(result => (
                   <div
@@ -282,7 +281,7 @@ export function BulkMarkStageDialog({ children, onSuccess }: BulkMarkStageDialog
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+            </div>
           </div>
         )}
 
