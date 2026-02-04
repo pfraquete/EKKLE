@@ -25,6 +25,9 @@ export interface AgentConfig {
   id: string
   church_id: string
 
+  // Agent Status
+  is_active: boolean
+
   // Personality
   agent_name: string
   tone: AgentTone
@@ -72,6 +75,7 @@ export interface AgentConfig {
 
 // Default configuration
 const DEFAULT_CONFIG: Omit<AgentConfig, 'id' | 'church_id' | 'created_at' | 'updated_at'> = {
+  is_active: true,
   agent_name: 'Assistente Ekkle',
   tone: 'friendly',
   language_style: 'encouraging',
@@ -359,4 +363,84 @@ export async function getChurchInfoContext(churchId: string): Promise<string> {
   }
 
   return parts.join('\n')
+}
+
+
+/**
+ * Toggle agent active status (simple on/off)
+ */
+export async function toggleAgentActive(isActive: boolean): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  // Get current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) {
+    return { success: false, error: 'Usuário não autenticado' }
+  }
+
+  // Get user's profile
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('church_id, role')
+    .eq('id', user.id)
+    .single()
+
+  if (profileError || !profile?.church_id) {
+    return { success: false, error: 'Perfil não encontrado' }
+  }
+
+  // Only pastors can toggle
+  if (profile.role !== 'PASTOR') {
+    return { success: false, error: 'Apenas pastores podem ativar/desativar o agente' }
+  }
+
+  // Update is_active status
+  const { error: updateError } = await supabase
+    .from('church_agent_config')
+    .update({ is_active: isActive })
+    .eq('church_id', profile.church_id)
+
+  if (updateError) {
+    console.error('[Agent Config] Error toggling agent:', updateError)
+    return { success: false, error: 'Erro ao atualizar status do agente' }
+  }
+
+  revalidatePath('/dashboard/comunicacoes')
+  return { success: true }
+}
+
+/**
+ * Get agent active status
+ */
+export async function getAgentActiveStatus(): Promise<{ isActive: boolean; churchName?: string }> {
+  const supabase = await createClient()
+
+  // Get current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) {
+    return { isActive: false }
+  }
+
+  // Get user's profile with church info
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('church_id, churches(name)')
+    .eq('id', user.id)
+    .single()
+
+  if (profileError || !profile?.church_id) {
+    return { isActive: false }
+  }
+
+  // Get agent config
+  const { data: config } = await supabase
+    .from('church_agent_config')
+    .select('is_active')
+    .eq('church_id', profile.church_id)
+    .single()
+
+  return { 
+    isActive: config?.is_active ?? false,
+    churchName: (profile.churches as any)?.name
+  }
 }

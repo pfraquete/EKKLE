@@ -270,6 +270,12 @@ export async function processEvolutionMessage(input: ProcessMessageInput): Promi
             return { success: false, error: 'Agent not configured' }
         }
 
+        // Check if agent is active
+        if (agentConfig.is_active === false) {
+            console.log('[Evolution AI Agent] Agent is disabled for this church')
+            return { success: false, error: 'Agent is disabled' }
+        }
+
         // Check working hours
         if (!isWithinWorkingHours(agentConfig)) {
             console.log('[Evolution AI Agent] Outside working hours')

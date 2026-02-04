@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { BulkMessagingForm } from '@/components/whatsapp/bulk-messaging-form'
 import { WhatsAppConfig } from '@/components/whatsapp/whatsapp-config'
 import { AgentConfigPanel } from '@/components/whatsapp/agent-config'
+import { AgentToggle } from '@/components/whatsapp/agent-toggle'
 import { WhatsAppChatLayout, WhatsAppContact } from '@/components/whatsapp-chat'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MessageSquare, Settings, Share2, Bot, MessagesSquare } from 'lucide-react'
@@ -34,6 +35,14 @@ export default async function ComunicacoesPage() {
                     Gerencie o contato com sua igreja e realize disparos em massa via WhatsApp.
                 </p>
             </div>
+
+            {/* Agent Toggle - Always visible at the top */}
+            {instance?.status === 'CONNECTED' && (
+                <AgentToggle 
+                    initialIsActive={agentConfig?.is_active ?? false}
+                    churchName={profile.church_id}
+                />
+            )}
 
             <Tabs defaultValue="conversations" className="space-y-6">
                 <TabsList className="h-12 rounded-2xl border border-border bg-muted/40 p-1">
