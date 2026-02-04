@@ -283,7 +283,7 @@ export async function getRecipientsByFilter(
                 phone: p.phone,
                 full_name: p.full_name,
                 church_id: p.church_id,
-                church_name: p.church?.name
+                church_name: (p.church as { name: string }[] | null)?.[0]?.name
             }))
             break
         }
@@ -307,7 +307,7 @@ export async function getRecipientsByFilter(
                 phone: p.phone,
                 full_name: p.full_name,
                 church_id: p.church_id,
-                church_name: p.church?.name
+                church_name: (p.church as { name: string }[] | null)?.[0]?.name
             }))
             break
         }
@@ -330,7 +330,7 @@ export async function getRecipientsByFilter(
                 phone: p.phone,
                 full_name: p.full_name,
                 church_id: p.church_id,
-                church_name: p.church?.name
+                church_name: (p.church as { name: string }[] | null)?.[0]?.name
             }))
             break
         }
@@ -364,7 +364,7 @@ export async function getRecipientsByFilter(
                     phone: p.phone,
                     full_name: p.full_name,
                     church_id: p.church_id,
-                    church_name: p.church?.name
+                    church_name: (p.church as { name: string }[] | null)?.[0]?.name
                 }))
             }
             break
@@ -397,7 +397,7 @@ export async function getRecipientsByFilter(
                     phone: p.phone,
                     full_name: p.full_name,
                     church_id: p.church_id,
-                    church_name: p.church?.name
+                    church_name: (p.church as { name: string }[] | null)?.[0]?.name
                 }))
             }
             break
