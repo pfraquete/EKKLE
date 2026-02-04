@@ -81,13 +81,19 @@ export async function getAllUsers(filters: UserFilters = {}) {
         throw new Error('Falha ao buscar usuarios')
     }
 
-    const usersWithChurch = users?.map(user => ({
-        ...user,
-        church: user.church || null
-    })) || []
+    const usersWithChurch: UserWithDetails[] = (users ?? []).map(user => {
+        const church = Array.isArray(user.church)
+            ? user.church[0] ?? null
+            : user.church ?? null
+
+        return {
+            ...user,
+            church
+        }
+    })
 
     return {
-        users: usersWithChurch as UserWithDetails[],
+        users: usersWithChurch,
         total: count || 0,
         page,
         limit,
