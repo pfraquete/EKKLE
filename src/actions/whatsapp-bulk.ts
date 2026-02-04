@@ -69,7 +69,7 @@ export async function getMessagingTargets(filters: {
 /**
  * Calcula o tempo estimado para envio em massa
  */
-export function calculateEstimatedTime(targetCount: number): string {
+export async function calculateEstimatedTime(targetCount: number): Promise<string> {
     // Tempo médio por mensagem (digitação + delay entre mensagens)
     const avgTimePerMessage = 
         (ANTI_BAN_CONFIG.MIN_TYPING_DELAY + ANTI_BAN_CONFIG.MAX_TYPING_DELAY) / 2 +
@@ -127,7 +127,7 @@ export async function sendBulkWhatsAppMessage(
         }
 
         console.log(`[Bulk Message] Starting bulk send to ${targets.length} targets`)
-        console.log(`[Bulk Message] Estimated time: ${calculateEstimatedTime(targets.length)}`)
+        console.log(`[Bulk Message] Estimated time: ${await calculateEstimatedTime(targets.length)}`)
 
         // Preparar mensagens com placeholders substituídos
         const messages = targets.map(target => ({
@@ -164,7 +164,7 @@ export async function sendBulkWhatsAppMessage(
             sent: bulkResult.sent,
             failed: bulkResult.failed,
             errors: errorsWithNames,
-            estimatedTime: calculateEstimatedTime(targets.length),
+            estimatedTime: await calculateEstimatedTime(targets.length),
         }
 
         console.log(`[Bulk Message] Completed. Sent: ${results.sent}, Failed: ${results.failed}`)
@@ -211,7 +211,8 @@ export async function getMessageQueueStatus(): Promise<{
     processing: number
     total: number
 }> {
-    return EvolutionService.getQueueStatus()
+    const status = EvolutionService.getQueueStatus()
+    return status
 }
 
 /**
