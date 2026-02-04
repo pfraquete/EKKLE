@@ -278,7 +278,7 @@ export async function getWhatsAppChats() {
                     last_message: chat.lastMessage?.content || '',
                     last_message_time: chat.lastMessage?.timestamp 
                         ? new Date(chat.lastMessage.timestamp * 1000).toISOString()
-                        : null,
+                        : undefined,
                     unread_count: chat.unreadCount || 0,
                     is_online: false
                 }
