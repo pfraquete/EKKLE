@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { processEvolutionMessage } from '@/lib/ai-agent/evolution-message-processor'
 
 // Initialize Supabase client with service role for webhook processing
 const supabase = createClient(
@@ -115,12 +116,24 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
     const senderName = data.pushName || 'Desconhecido'
     const isFromMe = data.key.fromMe
     
+    // Skip group messages
+    if (remoteJid.includes('@g.us')) {
+        console.log('[Evolution Webhook] Skipping group message')
+        return
+    }
+    
     // Extract message text
     let messageText = ''
     if (data.message?.conversation) {
         messageText = data.message.conversation
     } else if (data.message?.extendedTextMessage?.text) {
         messageText = data.message.extendedTextMessage.text
+    }
+
+    // Skip empty messages
+    if (!messageText.trim()) {
+        console.log('[Evolution Webhook] Skipping empty message')
+        return
     }
 
     console.log('[Evolution Webhook] Message received')
@@ -146,7 +159,6 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
     const instancePhone = instanceData.phone_number
 
     // Store the message in the database for chat history
-    // Using the correct table structure
     const { error: messageError } = await supabase
         .from('whatsapp_messages')
         .insert({
@@ -169,19 +181,36 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
         console.log('[Evolution Webhook] Message stored successfully')
     }
 
-    // If it's an incoming message, check if there's an AI agent configured
+    // If it's an incoming message, process with AI agent
     if (!isFromMe && messageText) {
+        // Check if there's an AI agent configured for this church
         const { data: agentConfig } = await supabase
-            .from('agent_configs')
-            .select('*')
+            .from('church_agent_config')
+            .select('id')
             .eq('church_id', churchId)
-            .eq('is_active', true)
             .single()
 
         if (agentConfig) {
-            console.log('[Evolution Webhook] AI Agent is active for this church')
-            // AI agent processing would be triggered here
-            // This could call an external AI service or process the message internally
+            console.log('[Evolution Webhook] AI Agent is configured, processing message...')
+            
+            // Process message with AI agent (async, don't wait for response)
+            processEvolutionMessage({
+                churchId,
+                instanceName: instance,
+                phoneNumber: phone,
+                message: messageText,
+                senderName
+            }).then(result => {
+                if (result.success) {
+                    console.log('[Evolution Webhook] AI Agent responded successfully')
+                } else {
+                    console.error('[Evolution Webhook] AI Agent error:', result.error)
+                }
+            }).catch(error => {
+                console.error('[Evolution Webhook] AI Agent processing error:', error)
+            })
+        } else {
+            console.log('[Evolution Webhook] No AI Agent configured for this church')
         }
     }
 }
