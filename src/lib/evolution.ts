@@ -158,20 +158,20 @@ export class EvolutionService {
 
     /**
      * Send a text message
+     * Updated for Evolution API v2 format
      */
     static async sendText(instanceName: string, to: string, text: string): Promise<EvolutionResponse> {
+        // Normalize phone number - remove non-digits and ensure proper format
+        const normalizedNumber = to.replace(/\D/g, '');
+        
+        console.log('[Evolution API] Sending message to:', normalizedNumber);
+        console.log('[Evolution API] Instance:', instanceName);
+        
         return this.request<EvolutionResponse>(`/message/sendText/${instanceName}`, {
             method: 'POST',
             body: JSON.stringify({
-                number: to,
-                options: {
-                    delay: 1200,
-                    presence: 'composing',
-                    linkPreview: false,
-                },
-                textMessage: {
-                    text,
-                },
+                number: normalizedNumber,
+                text: text,
             }),
         });
     }
