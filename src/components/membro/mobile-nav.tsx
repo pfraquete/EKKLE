@@ -24,7 +24,8 @@ import {
     Users,
     Image,
     HandCoins,
-    Video
+    Video,
+    Newspaper
 } from 'lucide-react'
 
 interface MobileNavProps {
@@ -50,6 +51,13 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             show: true
         },
         {
+            icon: Newspaper,
+            label: 'Feed',
+            href: '/membro/feed',
+            active: pathname.startsWith('/membro/feed'),
+            show: true
+        },
+        {
             icon: Sparkles,
             label: 'Célula',
             href: '/membro/minha-celula',
@@ -62,13 +70,6 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             href: '/membro/celulas',
             active: pathname.startsWith('/membro/celulas'),
             show: !hasCell
-        },
-        {
-            icon: Radio,
-            label: 'Lives',
-            href: '/membro/lives',
-            active: pathname.startsWith('/membro/lives'),
-            show: true
         },
         {
             icon: MessageCircle,
@@ -86,6 +87,13 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             label: 'Meu Perfil',
             href: '/membro',
             active: pathname === '/membro',
+            show: true
+        },
+        {
+            icon: Newspaper,
+            label: 'Feed',
+            href: '/membro/feed',
+            active: pathname.startsWith('/membro/feed'),
             show: true
         },
         {
