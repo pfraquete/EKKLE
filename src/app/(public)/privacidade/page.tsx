@@ -57,6 +57,7 @@ export default function PrivacyPolicyPage() {
                                     <li>Registros de presença em células e cultos</li>
                                     <li>Histórico de cursos e eventos</li>
                                     <li>Registros de dízimos e ofertas</li>
+				<li>Endereço IP, tipo de dispositivo, sistema operacional e identificadores de dispositivo</li>
                                 </ul>
                             </div>
                         </div>
@@ -175,6 +176,31 @@ export default function PrivacyPolicyPage() {
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                             <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">8</span>
+                            Cookies e Tecnologias de Rastreamento
+                        </h2>
+                        <div className="pl-10 space-y-2 text-muted-foreground">
+                            <p>Nossa plataforma utiliza cookies e tecnologias similares (como pixels, SDKs e armazenamento local) para melhorar sua experiência, entender como você usa o serviço e para fins de análise.</p>
+                            <ul className="list-disc list-inside space-y-1">
+                                <li><strong>Cookies Essenciais:</strong> Necessários para o funcionamento básico da plataforma, como manter sua sessão ativa.</li>
+                                <li><strong>Cookies de Análise:</strong> Nos ajudam a entender como os usuários interagem com a plataforma, quais recursos são mais populares e como podemos melhorar o serviço. Utilizamos ferramentas como Google Analytics.</li>
+                            </ul>
+                            <p className="mt-2">Você pode gerenciar suas preferências de cookies através das configurações do seu navegador.</p>
+                        </div>
+                    </section>
+
+                    <section className="space-y-4">
+                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">9</span>
+                            Transferência Internacional de Dados
+                        </h2>
+                        <div className="pl-10 space-y-2 text-muted-foreground">
+                            <p>Para fornecer nossos serviços, utilizamos provedores de infraestrutura globais (Supabase, Railway). Isso significa que seus dados podem ser armazenados e processados em servidores localizados fora do Brasil. Garantimos que esses provedores ofereçam um nível de proteção de dados compatível com a LGPD e outras leis aplicáveis.</p>
+                        </div>
+                    </section>
+
+                    <section className="space-y-4">
+                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">10</span>
                             Contato
                         </h2>
                         <div className="pl-10">
@@ -195,7 +221,7 @@ export default function PrivacyPolicyPage() {
 
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">9</span>
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">11</span>
                             Controlador de Dados
                         </h2>
                         <div className="pl-10">

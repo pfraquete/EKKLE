@@ -139,7 +139,9 @@ export function isPublicWebsiteRoute(pathname: string): boolean {
         pathname.startsWith('/cursos') ||
         pathname.startsWith('/cultos') ||
         pathname.startsWith('/sobre') ||
-        pathname.startsWith('/membro')
+        pathname.startsWith('/membro') ||
+        pathname.startsWith('/termos') ||
+        pathname.startsWith('/privacidade')
 }
 
 /**

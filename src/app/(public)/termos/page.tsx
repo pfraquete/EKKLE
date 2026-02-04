@@ -177,21 +177,43 @@ export default function TermsOfUsePage() {
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                             <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">8</span>
-                            Encerramento
+                            Encerramento e Exclusão de Conta
                         </h2>
                         <div className="pl-10 space-y-2 text-muted-foreground">
                             <ul className="list-disc list-inside space-y-1">
-                                <li>Qualquer parte pode encerrar o uso a qualquer momento</li>
-                                <li>Em caso de violação dos termos, a conta pode ser suspensa</li>
-                                <li>Dados serão mantidos por 30 dias após o encerramento</li>
-                                <li>A igreja pode solicitar exportação de seus dados antes do encerramento</li>
+                                <li>Qualquer parte pode encerrar o uso a qualquer momento.</li>
+                                <li>Em caso de violação dos termos, a conta pode ser suspensa.</li>
+                                <li>Dados serão mantidos por 30 dias após o encerramento.</li>
+                                <li>A igreja pode solicitar exportação de seus dados antes do encerramento.</li>
+				<li>Usuários do aplicativo móvel (iOS/Android) podem solicitar a exclusão de sua conta diretamente através do menu "Perfil" ou "Configurações" dentro do aplicativo.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+		<section className="space-y-4">
+                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">9</span>
+                            Termos Adicionais para Aplicativos iOS (EULA)
+                        </h2>
+                        <div className="pl-10 space-y-4 text-muted-foreground">
+			<p className="font-bold text-foreground">Se você está utilizando nosso aplicativo em um dispositivo Apple (iOS), os seguintes termos se aplicam:</p>
+                            <ul className="list-disc list-inside space-y-2">
+                                <li><strong>Reconhecimento:</strong> Você reconhece que este Contrato de Licença de Usuário Final (EULA) é celebrado entre você e a Meu Acesso Hub LTDA (Ekkle), e não com a Apple Inc. A Ekkle é a única responsável pelo aplicativo licenciado e seu conteúdo.</li>
+                                <li><strong>Escopo da Licença:</strong> A licença concedida a você para o aplicativo é limitada a uma licença intransferível para usar o aplicativo em qualquer produto da marca Apple que você possua ou controle, conforme permitido pelas Regras de Uso estabelecidas nos Termos de Serviço da App Store.</li>
+                                <li><strong>Manutenção e Suporte:</strong> A Ekkle é a única responsável por fornecer quaisquer serviços de manutenção e suporte com relação ao aplicativo, conforme especificado neste EULA, ou conforme exigido pela lei aplicável. Você reconhece que a Apple não tem nenhuma obrigação de fornecer quaisquer serviços de manutenção e suporte com relação ao aplicativo.</li>
+                                <li><strong>Garantia:</strong> A Ekkle é a única responsável por quaisquer garantias do produto, sejam expressas ou implícitas por lei, na medida em que não sejam efetivamente negadas. No caso de qualquer falha do aplicativo em conformidade com qualquer garantia aplicável, você pode notificar a Apple, e a Apple reembolsará o preço de compra do aplicativo a você; e, na medida máxima permitida pela lei aplicável, a Apple não terá nenhuma outra obrigação de garantia com relação ao aplicativo.</li>
+                                <li><strong>Reivindicações de Produto:</strong> Você reconhece que a Ekkle, e não a Apple, é responsável por lidar com quaisquer reivindicações suas ou de terceiros relacionadas ao aplicativo ou à sua posse e/ou uso do aplicativo, incluindo, mas não se limitando a: (i) reivindicações de responsabilidade do produto; (ii) qualquer reivindicação de que o aplicativo não está em conformidade com qualquer requisito legal ou regulamentar aplicável; e (iii) reivindicações decorrentes da proteção do consumidor ou legislação semelhante.</li>
+                                <li><strong>Direitos de Propriedade Intelectual:</strong> Você reconhece que, no caso de qualquer reivindicação de terceiros de que o aplicativo ou sua posse e uso do aplicativo infringe os direitos de propriedade intelectual desse terceiro, a Ekkle, e não a Apple, será a única responsável pela investigação, defesa, acordo e quitação de qualquer reivindicação de violação de propriedade intelectual.</li>
+                                <li><strong>Conformidade Legal:</strong> Você declara e garante que (i) não está localizado em um país sujeito a um embargo do governo dos EUA, ou que tenha sido designado pelo governo dos EUA como um país "apoiador do terrorismo"; e (ii) você não está listado em nenhuma lista de partes proibidas ou restritas do governo dos EUA.</li>
+                                <li><strong>Nome e Endereço do Desenvolvedor:</strong> Quaisquer perguntas, reclamações ou reivindicações do usuário final com relação ao aplicativo devem ser dirigidas a: Meu Acesso Hub LTDA, São Paulo/SP - Brasil, <a href="mailto:contato@ekkle.com.br" className="text-primary hover:underline">contato@ekkle.com.br</a>.</li>
+                                <li><strong>Apple como Terceiro Beneficiário:</strong> Você reconhece e concorda que a Apple, e as subsidiárias da Apple, são terceiros beneficiários deste EULA, e que, após sua aceitação dos termos e condições do EULA, a Apple terá o direito (e será considerada como tendo aceitado o direito) de fazer cumprir o EULA contra você como um terceiro beneficiário do mesmo.</li>
                             </ul>
                         </div>
                     </section>
 
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">9</span>
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">10</span>
                             Alterações nos Termos
                         </h2>
                         <div className="pl-10 space-y-2 text-muted-foreground">
@@ -205,7 +227,7 @@ export default function TermsOfUsePage() {
 
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">10</span>
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">11</span>
                             Foro
                         </h2>
                         <div className="pl-10 space-y-2 text-muted-foreground">
@@ -218,7 +240,7 @@ export default function TermsOfUsePage() {
 
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">11</span>
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">12</span>
                             Identificação da Empresa
                         </h2>
                         <div className="pl-10">
