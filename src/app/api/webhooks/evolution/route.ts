@@ -108,8 +108,12 @@ export async function POST(request: NextRequest) {
 
         console.log(`[Webhook] 📥 Event: ${payload.event} | Instance: ${payload.instance}`)
 
+        // Normalize event name (Evolution API sends both formats)
+        const eventName = payload.event.toUpperCase().replace(/\./g, '_')
+        console.log(`[Webhook] 📥 Normalized event: ${eventName}`)
+
         // Handle different event types
-        switch (payload.event) {
+        switch (eventName) {
             case 'CONNECTION_UPDATE':
                 await handleConnectionUpdate(payload)
                 break
