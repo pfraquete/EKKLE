@@ -35,6 +35,17 @@ export type AdminAction =
     | 'note.create'
     | 'note.update'
     | 'note.delete'
+    | 'ticket.create'
+    | 'ticket.update'
+    | 'ticket.reply'
+    | 'ticket.assign'
+    | 'ticket.close'
+    | 'communication.create'
+    | 'communication.send'
+    | 'communication.delete'
+    | 'template.create'
+    | 'template.update'
+    | 'template.delete'
 
 export type TargetType =
     | 'church'
@@ -47,6 +58,9 @@ export type TargetType =
     | 'alert'
     | 'note'
     | 'impersonation'
+    | 'ticket'
+    | 'communication'
+    | 'template'
 
 export interface AdminProfile {
     id: string

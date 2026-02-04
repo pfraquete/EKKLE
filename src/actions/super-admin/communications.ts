@@ -243,12 +243,9 @@ export async function createCommunication(data: {
         throw new Error('Falha ao criar comunicacao')
     }
 
-    await logAdminAction({
-        action: 'create',
-        targetType: 'communication',
+    await logAdminAction('communication.create', 'communication', {
         targetId: communication.id,
-        description: `Comunicacao criada: ${data.title}`,
-        metadata: { channel: data.channel, target_type: data.targetType }
+        reason: `Comunicacao criada: ${data.title}`
     })
 
     revalidatePath('/admin/support/communications')
@@ -597,12 +594,9 @@ export async function sendCommunication(communicationId: string): Promise<{
         })
         .eq('id', communicationId)
 
-    await logAdminAction({
-        action: 'send',
-        targetType: 'communication',
+    await logAdminAction('communication.send', 'communication', {
         targetId: communicationId,
-        description: `Comunicacao enviada: ${delivered} entregues, ${failed} falharam`,
-        metadata: { delivered, failed, total: recipients.length }
+        reason: `Comunicacao enviada: ${delivered} entregues, ${failed} falharam`
     })
 
     revalidatePath('/admin/support/communications')
@@ -644,11 +638,9 @@ export async function deleteCommunication(id: string): Promise<void> {
         throw new Error('Falha ao deletar comunicacao')
     }
 
-    await logAdminAction({
-        action: 'delete',
-        targetType: 'communication',
+    await logAdminAction('communication.delete', 'communication', {
         targetId: id,
-        description: `Comunicacao deletada: ${communication?.title}`
+        reason: `Comunicacao deletada: ${communication?.title}`
     })
 
     revalidatePath('/admin/support/communications')
@@ -747,11 +739,9 @@ export async function createTemplate(data: {
         throw new Error('Falha ao criar template')
     }
 
-    await logAdminAction({
-        action: 'create',
-        targetType: 'template',
+    await logAdminAction('template.create', 'template', {
         targetId: template.id,
-        description: `Template criado: ${data.name}`
+        reason: `Template criado: ${data.name}`
     })
 
     revalidatePath('/admin/support/communications/templates')
@@ -795,11 +785,9 @@ export async function updateTemplate(
         throw new Error('Falha ao atualizar template')
     }
 
-    await logAdminAction({
-        action: 'update',
-        targetType: 'template',
+    await logAdminAction('template.update', 'template', {
         targetId: id,
-        description: `Template atualizado: ${template?.name}`
+        reason: `Template atualizado: ${template?.name}`
     })
 
     revalidatePath('/admin/support/communications/templates')
@@ -830,11 +818,9 @@ export async function deleteTemplate(id: string): Promise<void> {
         throw new Error('Falha ao deletar template')
     }
 
-    await logAdminAction({
-        action: 'delete',
-        targetType: 'template',
+    await logAdminAction('template.delete', 'template', {
         targetId: id,
-        description: `Template deletado: ${template?.name}`
+        reason: `Template deletado: ${template?.name}`
     })
 
     revalidatePath('/admin/support/communications/templates')
