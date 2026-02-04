@@ -31,18 +31,18 @@ export const FinalCTASection = memo(function FinalCTASection() {
               </h2>
               <p className="text-xl text-[#0B0B0B]/80 mb-10">
                 Junte-se a mais de 100 igrejas que já estão crescendo de forma organizada com o
-                Ekkle. Comece hoje mesmo com 7 dias grátis.
+                Ekkle. Somente o pastor paga — líderes e membros usam grátis!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/registro"
                   className="group bg-[#0B0B0B] text-[#D4AF37] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#141414] transition-colors flex items-center justify-center gap-2"
                 >
-                  Começar Teste Grátis
+                  Começar Agora
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
-                  href="https://wa.me/5511999999999"
+                  href="https://wa.me/5512996169767"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-[#0B0B0B]/10 text-[#0B0B0B] px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#0B0B0B]/20 transition-colors border border-[#0B0B0B]/20"
@@ -131,7 +131,7 @@ export const LandingFooter = memo(function LandingFooter() {
               </li>
               <li>
                 <a
-                  href="https://wa.me/5511999999999"
+                  href="https://wa.me/5512996169767"
                   className="text-[#A0A0A0] hover:text-[#D4AF37] transition-colors flex items-center gap-2"
                 >
                   <Phone className="w-4 h-4" />

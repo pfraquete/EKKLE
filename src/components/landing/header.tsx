@@ -77,7 +77,7 @@ export const LandingHeader = memo(function LandingHeader() {
               href="/registro"
               className="bg-gradient-to-r from-[#D4AF37] via-[#F2D675] to-[#D4AF37] text-[#0B0B0B] px-5 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-[#D4AF37]/30 transition-all text-sm"
             >
-              Começar Grátis
+              Começar Agora
             </Link>
           </div>
 
@@ -121,7 +121,7 @@ export const LandingHeader = memo(function LandingHeader() {
                   href="/registro"
                   className="bg-gradient-to-r from-[#D4AF37] via-[#F2D675] to-[#D4AF37] text-[#0B0B0B] px-5 py-3 rounded-xl font-semibold text-center"
                 >
-                  Começar Grátis
+                  Começar Agora
                 </Link>
               </div>
             </nav>
