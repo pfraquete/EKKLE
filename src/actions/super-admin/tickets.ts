@@ -193,7 +193,7 @@ export async function getTickets(filters: TicketFilters = {}): Promise<{
                     acc[msg.ticket_id] = { count: 0, last_at: null }
                 }
                 acc[msg.ticket_id].count++
-                if (!acc[msg.ticket_id].last_at || msg.created_at > acc[msg.ticket_id].last_at) {
+                if (!acc[msg.ticket_id].last_at || (msg.created_at && acc[msg.ticket_id].last_at && msg.created_at > acc[msg.ticket_id].last_at)) {
                     acc[msg.ticket_id].last_at = msg.created_at
                 }
                 return acc
