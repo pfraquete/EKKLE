@@ -1,5 +1,6 @@
 import { getKidsChildById } from '@/actions/kids-children'
 import { getProfile } from '@/actions/auth'
+import { getActiveFormationStages, getChildWithProgress } from '@/actions/kids-formation'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,6 +25,7 @@ import { format, differenceInYears } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { EditChildDialog } from './edit-child-dialog'
 import { DeleteChildDialog } from './delete-child-dialog'
+import { ChildProgressCard } from '@/components/rede-kids/formation'
 
 export default async function CriancaDetalhePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -34,9 +36,17 @@ export default async function CriancaDetalhePage({ params }: { params: Promise<{
     const child = await getKidsChildById(id)
     if (!child) notFound()
 
+    // Get formation data
+    const stages = await getActiveFormationStages()
+    const childWithProgress = await getChildWithProgress(id)
+
     const age = child.birth_date
         ? differenceInYears(new Date(), new Date(child.birth_date))
         : null
+
+    // Check if user can edit formation progress
+    const canEditProgress = profile.role === 'PASTOR' || 
+        ['PASTORA_KIDS', 'DISCIPULADORA_KIDS', 'LEADER_KIDS'].includes(profile.kids_role || '')
 
     return (
         <div className="max-w-3xl mx-auto space-y-6 pb-20">
@@ -93,6 +103,15 @@ export default async function CriancaDetalhePage({ params }: { params: Promise<{
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Formation Track Card */}
+            {stages.length > 0 && childWithProgress && (
+                <ChildProgressCard
+                    child={childWithProgress}
+                    stages={stages}
+                    canEdit={canEditProgress}
+                />
+            )}
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Dados Pessoais */}
