@@ -1,9 +1,9 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users,
   MessageSquare,
@@ -24,6 +24,8 @@ import {
   UserPlus,
   Home,
   Star,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { AnimatedSection, fadeInUp, scaleIn, staggerContainer } from './animations'
 
@@ -93,16 +95,16 @@ export const ProblemsSection = memo(function ProblemsSection() {
 // =====================================================
 
 const FEATURES = [
-  { icon: Home, title: 'Gestão de Células', description: 'Organize células, líderes e membros. Acompanhe reuniões, relatórios e crescimento de cada grupo.', color: 'from-[#D4AF37] to-[#F2D675]' },
-  { icon: Users, title: 'Gestão de Membros', description: 'Cadastro completo de membros com histórico, estágio espiritual, aniversários e muito mais.', color: 'from-[#F2D675] to-[#B8962E]' },
-  { icon: MessageSquare, title: 'Automação WhatsApp', description: 'Envie lembretes automáticos de reuniões, aniversários e avisos importantes direto no WhatsApp.', color: 'from-[#B8962E] to-[#D4AF37]' },
-  { icon: Globe, title: 'Site Personalizado', description: 'Sua igreja com presença online profissional. Eventos, cursos e informações sempre atualizados.', color: 'from-[#D4AF37] to-[#B8962E]' },
-  { icon: BookOpen, title: 'Cursos e Eventos', description: 'Crie cursos de discipulado, organize eventos e gerencie inscrições de forma simples.', color: 'from-[#F2D675] to-[#D4AF37]' },
-  { icon: BarChart3, title: 'Relatórios Completos', description: 'Dashboards com métricas de crescimento, frequência, engajamento e muito mais.', color: 'from-[#B8962E] to-[#F2D675]' },
-  { icon: ShoppingBag, title: 'Loja Virtual', description: 'Venda produtos, livros, camisetas e materiais da igreja com gestão completa de estoque e pagamentos.', color: 'from-[#D4AF37] to-[#F2D675]' },
-  { icon: Video, title: 'Gestão de Cultos', description: 'Organize cultos, escalas de ministério, pregações e acompanhe a frequência dos membros.', color: 'from-[#F2D675] to-[#B8962E]' },
-  { icon: DollarSign, title: 'Controle Financeiro', description: 'Gerencie entradas, saídas, dízimos e ofertas com relatórios detalhados e transparência total.', color: 'from-[#B8962E] to-[#D4AF37]' },
-  { icon: Calendar, title: 'Calendário Integrado', description: 'Visualize todos os eventos, cultos e reuniões em um calendário unificado e compartilhável.', color: 'from-[#D4AF37] to-[#B8962E]' },
+  { icon: Home, title: 'Gestão de Células', description: 'Organize células, líderes e membros. Acompanhe reuniões, relatórios e crescimento de cada grupo.', color: 'from-[#D4AF37] to-[#F2D675]', screenshot: '/images/landing/celulas-screenshot.png' },
+  { icon: Users, title: 'Gestão de Membros', description: 'Cadastro completo de membros com histórico, estágio espiritual, aniversários e muito mais.', color: 'from-[#F2D675] to-[#B8962E]', screenshot: '/images/landing/membros-screenshot.png' },
+  { icon: MessageSquare, title: 'Automação WhatsApp', description: 'Envie lembretes automáticos de reuniões, aniversários e avisos importantes direto no WhatsApp.', color: 'from-[#B8962E] to-[#D4AF37]', screenshot: '/images/landing/comunicacoes-screenshot.png' },
+  { icon: Globe, title: 'Feed Social', description: 'Rede social exclusiva da igreja. Membros compartilham momentos, fotos e testemunhos.', color: 'from-[#D4AF37] to-[#B8962E]', screenshot: '/images/landing/feed-screenshot.png' },
+  { icon: BookOpen, title: 'Cursos Online', description: 'Crie cursos de discipulado com módulos, aulas em vídeo e acompanhamento de progresso.', color: 'from-[#F2D675] to-[#D4AF37]', screenshot: '/images/landing/cursos-screenshot.png' },
+  { icon: Calendar, title: 'Gestão de Eventos', description: 'Organize eventos, gerencie inscrições e envie lembretes automáticos aos participantes.', color: 'from-[#B8962E] to-[#F2D675]', screenshot: '/images/landing/eventos-screenshot.png' },
+  { icon: ShoppingBag, title: 'Loja Virtual', description: 'Venda produtos, livros, camisetas e materiais da igreja com gestão completa de estoque.', color: 'from-[#D4AF37] to-[#F2D675]', screenshot: '/images/landing/loja-screenshot.png' },
+  { icon: Video, title: 'Lives e Transmissões', description: 'Gerencie lives, cultos online e transmissões com integração ao YouTube e outras plataformas.', color: 'from-[#F2D675] to-[#B8962E]', screenshot: '/images/landing/lives-screenshot.png' },
+  { icon: DollarSign, title: 'Controle Financeiro', description: 'Gerencie dízimos, ofertas, entradas e saídas com relatórios detalhados e transparência total.', color: 'from-[#B8962E] to-[#D4AF37]', screenshot: '/images/landing/financeiro-screenshot.png' },
+  { icon: BarChart3, title: 'Dashboard Completo', description: 'Visão geral de toda a igreja com métricas, gráficos e indicadores de crescimento.', color: 'from-[#D4AF37] to-[#B8962E]', screenshot: '/images/landing/dashboard-screenshot.png' },
   { icon: Upload, title: 'Importação de Dados', description: 'Importe membros de planilhas Excel ou Google Sheets de forma rápida e sem complicação.', color: 'from-[#F2D675] to-[#D4AF37]' },
   { icon: Bell, title: 'Comunicações em Massa', description: 'Envie avisos, convites e mensagens para grupos específicos ou toda a igreja de uma vez.', color: 'from-[#B8962E] to-[#F2D675]' },
 ]
@@ -144,20 +146,91 @@ export const FeaturesSection = memo(function FeaturesSection() {
 })
 
 // =====================================================
-// SCREENSHOTS SECTION
+// SCREENSHOTS SECTION - GALERIA INTERATIVA
 // =====================================================
 
-const SCREENSHOT_HIGHLIGHTS = [
-  { icon: TrendingUp, title: 'Métricas em Tempo Real', description: 'Acompanhe o crescimento da sua igreja com gráficos atualizados' },
-  { icon: UserPlus, title: 'Gestão Simplificada', description: 'Cadastre e gerencie membros com poucos cliques' },
-  { icon: Bell, title: 'Notificações Automáticas', description: 'Receba alertas sobre eventos, aniversários e relatórios pendentes' },
+const SCREENSHOTS = [
+  { 
+    id: 'dashboard', 
+    title: 'Dashboard', 
+    description: 'Visão geral completa da sua igreja com métricas em tempo real',
+    image: '/images/landing/dashboard-screenshot.png',
+    icon: BarChart3,
+  },
+  { 
+    id: 'celulas', 
+    title: 'Células', 
+    description: 'Gerencie todas as células, líderes e relatórios de reuniões',
+    image: '/images/landing/celulas-screenshot.png',
+    icon: Home,
+  },
+  { 
+    id: 'membros', 
+    title: 'Membros', 
+    description: 'Cadastro completo com histórico e acompanhamento pastoral',
+    image: '/images/landing/membros-screenshot.png',
+    icon: Users,
+  },
+  { 
+    id: 'cursos', 
+    title: 'Cursos', 
+    description: 'Plataforma de ensino com módulos e acompanhamento de progresso',
+    image: '/images/landing/cursos-screenshot.png',
+    icon: BookOpen,
+  },
+  { 
+    id: 'eventos', 
+    title: 'Eventos', 
+    description: 'Organize eventos e gerencie inscrições facilmente',
+    image: '/images/landing/eventos-screenshot.png',
+    icon: Calendar,
+  },
+  { 
+    id: 'loja', 
+    title: 'Loja', 
+    description: 'Venda produtos da igreja com gestão completa',
+    image: '/images/landing/loja-screenshot.png',
+    icon: ShoppingBag,
+  },
+  { 
+    id: 'feed', 
+    title: 'Feed Social', 
+    description: 'Rede social exclusiva para sua comunidade',
+    image: '/images/landing/feed-screenshot.png',
+    icon: Globe,
+  },
+  { 
+    id: 'financeiro', 
+    title: 'Financeiro', 
+    description: 'Controle de dízimos, ofertas e relatórios financeiros',
+    image: '/images/landing/financeiro-screenshot.png',
+    icon: DollarSign,
+  },
+  { 
+    id: 'comunicacoes', 
+    title: 'WhatsApp', 
+    description: 'Automação de mensagens e comunicação em massa',
+    image: '/images/landing/comunicacoes-screenshot.png',
+    icon: MessageSquare,
+  },
 ]
 
 export const ScreenshotsSection = memo(function ScreenshotsSection() {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const activeScreenshot = SCREENSHOTS[activeIndex]
+
+  const nextSlide = () => {
+    setActiveIndex((prev) => (prev + 1) % SCREENSHOTS.length)
+  }
+
+  const prevSlide = () => {
+    setActiveIndex((prev) => (prev - 1 + SCREENSHOTS.length) % SCREENSHOTS.length)
+  }
+
   return (
     <section id="screenshots" className="py-20 bg-[#141414]/50">
       <div className="container mx-auto px-4">
-        <AnimatedSection className="text-center mb-16">
+        <AnimatedSection className="text-center mb-12">
           <motion.span variants={fadeInUp} className="text-[#F2D675] font-medium mb-4 block">
             CONHEÇA O SISTEMA
           </motion.span>
@@ -169,10 +242,38 @@ export const ScreenshotsSection = memo(function ScreenshotsSection() {
           </motion.p>
         </AnimatedSection>
 
+        {/* Tabs de navegação */}
+        <AnimatedSection className="mb-8">
+          <motion.div 
+            variants={fadeInUp}
+            className="flex flex-wrap justify-center gap-2 md:gap-3"
+          >
+            {SCREENSHOTS.map((screenshot, index) => (
+              <button
+                key={screenshot.id}
+                onClick={() => setActiveIndex(index)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  activeIndex === index
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#F2D675] text-white shadow-lg shadow-[#D4AF37]/20'
+                    : 'bg-[#1A1A1A] text-[#A0A0A0] hover:bg-[#2A2A2A] hover:text-white border border-[#2A2A2A]'
+                }`}
+              >
+                <screenshot.icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{screenshot.title}</span>
+              </button>
+            ))}
+          </motion.div>
+        </AnimatedSection>
+
+        {/* Screenshot principal com navegação */}
         <AnimatedSection>
-          <motion.div variants={scaleIn} className="relative max-w-5xl mx-auto">
+          <motion.div variants={scaleIn} className="relative max-w-6xl mx-auto">
+            {/* Glow effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 to-[#B8962E]/20 rounded-3xl blur-3xl" />
+            
+            {/* Container do screenshot */}
             <div className="relative bg-[#141414] border border-[#2A2A2A] rounded-3xl overflow-hidden shadow-2xl">
+              {/* Browser bar */}
               <div className="bg-[#1A1A1A] px-4 py-3 flex items-center gap-2 border-b border-[#2A2A2A]">
                 <div className="flex gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-500" />
@@ -181,33 +282,103 @@ export const ScreenshotsSection = memo(function ScreenshotsSection() {
                 </div>
                 <div className="flex-1 flex justify-center">
                   <div className="bg-[#2A2A2A] rounded-lg px-4 py-1 text-sm text-[#A0A0A0]">
-                    ekkle.com.br/dashboard
+                    ekkle.com.br/{activeScreenshot.id}
                   </div>
                 </div>
               </div>
-              <Image
-                src="/images/landing/dashboard-example.jpg"
-                alt="Dashboard do Ekkle"
-                width={1200}
-                height={800}
-                className="w-full h-auto"
-                loading="lazy"
-                priority={false}
-              />
+
+              {/* Screenshot com animação */}
+              <div className="relative aspect-video">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeScreenshot.id}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={activeScreenshot.image}
+                      alt={`${activeScreenshot.title} - Ekkle`}
+                      fill
+                      className="object-cover object-top"
+                      loading="lazy"
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Navegação lateral */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-all backdrop-blur-sm"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-all backdrop-blur-sm"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Info bar */}
+              <div className="bg-[#1A1A1A] px-6 py-4 border-t border-[#2A2A2A]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{activeScreenshot.title}</h3>
+                    <p className="text-sm text-[#A0A0A0]">{activeScreenshot.description}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[#A0A0A0]">
+                    <span>{activeIndex + 1}</span>
+                    <span>/</span>
+                    <span>{SCREENSHOTS.length}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dots de navegação */}
+            <div className="flex justify-center gap-2 mt-6">
+              {SCREENSHOTS.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    activeIndex === index
+                      ? 'w-8 bg-[#D4AF37]'
+                      : 'bg-[#2A2A2A] hover:bg-[#3A3A3A]'
+                  }`}
+                />
+              ))}
             </div>
           </motion.div>
         </AnimatedSection>
 
+        {/* Highlights abaixo do screenshot */}
         <AnimatedSection className="grid md:grid-cols-3 gap-8 mt-16">
-          {SCREENSHOT_HIGHLIGHTS.map((item, index) => (
-            <motion.div key={index} variants={fadeInUp} className="text-center">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-xl flex items-center justify-center mx-auto mb-4">
-                <item.icon className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-              <p className="text-[#A0A0A0]">{item.description}</p>
-            </motion.div>
-          ))}
+          <motion.div variants={fadeInUp} className="text-center">
+            <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-xl flex items-center justify-center mx-auto mb-4">
+              <TrendingUp className="w-7 h-7 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Métricas em Tempo Real</h3>
+            <p className="text-[#A0A0A0]">Acompanhe o crescimento da sua igreja com gráficos atualizados</p>
+          </motion.div>
+          <motion.div variants={fadeInUp} className="text-center">
+            <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-xl flex items-center justify-center mx-auto mb-4">
+              <UserPlus className="w-7 h-7 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Gestão Simplificada</h3>
+            <p className="text-[#A0A0A0]">Cadastre e gerencie membros com poucos cliques</p>
+          </motion.div>
+          <motion.div variants={fadeInUp} className="text-center">
+            <div className="w-14 h-14 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Bell className="w-7 h-7 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Notificações Automáticas</h3>
+            <p className="text-[#A0A0A0]">Receba alertas sobre eventos, aniversários e relatórios pendentes</p>
+          </motion.div>
         </AnimatedSection>
       </div>
     </section>
@@ -235,55 +406,75 @@ export const CommunitySection = memo(function CommunitySection() {
           <AnimatedSection className="relative">
             <div className="grid grid-cols-2 gap-4">
               <motion.div variants={fadeInUp} className="space-y-4">
-                <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <Image src="/images/landing/small-group.jpeg" alt="Célula em reunião" width={300} height={200} className="w-full h-48 object-cover" loading="lazy" />
+                <div className="rounded-2xl overflow-hidden shadow-xl border border-[#2A2A2A]">
+                  <Image
+                    src="/images/landing/celulas-screenshot.png"
+                    alt="Gestão de Células"
+                    width={300}
+                    height={200}
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
-                <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <Image src="/images/landing/bible-study.jpg" alt="Estudo bíblico" width={300} height={200} className="w-full h-48 object-cover" loading="lazy" />
+                <div className="rounded-2xl overflow-hidden shadow-xl border border-[#2A2A2A]">
+                  <Image
+                    src="/images/landing/feed-screenshot.png"
+                    alt="Feed Social"
+                    width={300}
+                    height={200}
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
               </motion.div>
               <motion.div variants={fadeInUp} className="space-y-4 pt-8">
-                <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <Image src="/images/landing/youth-worship.jpg" alt="Jovens em adoração" width={300} height={200} className="w-full h-48 object-cover" loading="lazy" />
+                <div className="rounded-2xl overflow-hidden shadow-xl border border-[#2A2A2A]">
+                  <Image
+                    src="/images/landing/membros-screenshot.png"
+                    alt="Gestão de Membros"
+                    width={300}
+                    height={200}
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
-                <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <Image src="/images/landing/church-worship.jpg" alt="Culto de celebração" width={300} height={200} className="w-full h-48 object-cover" loading="lazy" />
+                <div className="rounded-2xl overflow-hidden shadow-xl border border-[#2A2A2A]">
+                  <Image
+                    src="/images/landing/eventos-screenshot.png"
+                    alt="Eventos"
+                    width={300}
+                    height={200}
+                    className="w-full h-auto"
+                    loading="lazy"
+                  />
                 </div>
               </motion.div>
-            </div>
-            <div
-              className="absolute -bottom-4 -right-4 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-2xl p-4 shadow-xl"
-            >
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">+100</div>
-                <div className="text-sm text-white/80">Igrejas</div>
-              </div>
             </div>
           </AnimatedSection>
 
           <AnimatedSection>
             <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
-              COMUNIDADE
+              POR QUE ESCOLHER O EKKLE?
             </motion.span>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Feito para igrejas que querem crescer
+              Feito por quem entende de igreja
             </motion.h2>
-            <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] mb-8">
-              O Ekkle foi desenvolvido por quem entende as necessidades reais de uma igreja em crescimento.
-              Cada funcionalidade foi pensada para facilitar o trabalho pastoral e fortalecer a comunidade.
+            <motion.p variants={fadeInUp} className="text-lg text-[#A0A0A0] mb-8">
+              O Ekkle foi desenvolvido em parceria com pastores e líderes que conhecem os desafios reais da gestão eclesiástica. 
+              Cada funcionalidade foi pensada para facilitar o dia a dia da sua liderança.
             </motion.p>
-            <motion.div variants={staggerContainer} className="space-y-4">
-              {COMMUNITY_FEATURES.map((item, index) => (
-                <motion.div key={index} variants={fadeInUp} className="flex items-center gap-3">
+            <motion.ul variants={fadeInUp} className="space-y-4 mb-8">
+              {COMMUNITY_FEATURES.map((feature, index) => (
+                <li key={index} className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                  <span className="text-[#F5F5F5]">{item}</span>
-                </motion.div>
+                  <span className="text-[#F5F5F5]">{feature}</span>
+                </li>
               ))}
-            </motion.div>
-            <motion.div variants={fadeInUp} className="mt-8">
+            </motion.ul>
+            <motion.div variants={fadeInUp}>
               <Link
                 href="/registro"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#F2D675] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#F2D675] text-white px-8 py-4 rounded-xl font-semibold hover:shadow-lg hover:shadow-[#D4AF37]/20 transition-all"
               >
                 Começar Agora
                 <ArrowRight className="w-5 h-5" />
@@ -301,9 +492,26 @@ export const CommunitySection = memo(function CommunitySection() {
 // =====================================================
 
 const STEPS = [
-  { number: '01', title: 'Cadastre sua igreja', description: 'Crie sua conta em menos de 2 minutos. Sem burocracia, sem complicação.' },
-  { number: '02', title: 'Configure suas células', description: 'Adicione líderes, membros e configure os dias de reunião de cada célula.' },
-  { number: '03', title: 'Comece a crescer', description: 'Use os relatórios e automações para acompanhar e impulsionar o crescimento.' },
+  {
+    number: '01',
+    title: 'Crie sua conta',
+    description: 'Cadastre-se em menos de 2 minutos. Sem cartão de crédito, sem complicação.',
+  },
+  {
+    number: '02',
+    title: 'Configure sua igreja',
+    description: 'Personalize cores, logo e informações. Importe seus membros de planilhas existentes.',
+  },
+  {
+    number: '03',
+    title: 'Convide sua liderança',
+    description: 'Adicione pastores, discipuladores e líderes. Eles têm acesso gratuito!',
+  },
+  {
+    number: '04',
+    title: 'Transforme sua gestão',
+    description: 'Comece a usar todas as ferramentas e veja sua igreja crescer de forma organizada.',
+  },
 ]
 
 export const HowItWorksSection = memo(function HowItWorksSection() {
@@ -311,30 +519,26 @@ export const HowItWorksSection = memo(function HowItWorksSection() {
     <section className="py-20 bg-[#141414]/50">
       <div className="container mx-auto px-4">
         <AnimatedSection className="text-center mb-16">
-          <motion.span variants={fadeInUp} className="text-[#F2D675] font-medium mb-4 block">
+          <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
             COMO FUNCIONA
           </motion.span>
           <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Comece em 3 passos simples
+            Comece em 4 passos simples
           </motion.h2>
           <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
-            Não precisa ser especialista em tecnologia. O Ekkle foi feito para ser simples.
+            Em poucos minutos sua igreja estará pronta para usar o Ekkle.
           </motion.p>
         </AnimatedSection>
 
-        <AnimatedSection className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <AnimatedSection className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {STEPS.map((step, index) => (
             <motion.div key={index} variants={fadeInUp} className="relative">
+              <div className="text-6xl font-bold text-[#1A1A1A] mb-4">{step.number}</div>
+              <h3 className="text-xl font-semibold text-white mb-2">{step.title}</h3>
+              <p className="text-[#A0A0A0]">{step.description}</p>
               {index < STEPS.length - 1 && (
-                <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-[#D4AF37] to-transparent -translate-x-1/2" />
+                <div className="hidden lg:block absolute top-8 right-0 translate-x-1/2 w-full border-t border-dashed border-[#2A2A2A]" />
               )}
-              <div className="text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[#D4AF37]/20">
-                  <span className="text-3xl font-bold text-white">{step.number}</span>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
-                <p className="text-[#A0A0A0]">{step.description}</p>
-              </div>
             </motion.div>
           ))}
         </AnimatedSection>
@@ -348,71 +552,64 @@ export const HowItWorksSection = memo(function HowItWorksSection() {
 // =====================================================
 
 const BENEFITS = [
-  { icon: Clock, title: 'Economize até 10h por semana', description: 'Automatize tarefas repetitivas e foque no ministério.' },
-  { icon: MessageSquare, title: 'Comunicação eficiente', description: 'Todos os membros informados no momento certo.' },
-  { icon: BarChart3, title: 'Decisões baseadas em dados', description: 'Relatórios que mostram onde focar seus esforços.' },
-  { icon: Shield, title: 'Dados seguros', description: 'Informações protegidas com criptografia de ponta.' },
-]
-
-const NOTIFICATION_ITEMS = [
-  { icon: CheckCircle2, iconBg: 'bg-green-500/20', iconColor: 'text-green-400', title: 'Lembrete enviado', desc: 'Reunião de célula amanhã às 20h' },
-  { icon: Star, iconBg: 'bg-[#D4AF37]/20', iconColor: 'text-[#F2D675]', title: 'Novo membro!', desc: 'Maria Silva se cadastrou na célula Centro' },
-  { icon: BarChart3, iconBg: 'bg-[#D4AF37]/20', iconColor: 'text-[#D4AF37]', title: 'Crescimento de 15%', desc: 'Sua igreja cresceu este mês!' },
-  { icon: ShoppingBag, iconBg: 'bg-purple-500/20', iconColor: 'text-purple-400', title: 'Nova venda na loja', desc: 'Bíblia de Estudo - R$ 89,90' },
+  {
+    icon: Clock,
+    title: 'Economize Tempo',
+    description: 'Automatize tarefas repetitivas e foque no que realmente importa: as pessoas.',
+    stat: '10h',
+    statLabel: 'economizadas por semana',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Aumente o Engajamento',
+    description: 'Comunicação eficiente aumenta a participação dos membros em eventos e células.',
+    stat: '+40%',
+    statLabel: 'de engajamento',
+  },
+  {
+    icon: Shield,
+    title: 'Dados Seguros',
+    description: 'Criptografia de ponta a ponta e backups diários. Seus dados estão protegidos.',
+    stat: '99.9%',
+    statLabel: 'de uptime',
+  },
 ]
 
 export const BenefitsSection = memo(function BenefitsSection() {
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <AnimatedSection>
-            <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
-              BENEFÍCIOS
-            </motion.span>
-            <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Por que pastores escolhem o Ekkle
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] mb-10">
-              Mais do que um software, uma ferramenta que entende as necessidades reais de uma igreja em crescimento.
-            </motion.p>
-            <motion.div variants={staggerContainer} className="grid sm:grid-cols-2 gap-6">
-              {BENEFITS.map((benefit, index) => (
-                <motion.div key={index} variants={fadeInUp} className="flex gap-4">
-                  <div className="w-12 h-12 bg-[#D4AF37]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <benefit.icon className="w-6 h-6 text-[#D4AF37]" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white mb-1">{benefit.title}</h3>
-                    <p className="text-sm text-[#A0A0A0]">{benefit.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </AnimatedSection>
+        <AnimatedSection className="text-center mb-16">
+          <motion.span variants={fadeInUp} className="text-[#D4AF37] font-medium mb-4 block">
+            BENEFÍCIOS
+          </motion.span>
+          <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Resultados que você vai ver
+          </motion.h2>
+          <motion.p variants={fadeInUp} className="text-xl text-[#A0A0A0] max-w-2xl mx-auto">
+            Igrejas que usam o Ekkle relatam melhorias significativas na gestão.
+          </motion.p>
+        </AnimatedSection>
 
-          <AnimatedSection className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-[#B8962E]/10 rounded-3xl blur-3xl" />
-            <motion.div variants={scaleIn} className="relative bg-[#141414] border border-[#2A2A2A] rounded-3xl p-8">
-              <div className="space-y-6">
-                {NOTIFICATION_ITEMS.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-4 p-4 bg-[#1A1A1A]/50 rounded-xl"
-                  >
-                    <div className={`w-10 h-10 ${item.iconBg} rounded-full flex items-center justify-center`}>
-                      <item.icon className={`w-5 h-5 ${item.iconColor}`} />
-                    </div>
-                    <div>
-                      <div className="text-white font-medium">{item.title}</div>
-                      <div className="text-sm text-[#A0A0A0]">{item.desc}</div>
-                    </div>
-                  </div>
-                ))}
+        <AnimatedSection className="grid md:grid-cols-3 gap-8">
+          {BENEFITS.map((benefit, index) => (
+            <motion.div
+              key={index}
+              variants={fadeInUp}
+              className="bg-[#141414] border border-[#2A2A2A] rounded-2xl p-8 text-center hover:border-[#D4AF37]/30 transition-all"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-[#D4AF37] to-[#F2D675] rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <benefit.icon className="w-8 h-8 text-white" />
               </div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-[#D4AF37] to-[#F2D675] bg-clip-text text-transparent mb-2">
+                {benefit.stat}
+              </div>
+              <div className="text-sm text-[#A0A0A0] mb-4">{benefit.statLabel}</div>
+              <h3 className="text-xl font-semibold text-white mb-3">{benefit.title}</h3>
+              <p className="text-[#A0A0A0]">{benefit.description}</p>
             </motion.div>
-          </AnimatedSection>
-        </div>
+          ))}
+        </AnimatedSection>
       </div>
     </section>
   )

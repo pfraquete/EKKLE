@@ -4,12 +4,12 @@ import { memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Zap, ArrowRight, Play, Star } from 'lucide-react'
+import { Zap, ArrowRight, Play, Star, Users, CheckCircle2 } from 'lucide-react'
 
 const STATS = [
-  { value: '1.247', label: 'Membros', color: 'text-white' },
-  { value: '48', label: 'Células', color: 'text-[#D4AF37]' },
-  { value: '12', label: 'Eventos', color: 'text-[#F2D675]' },
+  { value: '152', label: 'Membros', color: 'text-white' },
+  { value: '24', label: 'Células', color: 'text-[#D4AF37]' },
+  { value: '4', label: 'Eventos', color: 'text-[#F2D675]' },
   { value: '+15%', label: 'Crescimento', color: 'text-green-400' },
 ]
 
@@ -76,7 +76,7 @@ export const HeroSection = memo(function HeroSection() {
                 href="/registro"
                 className="group bg-gradient-to-r from-[#D4AF37] via-[#F2D675] to-[#D4AF37] text-[#0B0B0B] px-8 py-4 rounded-xl font-bold text-lg hover:shadow-xl hover:shadow-[#D4AF37]/30 transition-all flex items-center justify-center gap-2"
               >
-                Começar Teste Grátis
+                Começar Agora
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <a
@@ -86,6 +86,19 @@ export const HeroSection = memo(function HeroSection() {
                 <Play className="w-5 h-5" />
                 Ver Sistema
               </a>
+            </motion.div>
+
+            {/* Destaque: Só o pastor paga */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="flex items-center gap-3 justify-center lg:justify-start mb-6 bg-[#141414]/50 border border-[#D4AF37]/20 rounded-xl px-4 py-3 max-w-fit mx-auto lg:mx-0"
+            >
+              <Users className="w-5 h-5 text-[#D4AF37]" />
+              <span className="text-sm text-[#F5F5F5]">
+                <span className="font-semibold text-[#D4AF37]">Somente o pastor paga</span> — Líderes e membros usam grátis!
+              </span>
             </motion.div>
 
             {/* Social Proof */}
@@ -118,30 +131,47 @@ export const HeroSection = memo(function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Right Image - Hero Image */}
+          {/* Right Image - Dashboard Screenshot */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative"
           >
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/50">
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/30 to-[#B8962E]/20 rounded-3xl blur-2xl scale-105" />
+            
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/50 border border-[#2A2A2A]">
+              {/* Browser bar */}
+              <div className="bg-[#1A1A1A] px-4 py-3 flex items-center gap-2 border-b border-[#2A2A2A]">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <div className="bg-[#2A2A2A] rounded-lg px-4 py-1 text-sm text-[#A0A0A0]">
+                    ekkle.com.br/dashboard
+                  </div>
+                </div>
+              </div>
+              
+              {/* Dashboard Screenshot */}
               <Image
-                src="/images/landing/congregation.jpg"
-                alt="Comunidade em adoração"
-                width={700}
+                src="/images/landing/dashboard-screenshot.png"
+                alt="Dashboard do Ekkle - Sistema de Gestão para Igrejas"
+                width={800}
                 height={500}
                 className="w-full h-auto object-cover"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B]/80 via-transparent to-transparent" />
 
               {/* Floating Stats Card */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
-                className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-[#141414]/90 backdrop-blur-lg rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#2A2A2A]"
+                className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-[#141414]/95 backdrop-blur-lg rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#2A2A2A]"
               >
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center">
                   {STATS.map((stat, i) => (
@@ -155,6 +185,27 @@ export const HeroSection = memo(function HeroSection() {
                 </div>
               </motion.div>
             </div>
+
+            {/* Floating badges */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 1 }}
+              className="absolute -left-4 top-1/4 bg-[#141414] border border-[#2A2A2A] rounded-xl px-4 py-2 shadow-xl hidden lg:flex items-center gap-2"
+            >
+              <CheckCircle2 className="w-5 h-5 text-green-400" />
+              <span className="text-sm text-white">Dados em tempo real</span>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 1.2 }}
+              className="absolute -right-4 top-1/2 bg-[#141414] border border-[#2A2A2A] rounded-xl px-4 py-2 shadow-xl hidden lg:flex items-center gap-2"
+            >
+              <Zap className="w-5 h-5 text-[#D4AF37]" />
+              <span className="text-sm text-white">Automação WhatsApp</span>
+            </motion.div>
           </motion.div>
         </div>
       </div>

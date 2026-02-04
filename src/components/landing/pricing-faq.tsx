@@ -183,8 +183,24 @@ export const PricingSection = memo(function PricingSection() {
           ))}
         </AnimatedSection>
 
-        <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-center text-[#A0A0A0] mt-8">
-          Todos os planos incluem 7 dias de teste grátis. Cancele quando quiser.
+        {/* Destaque: Só o pastor paga */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          className="mt-12 max-w-2xl mx-auto bg-gradient-to-r from-[#D4AF37]/10 to-[#F2D675]/10 border border-[#D4AF37]/30 rounded-2xl p-6 text-center"
+        >
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <span className="text-3xl">👥</span>
+            <h4 className="text-xl font-bold text-white">Somente o Pastor Paga!</h4>
+          </div>
+          <p className="text-[#A0A0A0]">
+            Discipuladores, líderes de célula e membros têm <span className="text-[#D4AF37] font-semibold">acesso 100% gratuito</span>. 
+            Toda a sua liderança pode usar o sistema sem custo adicional.
+          </p>
+        </motion.div>
+
+        <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-center text-[#A0A0A0] mt-6">
+          Cancele quando quiser. Sem taxas escondidas.
         </motion.p>
       </div>
     </section>
