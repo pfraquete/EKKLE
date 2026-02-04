@@ -227,26 +227,22 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="church-info" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="church-info" className="flex items-center gap-2">
                 <Church className="h-4 w-4" />
-                <span className="hidden sm:inline">Igreja</span>
+                <span className="hidden sm:inline">Minha Igreja</span>
               </TabsTrigger>
               <TabsTrigger value="personality" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Personalidade</span>
-              </TabsTrigger>
-              <TabsTrigger value="hours" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span className="hidden sm:inline">Horários</span>
+                <span className="hidden sm:inline">Estilo</span>
               </TabsTrigger>
               <TabsTrigger value="messages" className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4" />
-                <span className="hidden sm:inline">Mensagens</span>
+                <span className="hidden sm:inline">Respostas</span>
               </TabsTrigger>
               <TabsTrigger value="automations" className="flex items-center gap-2">
                 <Zap className="h-4 w-4" />
-                <span className="hidden sm:inline">Automações</span>
+                <span className="hidden sm:inline">Lembretes</span>
               </TabsTrigger>
             </TabsList>
 
@@ -567,99 +563,70 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
               </div>
             </TabsContent>
 
-            {/* Hours Tab */}
-            <TabsContent value="hours" className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
-                <div className="space-y-0.5">
-                  <Label className="text-base font-bold">Horário de Atendimento</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Definir horários específicos para o agente responder.
-                  </p>
-                </div>
-                <Switch
-                  checked={config.working_hours_enabled}
-                  onCheckedChange={(checked) => updateField('working_hours_enabled', checked)}
-                />
-              </div>
-
-              {config.working_hours_enabled && (
-                <div className="space-y-6 animate-in fade-in duration-300">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="start_time">Horário de Início</Label>
-                      <Input
-                        id="start_time"
-                        type="time"
-                        value={config.working_hours_start}
-                        onChange={(e) => updateField('working_hours_start', e.target.value)}
-                      />
+            {/* Messages Tab - inclui horários de atendimento */}
+            <TabsContent value="messages" className="space-y-6">
+              {/* Horário de Atendimento - integrado aqui */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-base font-bold flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-primary" />
+                        Horário de Atendimento
+                      </CardTitle>
+                      <CardDescription className="text-sm">
+                        Defina quando o assistente deve responder automaticamente
+                      </CardDescription>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="end_time">Horário de Término</Label>
-                      <Input
-                        id="end_time"
-                        type="time"
-                        value={config.working_hours_end}
-                        onChange={(e) => updateField('working_hours_end', e.target.value)}
-                      />
-                    </div>
+                    <Switch
+                      checked={config.working_hours_enabled}
+                      onCheckedChange={(checked) => updateField('working_hours_enabled', checked)}
+                    />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label>Dias de Atendimento</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {WEEKDAYS.map((day) => (
-                        <Button
-                          key={day.value}
-                          type="button"
-                          variant={config.working_days.includes(day.value) ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => toggleWorkingDay(day.value)}
-                          className="min-w-[50px]"
-                        >
-                          {day.label}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="timezone">Fuso Horário</Label>
-                    <Select
-                      value={config.timezone}
-                      onValueChange={(value) => updateField('timezone', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="America/Sao_Paulo">Brasília (GMT-3)</SelectItem>
-                        <SelectItem value="America/Manaus">Manaus (GMT-4)</SelectItem>
-                        <SelectItem value="America/Cuiaba">Cuiabá (GMT-4)</SelectItem>
-                        <SelectItem value="America/Rio_Branco">Rio Branco (GMT-5)</SelectItem>
-                        <SelectItem value="America/Noronha">Fernando de Noronha (GMT-2)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="p-4 bg-amber-500/5 rounded-xl border border-amber-500/10">
-                    <div className="flex items-start gap-3">
-                      <Clock className="h-5 w-5 text-amber-500 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-amber-700">Fora do Horário</h4>
-                        <p className="text-sm text-amber-600/80 mt-1">
-                          Quando alguém enviar mensagem fora do horário configurado,
-                          o agente enviará automaticamente a mensagem definida na aba &quot;Mensagens&quot;.
-                        </p>
+                </CardHeader>
+                {config.working_hours_enabled && (
+                  <CardContent className="space-y-4 pt-0">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="start_time">Das</Label>
+                        <Input
+                          id="start_time"
+                          type="time"
+                          value={config.working_hours_start}
+                          onChange={(e) => updateField('working_hours_start', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="end_time">Às</Label>
+                        <Input
+                          id="end_time"
+                          type="time"
+                          value={config.working_hours_end}
+                          onChange={(e) => updateField('working_hours_end', e.target.value)}
+                        />
                       </div>
                     </div>
-                  </div>
-                </div>
-              )}
-            </TabsContent>
+                    <div className="space-y-2">
+                      <Label>Dias da semana</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {WEEKDAYS.map((day) => (
+                          <Button
+                            key={day.value}
+                            type="button"
+                            variant={config.working_days.includes(day.value) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => toggleWorkingDay(day.value)}
+                            className="min-w-[50px]"
+                          >
+                            {day.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
 
-            {/* Messages Tab */}
-            <TabsContent value="messages" className="space-y-6">
               <MessageTemplates
                 fieldName="first_contact_message"
                 title="Mensagem de Boas-vindas"
