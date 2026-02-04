@@ -241,8 +241,8 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
         return
     }
 
-    const direction = isFromMe ? 'outbound' : 'inbound'
-    console.log(`[Webhook] 💬 ${direction === 'inbound' ? '📥' : '📤'} ${phone}: "${messageText.substring(0, 50)}..."`)
+    const direction = isFromMe ? 'OUTBOUND' : 'INBOUND'
+    console.log(`[Webhook] 💬 ${direction === 'INBOUND' ? '📥' : '📤'} ${phone}: "${messageText.substring(0, 50)}..."`)
 
     // Find the church associated with this instance
     const { data: instanceData, error: instanceError } = await supabase

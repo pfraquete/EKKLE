@@ -333,9 +333,12 @@ O QUE VOCÊ PODE FAZER:
 6. Encaminhar para atendimento humano quando necessário
 
 COMPORTAMENTO COM VISITANTES (NÚMEROS DESCONHECIDOS):
-- Se for primeiro contato e a pessoa NÃO está cadastrada, pergunte o nome de forma natural
+- Se a pessoa NÃO está cadastrada (Membro cadastrado: NÃO), você DEVE perguntar o nome
 - Exemplo: "${greeting}! Que bom falar com você! Como posso te chamar?"
-- Após saber o nome, use a função register_visitor para salvar
+- IMPORTANTE: Quando a pessoa responder com um nome (ex: "Pedro", "Maria", "João"), você DEVE:
+  1. IMEDIATAMENTE chamar a função register_visitor com o nome informado
+  2. Só depois de cadastrar, responder de forma acolhedora
+- Se a mensagem contiver APENAS um nome ou "me chamo X" ou "sou X", é uma resposta ao pedido de nome
 - Depois de cadastrar, continue ajudando normalmente
 - Seja acolhedor e faça a pessoa se sentir bem-vinda
 
@@ -405,13 +408,19 @@ CONTEXTO DA CONVERSA:
     prompt += `\n\nIMPORTANTE: Esta pessoa é um membro cadastrado. Trate-a pelo nome e de forma personalizada.`
   }
 
-  if (context.isFirstContact && !context.userProfile) {
-    prompt += `\n\n👋 PRIMEIRO CONTATO - VISITANTE NÃO CADASTRADO:
-- Esta pessoa está entrando em contato pela primeira vez
-- Cumprimente com "${greeting}" e pergunte o nome de forma natural e acolhedora
-- Exemplo: "${greeting}! Que alegria falar com você! Como posso te chamar?"
-- Após saber o nome, cadastre usando register_visitor
-- Depois pergunte como pode ajudar`
+  if (!context.userProfile) {
+    prompt += `\n\n👋 VISITANTE NÃO CADASTRADO - REGRAS OBRIGATÓRIAS:
+- Esta pessoa NÃO está cadastrada no sistema
+- Se a mensagem atual for um nome (ex: "Pedro", "Maria", "Me chamo João", "Sou Ana"):
+  → Você DEVE chamar register_visitor IMEDIATAMENTE com esse nome
+  → NÃO responda sem antes cadastrar a pessoa
+  → Após cadastrar, cumprimente pelo nome e pergunte como pode ajudar
+- Se a mensagem NÃO for um nome, pergunte: "${greeting}! Como posso te chamar?"
+- Exemplos de mensagens que SÃO nomes (cadastrar imediatamente):
+  "Pedro" → register_visitor(name="Pedro")
+  "Me chamo Maria" → register_visitor(name="Maria")
+  "Sou o João" → register_visitor(name="João")
+  "Ana Paula" → register_visitor(name="Ana Paula")`
   }
 
   return prompt
@@ -440,7 +449,7 @@ async function getConversationHistory(
   return messages
     .filter(msg => msg.content && msg.content.trim())
     .map(msg => ({
-      role: msg.direction === 'inbound' ? 'user' as const : 'assistant' as const,
+      role: (msg.direction === 'INBOUND' || msg.direction === 'inbound') ? 'user' as const : 'assistant' as const,
       content: msg.content
     }))
 }
@@ -564,15 +573,15 @@ function getVisitorFunctions() {
     },
     {
       name: 'register_visitor',
-      description: 'Cadastra um visitante interessado. Use quando alguém quiser visitar ou conhecer a igreja.',
+      description: 'Cadastra um visitante no sistema. OBRIGATÓRIO: Use SEMPRE que uma pessoa não cadastrada informar seu nome (ex: "Pedro", "Maria", "Me chamo João"). Também use quando alguém quiser visitar ou conhecer a igreja.',
       parameters: {
         type: 'object',
         properties: {
-          name: { type: 'string', description: 'Nome completo do visitante' },
-          phone: { type: 'string', description: 'Telefone do visitante' },
+          name: { type: 'string', description: 'Nome do visitante (extrair da mensagem)' },
+          phone: { type: 'string', description: 'Telefone do visitante (já disponível no contexto)' },
           interest: { type: 'string', description: 'O que motivou o interesse (opcional)' }
         },
-        required: ['name', 'phone']
+        required: ['name']
       }
     },
     {
@@ -615,25 +624,55 @@ async function executeVisitorFunction(
 
   switch (functionName) {
     case 'register_visitor': {
-      // Cadastrar visitante
-      const { error } = await supabase.from('profiles').insert({
-        full_name: args.name,
-        phone: args.phone || context.phoneNumber,
+      // Cadastrar visitante - usa o telefone do contexto automaticamente
+      const visitorPhone = context.phoneNumber.replace(/\D/g, '')
+      const visitorName = args.name?.trim()
+      
+      if (!visitorName) {
+        console.error('[Visitor Registration] Nome não fornecido')
+        return { success: false, error: 'Nome do visitante não foi fornecido.' }
+      }
+
+      console.log(`[Visitor Registration] Cadastrando: ${visitorName} - ${visitorPhone}`)
+
+      // Verificar se já existe pelo telefone
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('church_id', context.churchId)
+        .ilike('phone', `%${visitorPhone.slice(-9)}%`)
+        .single()
+
+      if (existing) {
+        console.log(`[Visitor Registration] Visitante já existe: ${existing.full_name}`)
+        return {
+          success: true,
+          message: `${visitorName} já está cadastrado(a) como ${existing.full_name}!`,
+          data: { alreadyExists: true, existingName: existing.full_name }
+        }
+      }
+
+      const { data: newProfile, error } = await supabase.from('profiles').insert({
+        full_name: visitorName,
+        phone: visitorPhone,
         church_id: context.churchId,
         role: 'MEMBER',
         member_stage: 'VISITOR',
         is_active: true,
-        notes: args.interest ? `Interesse: ${args.interest}` : null
-      })
+        notes: args.interest ? `Interesse: ${args.interest}` : 'Cadastrado via WhatsApp'
+      }).select('id, full_name').single()
 
       if (error) {
         console.error('[Visitor Registration] Error:', error)
         return { success: false, error: 'Não foi possível realizar o cadastro. Por favor, tente novamente.' }
       }
 
+      console.log(`[Visitor Registration] ✅ Cadastrado com sucesso: ${newProfile?.full_name} (ID: ${newProfile?.id})`)
+
       return {
         success: true,
-        message: `✅ Cadastro realizado com sucesso! ${args.name}, você está registrado como visitante. Será um prazer recebê-lo em nossa igreja! Um de nossos líderes entrará em contato em breve.`
+        message: `Cadastro realizado! ${visitorName} agora está registrado(a) como visitante.`,
+        data: { visitorId: newProfile?.id, name: newProfile?.full_name }
       }
     }
 
@@ -762,12 +801,12 @@ async function saveMessage(
   supabase: SupabaseClient,
   churchId: string,
   instanceName: string,
-  direction: 'inbound' | 'outbound',
+  direction: 'INBOUND' | 'OUTBOUND',
   fromNumber: string,
   toNumber: string,
   content: string
 ): Promise<void> {
-  await supabase.from('whatsapp_messages').insert({
+  const { error } = await supabase.from('whatsapp_messages').insert({
     church_id: churchId,
     instance_name: instanceName,
     direction,
@@ -775,9 +814,13 @@ async function saveMessage(
     to_number: toNumber,
     message_type: 'text',
     content,
-    status: direction === 'outbound' ? 'sent' : 'received',
+    status: direction === 'OUTBOUND' ? 'sent' : 'received',
     sent_at: new Date().toISOString()
   })
+
+  if (error) {
+    console.error('[AI Agent] ❌ Error saving message:', error.message)
+  }
 }
 
 // ============================================================================
@@ -833,7 +876,7 @@ export async function processEvolutionMessage(
         'Olá! No momento estamos fora do horário de atendimento. Retornaremos em breve!'
       
       await EvolutionService.sendTextWithTyping(instanceName, phoneNumber, outsideMessage)
-      await saveMessage(supabase, churchId, instanceName, 'outbound', '', phoneNumber, outsideMessage)
+      await saveMessage(supabase, churchId, instanceName, 'OUTBOUND', '', phoneNumber, outsideMessage)
       
       return { success: true, response: outsideMessage }
     }
@@ -945,7 +988,7 @@ export async function processEvolutionMessage(
       supabase,
       churchId,
       instanceName,
-      'outbound',
+      'OUTBOUND',
       instanceData?.phone_number || '',
       phoneNumber,
       response
