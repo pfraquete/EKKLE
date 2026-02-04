@@ -195,10 +195,49 @@ function isWithinWorkingHours(config: AgentConfig): boolean {
  * Detect user intent from message
  */
 function detectIntent(message: string): {
-  type: 'greeting' | 'question' | 'prayer_request' | 'visitor_registration' | 'human_request' | 'general'
+  type: 'greeting' | 'question' | 'prayer_request' | 'visitor_registration' | 'human_request' | 'name_response' | 'general'
   confidence: number
+  extractedName?: string
 } {
   const lowerMessage = message.toLowerCase().trim()
+  const originalMessage = message.trim()
+
+  // Name response patterns - detectar quando usuário responde com nome
+  // Padrões: "Pedro", "Me chamo Maria", "Sou o João", "Meu nome é Ana"
+  const namePatterns = [
+    /^me\s+chamo\s+(.+)$/i,
+    /^sou\s+(?:o|a)?\s*(.+)$/i,
+    /^meu\s+nome\s+é\s+(.+)$/i,
+    /^pode\s+me\s+chamar\s+de\s+(.+)$/i,
+    /^\u00e9\s+(.+)$/i,
+  ]
+  
+  for (const pattern of namePatterns) {
+    const match = originalMessage.match(pattern)
+    if (match && match[1]) {
+      const name = match[1].trim()
+      // Validar que parece um nome (1-4 palavras, sem números)
+      if (name.length >= 2 && name.length <= 50 && !/\d/.test(name) && name.split(/\s+/).length <= 4) {
+        return { type: 'name_response', confidence: 0.95, extractedName: name }
+      }
+    }
+  }
+
+  // Se a mensagem é curta (1-3 palavras) e parece um nome
+  const words = originalMessage.split(/\s+/)
+  if (words.length >= 1 && words.length <= 3) {
+    const potentialName = originalMessage
+    // Verificar se parece um nome: começa com maiúscula, sem números, sem pontuação excessiva
+    if (
+      potentialName.length >= 2 && 
+      potentialName.length <= 40 &&
+      /^[A-ZÀ-Ü]/.test(potentialName) && 
+      !/\d/.test(potentialName) &&
+      !/[?!@#$%^&*(){}\[\]|\\:";<>,.\/?]/.test(potentialName)
+    ) {
+      return { type: 'name_response', confidence: 0.8, extractedName: potentialName }
+    }
+  }
 
   // Greeting patterns
   const greetings = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'hey', 'eai', 'e ai', 'oie']
@@ -883,16 +922,35 @@ export async function processEvolutionMessage(
 
     // Detect intent
     const intent = detectIntent(message)
-    console.log(`[AI Agent] 🎯 Intent: ${intent.type} (confidence: ${intent.confidence})`)
+    console.log(`[AI Agent] 🎯 Intent: ${intent.type} (confidence: ${intent.confidence})${intent.extractedName ? ` - Name: ${intent.extractedName}` : ''}`)
 
     // Check if first contact
     const firstContact = await isFirstContact(supabase, churchId, phoneNumber)
     console.log(`[AI Agent] 👋 First contact: ${firstContact}`)
 
     // Find user profile by phone number
-    const userProfile = await findUserByPhone(supabase, churchId, phoneNumber)
+    let userProfile = await findUserByPhone(supabase, churchId, phoneNumber)
     if (userProfile) {
       console.log(`[AI Agent] 👤 Recognized member: ${userProfile.full_name} (${userProfile.role})`)
+    }
+
+    // AUTO-CADASTRO: Se detectou um nome e o usuário não está cadastrado, cadastrar automaticamente
+    if (intent.type === 'name_response' && intent.extractedName && !userProfile) {
+      console.log(`[AI Agent] 📝 Auto-registering visitor: ${intent.extractedName}`)
+      
+      const registerResult = await executeVisitorFunction('register_visitor', { name: intent.extractedName }, {
+        churchId,
+        phoneNumber,
+        senderName: intent.extractedName
+      })
+      
+      if (registerResult.success) {
+        console.log(`[AI Agent] ✅ Visitor auto-registered: ${intent.extractedName}`)
+        // Atualizar userProfile após cadastro
+        userProfile = await findUserByPhone(supabase, churchId, phoneNumber)
+      } else {
+        console.error(`[AI Agent] ❌ Failed to auto-register:`, registerResult.error)
+      }
     }
 
     // Get conversation history
