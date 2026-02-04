@@ -8,6 +8,19 @@ export type AgentTone = 'formal' | 'casual' | 'friendly' | 'professional'
 export type AgentLanguageStyle = 'direct' | 'detailed' | 'encouraging'
 export type AgentEmojiUsage = 'none' | 'minimal' | 'moderate' | 'frequent'
 
+export interface ServiceTime {
+  day: string
+  time: string
+  name: string
+}
+
+export interface LeaderContact {
+  name: string
+  role: string
+  phone: string
+  area: string
+}
+
 export interface AgentConfig {
   id: string
   church_id: string
@@ -39,6 +52,19 @@ export interface AgentConfig {
   auto_absence_followup_enabled: boolean
   auto_absence_followup_days: number
 
+  // Church Information (for AI agent)
+  church_address: string
+  church_address_complement: string
+  church_city: string
+  church_state: string
+  church_zip_code: string
+  church_google_maps_link: string
+  church_phone: string
+  church_email: string
+  service_times: ServiceTime[]
+  leaders_contacts: LeaderContact[]
+  custom_info: string
+
   // Timestamps
   created_at: string
   updated_at: string
@@ -65,6 +91,18 @@ const DEFAULT_CONFIG: Omit<AgentConfig, 'id' | 'church_id' | 'created_at' | 'upd
   auto_welcome_enabled: true,
   auto_absence_followup_enabled: false,
   auto_absence_followup_days: 14,
+  // Church Information defaults
+  church_address: '',
+  church_address_complement: '',
+  church_city: '',
+  church_state: '',
+  church_zip_code: '',
+  church_google_maps_link: '',
+  church_phone: '',
+  church_email: '',
+  service_times: [],
+  leaders_contacts: [],
+  custom_info: '',
 }
 
 /**
@@ -100,7 +138,12 @@ export async function getAgentConfig(): Promise<AgentConfig | null> {
     .single()
 
   if (existingConfig) {
-    return existingConfig as AgentConfig
+    // Ensure arrays are properly parsed
+    return {
+      ...existingConfig,
+      service_times: existingConfig.service_times || [],
+      leaders_contacts: existingConfig.leaders_contacts || [],
+    } as AgentConfig
   }
 
   // Config doesn't exist - create with defaults (only pastors can create)
@@ -123,7 +166,11 @@ export async function getAgentConfig(): Promise<AgentConfig | null> {
     return null
   }
 
-  return newConfig as AgentConfig
+  return {
+    ...newConfig,
+    service_times: newConfig.service_times || [],
+    leaders_contacts: newConfig.leaders_contacts || [],
+  } as AgentConfig
 }
 
 /**
@@ -142,7 +189,11 @@ export async function getAgentConfigByChurchId(churchId: string): Promise<AgentC
     return null
   }
 
-  return config as AgentConfig
+  return {
+    ...config,
+    service_times: config.service_times || [],
+    leaders_contacts: config.leaders_contacts || [],
+  } as AgentConfig
 }
 
 /**
@@ -249,4 +300,63 @@ export async function getOutsideHoursMessage(churchId: string): Promise<string |
   }
 
   return config.outside_hours_message
+}
+
+/**
+ * Get church information context for AI agent
+ */
+export async function getChurchInfoContext(churchId: string): Promise<string> {
+  const config = await getAgentConfigByChurchId(churchId)
+
+  if (!config) {
+    return ''
+  }
+
+  const parts: string[] = []
+
+  // Address
+  if (config.church_address) {
+    let address = `Endereço da igreja: ${config.church_address}`
+    if (config.church_address_complement) address += `, ${config.church_address_complement}`
+    if (config.church_city) address += ` - ${config.church_city}`
+    if (config.church_state) address += `/${config.church_state}`
+    if (config.church_zip_code) address += ` - CEP: ${config.church_zip_code}`
+    parts.push(address)
+  }
+
+  // Google Maps
+  if (config.church_google_maps_link) {
+    parts.push(`Link do Google Maps: ${config.church_google_maps_link}`)
+  }
+
+  // Contact
+  if (config.church_phone) {
+    parts.push(`Telefone da igreja: ${config.church_phone}`)
+  }
+  if (config.church_email) {
+    parts.push(`Email da igreja: ${config.church_email}`)
+  }
+
+  // Service times
+  if (config.service_times && config.service_times.length > 0) {
+    const times = config.service_times
+      .map(s => `${s.name}: ${s.day} às ${s.time}`)
+      .join('; ')
+    parts.push(`Horários dos cultos: ${times}`)
+  }
+
+  // Leaders
+  if (config.leaders_contacts && config.leaders_contacts.length > 0) {
+    const leaders = config.leaders_contacts
+      .map(l => `${l.name} (${l.role}${l.area ? ` - ${l.area}` : ''}): ${l.phone}`)
+      .join('; ')
+    parts.push(`Contatos dos líderes: ${leaders}`)
+  }
+
+  // Custom info
+  if (config.custom_info) {
+    parts.push(`Informações adicionais: ${config.custom_info}`)
+  }
+
+  return parts.join('\n')
 }

@@ -23,7 +23,15 @@ import {
   Gift,
   Bell,
   UserPlus,
-  UserX
+  UserX,
+  MapPin,
+  Phone,
+  Mail,
+  Plus,
+  Trash2,
+  Church,
+  Users,
+  Info
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -31,7 +39,9 @@ import {
   AgentConfig,
   AgentTone,
   AgentLanguageStyle,
-  AgentEmojiUsage
+  AgentEmojiUsage,
+  ServiceTime,
+  LeaderContact
 } from '@/actions/agent-config'
 
 interface AgentConfigPanelProps {
@@ -68,6 +78,13 @@ const WEEKDAYS = [
   { value: 6, label: 'Sáb' },
 ]
 
+const DAYS_OF_WEEK = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
+
+const BRAZILIAN_STATES = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
+  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+]
+
 export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
   const [config, setConfig] = useState<AgentConfig | null>(initialConfig)
   const [isPending, startTransition] = useTransition()
@@ -99,6 +116,40 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
     updateField('working_days', newDays)
   }
 
+  // Service Times handlers
+  const addServiceTime = () => {
+    const newServiceTime: ServiceTime = { day: 'Domingo', time: '10:00', name: 'Culto' }
+    updateField('service_times', [...(config.service_times || []), newServiceTime])
+  }
+
+  const updateServiceTime = (index: number, field: keyof ServiceTime, value: string) => {
+    const updated = [...(config.service_times || [])]
+    updated[index] = { ...updated[index], [field]: value }
+    updateField('service_times', updated)
+  }
+
+  const removeServiceTime = (index: number) => {
+    const updated = (config.service_times || []).filter((_, i) => i !== index)
+    updateField('service_times', updated)
+  }
+
+  // Leader Contacts handlers
+  const addLeaderContact = () => {
+    const newLeader: LeaderContact = { name: '', role: 'Líder de Célula', phone: '', area: '' }
+    updateField('leaders_contacts', [...(config.leaders_contacts || []), newLeader])
+  }
+
+  const updateLeaderContact = (index: number, field: keyof LeaderContact, value: string) => {
+    const updated = [...(config.leaders_contacts || [])]
+    updated[index] = { ...updated[index], [field]: value }
+    updateField('leaders_contacts', updated)
+  }
+
+  const removeLeaderContact = (index: number) => {
+    const updated = (config.leaders_contacts || []).filter((_, i) => i !== index)
+    updateField('leaders_contacts', updated)
+  }
+
   const handleSave = () => {
     startTransition(async () => {
       const result = await updateAgentConfig({
@@ -121,6 +172,18 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
         auto_welcome_enabled: config.auto_welcome_enabled,
         auto_absence_followup_enabled: config.auto_absence_followup_enabled,
         auto_absence_followup_days: config.auto_absence_followup_days,
+        // Church Information
+        church_address: config.church_address,
+        church_address_complement: config.church_address_complement,
+        church_city: config.church_city,
+        church_state: config.church_state,
+        church_zip_code: config.church_zip_code,
+        church_google_maps_link: config.church_google_maps_link,
+        church_phone: config.church_phone,
+        church_email: config.church_email,
+        service_times: config.service_times,
+        leaders_contacts: config.leaders_contacts,
+        custom_info: config.custom_info,
       })
 
       if (result.success) {
@@ -161,8 +224,12 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="personality" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6">
+          <Tabs defaultValue="church-info" className="w-full">
+            <TabsList className="grid w-full grid-cols-5 mb-6">
+              <TabsTrigger value="church-info" className="flex items-center gap-2">
+                <Church className="h-4 w-4" />
+                <span className="hidden sm:inline">Igreja</span>
+              </TabsTrigger>
               <TabsTrigger value="personality" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Personalidade</span>
@@ -180,6 +247,279 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
                 <span className="hidden sm:inline">Automações</span>
               </TabsTrigger>
             </TabsList>
+
+            {/* Church Info Tab */}
+            <TabsContent value="church-info" className="space-y-6">
+              {/* Info Banner */}
+              <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/10">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-blue-700">Informações para o Agente IA</h4>
+                    <p className="text-sm text-blue-600/80 mt-1">
+                      Preencha estas informações para que o agente possa responder perguntas sobre localização, 
+                      horários dos cultos e contato dos líderes quando as pessoas entrarem em contato pelo WhatsApp.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Address Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <h3 className="font-bold text-lg">Endereço da Igreja</h3>
+                </div>
+                
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="church_address">Endereço</Label>
+                    <Input
+                      id="church_address"
+                      value={config.church_address || ''}
+                      onChange={(e) => updateField('church_address', e.target.value)}
+                      placeholder="Rua, número, bairro"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="church_address_complement">Complemento</Label>
+                    <Input
+                      id="church_address_complement"
+                      value={config.church_address_complement || ''}
+                      onChange={(e) => updateField('church_address_complement', e.target.value)}
+                      placeholder="Sala, andar, etc."
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="church_city">Cidade</Label>
+                    <Input
+                      id="church_city"
+                      value={config.church_city || ''}
+                      onChange={(e) => updateField('church_city', e.target.value)}
+                      placeholder="Nome da cidade"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="church_state">Estado</Label>
+                    <Select
+                      value={config.church_state || ''}
+                      onValueChange={(value) => updateField('church_state', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BRAZILIAN_STATES.map((state) => (
+                          <SelectItem key={state} value={state}>{state}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="church_zip_code">CEP</Label>
+                    <Input
+                      id="church_zip_code"
+                      value={config.church_zip_code || ''}
+                      onChange={(e) => updateField('church_zip_code', e.target.value)}
+                      placeholder="00000-000"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="church_google_maps_link">Link do Google Maps</Label>
+                    <Input
+                      id="church_google_maps_link"
+                      value={config.church_google_maps_link || ''}
+                      onChange={(e) => updateField('church_google_maps_link', e.target.value)}
+                      placeholder="https://maps.google.com/..."
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Cole o link de compartilhamento do Google Maps para facilitar a localização.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-5 w-5 text-primary" />
+                  <h3 className="font-bold text-lg">Contato da Igreja</h3>
+                </div>
+                
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="church_phone">Telefone</Label>
+                    <Input
+                      id="church_phone"
+                      value={config.church_phone || ''}
+                      onChange={(e) => updateField('church_phone', e.target.value)}
+                      placeholder="(11) 99999-9999"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="church_email">Email</Label>
+                    <Input
+                      id="church_email"
+                      type="email"
+                      value={config.church_email || ''}
+                      onChange={(e) => updateField('church_email', e.target.value)}
+                      placeholder="contato@igreja.com.br"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Times Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    <h3 className="font-bold text-lg">Horários dos Cultos</h3>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={addServiceTime}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
+                
+                {(!config.service_times || config.service_times.length === 0) ? (
+                  <div className="p-6 border-2 border-dashed border-border rounded-xl text-center">
+                    <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground text-sm">
+                      Nenhum horário cadastrado. Clique em "Adicionar" para incluir os horários dos cultos.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {config.service_times.map((service, index) => (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
+                        <div className="flex-1 grid grid-cols-3 gap-3">
+                          <Input
+                            value={service.name}
+                            onChange={(e) => updateServiceTime(index, 'name', e.target.value)}
+                            placeholder="Nome do culto"
+                          />
+                          <Select
+                            value={service.day}
+                            onValueChange={(value) => updateServiceTime(index, 'day', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DAYS_OF_WEEK.map((day) => (
+                                <SelectItem key={day} value={day}>{day}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            type="time"
+                            value={service.time}
+                            onChange={(e) => updateServiceTime(index, 'time', e.target.value)}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeServiceTime(index)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Leaders Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    <h3 className="font-bold text-lg">Contatos dos Líderes</h3>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={addLeaderContact}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
+                
+                {(!config.leaders_contacts || config.leaders_contacts.length === 0) ? (
+                  <div className="p-6 border-2 border-dashed border-border rounded-xl text-center">
+                    <Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground text-sm">
+                      Nenhum líder cadastrado. Adicione os líderes para que o agente possa direcionar as pessoas.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {config.leaders_contacts.map((leader, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
+                        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <Input
+                            value={leader.name}
+                            onChange={(e) => updateLeaderContact(index, 'name', e.target.value)}
+                            placeholder="Nome"
+                          />
+                          <Input
+                            value={leader.role}
+                            onChange={(e) => updateLeaderContact(index, 'role', e.target.value)}
+                            placeholder="Função (ex: Líder de Célula)"
+                          />
+                          <Input
+                            value={leader.phone}
+                            onChange={(e) => updateLeaderContact(index, 'phone', e.target.value)}
+                            placeholder="Telefone"
+                          />
+                          <Input
+                            value={leader.area}
+                            onChange={(e) => updateLeaderContact(index, 'area', e.target.value)}
+                            placeholder="Área/Região (opcional)"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeLeaderContact(index)}
+                          className="text-destructive hover:text-destructive mt-1"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Custom Info Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Info className="h-5 w-5 text-primary" />
+                  <h3 className="font-bold text-lg">Informações Adicionais</h3>
+                </div>
+                
+                <div className="space-y-2">
+                  <Textarea
+                    value={config.custom_info || ''}
+                    onChange={(e) => updateField('custom_info', e.target.value)}
+                    placeholder="Adicione qualquer informação extra que o agente deve saber para responder às pessoas. Ex: Estacionamento gratuito, acessibilidade, ministérios disponíveis, etc."
+                    rows={4}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Estas informações serão usadas pelo agente para responder perguntas gerais sobre a igreja.
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
 
             {/* Personality Tab */}
             <TabsContent value="personality" className="space-y-6">
