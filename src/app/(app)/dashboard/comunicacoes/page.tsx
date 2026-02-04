@@ -1,5 +1,5 @@
 import { getProfile } from '@/actions/auth'
-import { getWhatsAppInstance } from '@/actions/whatsapp'
+import { getWhatsAppInstance, getWhatsAppChats } from '@/actions/whatsapp'
 import { getAgentConfig } from '@/actions/agent-config'
 import { redirect } from 'next/navigation'
 import { BulkMessagingForm } from '@/components/whatsapp/bulk-messaging-form'
@@ -19,54 +19,12 @@ export default async function ComunicacoesPage() {
     const { data: instance } = await getWhatsAppInstance()
     const agentConfig = await getAgentConfig()
 
-    // Mock contacts for demonstration - in production, fetch from Evolution API
-    const mockContacts: WhatsAppContact[] = instance?.status === 'CONNECTED' ? [
-        {
-            id: '1',
-            name: 'Maria Silva',
-            phone: '+55 11 99999-1234',
-            last_message: 'Obrigada pela informação!',
-            last_message_time: new Date(Date.now() - 300000).toISOString(),
-            unread_count: 2,
-            is_online: true
-        },
-        {
-            id: '2',
-            name: 'João Santos',
-            phone: '+55 11 98888-5678',
-            last_message: 'Qual horário do culto?',
-            last_message_time: new Date(Date.now() - 3600000).toISOString(),
-            unread_count: 0,
-            is_online: false
-        },
-        {
-            id: '3',
-            name: 'Ana Oliveira',
-            phone: '+55 11 97777-9012',
-            last_message: 'Vou participar da célula amanhã',
-            last_message_time: new Date(Date.now() - 7200000).toISOString(),
-            unread_count: 5,
-            is_online: true
-        },
-        {
-            id: '4',
-            name: 'Pedro Costa',
-            phone: '+55 11 96666-3456',
-            last_message: 'Amém! Deus abençoe',
-            last_message_time: new Date(Date.now() - 86400000).toISOString(),
-            unread_count: 0,
-            is_online: false
-        },
-        {
-            id: '5',
-            name: 'Carla Mendes',
-            phone: '+55 11 95555-7890',
-            last_message: 'Preciso conversar com o pastor',
-            last_message_time: new Date(Date.now() - 172800000).toISOString(),
-            unread_count: 1,
-            is_online: false
-        },
-    ] : []
+    // Fetch real contacts from Evolution API
+    let contacts: WhatsAppContact[] = []
+    if (instance?.status === 'CONNECTED') {
+        const { data: chats } = await getWhatsAppChats()
+        contacts = chats || []
+    }
 
     return (
         <div className="max-w-7xl mx-auto space-y-6 pb-20">
@@ -111,7 +69,7 @@ export default async function ComunicacoesPage() {
 
                 <TabsContent value="conversations" className="mt-0 outline-none">
                     <WhatsAppChatLayout
-                        contacts={mockContacts}
+                        contacts={contacts}
                         instanceName={instance?.instance_name || ''}
                         isConnected={instance?.status === 'CONNECTED'}
                     />

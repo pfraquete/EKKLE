@@ -5,9 +5,12 @@ import { WhatsAppConversationList } from './whatsapp-conversation-list'
 import { WhatsAppChatArea } from './whatsapp-chat-area'
 import { WhatsAppEmptyState } from './whatsapp-empty-state'
 import { MessageSquare } from 'lucide-react'
+import { getWhatsAppMessages, sendWhatsAppMessage } from '@/actions/whatsapp'
+import { toast } from 'sonner'
 
 export interface WhatsAppContact {
     id: string
+    remoteJid?: string
     name: string
     phone: string
     photo_url?: string | null
@@ -44,6 +47,11 @@ export function WhatsAppChatLayout({
     const [searchQuery, setSearchQuery] = useState('')
     const [isLoading, setIsLoading] = useState(false)
 
+    // Update contacts when initialContacts changes
+    useEffect(() => {
+        setContacts(initialContacts)
+    }, [initialContacts])
+
     // Filter contacts based on search
     const filteredContacts = contacts.filter(contact =>
         contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -55,40 +63,25 @@ export function WhatsAppChatLayout({
         setSelectedContact(contact)
         setIsLoading(true)
         
-        // TODO: Fetch messages for this contact from Evolution API
-        // For now, using mock data
-        setTimeout(() => {
-            setMessages([
-                {
-                    id: '1',
-                    contact_id: contact.id,
-                    content: 'Olá! Como posso ajudar?',
-                    is_from_me: true,
-                    timestamp: new Date(Date.now() - 3600000).toISOString(),
-                    status: 'read',
-                    type: 'text'
-                },
-                {
-                    id: '2',
-                    contact_id: contact.id,
-                    content: 'Oi! Gostaria de saber mais sobre os cultos.',
-                    is_from_me: false,
-                    timestamp: new Date(Date.now() - 3500000).toISOString(),
-                    status: 'read',
-                    type: 'text'
-                },
-                {
-                    id: '3',
-                    contact_id: contact.id,
-                    content: 'Claro! Nossos cultos acontecem aos domingos às 10h e 18h.',
-                    is_from_me: true,
-                    timestamp: new Date(Date.now() - 3400000).toISOString(),
-                    status: 'read',
-                    type: 'text'
-                },
-            ])
+        try {
+            // Fetch real messages from Evolution API
+            const remoteJid = contact.remoteJid || `${contact.phone.replace(/\D/g, '')}@s.whatsapp.net`
+            const { data: fetchedMessages, error } = await getWhatsAppMessages(remoteJid)
+            
+            if (error) {
+                console.error('Error fetching messages:', error)
+                toast.error('Erro ao carregar mensagens')
+                setMessages([])
+            } else {
+                setMessages(fetchedMessages || [])
+            }
+        } catch (err) {
+            console.error('Error fetching messages:', err)
+            toast.error('Erro ao carregar mensagens')
+            setMessages([])
+        } finally {
             setIsLoading(false)
-        }, 500)
+        }
 
         // Mark as read
         setContacts(prev => prev.map(c => 
@@ -110,6 +103,7 @@ export function WhatsAppChatLayout({
             type: 'text'
         }
 
+        // Optimistically add message to UI
         setMessages(prev => [...prev, newMessage])
 
         // Update contact's last message
@@ -119,13 +113,28 @@ export function WhatsAppChatLayout({
                 : c
         ))
 
-        // TODO: Actually send via Evolution API
-        // Simulate delivery
-        setTimeout(() => {
-            setMessages(prev => prev.map(m => 
-                m.id === newMessage.id ? { ...m, status: 'delivered' } : m
-            ))
-        }, 1000)
+        try {
+            // Send via Evolution API
+            const remoteJid = selectedContact.remoteJid || `${selectedContact.phone.replace(/\D/g, '')}@s.whatsapp.net`
+            const { success, error } = await sendWhatsAppMessage(remoteJid, content.trim())
+            
+            if (success) {
+                // Update message status to delivered
+                setMessages(prev => prev.map(m => 
+                    m.id === newMessage.id ? { ...m, status: 'delivered' } : m
+                ))
+                toast.success('Mensagem enviada!')
+            } else {
+                toast.error(error || 'Erro ao enviar mensagem')
+                // Remove failed message from UI
+                setMessages(prev => prev.filter(m => m.id !== newMessage.id))
+            }
+        } catch (err) {
+            console.error('Error sending message:', err)
+            toast.error('Erro ao enviar mensagem')
+            // Remove failed message from UI
+            setMessages(prev => prev.filter(m => m.id !== newMessage.id))
+        }
     }
 
     if (!isConnected) {

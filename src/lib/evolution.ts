@@ -41,6 +41,36 @@ export interface EvolutionStateResponse {
     };
 }
 
+export interface EvolutionChat {
+    id: string;
+    remoteJid: string;
+    pushName?: string;
+    profilePicUrl?: string;
+    lastMessage?: {
+        content: string;
+        timestamp: number;
+    };
+    unreadCount?: number;
+}
+
+export interface EvolutionMessage {
+    id: string;
+    key: {
+        id: string;
+        fromMe: boolean;
+        remoteJid: string;
+    };
+    pushName?: string;
+    message?: {
+        conversation?: string;
+        extendedTextMessage?: {
+            text: string;
+        };
+    };
+    messageType?: string;
+    messageTimestamp?: number;
+}
+
 export class EvolutionService {
     private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         checkConfig();
@@ -192,5 +222,60 @@ export class EvolutionService {
                 }
             }),
         });
+    }
+
+    /**
+     * Get all chats for an instance
+     */
+    static async getChats(instanceName: string): Promise<EvolutionChat[]> {
+        try {
+            const response = await this.request<any>(`/chat/findChats/${instanceName}`, {
+                method: 'POST',
+                body: JSON.stringify({}),
+            });
+            return response || [];
+        } catch (error) {
+            console.error('[Evolution API] Error fetching chats:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Get messages for a specific chat
+     */
+    static async getMessages(instanceName: string, remoteJid: string, limit: number = 50): Promise<{ messages: { records: EvolutionMessage[] } }> {
+        try {
+            const response = await this.request<any>(`/chat/findMessages/${instanceName}`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    where: {
+                        key: {
+                            remoteJid: remoteJid
+                        }
+                    },
+                    limit: limit
+                }),
+            });
+            return response;
+        } catch (error) {
+            console.error('[Evolution API] Error fetching messages:', error);
+            return { messages: { records: [] } };
+        }
+    }
+
+    /**
+     * Get contacts for an instance
+     */
+    static async getContacts(instanceName: string): Promise<any[]> {
+        try {
+            const response = await this.request<any>(`/chat/findContacts/${instanceName}`, {
+                method: 'POST',
+                body: JSON.stringify({}),
+            });
+            return response || [];
+        } catch (error) {
+            console.error('[Evolution API] Error fetching contacts:', error);
+            return [];
+        }
     }
 }

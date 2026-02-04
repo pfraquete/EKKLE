@@ -250,3 +250,132 @@ export async function checkWhatsAppStatus(instanceName: string) {
         return 'ERROR'
     }
 }
+
+
+export async function getWhatsAppChats() {
+    const profile = await getProfile()
+    if (!profile) return { data: [], error: new Error('Não autenticado') }
+    
+    const { data: instance } = await getWhatsAppInstance()
+    if (!instance || instance.status !== 'CONNECTED') {
+        return { data: [], error: new Error('WhatsApp não conectado') }
+    }
+
+    try {
+        const chats = await EvolutionService.getChats(instance.instance_name)
+        
+        // Transform chats to our format, filtering out groups
+        const contacts = chats
+            .filter((chat: any) => chat.remoteJid?.endsWith('@s.whatsapp.net'))
+            .map((chat: any) => {
+                const phone = chat.remoteJid?.replace('@s.whatsapp.net', '') || ''
+                return {
+                    id: chat.id || chat.remoteJid,
+                    remoteJid: chat.remoteJid,
+                    name: chat.pushName || chat.name || formatPhoneNumber(phone),
+                    phone: phone,
+                    photo_url: chat.profilePicUrl || null,
+                    last_message: chat.lastMessage?.content || '',
+                    last_message_time: chat.lastMessage?.timestamp 
+                        ? new Date(chat.lastMessage.timestamp * 1000).toISOString()
+                        : null,
+                    unread_count: chat.unreadCount || 0,
+                    is_online: false
+                }
+            })
+            .sort((a: any, b: any) => {
+                const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0
+                const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0
+                return timeB - timeA
+            })
+
+        return { data: contacts, error: null }
+    } catch (error: any) {
+        console.error('Error fetching WhatsApp chats:', error)
+        return { data: [], error }
+    }
+}
+
+export async function getWhatsAppMessages(remoteJid: string) {
+    const profile = await getProfile()
+    if (!profile) return { data: [], error: new Error('Não autenticado') }
+    
+    const { data: instance } = await getWhatsAppInstance()
+    if (!instance || instance.status !== 'CONNECTED') {
+        return { data: [], error: new Error('WhatsApp não conectado') }
+    }
+
+    try {
+        const response = await EvolutionService.getMessages(instance.instance_name, remoteJid, 100)
+        const records = response?.messages?.records || []
+        
+        // Transform messages to our format
+        const messages = records
+            .filter((msg: any) => {
+                const msgType = msg.messageType
+                return msgType === 'conversation' || msgType === 'extendedTextMessage'
+            })
+            .map((msg: any) => {
+                let content = ''
+                if (msg.message?.conversation) {
+                    content = msg.message.conversation
+                } else if (msg.message?.extendedTextMessage?.text) {
+                    content = msg.message.extendedTextMessage.text
+                }
+
+                return {
+                    id: msg.key?.id || msg.id,
+                    contact_id: remoteJid,
+                    content: content,
+                    is_from_me: msg.key?.fromMe || false,
+                    timestamp: msg.messageTimestamp 
+                        ? new Date(msg.messageTimestamp * 1000).toISOString()
+                        : new Date().toISOString(),
+                    status: 'read' as const,
+                    type: 'text' as const
+                }
+            })
+            .sort((a: any, b: any) => {
+                return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+            })
+
+        return { data: messages, error: null }
+    } catch (error: any) {
+        console.error('Error fetching WhatsApp messages:', error)
+        return { data: [], error }
+    }
+}
+
+export async function sendWhatsAppMessage(remoteJid: string, text: string) {
+    const profile = await getProfile()
+    if (!profile) return { success: false, error: 'Não autenticado' }
+    
+    const { data: instance } = await getWhatsAppInstance()
+    if (!instance || instance.status !== 'CONNECTED') {
+        return { success: false, error: 'WhatsApp não conectado' }
+    }
+
+    try {
+        const phone = remoteJid.replace('@s.whatsapp.net', '')
+        await EvolutionService.sendText(instance.instance_name, phone, text)
+        return { success: true, error: null }
+    } catch (error: any) {
+        console.error('Error sending WhatsApp message:', error)
+        return { success: false, error: error.message }
+    }
+}
+
+function formatPhoneNumber(phone: string): string {
+    if (!phone) return 'Desconhecido'
+    // Format Brazilian phone numbers
+    if (phone.startsWith('55') && phone.length >= 12) {
+        const ddd = phone.slice(2, 4)
+        const number = phone.slice(4)
+        if (number.length === 9) {
+            return `(${ddd}) ${number.slice(0, 5)}-${number.slice(5)}`
+        } else if (number.length === 8) {
+            return `(${ddd}) ${number.slice(0, 4)}-${number.slice(4)}`
+        }
+    }
+    return `+${phone}`
+}
