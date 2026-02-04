@@ -27,6 +27,7 @@ export interface AgentConfig {
 
   // Agent Status
   is_active: boolean
+  setup_completed: boolean
 
   // Personality
   agent_name: string
@@ -76,6 +77,7 @@ export interface AgentConfig {
 // Default configuration
 const DEFAULT_CONFIG: Omit<AgentConfig, 'id' | 'church_id' | 'created_at' | 'updated_at'> = {
   is_active: true,
+  setup_completed: false,
   agent_name: 'Assistente Ekkle',
   tone: 'friendly',
   language_style: 'encouraging',
