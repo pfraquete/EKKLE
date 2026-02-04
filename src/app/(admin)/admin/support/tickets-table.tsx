@@ -154,6 +154,8 @@ export function TicketsTable({ tickets, total, page, totalPages, currentFilters 
                                 const status = statusConfig[ticket.status]
                                 const priority = priorityConfig[ticket.priority]
 
+                                const messageCount = ticket.message_count ?? 0
+
                                 return (
                                     <tr key={ticket.id} className="hover:bg-zinc-800/50 transition-colors">
                                         <td className="px-4 py-4">
@@ -164,10 +166,10 @@ export function TicketsTable({ tickets, total, page, totalPages, currentFilters 
                                                             <span className="text-xs text-zinc-500">
                                                                 #{ticket.ticket_number}
                                                             </span>
-                                                            {ticket.message_count > 0 && (
+                                                            {messageCount > 0 && (
                                                                 <span className="flex items-center gap-1 text-xs text-zinc-500">
                                                                     <MessageSquare className="h-3 w-3" />
-                                                                    {ticket.message_count}
+                                                                    {messageCount}
                                                                 </span>
                                                             )}
                                                         </div>
