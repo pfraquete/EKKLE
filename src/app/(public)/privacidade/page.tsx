@@ -193,8 +193,30 @@ export default function PrivacyPolicyPage() {
                         </div>
                     </section>
 
+                    <section className="space-y-4">
+                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">9</span>
+                            Controlador de Dados
+                        </h2>
+                        <div className="pl-10">
+                            <div className="bg-card border border-border rounded-xl p-6">
+                                <p className="text-muted-foreground space-y-2">
+                                    <span className="block"><strong className="text-foreground">Razão Social:</strong> Meu Acesso Hub LTDA</span>
+                                    <span className="block"><strong className="text-foreground">CNPJ:</strong> 61.429.687/0001-70</span>
+                                    <span className="block"><strong className="text-foreground">Endereço:</strong> São Paulo/SP - Brasil</span>
+                                    <span className="block"><strong className="text-foreground">E-mail DPO:</strong> <a href="mailto:privacidade@ekkle.com.br" className="text-primary hover:underline">privacidade@ekkle.com.br</a></span>
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-4">
+                                    A Meu Acesso Hub LTDA atua como controladora dos dados pessoais tratados pela plataforma Ekkle, 
+                                    nos termos do Art. 5º, VI da Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
                     <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
                         <p>© {new Date().getFullYear()} Ekkle - Sistema de Gestão Eclesiástica</p>
+                        <p className="text-xs mt-1">Meu Acesso Hub LTDA - CNPJ: 61.429.687/0001-70</p>
                         <p className="mt-2">
                             <Link href="/termos" className="text-primary hover:underline">Termos de Uso</Link>
                         </p>

@@ -216,8 +216,26 @@ export default function TermsOfUsePage() {
                         </div>
                     </section>
 
+                    <section className="space-y-4">
+                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                            <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-sm">11</span>
+                            Identificação da Empresa
+                        </h2>
+                        <div className="pl-10">
+                            <div className="bg-card border border-border rounded-xl p-6">
+                                <p className="text-muted-foreground space-y-2">
+                                    <span className="block"><strong className="text-foreground">Razão Social:</strong> Meu Acesso Hub LTDA</span>
+                                    <span className="block"><strong className="text-foreground">CNPJ:</strong> 61.429.687/0001-70</span>
+                                    <span className="block"><strong className="text-foreground">Endereço:</strong> São Paulo/SP - Brasil</span>
+                                    <span className="block"><strong className="text-foreground">E-mail:</strong> <a href="mailto:contato@ekkle.com.br" className="text-primary hover:underline">contato@ekkle.com.br</a></span>
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
                     <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
                         <p>© {new Date().getFullYear()} Ekkle - Sistema de Gestão Eclesiástica</p>
+                        <p className="text-xs mt-1">Meu Acesso Hub LTDA - CNPJ: 61.429.687/0001-70</p>
                         <p className="mt-2">
                             <Link href="/privacidade" className="text-primary hover:underline">Política de Privacidade</Link>
                         </p>
