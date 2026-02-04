@@ -832,7 +832,7 @@ export async function processEvolutionMessage(
       const outsideMessage = agentConfig.outside_hours_message || 
         'Olá! No momento estamos fora do horário de atendimento. Retornaremos em breve!'
       
-      await EvolutionService.sendText(instanceName, phoneNumber, outsideMessage)
+      await EvolutionService.sendTextWithTyping(instanceName, phoneNumber, outsideMessage)
       await saveMessage(supabase, churchId, instanceName, 'outbound', '', phoneNumber, outsideMessage)
       
       return { success: true, response: outsideMessage }
@@ -932,7 +932,7 @@ export async function processEvolutionMessage(
     console.log(`[AI Agent] 📤 Response: "${response.substring(0, 100)}..."`)
 
     // Send response via Evolution API
-    await EvolutionService.sendText(instanceName, phoneNumber, response)
+    await EvolutionService.sendTextWithTyping(instanceName, phoneNumber, response)
 
     // Save response to database
     const { data: instanceData } = await supabase
