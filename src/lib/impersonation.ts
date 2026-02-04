@@ -201,7 +201,9 @@ export async function startImpersonation(
         redirectUrl = '/membro'
     }
 
-    const church = targetProfile.church as { id: string; name: string; slug: string } | null
+    const church = Array.isArray(targetProfile.church)
+        ? targetProfile.church[0] ?? null
+        : targetProfile.church ?? null
 
     return {
         success: true,
@@ -276,9 +278,20 @@ export async function getImpersonationSession(): Promise<ImpersonationSession | 
             return null
         }
 
-        const admin = session.admin as { email: string; full_name: string | null }
-        const target = session.target as { email: string; full_name: string | null }
-        const church = session.church as { name: string } | null
+        const admin = Array.isArray(session.admin)
+            ? session.admin[0] ?? null
+            : session.admin ?? null
+        const target = Array.isArray(session.target)
+            ? session.target[0] ?? null
+            : session.target ?? null
+        const church = Array.isArray(session.church)
+            ? session.church[0] ?? null
+            : session.church ?? null
+
+        if (!admin || !target) {
+            await clearImpersonationCookie()
+            return null
+        }
 
         return {
             sessionId: session.id,
