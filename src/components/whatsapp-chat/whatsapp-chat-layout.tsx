@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { WhatsAppConversationList } from './whatsapp-conversation-list'
 import { WhatsAppChatArea } from './whatsapp-chat-area'
 import { WhatsAppEmptyState } from './whatsapp-empty-state'
-import { MessageSquare } from 'lucide-react'
-import { getWhatsAppMessages, sendWhatsAppMessage } from '@/actions/whatsapp'
+import { MessageSquare, Wifi, WifiOff } from 'lucide-react'
+import { getWhatsAppMessages, sendWhatsAppMessage, getWhatsAppChats } from '@/actions/whatsapp'
+import { useRealtimeMessages, RealtimeMessage } from '@/hooks/use-realtime-messages'
 import { toast } from 'sonner'
 
 export interface WhatsAppContact {
@@ -34,23 +35,135 @@ interface WhatsAppChatLayoutProps {
     contacts: WhatsAppContact[]
     instanceName: string
     isConnected: boolean
+    churchId?: string
 }
 
 export function WhatsAppChatLayout({
     contacts: initialContacts,
     instanceName,
-    isConnected
+    isConnected,
+    churchId
 }: WhatsAppChatLayoutProps) {
     const [contacts, setContacts] = useState<WhatsAppContact[]>(initialContacts)
     const [selectedContact, setSelectedContact] = useState<WhatsAppContact | null>(null)
     const [messages, setMessages] = useState<WhatsAppMessage[]>([])
     const [searchQuery, setSearchQuery] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const selectedContactRef = useRef<WhatsAppContact | null>(null)
+
+    // Keep ref in sync with state
+    useEffect(() => {
+        selectedContactRef.current = selectedContact
+    }, [selectedContact])
+
+    // Handle new realtime messages
+    const handleNewRealtimeMessage = useCallback((realtimeMsg: RealtimeMessage) => {
+        console.log('[Realtime] Processing new message:', realtimeMsg)
+        
+        // Convert realtime message to our format
+        const newMessage: WhatsAppMessage = {
+            id: realtimeMsg.id,
+            contact_id: realtimeMsg.direction === 'inbound' ? realtimeMsg.from_number : realtimeMsg.to_number,
+            content: realtimeMsg.content,
+            is_from_me: realtimeMsg.direction === 'outbound',
+            timestamp: realtimeMsg.sent_at,
+            status: 'delivered',
+            type: realtimeMsg.message_type as any || 'text'
+        }
+
+        // Determine the contact phone number
+        const contactPhone = realtimeMsg.direction === 'inbound' 
+            ? realtimeMsg.from_number 
+            : realtimeMsg.to_number
+
+        // Check if this message is for the currently selected contact
+        const currentContact = selectedContactRef.current
+        if (currentContact) {
+            const currentContactPhone = currentContact.phone.replace(/\D/g, '')
+            if (contactPhone === currentContactPhone || contactPhone.endsWith(currentContactPhone)) {
+                // Add message to current conversation
+                setMessages(prev => {
+                    // Check if message already exists (avoid duplicates)
+                    if (prev.some(m => m.id === newMessage.id)) {
+                        return prev
+                    }
+                    return [...prev, newMessage]
+                })
+            }
+        }
+
+        // Update contacts list with new last message
+        setContacts(prev => {
+            const updatedContacts = prev.map(contact => {
+                const contactPhoneClean = contact.phone.replace(/\D/g, '')
+                if (contactPhone === contactPhoneClean || contactPhone.endsWith(contactPhoneClean)) {
+                    return {
+                        ...contact,
+                        last_message: realtimeMsg.content,
+                        last_message_time: realtimeMsg.sent_at,
+                        unread_count: realtimeMsg.direction === 'inbound' && 
+                            (!currentContact || currentContact.phone.replace(/\D/g, '') !== contactPhoneClean)
+                            ? (contact.unread_count || 0) + 1 
+                            : contact.unread_count
+                    }
+                }
+                return contact
+            })
+
+            // Sort by last message time
+            return updatedContacts.sort((a, b) => {
+                const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0
+                const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0
+                return timeB - timeA
+            })
+        })
+
+        // Show notification for incoming messages
+        if (realtimeMsg.direction === 'inbound') {
+            const senderContact = contacts.find(c => {
+                const contactPhoneClean = c.phone.replace(/\D/g, '')
+                return contactPhone === contactPhoneClean || contactPhone.endsWith(contactPhoneClean)
+            })
+            
+            // Only show toast if not viewing that conversation
+            const currentContact = selectedContactRef.current
+            if (!currentContact || currentContact.phone.replace(/\D/g, '') !== contactPhone) {
+                toast.info(`Nova mensagem de ${senderContact?.name || contactPhone}`, {
+                    description: realtimeMsg.content.substring(0, 50) + (realtimeMsg.content.length > 50 ? '...' : '')
+                })
+            }
+        }
+    }, [contacts])
+
+    // Setup realtime subscription
+    const { isConnected: isRealtimeConnected } = useRealtimeMessages({
+        churchId: churchId || null,
+        onNewMessage: handleNewRealtimeMessage
+    })
 
     // Update contacts when initialContacts changes
     useEffect(() => {
         setContacts(initialContacts)
     }, [initialContacts])
+
+    // Refresh contacts periodically (every 30 seconds as fallback)
+    useEffect(() => {
+        if (!isConnected) return
+
+        const refreshContacts = async () => {
+            try {
+                const { data: chats } = await getWhatsAppChats()
+                if (chats && chats.length > 0) {
+                    setContacts(chats)
+                }
+            } catch (error) {
+                console.error('Error refreshing contacts:', error)
+            }
+        }
+
+        const interval = setInterval(refreshContacts, 30000)
+        return () => clearInterval(interval)
+    }, [isConnected])
 
     // Filter contacts based on search
     const filteredContacts = contacts.filter(contact =>
@@ -123,7 +236,6 @@ export function WhatsAppChatLayout({
                 setMessages(prev => prev.map(m => 
                     m.id === newMessage.id ? { ...m, status: 'delivered' } : m
                 ))
-                toast.success('Mensagem enviada!')
             } else {
                 toast.error(error || 'Erro ao enviar mensagem')
                 // Remove failed message from UI
@@ -155,6 +267,27 @@ export function WhatsAppChatLayout({
 
     return (
         <div className="h-[calc(100vh-16rem)] bg-[#111b21] rounded-2xl border border-[#2a3942] overflow-hidden">
+            {/* Realtime status indicator */}
+            <div className="absolute top-2 right-2 z-10">
+                <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${
+                    isRealtimeConnected 
+                        ? 'bg-green-500/20 text-green-400' 
+                        : 'bg-yellow-500/20 text-yellow-400'
+                }`}>
+                    {isRealtimeConnected ? (
+                        <>
+                            <Wifi className="w-3 h-3" />
+                            <span>Tempo real</span>
+                        </>
+                    ) : (
+                        <>
+                            <WifiOff className="w-3 h-3" />
+                            <span>Conectando...</span>
+                        </>
+                    )}
+                </div>
+            </div>
+
             <div className="grid grid-cols-[380px_1fr] h-full">
                 {/* Left: Conversation List */}
                 <div className="border-r border-[#2a3942] overflow-hidden">

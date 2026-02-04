@@ -72,6 +72,7 @@ export default async function ComunicacoesPage() {
                         contacts={contacts}
                         instanceName={instance?.instance_name || ''}
                         isConnected={instance?.status === 'CONNECTED'}
+                        churchId={profile.church_id}
                     />
                 </TabsContent>
 
