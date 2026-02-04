@@ -42,6 +42,10 @@ export interface AgentConfig {
   working_days: number[]
   timezone: string
 
+  // Greeting & Messages
+  greeting_style: 'graca_paz' | 'paz_senhor' | 'ola' | 'custom'
+  custom_greeting: string
+  
   // Automated Messages
   outside_hours_message: string
   first_contact_message: string
@@ -87,8 +91,10 @@ const DEFAULT_CONFIG: Omit<AgentConfig, 'id' | 'church_id' | 'created_at' | 'upd
   working_hours_end: '18:00',
   working_days: [1, 2, 3, 4, 5],
   timezone: 'America/Sao_Paulo',
-  outside_hours_message: 'Olá! Nosso horário de atendimento é de segunda a sexta, das 08h às 18h. Deixe sua mensagem que responderemos assim que possível. Que Deus abençoe! 🙏',
-  first_contact_message: 'Olá! Sou o assistente virtual da igreja. Como posso ajudá-lo hoje?',
+  greeting_style: 'graca_paz',
+  custom_greeting: '',
+  outside_hours_message: 'Graça e Paz! Nosso horário de atendimento é de segunda a sexta, das 08h às 18h. Deixe sua mensagem que responderemos assim que possível. Que Deus abençoe! 🙏',
+  first_contact_message: '',
   fallback_message: 'Desculpe, não consegui processar sua mensagem no momento. Por favor, tente novamente em alguns instantes.',
   auto_birthday_enabled: true,
   auto_birthday_time: '09:00',

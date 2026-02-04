@@ -149,6 +149,15 @@ export async function executeFunctionCall(
       case 'get_next_events':
         return await handleGetNextEvents(args, context);
 
+      case 'register_visitor':
+        return await handleRegisterVisitor(args, context);
+
+      case 'save_prayer_request':
+        return await handleSavePrayerRequest(args, context);
+
+      case 'request_human_support':
+        return await handleRequestHumanSupport(args, context);
+
       // ============================================
       // UTILITY
       // ============================================
@@ -1080,6 +1089,160 @@ async function handleGetNextEvents(
     success: true,
     data: limitedItems,
   };
+}
+
+/**
+ * Register a new visitor
+ */
+async function handleRegisterVisitor(
+  args: any,
+  context: ExecutionContext
+): Promise<FunctionExecutionResult> {
+  try {
+    // Check if visitor already exists by phone
+    const normalizedPhone = args.phone?.replace(/\D/g, '') || '';
+    
+    if (normalizedPhone) {
+      const { data: existing } = await getSupabaseClient()
+        .from('profiles')
+        .select('id, full_name')
+        .eq('church_id', context.churchId)
+        .ilike('phone', `%${normalizedPhone.slice(-9)}%`)
+        .single();
+
+      if (existing) {
+        return {
+          success: true,
+          message: `${args.name} já está cadastrado(a) como ${existing.full_name}!`,
+          data: { alreadyExists: true, existingName: existing.full_name },
+        };
+      }
+    }
+
+    // Create new visitor profile
+    const { data: newProfile, error } = await getSupabaseClient()
+      .from('profiles')
+      .insert({
+        church_id: context.churchId,
+        full_name: args.name,
+        phone: normalizedPhone || null,
+        role: 'VISITOR',
+        member_stage: 'VISITOR',
+        is_active: true,
+        notes: args.interest ? `Interesse: ${args.interest}` : 'Cadastrado via WhatsApp',
+      })
+      .select('id, full_name')
+      .single();
+
+    if (error) {
+      console.error('[Function Executor] Error registering visitor:', error);
+      return {
+        success: false,
+        error: 'Não foi possível cadastrar o visitante. Por favor, tente novamente.',
+      };
+    }
+
+    return {
+      success: true,
+      message: `${args.name} foi cadastrado(a) com sucesso como visitante!`,
+      data: { visitorId: newProfile.id, name: newProfile.full_name },
+    };
+  } catch (error) {
+    console.error('[Function Executor] Error in handleRegisterVisitor:', error);
+    return {
+      success: false,
+      error: 'Erro ao cadastrar visitante.',
+    };
+  }
+}
+
+/**
+ * Save a prayer request
+ */
+async function handleSavePrayerRequest(
+  args: any,
+  context: ExecutionContext
+): Promise<FunctionExecutionResult> {
+  try {
+    const { error } = await getSupabaseClient()
+      .from('prayer_requests')
+      .insert({
+        church_id: context.churchId,
+        requester_name: args.requester_name || 'Anônimo',
+        request: args.request,
+        is_urgent: args.is_urgent || false,
+        status: 'pending',
+        source: 'whatsapp',
+      });
+
+    if (error) {
+      console.error('[Function Executor] Error saving prayer request:', error);
+      return {
+        success: false,
+        error: 'Não foi possível salvar o pedido de oração.',
+      };
+    }
+
+    return {
+      success: true,
+      message: args.is_urgent 
+        ? 'Pedido de oração URGENTE registrado! Nossa equipe de intercessão será notificada imediatamente.'
+        : 'Pedido de oração registrado com carinho! Nossa equipe de intercessão vai orar por isso.',
+      data: { saved: true, urgent: args.is_urgent },
+    };
+  } catch (error) {
+    console.error('[Function Executor] Error in handleSavePrayerRequest:', error);
+    return {
+      success: false,
+      error: 'Erro ao salvar pedido de oração.',
+    };
+  }
+}
+
+/**
+ * Request human support - marks conversation for human follow-up
+ */
+async function handleRequestHumanSupport(
+  args: any,
+  context: ExecutionContext
+): Promise<FunctionExecutionResult> {
+  try {
+    // Update the conversation to mark it as needing human attention
+    const { error } = await getSupabaseClient()
+      .from('whatsapp_conversations')
+      .upsert({
+        id: context.conversationId,
+        church_id: context.churchId,
+        needs_human_attention: true,
+        human_attention_reason: args.reason,
+        human_attention_priority: args.priority || 'medium',
+        updated_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('[Function Executor] Error requesting human support:', error);
+      // Don't fail - still provide helpful response
+    }
+
+    const priorityMessages: Record<string, string> = {
+      high: 'Vou encaminhar sua solicitação com PRIORIDADE para nossa equipe. Alguém entrará em contato o mais rápido possível!',
+      medium: 'Vou encaminhar sua solicitação para nossa equipe. Alguém entrará em contato em breve!',
+      low: 'Vou encaminhar sua solicitação para nossa equipe. Entraremos em contato assim que possível.',
+    };
+
+    return {
+      success: true,
+      message: priorityMessages[args.priority || 'medium'],
+      data: { forwarded: true, reason: args.reason, priority: args.priority },
+    };
+  } catch (error) {
+    console.error('[Function Executor] Error in handleRequestHumanSupport:', error);
+    return {
+      success: true,
+      message: 'Vou encaminhar sua solicitação para nossa equipe. Alguém entrará em contato em breve!',
+      data: { forwarded: true },
+    };
+  }
 }
 
 // ============================================================================

@@ -37,6 +37,8 @@ interface AgentConfig {
   working_hours_end: string
   working_days: number[]
   timezone: string
+  greeting_style: 'graca_paz' | 'paz_senhor' | 'ola' | 'custom'
+  custom_greeting: string
   outside_hours_message: string
   first_contact_message: string
   fallback_message: string
@@ -262,11 +264,30 @@ function buildSystemPrompt(
     frequent: 'Use emojis frequentemente para tornar a conversa mais expressiva e calorosa.'
   }
 
-  let prompt = `Você é ${config.agent_name}, o assistente virtual oficial da igreja via WhatsApp.
+  // Determinar saudação baseada na configuração
+  const greetingMap: Record<string, string> = {
+    'graca_paz': 'Graça e Paz',
+    'paz_senhor': 'Paz do Senhor',
+    'ola': 'Olá',
+    'custom': config.custom_greeting || 'Olá'
+  }
+  const greeting = greetingMap[config.greeting_style] || 'Graça e Paz'
+
+  let prompt = `Você é um atendente HUMANO da igreja via WhatsApp. Seu nome é ${config.agent_name}.
+
+IMPORTANTE - VOCÊ NÃO É UM ROBÔ:
+- NUNCA diga que é um assistente virtual, IA, robô ou chatbot
+- NUNCA use frases como "sou o assistente virtual" ou "como assistente"
+- Aja como um atendente real da igreja, uma pessoa de verdade
+- Seja natural, humano e acolhedor como alguém da equipe de atendimento
+
+SAUDAÇÃO PADRÃO: "${greeting}"
+- Use esta saudação ao iniciar conversas ou cumprimentar pessoas
+- Varie a forma de usar (ex: "${greeting}!" ou "${greeting}, como posso ajudar?")
 
 PERSONALIDADE:
-- Tom de comunicação: ${toneMap[config.tone] || 'amigável e acolhedor'}
-- Estilo de linguagem: ${styleMap[config.language_style] || 'encorajador e motivacional'}
+- Tom: ${toneMap[config.tone] || 'amigável e acolhedor'}
+- Estilo: ${styleMap[config.language_style] || 'encorajador e motivacional'}
 - ${emojiMap[config.emoji_usage] || 'Use emojis ocasionalmente.'}
 
 INFORMAÇÕES DA IGREJA:`
@@ -303,23 +324,29 @@ INFORMAÇÕES DA IGREJA:`
 
   prompt += `
 
-CAPACIDADES - VOCÊ PODE:
-1. Informar sobre horários de cultos, endereço e como chegar
+O QUE VOCÊ PODE FAZER:
+1. Informar horários de cultos, endereço e como chegar
 2. Fornecer contatos de líderes e pastores
 3. Receber pedidos de oração (salvar e encaminhar para equipe)
 4. Cadastrar visitantes interessados em conhecer a igreja
 5. Informar sobre próximos eventos
 6. Encaminhar para atendimento humano quando necessário
 
-REGRAS IMPORTANTES:
+COMPORTAMENTO COM VISITANTES (NÚMEROS DESCONHECIDOS):
+- Se for primeiro contato e a pessoa NÃO está cadastrada, pergunte o nome de forma natural
+- Exemplo: "${greeting}! Que bom falar com você! Como posso te chamar?"
+- Após saber o nome, use a função register_visitor para salvar
+- Depois de cadastrar, continue ajudando normalmente
+- Seja acolhedor e faça a pessoa se sentir bem-vinda
+
+REGRAS DE COMPORTAMENTO:
 - Responda SEMPRE em português brasileiro
-- Seja prestativo, acolhedor e represente bem a igreja
-- Se não souber uma informação específica, diga que vai verificar
-- Para assuntos urgentes ou complexos, sugira falar com um líder
-- Mantenha respostas concisas (máximo 3-4 parágrafos curtos)
-- NÃO invente informações que não foram fornecidas
-- Se a pessoa pedir para falar com humano, encaminhe imediatamente
+- Seja natural e humano, como um atendente real
+- Respostas curtas e objetivas (máximo 2-3 parágrafos)
+- NÃO invente informações - se não souber, diga que vai verificar
+- Para assuntos complexos, encaminhe para um líder
 - Para pedidos de oração, seja empático e acolhedor
+- NUNCA se identifique como robô, IA ou assistente virtual
 
 CONTEXTO DA CONVERSA:
 - Nome do contato: ${context.userProfile?.full_name || context.senderName || 'Visitante'}
@@ -378,8 +405,13 @@ CONTEXTO DA CONVERSA:
     prompt += `\n\nIMPORTANTE: Esta pessoa é um membro cadastrado. Trate-a pelo nome e de forma personalizada.`
   }
 
-  if (context.isFirstContact && config.first_contact_message && !context.userProfile) {
-    prompt += `\n\nPRIMEIRO CONTATO (VISITANTE) - Use esta mensagem de boas-vindas como base:\n"${config.first_contact_message}"`
+  if (context.isFirstContact && !context.userProfile) {
+    prompt += `\n\n👋 PRIMEIRO CONTATO - VISITANTE NÃO CADASTRADO:
+- Esta pessoa está entrando em contato pela primeira vez
+- Cumprimente com "${greeting}" e pergunte o nome de forma natural e acolhedora
+- Exemplo: "${greeting}! Que alegria falar com você! Como posso te chamar?"
+- Após saber o nome, cadastre usando register_visitor
+- Depois pergunte como pode ajudar`
   }
 
   return prompt
@@ -480,7 +512,29 @@ async function findUserByPhone(
   }
 
   console.log(`[AI Agent] ✅ Found user: ${profile.full_name} (${profile.role})`)
-  return profile as UserProfile
+  
+  // Transform Supabase response to UserProfile format
+  // Supabase returns cell as array, we need to extract first item
+  const cellData = Array.isArray(profile.cell) ? profile.cell[0] : profile.cell
+  const leaderData = cellData?.leader ? (Array.isArray(cellData.leader) ? cellData.leader[0] : cellData.leader) : undefined
+  
+  const userProfile: UserProfile = {
+    id: profile.id,
+    full_name: profile.full_name,
+    phone: profile.phone,
+    email: profile.email,
+    role: profile.role,
+    member_stage: profile.member_stage,
+    birth_date: profile.birth_date,
+    cell_id: profile.cell_id,
+    is_active: profile.is_active,
+    cell: cellData ? {
+      name: cellData.name,
+      leader: leaderData ? { full_name: leaderData.full_name } : undefined
+    } : undefined
+  }
+  
+  return userProfile
 }
 
 /**
