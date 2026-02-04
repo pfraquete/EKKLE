@@ -34,6 +34,7 @@ import {
   Info
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { PersonalitySelector } from '@/components/whatsapp/personality-selector'
 import {
   updateAgentConfig,
   AgentConfig,
@@ -523,9 +524,18 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
 
             {/* Personality Tab */}
             <TabsContent value="personality" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
+              {/* Simplified Personality Selection */}
+              <PersonalitySelector
+                currentTone={config.tone}
+                currentStyle={config.language_style}
+                currentEmoji={config.emoji_usage}
+                onUpdate={() => setHasChanges(false)}
+              />
+
+              {/* Agent Name - kept simple */}
+              <div className="p-4 bg-muted/30 rounded-xl space-y-3">
                 <div className="space-y-2">
-                  <Label htmlFor="agent_name">Nome do Assistente</Label>
+                  <Label htmlFor="agent_name" className="font-bold">Nome do Assistente</Label>
                   <Input
                     id="agent_name"
                     value={config.agent_name}
@@ -536,79 +546,14 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
                     Como o assistente se apresentará nas conversas.
                   </p>
                 </div>
-
-                <div className="space-y-2">
-                  <Label>Tom de Comunicação</Label>
-                  <Select
-                    value={config.tone}
-                    onValueChange={(value: AgentTone) => updateField('tone', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TONE_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{option.label}</span>
-                            <span className="text-xs text-muted-foreground">{option.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Estilo de Linguagem</Label>
-                  <Select
-                    value={config.language_style}
-                    onValueChange={(value: AgentLanguageStyle) => updateField('language_style', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGE_STYLE_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{option.label}</span>
-                            <span className="text-xs text-muted-foreground">{option.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Uso de Emojis</Label>
-                  <Select
-                    value={config.emoji_usage}
-                    onValueChange={(value: AgentEmojiUsage) => updateField('emoji_usage', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EMOJI_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{option.label}</span>
-                            <span className="text-xs text-muted-foreground">{option.example}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
 
+              {/* Preview */}
               <div className="p-4 bg-indigo-500/5 rounded-xl border border-indigo-500/10">
                 <div className="flex items-start gap-3">
                   <Smile className="h-5 w-5 text-indigo-500 mt-0.5" />
                   <div>
-                    <h4 className="font-medium text-indigo-700">Preview</h4>
+                    <h4 className="font-medium text-indigo-700">Preview da Mensagem</h4>
                     <p className="text-sm text-indigo-600/80 mt-1">
                       {config.emoji_usage === 'frequent' && '👋 '}
                       Olá! Sou {config.agent_name}.
