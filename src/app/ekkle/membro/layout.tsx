@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { EkkleSidebarNav } from '@/components/ekkle/sidebar-nav'
 import { EkkleMobileNav } from '@/components/ekkle/mobile-nav'
 import { isEkkleHubUser } from '@/lib/ekkle-utils'
+import { ImpersonationWrapper } from '@/components/admin/impersonation-wrapper'
 
 export default async function EkkleMembroLayout({
   children,
@@ -42,9 +43,13 @@ export default async function EkkleMembroLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20">
-      {/* Header */}
-      <header className="border-b border-border/40 bg-background/95 backdrop-blur-xl sticky top-0 z-50">
+    <>
+      {/* Impersonation Banner */}
+      <ImpersonationWrapper />
+
+      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20">
+        {/* Header */}
+        <header className="border-b border-border/40 bg-background/95 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             {/* Logo and Ekkle Name */}
@@ -104,8 +109,9 @@ export default async function EkkleMembroLayout({
         </main>
       </div>
 
-      {/* Mobile Navigation */}
-      <EkkleMobileNav />
-    </div>
+        {/* Mobile Navigation */}
+        <EkkleMobileNav />
+      </div>
+    </>
   )
 }

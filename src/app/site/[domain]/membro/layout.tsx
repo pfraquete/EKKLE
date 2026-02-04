@@ -8,6 +8,7 @@ import { CartProvider } from '@/context/cart-context'
 import { CartButton } from '@/components/store/cart-button'
 import { SidebarNav } from '@/components/membro/sidebar-nav'
 import { MemberMobileNav } from '@/components/membro/mobile-nav'
+import { ImpersonationWrapper } from '@/components/admin/impersonation-wrapper'
 
 export default async function MembroLayout({
   children,
@@ -44,6 +45,9 @@ export default async function MembroLayout({
 
   return (
     <CartProvider>
+      {/* Impersonation Banner */}
+      <ImpersonationWrapper />
+
       <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20">
         {/* Header */}
         <header className="border-b border-border/40 bg-background/95 backdrop-blur-xl sticky top-0 z-50">

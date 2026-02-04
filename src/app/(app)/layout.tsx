@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/header'
 import { MobileNav } from '@/components/layout/mobile-nav'
 import { isEkkleHubUser } from '@/lib/ekkle-utils'
 import { logger } from '@/lib/logger'
+import { ImpersonationWrapper } from '@/components/admin/impersonation-wrapper'
 
 // Routes that LEADER role can access in the dashboard
 const LEADER_ALLOWED_ROUTES = [
@@ -50,9 +51,13 @@ export default async function AppLayout({
     }
 
     return (
-        <div className="flex h-screen bg-black-absolute text-white-primary overflow-hidden dark">
-            {/* Sidebar */}
-            <Sidebar profile={profile} />
+        <>
+            {/* Impersonation Banner (shown when admin is impersonating a user) */}
+            <ImpersonationWrapper />
+
+            <div className="flex h-screen bg-black-absolute text-white-primary overflow-hidden dark pt-[var(--impersonation-banner-height,0px)]">
+                {/* Sidebar */}
+                <Sidebar profile={profile} />
             
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -75,5 +80,6 @@ export default async function AppLayout({
             {/* Mobile Navigation */}
             <MobileNav profile={profile} />
         </div>
+        </>
     )
 }
