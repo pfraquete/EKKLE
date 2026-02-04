@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { PersonalitySelector } from '@/components/whatsapp/personality-selector'
+import { MessageTemplates } from '@/components/whatsapp/message-templates'
 import {
   updateAgentConfig,
   AgentConfig,
@@ -659,49 +660,32 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
 
             {/* Messages Tab */}
             <TabsContent value="messages" className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="outside_hours">Mensagem Fora do Horário</Label>
-                  <Textarea
-                    id="outside_hours"
-                    value={config.outside_hours_message}
-                    onChange={(e) => updateField('outside_hours_message', e.target.value)}
-                    placeholder="Mensagem enviada fora do horário de atendimento..."
-                    rows={3}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Enviada automaticamente quando alguém entra em contato fora do horário.
-                  </p>
-                </div>
+              <MessageTemplates
+                fieldName="first_contact_message"
+                title="Mensagem de Boas-vindas"
+                description="Enviada na primeira interação com um novo contato"
+                currentValue={config.first_contact_message}
+                churchName={config.agent_name?.replace('Assistente ', '') || 'Igreja'}
+                onUpdate={() => setHasChanges(false)}
+              />
 
-                <div className="space-y-2">
-                  <Label htmlFor="first_contact">Mensagem de Primeiro Contato</Label>
-                  <Textarea
-                    id="first_contact"
-                    value={config.first_contact_message}
-                    onChange={(e) => updateField('first_contact_message', e.target.value)}
-                    placeholder="Mensagem de boas-vindas para novos contatos..."
-                    rows={3}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Enviada na primeira interação com um novo contato.
-                  </p>
-                </div>
+              <MessageTemplates
+                fieldName="outside_hours_message"
+                title="Mensagem Fora do Horário"
+                description="Enviada quando alguém entra em contato fora do horário de atendimento"
+                currentValue={config.outside_hours_message}
+                churchName={config.agent_name?.replace('Assistente ', '') || 'Igreja'}
+                onUpdate={() => setHasChanges(false)}
+              />
 
-                <div className="space-y-2">
-                  <Label htmlFor="fallback">Mensagem de Fallback</Label>
-                  <Textarea
-                    id="fallback"
-                    value={config.fallback_message}
-                    onChange={(e) => updateField('fallback_message', e.target.value)}
-                    placeholder="Mensagem enviada quando ocorre um erro..."
-                    rows={3}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Enviada quando o agente não consegue processar a mensagem.
-                  </p>
-                </div>
-              </div>
+              <MessageTemplates
+                fieldName="fallback_message"
+                title="Mensagem de Erro"
+                description="Enviada quando o assistente não consegue entender a mensagem"
+                currentValue={config.fallback_message}
+                churchName={config.agent_name?.replace('Assistente ', '') || 'Igreja'}
+                onUpdate={() => setHasChanges(false)}
+              />
             </TabsContent>
 
             {/* Automations Tab */}
