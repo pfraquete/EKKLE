@@ -307,12 +307,9 @@ export async function createTicket(data: {
         throw new Error('Falha ao criar ticket')
     }
 
-    await logAdminAction({
-        action: 'create',
-        targetType: 'ticket',
+    await logAdminAction('ticket.create', 'ticket', {
         targetId: ticket.id,
-        description: `Ticket #${ticket.ticket_number} criado: ${data.subject}`,
-        metadata: { priority: data.priority, category: data.category }
+        reason: `Ticket #${ticket.ticket_number} criado: ${data.subject}`
     })
 
     revalidatePath('/admin/support')
@@ -373,12 +370,9 @@ export async function updateTicket(
         changes.push(`atribuido: ${data.assignedTo || 'ninguem'}`)
     }
 
-    await logAdminAction({
-        action: 'update',
-        targetType: 'ticket',
+    await logAdminAction('ticket.update', 'ticket', {
         targetId: ticketId,
-        description: `Ticket #${currentTicket?.ticket_number} atualizado: ${changes.join(', ')}`,
-        metadata: { changes: data }
+        reason: `Ticket #${currentTicket?.ticket_number} atualizado: ${changes.join(', ')}`
     })
 
     revalidatePath('/admin/support')
@@ -444,12 +438,9 @@ export async function addTicketMessage(
                 .eq('id', ticketId)
         }
 
-        await logAdminAction({
-            action: 'update',
-            targetType: 'ticket',
+        await logAdminAction('ticket.reply', 'ticket', {
             targetId: ticketId,
-            description: `Resposta enviada no ticket #${ticket?.ticket_number}`,
-            metadata: { is_internal: false }
+            reason: `Resposta enviada no ticket #${ticket?.ticket_number}`
         })
     }
 
