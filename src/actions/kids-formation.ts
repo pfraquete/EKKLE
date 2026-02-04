@@ -934,13 +934,17 @@ export async function getFormationReportData() {
       ? stages[0]
       : null
 
+    const cellName = Array.isArray(child.kids_cell)
+      ? child.kids_cell[0]?.name
+      : child.kids_cell?.name
+
     return {
       id: child.id,
       fullName: child.full_name,
       birthDate: child.birth_date,
       gender: child.gender,
       parentName: child.parent_name,
-      cellName: (child.kids_cell as { name: string } | null)?.name || 'Sem célula',
+      cellName: cellName || 'Sem célula',
       completedCount,
       totalStages: stages.length,
       progressPercentage,
