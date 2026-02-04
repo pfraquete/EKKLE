@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { extractSubdomain, resolveChurchFromSubdomain, isPublicWebsiteRoute, isAdminRoute, isSuperAdminRoute } from '@/lib/tenant'
 import { EKKLE_HUB_ID } from '@/lib/ekkle-utils'
+import { IMPERSONATION_COOKIE } from '@/lib/impersonation'
 
 type CookieOptions = Parameters<NextResponse['cookies']['set']>[2]
 
@@ -88,6 +89,17 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    // =====================================================
+    // IMPERSONATION DETECTION
+    // =====================================================
+    const impersonationToken = request.cookies.get(IMPERSONATION_COOKIE)?.value
+    const isImpersonating = !!impersonationToken
+
+    if (isImpersonating) {
+        // Inject impersonation header for components to detect
+        supabaseResponse.headers.set('x-impersonating', 'true')
+    }
+
     // Extract subdomain and resolve church
     const hostname = request.headers.get('host') || ''
     const subdomain = extractSubdomain(hostname)
@@ -167,7 +179,15 @@ export async function updateSession(request: NextRequest) {
     // SUPER ADMIN ROUTE PROTECTION
     // =====================================================
     // Only users with SUPER_ADMIN role can access /admin routes
+    // Cannot access admin routes while impersonating
     if (isSuperAdmin) {
+        // Block admin access while impersonating
+        if (isImpersonating) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/dashboard'
+            return redirectWithCookies(url, supabaseResponse, request)
+        }
+
         if (!user) {
             const url = request.nextUrl.clone()
             url.pathname = '/login'

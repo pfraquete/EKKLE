@@ -20,6 +20,8 @@ export type AdminAction =
     | 'user.update'
     | 'user.promote'
     | 'user.demote'
+    | 'user.impersonate_start'
+    | 'user.impersonate_end'
     | 'setting.view'
     | 'setting.update'
     | 'feature_flag.create'
@@ -30,6 +32,9 @@ export type AdminAction =
     | 'webhook.retry'
     | 'alert.resolve'
     | 'alert.dismiss'
+    | 'note.create'
+    | 'note.update'
+    | 'note.delete'
 
 export type TargetType =
     | 'church'
@@ -40,6 +45,8 @@ export type TargetType =
     | 'integration'
     | 'webhook'
     | 'alert'
+    | 'note'
+    | 'impersonation'
 
 export interface AdminProfile {
     id: string

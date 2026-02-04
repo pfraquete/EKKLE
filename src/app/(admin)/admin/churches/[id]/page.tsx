@@ -13,12 +13,14 @@ import {
     AlertTriangle,
     CheckCircle,
     Clock,
-    FileText
+    FileText,
+    UserCog
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { ChurchActions } from './church-actions'
+import { ImpersonateButton } from './impersonate-button'
 
 interface ChurchDetailPageProps {
     params: Promise<{
@@ -208,15 +210,22 @@ export default async function ChurchDetailPage({ params }: ChurchDetailPageProps
                         )}
 
                         {church.pastor && (
-                            <div className="flex items-start gap-3">
-                                <Mail className="h-5 w-5 text-zinc-500 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
-                                        Pastor
-                                    </p>
-                                    <p className="text-zinc-300">{church.pastor.full_name}</p>
-                                    <p className="text-sm text-zinc-500">{church.pastor.email}</p>
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-3">
+                                    <UserCog className="h-5 w-5 text-zinc-500 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
+                                            Pastor
+                                        </p>
+                                        <p className="text-zinc-300">{church.pastor.full_name}</p>
+                                        <p className="text-sm text-zinc-500">{church.pastor.email}</p>
+                                    </div>
                                 </div>
+                                <ImpersonateButton
+                                    userId={church.pastor.id}
+                                    userName={church.pastor.full_name}
+                                    userEmail={church.pastor.email}
+                                />
                             </div>
                         )}
                     </div>
