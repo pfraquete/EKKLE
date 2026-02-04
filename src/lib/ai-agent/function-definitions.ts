@@ -396,6 +396,56 @@ export const AGENT_FUNCTIONS: FunctionDefinition[] = [
   },
 
   // ============================================
+  // VISITOR INFORMATION
+  // ============================================
+  {
+    name: 'get_church_location',
+    description:
+      'Obtém informações de localização da igreja (endereço, como chegar, link do Google Maps). Use quando alguém perguntar onde fica a igreja, como chegar, endereço, localização.',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_service_times',
+    description:
+      'Obtém horários dos cultos da igreja. Use quando alguém perguntar sobre horários dos cultos, quando tem culto, programação de cultos.',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_leader_contacts',
+    description:
+      'Obtém contatos dos líderes de célula. Use quando alguém quiser falar com um líder, participar de uma célula, ou precisar de contato de liderança.',
+    parameters: {
+      type: 'object',
+      properties: {
+        area: {
+          type: 'string',
+          description: 'Filtrar por área/região específica (opcional)',
+        },
+      },
+    },
+  },
+  {
+    name: 'get_next_events',
+    description:
+      'Obtém próximos eventos e cultos da igreja. Use quando alguém perguntar sobre próximos eventos, o que vai acontecer, agenda da igreja.',
+    parameters: {
+      type: 'object',
+      properties: {
+        limit: {
+          type: 'number',
+          description: 'Número máximo de eventos a retornar (default: 5)',
+        },
+      },
+    },
+  },
+
+  // ============================================
   // UTILITY
   // ============================================
   {

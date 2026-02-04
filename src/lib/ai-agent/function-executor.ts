@@ -135,6 +135,21 @@ export async function executeFunctionCall(
         return await handleCompleteOnboardingStep(args, context);
 
       // ============================================
+      // VISITOR INFORMATION
+      // ============================================
+      case 'get_church_location':
+        return await handleGetChurchLocation(context);
+
+      case 'get_service_times':
+        return await handleGetServiceTimes(context);
+
+      case 'get_leader_contacts':
+        return await handleGetLeaderContacts(args, context);
+
+      case 'get_next_events':
+        return await handleGetNextEvents(args, context);
+
+      // ============================================
       // UTILITY
       // ============================================
       case 'ask_clarification':
@@ -863,6 +878,207 @@ async function handleCompleteOnboardingStep(
   return {
     success: true,
     message: '✅ Passo do onboarding completado!',
+  };
+}
+
+// ============================================================================
+// VISITOR INFORMATION HANDLERS
+// ============================================================================
+
+/**
+ * Get church location information
+ */
+async function handleGetChurchLocation(
+  context: ExecutionContext
+): Promise<FunctionExecutionResult> {
+  const { data: config, error } = await getSupabaseClient()
+    .from('church_agent_config')
+    .select('church_address, church_address_complement, church_city, church_state, church_zip_code, church_google_maps_link')
+    .eq('church_id', context.churchId)
+    .single();
+
+  if (error || !config) {
+    return {
+      success: false,
+      error: 'Informações de localização não configuradas.',
+    };
+  }
+
+  if (!config.church_address) {
+    return {
+      success: true,
+      message: 'O endereço da igreja ainda não foi configurado. Por favor, peça ao pastor para configurar nas configurações do agente.',
+      data: null,
+    };
+  }
+
+  let address = config.church_address;
+  if (config.church_address_complement) address += `, ${config.church_address_complement}`;
+  if (config.church_city) address += ` - ${config.church_city}`;
+  if (config.church_state) address += `/${config.church_state}`;
+  if (config.church_zip_code) address += ` - CEP: ${config.church_zip_code}`;
+
+  return {
+    success: true,
+    data: {
+      address,
+      googleMapsLink: config.church_google_maps_link || null,
+    },
+  };
+}
+
+/**
+ * Get service times
+ */
+async function handleGetServiceTimes(
+  context: ExecutionContext
+): Promise<FunctionExecutionResult> {
+  const { data: config, error } = await getSupabaseClient()
+    .from('church_agent_config')
+    .select('service_times')
+    .eq('church_id', context.churchId)
+    .single();
+
+  if (error || !config) {
+    return {
+      success: false,
+      error: 'Horários dos cultos não configurados.',
+    };
+  }
+
+  const serviceTimes = config.service_times || [];
+
+  if (serviceTimes.length === 0) {
+    return {
+      success: true,
+      message: 'Os horários dos cultos ainda não foram configurados. Por favor, peça ao pastor para configurar nas configurações do agente.',
+      data: [],
+    };
+  }
+
+  return {
+    success: true,
+    data: serviceTimes,
+  };
+}
+
+/**
+ * Get leader contacts
+ */
+async function handleGetLeaderContacts(
+  args: any,
+  context: ExecutionContext
+): Promise<FunctionExecutionResult> {
+  const { data: config, error } = await getSupabaseClient()
+    .from('church_agent_config')
+    .select('leaders_contacts')
+    .eq('church_id', context.churchId)
+    .single();
+
+  if (error || !config) {
+    return {
+      success: false,
+      error: 'Contatos dos líderes não configurados.',
+    };
+  }
+
+  let leaders = config.leaders_contacts || [];
+
+  if (leaders.length === 0) {
+    return {
+      success: true,
+      message: 'Os contatos dos líderes ainda não foram configurados. Por favor, peça ao pastor para configurar nas configurações do agente.',
+      data: [],
+    };
+  }
+
+  // Filter by area if provided
+  if (args.area) {
+    leaders = leaders.filter((l: any) => 
+      l.area && l.area.toLowerCase().includes(args.area.toLowerCase())
+    );
+  }
+
+  return {
+    success: true,
+    data: leaders,
+  };
+}
+
+/**
+ * Get next events
+ */
+async function handleGetNextEvents(
+  args: any,
+  context: ExecutionContext
+): Promise<FunctionExecutionResult> {
+  const limit = args.limit || 5;
+  const today = new Date().toISOString().split('T')[0];
+
+  // Get upcoming services
+  const { data: services, error: servicesError } = await getSupabaseClient()
+    .from('services')
+    .select('id, title, service_date, service_time, type, location')
+    .eq('church_id', context.churchId)
+    .gte('service_date', today)
+    .order('service_date', { ascending: true })
+    .limit(limit);
+
+  // Get upcoming events
+  const { data: events, error: eventsError } = await getSupabaseClient()
+    .from('events')
+    .select('id, title, event_date, location, description')
+    .eq('church_id', context.churchId)
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+    .limit(limit);
+
+  const upcomingItems: any[] = [];
+
+  // Add services
+  if (services && !servicesError) {
+    services.forEach((s: any) => {
+      upcomingItems.push({
+        type: 'culto',
+        title: s.title,
+        date: s.service_date,
+        time: s.service_time,
+        location: s.location,
+        serviceType: s.type,
+      });
+    });
+  }
+
+  // Add events
+  if (events && !eventsError) {
+    events.forEach((e: any) => {
+      upcomingItems.push({
+        type: 'evento',
+        title: e.title,
+        date: e.event_date,
+        location: e.location,
+        description: e.description,
+      });
+    });
+  }
+
+  // Sort by date
+  upcomingItems.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Limit results
+  const limitedItems = upcomingItems.slice(0, limit);
+
+  if (limitedItems.length === 0) {
+    return {
+      success: true,
+      message: 'Não há eventos ou cultos agendados próximamente.',
+      data: [],
+    };
+  }
+
+  return {
+    success: true,
+    data: limitedItems,
   };
 }
 
