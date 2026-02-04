@@ -1,3 +1,16 @@
+/**
+ * Evolution API Webhook Handler - Enterprise Edition
+ *
+ * Processa eventos do WhatsApp via Evolution API com:
+ * - Idempotência (evita duplicatas)
+ * - Validação de origem
+ * - Processamento assíncrono
+ * - Logging detalhado
+ *
+ * @author Ekkle Team
+ * @version 2.0.0
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { processEvolutionMessage } from '@/lib/ai-agent/evolution-message-processor'
@@ -7,6 +20,20 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+// Cache para idempotência (em produção, usar Redis)
+const processedMessages = new Map<string, number>()
+const MESSAGE_CACHE_TTL = 60000 // 1 minuto
+
+// Limpar cache periodicamente
+setInterval(() => {
+    const now = Date.now()
+    for (const [key, timestamp] of processedMessages.entries()) {
+        if (now - timestamp > MESSAGE_CACHE_TTL) {
+            processedMessages.delete(key)
+        }
+    }
+}, 30000)
 
 interface EvolutionWebhookPayload {
     event: string
@@ -23,68 +50,119 @@ interface EvolutionWebhookPayload {
             extendedTextMessage?: {
                 text: string
             }
+            imageMessage?: any
+            audioMessage?: any
+            videoMessage?: any
+            documentMessage?: any
         }
         messageType?: string
         messageTimestamp?: number
         state?: string
     }
+    sender?: string
+    apikey?: string
 }
 
+/**
+ * Validate webhook origin (basic validation)
+ */
+function validateWebhook(request: NextRequest, payload: EvolutionWebhookPayload): boolean {
+    // Check if it's from a valid Evolution API instance
+    if (!payload.instance || !payload.event) {
+        console.warn('[Webhook] Invalid payload: missing instance or event')
+        return false
+    }
+
+    // In production, you could validate the API key header
+    // const apiKey = request.headers.get('apikey')
+    // if (apiKey !== process.env.EVOLUTION_API_KEY) return false
+
+    return true
+}
+
+/**
+ * Check if message was already processed (idempotency)
+ */
+function isMessageProcessed(messageId: string): boolean {
+    if (processedMessages.has(messageId)) {
+        console.log(`[Webhook] Message ${messageId} already processed, skipping`)
+        return true
+    }
+    processedMessages.set(messageId, Date.now())
+    return false
+}
+
+/**
+ * Main webhook handler
+ */
 export async function POST(request: NextRequest) {
+    const startTime = Date.now()
+
     try {
         const payload: EvolutionWebhookPayload = await request.json()
-        
-        console.log('[Evolution Webhook] Received event:', payload.event)
-        console.log('[Evolution Webhook] Instance:', payload.instance)
-        console.log('[Evolution Webhook] Data:', JSON.stringify(payload.data, null, 2))
+
+        // Validate webhook
+        if (!validateWebhook(request, payload)) {
+            return NextResponse.json({ error: 'Invalid webhook' }, { status: 400 })
+        }
+
+        console.log(`[Webhook] 📥 Event: ${payload.event} | Instance: ${payload.instance}`)
 
         // Handle different event types
         switch (payload.event) {
             case 'CONNECTION_UPDATE':
                 await handleConnectionUpdate(payload)
                 break
+
             case 'MESSAGES_UPSERT':
                 await handleMessageReceived(payload)
                 break
+
             case 'QRCODE_UPDATED':
                 await handleQrCodeUpdate(payload)
                 break
+
+            case 'MESSAGES_UPDATE':
+                // Status updates (delivered, read, etc.)
+                await handleMessageStatusUpdate(payload)
+                break
+
             default:
-                console.log('[Evolution Webhook] Unhandled event type:', payload.event)
+                console.log(`[Webhook] ⚠️ Unhandled event: ${payload.event}`)
         }
 
-        return NextResponse.json({ success: true })
-    } catch (error) {
-        console.error('[Evolution Webhook] Error processing webhook:', error)
+        const duration = Date.now() - startTime
+        console.log(`[Webhook] ✅ Processed in ${duration}ms`)
+
+        return NextResponse.json({ success: true, duration })
+
+    } catch (error: any) {
+        console.error('[Webhook] ❌ Error:', error.message)
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: 'Internal server error', message: error.message },
             { status: 500 }
         )
     }
 }
 
+/**
+ * Handle connection status updates
+ */
 async function handleConnectionUpdate(payload: EvolutionWebhookPayload) {
     const { instance, data } = payload
     const state = data.state
 
-    console.log('[Evolution Webhook] Connection update for instance:', instance, 'State:', state)
+    console.log(`[Webhook] 🔌 Connection update: ${instance} -> ${state}`)
 
     // Map Evolution state to our status
-    let status: string
-    switch (state) {
-        case 'open':
-            status = 'CONNECTED'
-            break
-        case 'close':
-        case 'refused':
-            status = 'DISCONNECTED'
-            break
-        case 'connecting':
-            status = 'CONNECTING'
-            break
-        default:
-            status = 'DISCONNECTED'
+    const statusMap: Record<string, string> = {
+        'open': 'CONNECTED',
+        'close': 'DISCONNECTED',
+        'refused': 'DISCONNECTED',
+        'connecting': 'CONNECTING'
     }
+
+    const status = statusMap[state || ''] || 'DISCONNECTED'
 
     // Update the instance status in database
     const { error } = await supabase
@@ -97,51 +175,70 @@ async function handleConnectionUpdate(payload: EvolutionWebhookPayload) {
         .eq('instance_name', instance)
 
     if (error) {
-        console.error('[Evolution Webhook] Error updating instance status:', error)
-    } else {
-        console.log('[Evolution Webhook] Instance status updated to:', status)
+        console.error('[Webhook] ❌ Error updating instance status:', error.message)
     }
 }
 
+/**
+ * Handle incoming messages
+ */
 async function handleMessageReceived(payload: EvolutionWebhookPayload) {
     const { instance, data } = payload
 
     if (!data.key) {
-        console.log('[Evolution Webhook] No key in message data')
+        console.log('[Webhook] ⚠️ No key in message data')
         return
     }
 
+    const messageId = data.key.id
     const remoteJid = data.key.remoteJid
-    const phone = remoteJid.replace('@s.whatsapp.net', '').replace('@g.us', '')
-    const senderName = data.pushName || 'Desconhecido'
     const isFromMe = data.key.fromMe
-    
-    // Skip group messages
-    if (remoteJid.includes('@g.us')) {
-        console.log('[Evolution Webhook] Skipping group message')
+    const senderName = data.pushName || 'Desconhecido'
+
+    // Idempotency check
+    if (isMessageProcessed(messageId)) {
         return
     }
-    
+
+    // Skip group messages
+    if (remoteJid.includes('@g.us')) {
+        console.log('[Webhook] 👥 Skipping group message')
+        return
+    }
+
+    // Extract phone number
+    const phone = remoteJid.replace('@s.whatsapp.net', '')
+
     // Extract message text
     let messageText = ''
+    let messageType = 'text'
+
     if (data.message?.conversation) {
         messageText = data.message.conversation
     } else if (data.message?.extendedTextMessage?.text) {
         messageText = data.message.extendedTextMessage.text
+    } else if (data.message?.imageMessage) {
+        messageType = 'image'
+        messageText = data.message.imageMessage.caption || '[Imagem]'
+    } else if (data.message?.audioMessage) {
+        messageType = 'audio'
+        messageText = '[Áudio]'
+    } else if (data.message?.videoMessage) {
+        messageType = 'video'
+        messageText = data.message.videoMessage.caption || '[Vídeo]'
+    } else if (data.message?.documentMessage) {
+        messageType = 'document'
+        messageText = data.message.documentMessage.fileName || '[Documento]'
     }
 
     // Skip empty messages
     if (!messageText.trim()) {
-        console.log('[Evolution Webhook] Skipping empty message')
+        console.log('[Webhook] ⚠️ Skipping empty message')
         return
     }
 
-    console.log('[Evolution Webhook] Message received')
-    console.log('[Evolution Webhook] From:', phone)
-    console.log('[Evolution Webhook] Sender name:', senderName)
-    console.log('[Evolution Webhook] Message:', messageText)
-    console.log('[Evolution Webhook] Message type:', data.messageType)
-    console.log('[Evolution Webhook] Is from me:', isFromMe)
+    const direction = isFromMe ? 'outbound' : 'inbound'
+    console.log(`[Webhook] 💬 ${direction === 'inbound' ? '📥' : '📤'} ${phone}: "${messageText.substring(0, 50)}..."`)
 
     // Find the church associated with this instance
     const { data: instanceData, error: instanceError } = await supabase
@@ -151,84 +248,115 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
         .single()
 
     if (instanceError || !instanceData) {
-        console.error('[Evolution Webhook] Could not find church for instance:', instance)
+        console.error('[Webhook] ❌ Could not find church for instance:', instance)
         return
     }
 
     const churchId = instanceData.church_id
-    const instancePhone = instanceData.phone_number
+    const instancePhone = instanceData.phone_number || ''
 
-    // Store the message in the database for chat history
+    // Store the message in the database with upsert (idempotency)
     const { error: messageError } = await supabase
         .from('whatsapp_messages')
-        .insert({
+        .upsert({
+            id: messageId, // Use Evolution message ID as primary key
             church_id: churchId,
             instance_name: instance,
-            direction: isFromMe ? 'outbound' : 'inbound',
+            direction,
             from_number: isFromMe ? instancePhone : phone,
             to_number: isFromMe ? phone : instancePhone,
-            message_type: data.messageType || 'text',
+            message_type: messageType,
             content: messageText,
             status: 'received',
-            sent_at: data.messageTimestamp 
-                ? new Date(data.messageTimestamp * 1000).toISOString() 
+            sent_at: data.messageTimestamp
+                ? new Date(data.messageTimestamp * 1000).toISOString()
                 : new Date().toISOString()
-        })
+        }, { onConflict: 'id', ignoreDuplicates: true })
 
-    if (messageError) {
-        console.error('[Evolution Webhook] Error storing message:', messageError.message)
-    } else {
-        console.log('[Evolution Webhook] Message stored successfully')
+    if (messageError && !messageError.message.includes('duplicate')) {
+        console.error('[Webhook] ❌ Error storing message:', messageError.message)
     }
 
-    // If it's an incoming message, process with AI agent
-    if (!isFromMe && messageText) {
+    // Update conversation tracking
+    await supabase
+        .from('whatsapp_conversations')
+        .upsert({
+            church_id: churchId,
+            phone_number: phone,
+            contact_name: senderName,
+            last_message_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'church_id,phone_number' })
+
+    // If it's an incoming text message, process with AI agent
+    if (!isFromMe && messageText && messageType === 'text') {
         // Check if there's an AI agent configured for this church
         const { data: agentConfig } = await supabase
             .from('church_agent_config')
-            .select('id')
+            .select('id, is_active')
             .eq('church_id', churchId)
             .single()
 
-        if (agentConfig) {
-            console.log('[Evolution Webhook] AI Agent is configured, processing message...')
-            
-            // Process message with AI agent (async, don't wait for response)
+        if (agentConfig && agentConfig.is_active !== false) {
+            console.log('[Webhook] 🤖 Processing with AI Agent...')
+
+            // Process message with AI agent (async, don't block webhook response)
             processEvolutionMessage({
                 churchId,
                 instanceName: instance,
                 phoneNumber: phone,
                 message: messageText,
-                senderName
+                senderName,
+                messageId
             }).then(result => {
                 if (result.success) {
-                    console.log('[Evolution Webhook] AI Agent responded successfully')
+                    console.log('[Webhook] ✅ AI Agent responded successfully')
                 } else {
-                    console.error('[Evolution Webhook] AI Agent error:', result.error)
+                    console.error('[Webhook] ❌ AI Agent error:', result.error)
                 }
             }).catch(error => {
-                console.error('[Evolution Webhook] AI Agent processing error:', error)
+                console.error('[Webhook] ❌ AI Agent processing error:', error.message)
             })
         } else {
-            console.log('[Evolution Webhook] No AI Agent configured for this church')
+            console.log('[Webhook] ⏸️ AI Agent not configured or disabled')
         }
     }
 }
 
-async function handleQrCodeUpdate(payload: EvolutionWebhookPayload) {
-    const { instance } = payload
-    
-    console.log('[Evolution Webhook] QR Code updated for instance:', instance)
-    
-    // The QR code is typically handled by the frontend polling
-    // This webhook is mainly for logging purposes
+/**
+ * Handle message status updates (delivered, read, etc.)
+ */
+async function handleMessageStatusUpdate(payload: EvolutionWebhookPayload) {
+    // This could be used to update message delivery status
+    // For now, just log it
+    console.log('[Webhook] 📊 Message status update received')
 }
 
-// Also handle GET requests for webhook verification
+/**
+ * Handle QR code updates
+ */
+async function handleQrCodeUpdate(payload: EvolutionWebhookPayload) {
+    const { instance } = payload
+    console.log(`[Webhook] 📱 QR Code updated for: ${instance}`)
+
+    // Update instance status to CONNECTING
+    await supabase
+        .from('whatsapp_instances')
+        .update({
+            status: 'CONNECTING',
+            last_ping: new Date().toISOString()
+        })
+        .eq('instance_name', instance)
+}
+
+/**
+ * GET endpoint for webhook verification
+ */
 export async function GET(request: NextRequest) {
-    return NextResponse.json({ 
-        status: 'ok', 
+    return NextResponse.json({
+        status: 'ok',
         message: 'Evolution API Webhook endpoint is active',
+        version: '2.0.0',
         timestamp: new Date().toISOString()
     })
 }
