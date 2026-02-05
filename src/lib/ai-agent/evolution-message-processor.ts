@@ -597,7 +597,8 @@ async function findUserByPhone(
   console.log(`[AI Agent] 🔍 Searching for user with phone variants:`, phoneVariants.slice(0, 3))
 
   // Search for user with any of the phone variants
-  const { data: profile, error } = await supabase
+  // Use limit(1) instead of single() to avoid error when multiple matches exist
+  const { data: profiles, error } = await supabase
     .from('profiles')
     .select(`
       id,
@@ -609,17 +610,21 @@ async function findUserByPhone(
       birth_date,
       cell_id,
       is_active,
+      created_at,
       cell:cells(name, leader:profiles!cells_leader_id_fkey(full_name))
     `)
     .eq('church_id', churchId)
     .eq('is_active', true)
     .or(phoneVariants.map(p => `phone.ilike.%${p.slice(-9)}%`).join(','))
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
 
-  if (error || !profile) {
+  if (error || !profiles || profiles.length === 0) {
     console.log(`[AI Agent] 👤 User not found for phone ${phoneNumber}`)
     return null
   }
+
+  const profile = profiles[0]
 
   console.log(`[AI Agent] ✅ Found user: ${profile.full_name} (${profile.role})`)
   
@@ -736,13 +741,16 @@ async function executeVisitorFunction(
 
       console.log(`[Visitor Registration] Cadastrando: ${visitorName} - ${visitorPhone}`)
 
-      // Verificar se já existe pelo telefone
-      const { data: existing } = await supabase
+      // Verificar se já existe pelo telefone (usar limit(1) para evitar erro com múltiplos)
+      const { data: existingProfiles } = await supabase
         .from('profiles')
         .select('id, full_name')
         .eq('church_id', context.churchId)
         .ilike('phone', `%${visitorPhone.slice(-9)}%`)
-        .single()
+        .order('created_at', { ascending: false })
+        .limit(1)
+      
+      const existing = existingProfiles?.[0]
 
       if (existing) {
         console.log(`[Visitor Registration] Visitante já existe: ${existing.full_name}`)
