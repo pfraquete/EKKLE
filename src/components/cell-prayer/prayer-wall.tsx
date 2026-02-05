@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -49,6 +50,7 @@ export function PrayerWall({ cellId, initialRequests, currentUserId }: PrayerWal
     const [isPending, startTransition] = useTransition()
     const [testimonyDialogOpen, setTestimonyDialogOpen] = useState<string | null>(null)
     const [testimony, setTestimony] = useState('')
+    const router = useRouter()
 
     const handleCreateRequest = () => {
         if (!newRequest.trim()) {
@@ -63,8 +65,8 @@ export function PrayerWall({ cellId, initialRequests, currentUserId }: PrayerWal
                 setNewRequest('')
                 setIsAnonymous(false)
                 setIsCreating(false)
-                // Refresh will happen via revalidatePath
-                window.location.reload()
+                // Refresh the page data
+                router.refresh()
             } else {
                 toast.error(result.error || 'Erro ao enviar pedido')
             }
@@ -101,7 +103,7 @@ export function PrayerWall({ cellId, initialRequests, currentUserId }: PrayerWal
                 toast.success('Glória a Deus! Oração respondida! 🎉')
                 setTestimonyDialogOpen(null)
                 setTestimony('')
-                window.location.reload()
+                router.refresh()
             } else {
                 toast.error(result.error || 'Erro ao marcar como respondida')
             }

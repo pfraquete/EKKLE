@@ -50,29 +50,34 @@ export async function getCellPrayerRequests(cellId: string): Promise<{ success: 
             return { success: false, error: error.message }
         }
 
-        // Get supporters count and check if user is supporting for each request
-        const requestsWithSupport = await Promise.all(
-            (requests || []).map(async (request) => {
-                const { count: supportersCount } = await supabase
-                    .from('cell_prayer_supporters')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('prayer_request_id', request.id)
+        // Get all supporters in a single query for efficiency
+        const requestIds = (requests || []).map(r => r.id)
+        
+        const { data: allSupporters } = await supabase
+            .from('cell_prayer_supporters')
+            .select('prayer_request_id, supporter_id')
+            .in('prayer_request_id', requestIds)
 
-                const { data: userSupport } = await supabase
-                    .from('cell_prayer_supporters')
-                    .select('id')
-                    .eq('prayer_request_id', request.id)
-                    .eq('supporter_id', profile.id)
-                    .maybeSingle()
-
-                return {
-                    ...request,
-                    author: Array.isArray(request.author) ? request.author[0] : request.author,
-                    supporters_count: supportersCount || 0,
-                    user_is_supporting: !!userSupport
-                }
+        // Count supporters and check user support for each request
+        const supportersByRequest = new Map<string, { count: number; userSupporting: boolean }>()
+        
+        for (const requestId of requestIds) {
+            const supporters = (allSupporters || []).filter(s => s.prayer_request_id === requestId)
+            supportersByRequest.set(requestId, {
+                count: supporters.length,
+                userSupporting: supporters.some(s => s.supporter_id === profile.id)
             })
-        )
+        }
+
+        const requestsWithSupport = (requests || []).map(request => {
+            const supportInfo = supportersByRequest.get(request.id) || { count: 0, userSupporting: false }
+            return {
+                ...request,
+                author: Array.isArray(request.author) ? request.author[0] : request.author,
+                supporters_count: supportInfo.count,
+                user_is_supporting: supportInfo.userSupporting
+            }
+        })
 
         return { success: true, data: requestsWithSupport }
     } catch (error) {
