@@ -191,7 +191,10 @@ export async function updateSession(request: NextRequest) {
             userProfile = {
                 church_id: profile.church_id,
                 role: profile.role,
-                church_slug: (profile.churches as { slug: string } | null)?.slug || null
+                church_slug: (() => {
+                    const churchesData = profile.churches as unknown as { slug: string }[] | null
+                    return Array.isArray(churchesData) && churchesData.length > 0 ? churchesData[0].slug : null
+                })()
             }
         }
     }
