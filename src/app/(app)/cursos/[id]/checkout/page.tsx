@@ -167,26 +167,26 @@ export default function CourseCheckoutPage() {
           return;
         }
 
-        if (result.paid) {
+        if ('paid' in result && result.paid) {
           toast.success('Pagamento confirmado! Você já pode acessar o curso.');
           router.push(`/cursos/${courseId}`);
           return;
         }
 
-        if (paymentMethod === 'pix' && result.pix_qr_code) {
+        if (paymentMethod === 'pix' && 'pix_qr_code' in result && result.pix_qr_code) {
           setPixData({
             qr_code: result.pix_qr_code,
-            qr_code_url: result.pix_qr_code_url,
-            order_id: result.order_id,
-            expires_at: result.pix_expires_at
+            qr_code_url: result.pix_qr_code_url || null,
+            order_id: result.order_id || null,
+            expires_at: result.pix_expires_at || null
           });
           toast.success('QR Code gerado! Escaneie para pagar.');
         }
 
-        if (paymentMethod === 'cash') {
+        if (paymentMethod === 'cash' && 'expires_at' in result) {
           setCashPaymentSuccess(true);
-          setExpiresAt(result.expires_at ?? null);
-          toast.success(result.message);
+          setExpiresAt(result.expires_at || null);
+          toast.success('message' in result ? (result.message || 'Inscrição registrada!') : 'Inscrição registrada!');
         }
       } catch (error) {
         console.error('Payment error:', error);

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getProfile } from '@/actions/auth'
 import { getFeedPosts, getFeedSettings } from '@/actions/feed'
 import { FeedContainer } from '@/components/feed/feed-container'
+import { ProfileSidebar } from '@/components/badges/profile-sidebar'
 import { isEkkleHubUser } from '@/lib/ekkle-utils'
 
 export const dynamic = 'force-dynamic'
@@ -37,15 +38,35 @@ export default async function FeedPage() {
                 </p>
             </div>
 
-            <FeedContainer
-                initialPosts={posts}
-                initialHasMore={hasMore}
-                settings={settings}
-                currentUserId={profile.id}
-                currentUserRole={profile.role}
-                currentUserName={profile.full_name}
-                currentUserPhoto={profile.photo_url}
-            />
+            <div className="flex gap-6">
+                {/* Main Feed */}
+                <div className="flex-1 min-w-0">
+                    <FeedContainer
+                        initialPosts={posts}
+                        initialHasMore={hasMore}
+                        settings={settings}
+                        currentUserId={profile.id}
+                        currentUserRole={profile.role}
+                        currentUserName={profile.full_name}
+                        currentUserPhoto={profile.photo_url}
+                    />
+                </div>
+
+                {/* Profile Sidebar - Desktop Only */}
+                <div className="hidden lg:block w-80 flex-shrink-0">
+                    <div className="sticky top-6">
+                        <ProfileSidebar 
+                            user={{
+                                id: profile.id,
+                                full_name: profile.full_name,
+                                photo_url: profile.photo_url,
+                                email: profile.email,
+                                member_stage: profile.member_stage
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

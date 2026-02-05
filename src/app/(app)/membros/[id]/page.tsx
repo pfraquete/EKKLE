@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { getMemberDetails } from '@/actions/members'
+import { getUserBadges } from '@/actions/badges'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,16 +14,23 @@ import {
     Mail,
     Clock,
     CheckCircle2,
-    XCircle
+    XCircle,
+    Award
 } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import Image from 'next/image'
 
 export default async function MemberDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    const { member, attendance } = await getMemberDetails(id)
+    const [{ member, attendance }, badgesResult] = await Promise.all([
+        getMemberDetails(id),
+        getUserBadges(id)
+    ])
+
+    const userBadges = badgesResult.data || []
 
     if (!member) {
         return (
@@ -39,6 +47,8 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
         'VISITOR': 'Visitante',
         'REGULAR_VISITOR': 'Visitante Frequente',
         'MEMBER': 'Membro',
+        'GUARDIAN_ANGEL': 'Anjo da Guarda',
+        'TRAINING_LEADER': 'Líder em Treinamento',
         'LEADER': 'Líder',
         'PASTOR': 'Pastor'
     }
@@ -91,6 +101,34 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
                                     </span>
                                 )}
                             </div>
+                            
+                            {/* Badges Display */}
+                            {userBadges.length > 0 && (
+                                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+                                    <Award className="h-4 w-4 text-amber-500" />
+                                    <div className="flex gap-1.5 flex-wrap">
+                                        {userBadges.map((ub) => (
+                                            <div
+                                                key={ub.id}
+                                                className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-yellow-500/20 flex items-center justify-center overflow-hidden border border-amber-500/30"
+                                                title={ub.badge?.name}
+                                            >
+                                                {ub.badge?.image_url ? (
+                                                    <Image
+                                                        src={ub.badge.image_url}
+                                                        alt={ub.badge.name}
+                                                        width={24}
+                                                        height={24}
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    <Award className="h-4 w-4 text-amber-500" />
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="flex gap-2 w-full md:w-auto">
                             <Button variant="outline" className="flex-1 md:flex-none font-bold rounded-xl border-2">Editar</Button>
@@ -103,6 +141,7 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
             <Tabs defaultValue="timeline" className="space-y-6">
                 <TabsList className="bg-muted/50 p-1 rounded-xl h-11">
                     <TabsTrigger value="timeline" className="rounded-lg font-bold">Timeline</TabsTrigger>
+                    <TabsTrigger value="selos" className="rounded-lg font-bold">Selos</TabsTrigger>
                     <TabsTrigger value="presenca" className="rounded-lg font-bold">Histórico de Presença</TabsTrigger>
                     <TabsTrigger value="dados" className="rounded-lg font-bold">Dados Detalhados</TabsTrigger>
                 </TabsList>
@@ -165,6 +204,16 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
 
                                     <div className="flex justify-between items-center rounded-xl bg-muted/30 p-4">
                                         <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center">
+                                                <Award className="h-5 w-5" />
+                                            </div>
+                                            <p className="text-sm font-bold">Selos</p>
+                                        </div>
+                                        <p className="text-xl font-black">{userBadges.length}</p>
+                                    </div>
+
+                                    <div className="flex justify-between items-center rounded-xl bg-muted/30 p-4">
+                                        <div className="flex items-center gap-3">
                                             <div className="h-10 w-10 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center">
                                                 <Calendar className="h-5 w-5" />
                                             </div>
@@ -178,6 +227,58 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
                             </Card>
                         </div>
                     </div>
+                </TabsContent>
+
+                {/* New Badges Tab */}
+                <TabsContent value="selos" className="outline-none">
+                    <Card className="border-none shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                <Award className="h-5 w-5 text-amber-500" />
+                                Selos Conquistados
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {userBadges.length > 0 ? (
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {userBadges.map((ub) => (
+                                        <div
+                                            key={ub.id}
+                                            className="flex flex-col items-center p-4 bg-gradient-to-br from-amber-500/10 to-yellow-500/10 rounded-xl border border-amber-500/30"
+                                        >
+                                            <div className="w-16 h-16 rounded-xl bg-amber-500/20 flex items-center justify-center overflow-hidden mb-3">
+                                                {ub.badge?.image_url ? (
+                                                    <Image
+                                                        src={ub.badge.image_url}
+                                                        alt={ub.badge.name}
+                                                        width={48}
+                                                        height={48}
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    <Award className="h-8 w-8 text-amber-500" />
+                                                )}
+                                            </div>
+                                            <p className="font-bold text-center text-sm">{ub.badge?.name}</p>
+                                            {ub.badge?.description && (
+                                                <p className="text-xs text-muted-foreground text-center mt-1 line-clamp-2">
+                                                    {ub.badge.description}
+                                                </p>
+                                            )}
+                                            <p className="text-xs text-muted-foreground mt-2">
+                                                {format(new Date(ub.earned_at), "d 'de' MMM 'de' yyyy", { locale: ptBR })}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-20 text-muted-foreground">
+                                    <Award className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                                    <p>Este membro ainda não conquistou nenhum selo.</p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
                 <TabsContent value="presenca" className="outline-none">
