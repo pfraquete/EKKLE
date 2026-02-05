@@ -43,23 +43,41 @@ export async function createCell(formData: FormData) {
         const adminSupabase = getAdminClient()
 
         const name = formData.get('name') as string
-        const leaderEmail = formData.get('leaderEmail') as string
-        const leaderName = formData.get('leaderName') as string
+        const existingLeaderId = formData.get('leaderId') as string | null
+        const leaderEmail = formData.get('leaderEmail') as string | null
+        const leaderName = formData.get('leaderName') as string | null
 
         let leaderId: string | null = null
         let generatedPassword: string | null = null
 
-        // 1. Check if profile already exists IN THIS CHURCH
-        const { data: existingProfile } = await supabase
-            .from('profiles')
-            .select('id, church_id')
-            .eq('email', leaderEmail)
-            .eq('church_id', churchId)
-            .maybeSingle()
+        // Se um líder existente foi selecionado pelo ID
+        if (existingLeaderId) {
+            // Verificar se o membro pertence a esta igreja
+            const { data: existingMember } = await supabase
+                .from('profiles')
+                .select('id, full_name')
+                .eq('id', existingLeaderId)
+                .eq('church_id', churchId)
+                .single()
 
-        if (existingProfile) {
-            leaderId = existingProfile.id
-        } else {
+            if (!existingMember) {
+                throw new Error('Membro não encontrado nesta igreja')
+            }
+
+            leaderId = existingLeaderId
+        } else if (leaderEmail) {
+            // Modo de criação de novo líder
+            // 1. Check if profile already exists IN THIS CHURCH
+            const { data: existingProfile } = await supabase
+                .from('profiles')
+                .select('id, church_id')
+                .eq('email', leaderEmail)
+                .eq('church_id', churchId)
+                .maybeSingle()
+
+            if (existingProfile) {
+                leaderId = existingProfile.id
+            } else {
             // 2. Check if user exists in AUTH and then check their PROFILE church_id
             // We use adminSupabase ONLY for the auth check, but we still respect tenant privacy
             const { data: userData, error: listError } = await adminSupabase.auth.admin.listUsers()
@@ -130,9 +148,12 @@ export async function createCell(formData: FormData) {
             await new Promise(resolve => setTimeout(resolve, 800))
 
             // 5. Send welcome email with generated password (non-blocking)
-            if (generatedPassword) {
+            if (generatedPassword && leaderEmail && leaderName) {
                 sendLeaderWelcomeEmail(leaderEmail, leaderName, generatedPassword).catch(e => console.error('Silent email error:', e))
             }
+            }
+        } else {
+            throw new Error('Informe um líder existente ou os dados para criar um novo')
         }
 
         // 4. Create the cell
@@ -153,13 +174,17 @@ export async function createCell(formData: FormData) {
         }
 
         // 5. Update profile role and link cell
+        const updateData: { role: string; cell_id: string; full_name?: string } = {
+            role: 'LEADER',
+            cell_id: cell.id,
+        }
+        // Só atualiza o nome se foi fornecido (modo criação)
+        if (leaderName) {
+            updateData.full_name = leaderName
+        }
         const { error: profileError } = await adminSupabase
             .from('profiles')
-            .update({
-                role: 'LEADER',
-                cell_id: cell.id,
-                full_name: leaderName
-            })
+            .update(updateData)
             .eq('id', leaderId)
 
         if (profileError) {
