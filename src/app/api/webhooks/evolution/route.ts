@@ -15,11 +15,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { processEvolutionMessage } from '@/lib/ai-agent/evolution-message-processor'
 
-// Initialize Supabase client with service role for webhook processing
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabaseClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !serviceRoleKey) {
+        console.error('Evolution API environment variables are missing.')
+        return null
+    }
+
+    return createClient(supabaseUrl, serviceRoleKey)
+}
 
 // Cache para idempotência (em produção, usar Redis)
 const processedMessages = new Map<string, number>()
@@ -158,6 +164,11 @@ async function handleConnectionUpdate(payload: EvolutionWebhookPayload) {
 
     console.log(`[Webhook] 🔌 Connection update: ${instance} -> ${state}`)
 
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+        return
+    }
+
     // Map Evolution state to our status
     const statusMap: Record<string, string> = {
         'open': 'CONNECTED',
@@ -191,6 +202,11 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
 
     if (!data.key) {
         console.log('[Webhook] ⚠️ No key in message data')
+        return
+    }
+
+    const supabase = getSupabaseClient()
+    if (!supabase) {
         return
     }
 
@@ -342,6 +358,11 @@ async function handleMessageStatusUpdate(payload: EvolutionWebhookPayload) {
 async function handleQrCodeUpdate(payload: EvolutionWebhookPayload) {
     const { instance } = payload
     console.log(`[Webhook] 📱 QR Code updated for: ${instance}`)
+
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+        return
+    }
 
     // Update instance status to CONNECTING
     await supabase

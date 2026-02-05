@@ -114,6 +114,7 @@ export async function createEventPayment(input: CreateEventPaymentInput) {
 
     return {
       success: true,
+      paid: false,
       paymentId: payment.id,
       paymentMethod: 'cash',
       expiresAt: expiresAt.toISOString(),
@@ -207,6 +208,7 @@ export async function createEventPayment(input: CreateEventPaymentInput) {
       
       return {
         success: true,
+        paid: false,
         paymentId: payment.id,
         orderId: order.id,
         pixQrCode: pixTransaction?.qr_code,
@@ -217,6 +219,7 @@ export async function createEventPayment(input: CreateEventPaymentInput) {
 
     return {
       success: true,
+      paid: false,
       paymentId: payment.id,
       orderId: order.id
     };

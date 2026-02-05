@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { WebhookReceiver } from 'livekit-server-sdk'
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client with service role for webhook processing
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error('LiveKit webhook Supabase environment variables are missing.')
+    return null
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey)
+}
 
 // Initialize webhook receiver
 function getWebhookReceiver() {
@@ -93,6 +99,11 @@ export async function POST(request: NextRequest) {
 // Handle room finished - end the live stream
 async function handleRoomFinished(roomName: string) {
   try {
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      return
+    }
+
     // Find stream by room name
     const { data: stream } = await supabase
       .from('live_streams')
@@ -121,6 +132,11 @@ async function handleRoomFinished(roomName: string) {
 // Handle egress started - update stream with egress ID
 async function handleEgressStarted(roomName: string, egressId: string) {
   try {
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      return
+    }
+
     const { error } = await supabase
       .from('live_streams')
       .update({
@@ -143,6 +159,11 @@ async function handleEgressStarted(roomName: string, egressId: string) {
 // Handle egress ended - update stream status
 async function handleEgressEnded(roomName: string) {
   try {
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      return
+    }
+
     // Find stream by room name
     const { data: stream } = await supabase
       .from('live_streams')
