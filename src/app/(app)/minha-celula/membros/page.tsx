@@ -3,7 +3,7 @@ import { getProfile } from '@/actions/auth'
 import { getMyCellData } from '@/actions/cell'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, Plus } from 'lucide-react'
+import { ChevronLeft, Plus, Link2 } from 'lucide-react'
 import Link from 'next/link'
 import { MembersList } from '@/components/members/members-list'
 import { ExportMembersButton } from '@/components/members/export-members-button'
@@ -29,6 +29,12 @@ export default async function MembrosPage() {
                     <h1 className="text-2xl font-bold text-foreground">Membros</h1>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Link href="/minha-celula/vincular-membro">
+                        <Button variant="outline" size="sm" className="gap-2">
+                            <Link2 className="h-4 w-4" />
+                            Vincular
+                        </Button>
+                    </Link>
                     <ExportMembersButton members={members} cellName={cellName} />
                     <Link href="/minha-celula/membros/novo">
                         <Button size="icon" className="rounded-full h-10 w-10 shadow-lg">
