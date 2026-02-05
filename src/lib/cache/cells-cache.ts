@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 
 export interface CachedCell {
   id: string
@@ -15,10 +15,12 @@ export interface CachedCell {
 /**
  * Cached cells list - reduces database queries
  * Cache is revalidated every 5 minutes or when 'cells' tag is invalidated
+ * Uses createStaticClient to avoid cookies() conflict with unstable_cache
  */
 export const getCachedCellsByChurch = unstable_cache(
   async (churchId: string): Promise<CachedCell[]> => {
-    const supabase = await createClient()
+    // Use static client (no cookies) to avoid conflict with unstable_cache
+    const supabase = createStaticClient()
     
     const { data: cells, error } = await supabase
       .from('cells')

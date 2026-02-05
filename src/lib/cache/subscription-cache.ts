@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 
 export interface SubscriptionStatus {
   isActive: boolean
@@ -11,10 +11,12 @@ export interface SubscriptionStatus {
 /**
  * Cached subscription status - reduces database queries
  * Cache is revalidated every hour or when 'subscription' tag is invalidated
+ * Uses createStaticClient to avoid cookies() conflict with unstable_cache
  */
 export const getCachedSubscriptionStatus = unstable_cache(
   async (churchId: string): Promise<SubscriptionStatus> => {
-    const supabase = await createClient()
+    // Use static client (no cookies) to avoid conflict with unstable_cache
+    const supabase = createStaticClient()
     
     const { data: subStatus, error } = await supabase
       .rpc('check_church_subscription_status', { p_church_id: churchId })
@@ -53,10 +55,12 @@ export const getCachedSubscriptionStatus = unstable_cache(
 
 /**
  * Get subscription with shorter cache for billing pages
+ * Uses createStaticClient to avoid cookies() conflict with unstable_cache
  */
 export const getSubscriptionForBilling = unstable_cache(
   async (churchId: string) => {
-    const supabase = await createClient()
+    // Use static client (no cookies) to avoid conflict with unstable_cache
+    const supabase = createStaticClient()
     
     const { data: subscription, error } = await supabase
       .from('subscriptions')
