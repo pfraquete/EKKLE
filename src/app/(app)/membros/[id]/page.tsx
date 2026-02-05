@@ -25,12 +25,23 @@ import Image from 'next/image'
 
 export default async function MemberDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    const [{ member, attendance }, badgesResult] = await Promise.all([
-        getMemberDetails(id),
-        getUserBadges(id)
-    ])
-
-    const userBadges = badgesResult.data || []
+    
+    let member = null
+    let attendance: any[] = []
+    let userBadges: any[] = []
+    
+    try {
+        const [memberResult, badgesResult] = await Promise.all([
+            getMemberDetails(id),
+            getUserBadges(id).catch(() => ({ data: null, error: 'Failed to load badges' }))
+        ])
+        
+        member = memberResult.member
+        attendance = memberResult.attendance || []
+        userBadges = badgesResult.data || []
+    } catch (error) {
+        console.error('Error loading member details:', error)
+    }
 
     if (!member) {
         return (
