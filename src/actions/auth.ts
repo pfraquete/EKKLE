@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { isEkkleHubUser } from '@/lib/ekkle-utils'
+import { unstable_cache } from 'next/cache'
 
 export interface Profile {
     id: string
@@ -24,6 +25,33 @@ export interface Profile {
     kids_cell_id: string | null
 }
 
+/**
+ * Cached profile fetch - reduces database queries
+ * Cache is revalidated every 60 seconds or when 'profile' tag is invalidated
+ */
+const getCachedProfileById = unstable_cache(
+    async (userId: string): Promise<Profile | null> => {
+        const supabase = await createClient()
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single()
+
+        if (error) {
+            console.error('Error fetching profile:', error)
+            return null
+        }
+
+        return profile
+    },
+    ['profile-by-id'],
+    {
+        revalidate: 60, // Cache for 60 seconds
+        tags: ['profile'],
+    }
+)
+
 export async function getProfile(): Promise<Profile | null> {
     const supabase = await createClient()
 
@@ -31,18 +59,8 @@ export async function getProfile(): Promise<Profile | null> {
 
     if (!user) return null
 
-    const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-    if (error) {
-        console.error('Error fetching profile:', error)
-        return null
-    }
-
-    return profile
+    // Use cached profile fetch
+    return getCachedProfileById(user.id)
 }
 
 export async function signIn(formData: FormData) {

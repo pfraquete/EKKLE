@@ -39,7 +39,7 @@ const getCachedChurchById = unstable_cache(
   },
   ['church-by-id-v2'],
   {
-    revalidate: 60, // Cache for 60 seconds
+    revalidate: 300, // Cache for 5 minutes
     tags: ['church'],
   }
 )
@@ -63,7 +63,7 @@ const getCachedChurchBySlug = unstable_cache(
   },
   ['church-by-slug-v2'],
   {
-    revalidate: 60, // Cache for 60 seconds
+    revalidate: 300, // Cache for 5 minutes
     tags: ['church'],
   }
 )
