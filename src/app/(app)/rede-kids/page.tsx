@@ -14,7 +14,8 @@ import {
   Crown,
   Plus,
   ChevronRight,
-  AlertTriangle
+  AlertTriangle,
+  Calendar,
 } from 'lucide-react'
 import { BirthdayWidget } from '@/components/rede-kids/birthday-widget'
 import { UpcomingMeetingsWidget } from '@/components/rede-kids/upcoming-meetings-widget'
@@ -88,6 +89,15 @@ export default async function RedeKidsPage() {
                   Nova Célula
                 </Link>
               </>
+            )}
+            {canManage && (
+              <Link
+                href="/rede-kids/cultos"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                <Calendar className="h-4 w-4" />
+                Cultos Kids
+              </Link>
             )}
           </div>
         )}
