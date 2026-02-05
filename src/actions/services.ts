@@ -5,6 +5,11 @@ import { getProfile } from './auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+// Helper para converter string vazia em null para campos UUID opcionais
+const emptyStringToNull = z.string().transform(val => val === '' ? null : val)
+const optionalUuid = emptyStringToNull.pipe(z.string().uuid().nullable()).optional()
+const optionalString = emptyStringToNull.pipe(z.string().nullable()).optional()
+
 const serviceSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
   description: z.string().optional(),
@@ -16,17 +21,17 @@ const serviceSchema = z.object({
   zoom_meeting_id: z.string().optional(),
   zoom_password: z.string().optional(),
   is_published: z.boolean().default(false),
-  // Programming fields
-  preacher_id: z.string().uuid().optional().nullable(),
-  preacher_name: z.string().optional().nullable(),
-  opening_id: z.string().uuid().optional().nullable(),
-  offerings_id: z.string().uuid().optional().nullable(),
-  praise_team: z.string().optional().nullable(),
-  media_team: z.string().optional().nullable(),
-  welcome_team: z.string().optional().nullable(),
-  cleaning_team: z.string().optional().nullable(),
-  cafeteria_team: z.string().optional().nullable(),
-  communion_team: z.string().optional().nullable(),
+  // Programming fields - aceita string vazia e converte para null
+  preacher_id: optionalUuid,
+  preacher_name: optionalString,
+  opening_id: optionalUuid,
+  offerings_id: optionalUuid,
+  praise_team: optionalString,
+  media_team: optionalString,
+  welcome_team: optionalString,
+  cleaning_team: optionalString,
+  cafeteria_team: optionalString,
+  communion_team: optionalString,
 })
 
 type ServiceInput = z.infer<typeof serviceSchema>
