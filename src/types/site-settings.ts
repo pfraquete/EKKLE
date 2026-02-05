@@ -127,11 +127,11 @@ export interface WebsiteSettings {
 
 // Default values
 export const defaultSiteTheme: SiteTheme = {
-  primaryColor: '#D4AF37',
-  secondaryColor: '#1A1A1A',
-  accentColor: '#F2D675',
-  backgroundColor: '#0B0B0B',
-  textColor: '#FFFFFF',
+  primaryColor: '#1F2937',
+  secondaryColor: '#F3F4F6',
+  accentColor: '#6B7280',
+  backgroundColor: '#FFFFFF',
+  textColor: '#111827',
   fontFamily: 'Inter',
   borderRadius: 'lg',
 }
@@ -150,7 +150,7 @@ export const defaultSiteFooter: SiteFooter = {
   showSocialLinks: true,
   showCopyright: true,
   customText: '',
-  backgroundColor: '#0F0F0F',
+  backgroundColor: '#1F2937',
 }
 
 export const defaultSiteHero: SiteHero = {
