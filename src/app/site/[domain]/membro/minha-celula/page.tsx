@@ -20,6 +20,9 @@ import Link from 'next/link'
 import { getCellPhotos } from '@/actions/cell-album'
 import { CellPhotoGallery } from '@/components/cell-album/cell-photo-gallery'
 import { CreateInviteLinkDialog } from '@/components/cell-invites/create-invite-link-dialog'
+import { PrayerWall } from '@/components/cell-prayer/prayer-wall'
+import { CellBirthdays } from '@/components/cell-prayer/cell-birthdays'
+import { getCellPrayerRequests } from '@/actions/cell-prayer'
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
@@ -53,6 +56,15 @@ export default async function MembroMinhaCelulaPage() {
     const leader = Array.isArray(cell.leader) ? cell.leader[0] : cell.leader
 
     const { data: photos } = await getCellPhotos(cell.id)
+    const { data: prayerRequests } = await getCellPrayerRequests(cell.id)
+
+    // Prepare members data for birthdays component
+    const membersForBirthdays = members.map(m => ({
+        id: m.id,
+        full_name: m.fullName,
+        photo_url: m.photoUrl,
+        birth_date: m.birthDate || null
+    }))
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 lg:space-y-12 pb-8 animate-in fade-in duration-700">
@@ -246,6 +258,16 @@ export default async function MembroMinhaCelulaPage() {
                     </div>
                 </div>
             )}
+
+            {/* Prayer Wall and Birthdays */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
+                <PrayerWall 
+                    cellId={cell.id} 
+                    initialRequests={prayerRequests || []} 
+                    currentUserId={profile?.id || ''}
+                />
+                <CellBirthdays members={membersForBirthdays} />
+            </div>
 
             <CellPhotoGallery photos={photos || []} />
         </div>

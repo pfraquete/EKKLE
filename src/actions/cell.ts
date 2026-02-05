@@ -25,6 +25,7 @@ export interface MyCellData {
         id: string
         fullName: string
         photoUrl: string | null
+        birthDate: string | null
         consecutiveAbsences: number
     }[]
     recentMeetings: {
@@ -81,6 +82,7 @@ interface CellMemberRow {
     id: string
     full_name: string
     photo_url: string | null
+    birth_date: string | null
 }
 
 interface CellMeetingAttendance {
@@ -282,7 +284,7 @@ export async function getMemberCellData(): Promise<MyCellData | null> {
     const [membersResponse, meetingsResponse] = await Promise.all([
         supabase
             .from('profiles')
-            .select('id, full_name, photo_url')
+            .select('id, full_name, photo_url, birth_date')
             .eq('cell_id', cell.id)
             .eq('is_active', true)
             .order('full_name'),
@@ -345,6 +347,7 @@ export async function getMemberCellData(): Promise<MyCellData | null> {
             id: m.id,
             fullName: m.full_name,
             photoUrl: m.photo_url,
+            birthDate: m.birth_date,
             consecutiveAbsences: 0 // Not relevant for members view
         })),
         recentMeetings: meetings.map(m => ({
