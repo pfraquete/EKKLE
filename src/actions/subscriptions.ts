@@ -156,7 +156,7 @@ export async function hasActiveSubscription(): Promise<boolean> {
 
 interface CreateSubscriptionInput {
   plan_id: string;
-  payment_method: 'credit_card' | 'boleto' | 'pix';
+  payment_method: 'credit_card' | 'boleto';
   customer: {
     name: string;
     email: string;
