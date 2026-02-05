@@ -402,23 +402,37 @@ export default function AssinaturaPage() {
                     </ul>
                   </CardContent>
                   <CardFooter className="flex flex-col gap-2">
-                    <Button
-                      className="w-full"
-                      variant={isAnnual ? 'default' : 'outline'}
-                      onClick={() => handleSelectPlan(plan.id)}
-                    >
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      Pagar com Cartão
-                    </Button>
-                    {isAnnual && (
+                    {/* Plano Mensal: apenas Cartão via Stripe */}
+                    {!isAnnual && (
                       <Button
                         className="w-full"
-                        variant="outline"
-                        onClick={() => handlePixPayment(plan)}
+                        onClick={() => handleSelectPlan(plan.id)}
                       >
-                        <QrCode className="w-4 h-4 mr-2" />
-                        Pagar com PIX
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Assinar com Cartão
                       </Button>
+                    )}
+                    
+                    {/* Plano Anual: PIX (Pagar.me) ou Cartão (Stripe) */}
+                    {isAnnual && (
+                      <>
+                        <Button
+                          className="w-full"
+                          variant="default"
+                          onClick={() => handlePixPayment(plan)}
+                        >
+                          <QrCode className="w-4 h-4 mr-2" />
+                          Pagar com PIX
+                        </Button>
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          onClick={() => handleSelectPlan(plan.id)}
+                        >
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Pagar com Cartão
+                        </Button>
+                      </>
                     )}
                   </CardFooter>
                 </Card>
