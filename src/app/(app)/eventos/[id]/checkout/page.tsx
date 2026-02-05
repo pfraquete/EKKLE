@@ -142,26 +142,14 @@ export default function EventCheckoutPage() {
 
     startTransition(async () => {
       try {
-        const input: any = {
-          event_id: eventId,
-          payment_method: paymentMethod,
-          customer: {
-            name: formData.name,
-            email: formData.email,
-            document: formData.document.replace(/\D/g, ''),
-            phone: formData.phone.replace(/\D/g, '')
-          }
+        const input = {
+          eventId,
+          paymentMethod,
+          customerName: formData.name,
+          customerEmail: formData.email,
+          customerDocument: formData.document.replace(/\D/g, ''),
+          customerPhone: formData.phone.replace(/\D/g, '')
         };
-
-        if (paymentMethod === 'credit_card') {
-          input.card = {
-            number: formData.cardNumber.replace(/\s/g, ''),
-            holder_name: formData.cardHolder,
-            exp_month: parseInt(formData.cardExpMonth),
-            exp_year: parseInt(formData.cardExpYear),
-            cvv: formData.cardCvv
-          };
-        }
 
         const result = await createEventPayment(input);
 
@@ -170,26 +158,26 @@ export default function EventCheckoutPage() {
           return;
         }
 
-        if (result.paid) {
+        if ('paid' in result && result.paid) {
           toast.success('Pagamento confirmado! Sua inscrição está confirmada.');
           router.push(`/eventos/${eventId}`);
           return;
         }
 
-        if (paymentMethod === 'pix' && result.pix_qr_code) {
+        if (paymentMethod === 'pix' && result.pixQrCode) {
           setPixData({
-            qr_code: result.pix_qr_code,
-            qr_code_url: result.pix_qr_code_url,
-            order_id: result.order_id,
-            expires_at: result.pix_expires_at
+            qr_code: result.pixQrCode,
+            qr_code_url: result.pixQrCodeUrl,
+            order_id: result.orderId,
+            expires_at: result.expiresAt
           });
           toast.success('QR Code gerado! Escaneie para pagar.');
         }
 
         if (paymentMethod === 'cash') {
           setCashPaymentSuccess(true);
-          setExpiresAt(result.expires_at);
-          toast.success(result.message);
+          setExpiresAt(result.expiresAt ?? null);
+          toast.success(result.message ?? 'Pagamento registrado com sucesso.');
         }
       } catch (error) {
         console.error('Payment error:', error);
