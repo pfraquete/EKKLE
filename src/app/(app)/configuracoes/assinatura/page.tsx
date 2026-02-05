@@ -5,10 +5,16 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { CreditCard, QrCode, Loader2, Copy, Check } from 'lucide-react';
 import {
   getSubscriptionPlans,
   getChurchSubscription,
   cancelChurchSubscription,
+  createPixPaymentForAnnualPlan,
+  checkPixPaymentStatus,
   type SubscriptionPlan,
   type Subscription,
 } from '@/actions/subscriptions';
@@ -41,6 +47,27 @@ export default function AssinaturaPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [canceling, setCanceling] = useState(false);
+  
+  // PIX payment state
+  const [showPixModal, setShowPixModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [pixLoading, setPixLoading] = useState(false);
+  const [pixData, setPixData] = useState<{
+    qr_code: string;
+    qr_code_url?: string;
+    expires_at?: string;
+    order_id?: string;
+    amount_cents?: number;
+  } | null>(null);
+  const [pixCopied, setPixCopied] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  
+  // Customer form state
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerDocument, setCustomerDocument] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     async function loadData() {
@@ -60,8 +87,124 @@ export default function AssinaturaPage() {
     loadData();
   }, []);
 
+  // Poll for PIX payment status
+  useEffect(() => {
+    if (!pixData?.order_id) return;
+    
+    const interval = setInterval(async () => {
+      try {
+        const result = await checkPixPaymentStatus(pixData.order_id!);
+        if (result.paid) {
+          clearInterval(interval);
+          setShowPixModal(false);
+          setPixData(null);
+          // Reload subscription data
+          const updatedSubscription = await getChurchSubscription();
+          setSubscription(updatedSubscription);
+          alert('Pagamento confirmado! Sua assinatura está ativa.');
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    }, 5000); // Check every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, [pixData?.order_id]);
+
   const handleSelectPlan = (planId: string) => {
     router.push(`/configuracoes/assinatura/checkout?plan=${planId}`);
+  };
+
+  const handlePixPayment = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setShowPixModal(true);
+    setPixData(null);
+    setFormError('');
+  };
+
+  const handleGeneratePix = async () => {
+    if (!selectedPlan) return;
+    
+    // Validate form
+    if (!customerName.trim()) {
+      setFormError('Nome é obrigatório');
+      return;
+    }
+    if (!customerEmail.trim() || !customerEmail.includes('@')) {
+      setFormError('Email válido é obrigatório');
+      return;
+    }
+    if (!customerDocument.trim() || customerDocument.replace(/\D/g, '').length < 11) {
+      setFormError('CPF/CNPJ válido é obrigatório');
+      return;
+    }
+    
+    setFormError('');
+    setPixLoading(true);
+    
+    try {
+      const result = await createPixPaymentForAnnualPlan({
+        plan_id: selectedPlan.id,
+        customer: {
+          name: customerName,
+          email: customerEmail,
+          document: customerDocument,
+          phone: customerPhone || undefined,
+        },
+      });
+      
+      if (result.success && result.pix_qr_code) {
+        setPixData({
+          qr_code: result.pix_qr_code,
+          qr_code_url: result.pix_qr_code_url,
+          expires_at: result.pix_expires_at,
+          order_id: result.order_id,
+          amount_cents: result.amount_cents,
+        });
+      } else {
+        setFormError(result.error || 'Erro ao gerar PIX');
+      }
+    } catch (error) {
+      console.error('Error generating PIX:', error);
+      setFormError('Erro ao gerar PIX. Tente novamente.');
+    } finally {
+      setPixLoading(false);
+    }
+  };
+
+  const handleCopyPix = async () => {
+    if (!pixData?.qr_code) return;
+    
+    try {
+      await navigator.clipboard.writeText(pixData.qr_code);
+      setPixCopied(true);
+      setTimeout(() => setPixCopied(false), 2000);
+    } catch (error) {
+      console.error('Error copying PIX:', error);
+    }
+  };
+
+  const handleCheckPayment = async () => {
+    if (!pixData?.order_id) return;
+    
+    setCheckingPayment(true);
+    try {
+      const result = await checkPixPaymentStatus(pixData.order_id);
+      if (result.paid) {
+        setShowPixModal(false);
+        setPixData(null);
+        const updatedSubscription = await getChurchSubscription();
+        setSubscription(updatedSubscription);
+        alert('Pagamento confirmado! Sua assinatura está ativa.');
+      } else {
+        alert('Pagamento ainda não confirmado. Aguarde alguns instantes após realizar o pagamento.');
+      }
+    } catch (error) {
+      console.error('Error checking payment:', error);
+      alert('Erro ao verificar pagamento. Tente novamente.');
+    } finally {
+      setCheckingPayment(false);
+    }
   };
 
   const handleCancelSubscription = async () => {
@@ -83,6 +226,40 @@ export default function AssinaturaPage() {
       alert('Erro ao cancelar assinatura');
     } finally {
       setCanceling(false);
+    }
+  };
+
+  const formatDocument = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      // CPF: 000.000.000-00
+      return numbers
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+        .replace(/(-\d{2})\d+?$/, '$1');
+    } else {
+      // CNPJ: 00.000.000/0000-00
+      return numbers
+        .replace(/(\d{2})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1/$2')
+        .replace(/(\d{4})(\d{1,2})/, '$1-$2')
+        .replace(/(-\d{2})\d+?$/, '$1');
+    }
+  };
+
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 10) {
+      return numbers
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{4})(\d)/, '$1-$2');
+    } else {
+      return numbers
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{5})(\d)/, '$1-$2')
+        .replace(/(-\d{4})\d+?$/, '$1');
     }
   };
 
@@ -224,14 +401,25 @@ export default function AssinaturaPage() {
                       ))}
                     </ul>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="flex flex-col gap-2">
                     <Button
                       className="w-full"
                       variant={isAnnual ? 'default' : 'outline'}
                       onClick={() => handleSelectPlan(plan.id)}
                     >
-                      Assinar {plan.name}
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Pagar com Cartão
                     </Button>
+                    {isAnnual && (
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        onClick={() => handlePixPayment(plan)}
+                      >
+                        <QrCode className="w-4 h-4 mr-2" />
+                        Pagar com PIX
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               );
@@ -276,6 +464,154 @@ export default function AssinaturaPage() {
           </div>
         </div>
       )}
+
+      {/* PIX Payment Modal */}
+      <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pagamento via PIX</DialogTitle>
+            <DialogDescription>
+              {selectedPlan && `${selectedPlan.name} - ${formatCurrency(selectedPlan.price_cents)}`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {!pixData ? (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nome Completo *</Label>
+                <Input
+                  id="name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Seu nome completo"
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                />
+              </div>
+              <div>
+                <Label htmlFor="document">CPF/CNPJ *</Label>
+                <Input
+                  id="document"
+                  value={customerDocument}
+                  onChange={(e) => setCustomerDocument(formatDocument(e.target.value))}
+                  placeholder="000.000.000-00"
+                  maxLength={18}
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Telefone (opcional)</Label>
+                <Input
+                  id="phone"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(formatPhone(e.target.value))}
+                  placeholder="(00) 00000-0000"
+                  maxLength={15}
+                />
+              </div>
+
+              {formError && (
+                <p className="text-sm text-destructive">{formError}</p>
+              )}
+
+              <Button
+                className="w-full"
+                onClick={handleGeneratePix}
+                disabled={pixLoading}
+              >
+                {pixLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Gerando PIX...
+                  </>
+                ) : (
+                  <>
+                    <QrCode className="w-4 h-4 mr-2" />
+                    Gerar QR Code PIX
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {pixData.qr_code_url && (
+                <div className="flex justify-center">
+                  <img
+                    src={pixData.qr_code_url}
+                    alt="QR Code PIX"
+                    className="w-48 h-48"
+                  />
+                </div>
+              )}
+
+              <div>
+                <Label>Código PIX (Copia e Cola)</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value={pixData.qr_code}
+                    readOnly
+                    className="text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleCopyPix}
+                  >
+                    {pixCopied ? (
+                      <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {pixData.expires_at && (
+                <p className="text-sm text-muted-foreground text-center">
+                  Expira em: {new Date(pixData.expires_at).toLocaleString('pt-BR')}
+                </p>
+              )}
+
+              <div className="bg-muted p-3 rounded-lg text-sm">
+                <p className="font-medium mb-2">Como pagar:</p>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                  <li>Abra o app do seu banco</li>
+                  <li>Escolha pagar com PIX</li>
+                  <li>Escaneie o QR Code ou cole o código</li>
+                  <li>Confirme o pagamento</li>
+                </ol>
+              </div>
+
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={handleCheckPayment}
+                disabled={checkingPayment}
+              >
+                {checkingPayment ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Verificando...
+                  </>
+                ) : (
+                  'Já paguei, verificar pagamento'
+                )}
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center">
+                O pagamento será confirmado automaticamente em alguns segundos após a transferência.
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

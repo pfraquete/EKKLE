@@ -8,6 +8,8 @@ import {
   cancelSubscription as cancelPagarmeSubscription,
   getSubscription as getPagarmeSubscription,
   getSubscriptionInvoices as getPagarmeInvoices,
+  createOrder,
+  getOrder,
   PagarmeError,
 } from '@/lib/pagarme';
 
@@ -154,7 +156,7 @@ export async function hasActiveSubscription(): Promise<boolean> {
 
 interface CreateSubscriptionInput {
   plan_id: string;
-  payment_method: 'credit_card' | 'boleto';
+  payment_method: 'credit_card' | 'boleto' | 'pix';
   customer: {
     name: string;
     email: string;
@@ -498,4 +500,250 @@ function calculatePeriodEnd(interval: 'month' | 'year', intervalCount: number): 
     now.setFullYear(now.getFullYear() + intervalCount);
   }
   return now.toISOString();
+}
+
+
+// =====================================================
+// PIX PAYMENT FOR ANNUAL PLAN
+// =====================================================
+
+interface CreatePixPaymentInput {
+  plan_id: string;
+  customer: {
+    name: string;
+    email: string;
+    document: string;
+    phone?: string;
+  };
+}
+
+interface PixPaymentResult {
+  success: boolean;
+  error?: string;
+  order_id?: string;
+  pix_qr_code?: string;
+  pix_qr_code_url?: string;
+  pix_expires_at?: string;
+  amount_cents?: number;
+}
+
+/**
+ * Create a PIX payment for annual subscription
+ * PIX is only available for annual plans (one-time payment)
+ */
+export async function createPixPaymentForAnnualPlan(input: CreatePixPaymentInput): Promise<PixPaymentResult> {
+  const supabase = await createClient();
+
+  // Get current user's church
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: 'Usuário não autenticado' };
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('church_id, role')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, error: 'Perfil não encontrado' };
+  }
+
+  if (profile.role !== 'PASTOR') {
+    return { success: false, error: 'Apenas pastores podem gerenciar assinaturas' };
+  }
+
+  // Check if already has active subscription
+  const existingSubscription = await getChurchSubscription();
+  if (existingSubscription && ['active', 'trialing'].includes(existingSubscription.status)) {
+    return { success: false, error: 'Já existe uma assinatura ativa' };
+  }
+
+  // Get plan
+  const plan = await getSubscriptionPlan(input.plan_id);
+  if (!plan) {
+    return { success: false, error: 'Plano não encontrado' };
+  }
+
+  // PIX is only available for annual plans
+  if (plan.interval !== 'year') {
+    return { success: false, error: 'PIX está disponível apenas para o plano anual' };
+  }
+
+  try {
+    // Determine document type
+    const cleanDocument = input.customer.document.replace(/\D/g, '');
+    const documentType = cleanDocument.length <= 11 ? 'CPF' : 'CNPJ';
+    const customerType = cleanDocument.length <= 11 ? 'individual' : 'company';
+
+    // Parse phone
+    let phones;
+    if (input.customer.phone) {
+      const cleanPhone = input.customer.phone.replace(/\D/g, '');
+      if (cleanPhone.length >= 10) {
+        phones = {
+          mobile_phone: {
+            country_code: '55',
+            area_code: cleanPhone.substring(0, 2),
+            number: cleanPhone.substring(2),
+          },
+        };
+      }
+    }
+
+    // Create order with PIX payment
+    const order = await createOrder({
+      code: `annual-${profile.church_id}-${Date.now()}`,
+      items: [
+        {
+          amount: plan.price_cents,
+          description: `${plan.name} - Assinatura Anual`,
+          quantity: 1,
+        },
+      ],
+      customer: {
+        name: input.customer.name,
+        email: input.customer.email,
+        document: cleanDocument,
+        document_type: documentType,
+        type: customerType,
+        phones,
+      },
+      payments: [
+        {
+          payment_method: 'pix',
+          pix: {
+            expires_in: 3600, // 1 hour
+            additional_information: [
+              { name: 'Igreja', value: profile.church_id },
+              { name: 'Plano', value: plan.name },
+            ],
+          },
+        },
+      ],
+      metadata: {
+        church_id: profile.church_id,
+        plan_id: plan.id,
+        type: 'annual_subscription',
+      },
+      closed: true,
+    });
+
+    // Extract PIX info from response
+    const charge = order.charges?.[0];
+    const pixTransaction = charge?.last_transaction;
+
+    if (!pixTransaction?.qr_code) {
+      console.error('PIX QR code not found in response:', order);
+      return { success: false, error: 'Erro ao gerar QR Code PIX' };
+    }
+
+    // Save pending subscription in database
+    const periodEnd = calculatePeriodEnd('year', 1);
+    
+    const { data: subscription, error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .insert({
+        church_id: profile.church_id,
+        plan_id: plan.id,
+        pagarme_order_id: order.id,
+        status: 'pending',
+        current_period_start: new Date().toISOString(),
+        current_period_end: periodEnd,
+      })
+      .select()
+      .single();
+
+    if (subscriptionError) {
+      console.error('Error saving subscription:', subscriptionError);
+      return { success: false, error: 'Erro ao salvar assinatura' };
+    }
+
+    // Save invoice record
+    await supabase.from('subscription_invoices').insert({
+      subscription_id: subscription.id,
+      church_id: profile.church_id,
+      pagarme_invoice_id: order.id,
+      amount_cents: plan.price_cents,
+      status: 'pending',
+      payment_method: 'pix',
+      due_date: pixTransaction.expires_at,
+      pix_qr_code: pixTransaction.qr_code,
+    });
+
+    return {
+      success: true,
+      order_id: order.id,
+      pix_qr_code: pixTransaction.qr_code,
+      pix_qr_code_url: pixTransaction.qr_code_url,
+      pix_expires_at: pixTransaction.expires_at,
+      amount_cents: plan.price_cents,
+    };
+  } catch (error: unknown) {
+    console.error('Error creating PIX payment:', error);
+
+    let errorMessage = 'Erro ao processar pagamento PIX';
+    if (error instanceof PagarmeError) {
+      if (error.data?.errors) {
+        const errors = error.data.errors;
+        if (Array.isArray(errors) && errors.length > 0) {
+          errorMessage = errors.map((e: { message?: string; description?: string }) => e.message || e.description || '').join(', ');
+        }
+      } else if (error.data?.message) {
+        errorMessage = error.data.message;
+      }
+    } else if (error instanceof Error && error.message) {
+      errorMessage = error.message;
+    }
+
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Check PIX payment status
+ */
+export async function checkPixPaymentStatus(orderId: string): Promise<{
+  success: boolean;
+  status?: string;
+  paid?: boolean;
+  error?: string;
+}> {
+  try {
+    const order = await getOrder(orderId);
+    const charge = order.charges?.[0];
+    
+    const isPaid = charge?.status === 'paid';
+    
+    if (isPaid) {
+      // Update subscription status to active
+      const supabase = await createClient();
+      
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'active' })
+        .eq('pagarme_order_id', orderId);
+      
+      await supabase
+        .from('subscription_invoices')
+        .update({ 
+          status: 'paid',
+          paid_at: new Date().toISOString(),
+        })
+        .eq('pagarme_invoice_id', orderId);
+      
+      revalidatePath('/configuracoes/assinatura');
+      revalidatePath('/dashboard');
+    }
+    
+    return {
+      success: true,
+      status: charge?.status || order.status,
+      paid: isPaid,
+    };
+  } catch (error) {
+    console.error('Error checking PIX status:', error);
+    return { success: false, error: 'Erro ao verificar status do pagamento' };
+  }
 }
