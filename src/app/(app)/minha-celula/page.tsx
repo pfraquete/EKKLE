@@ -1,4 +1,5 @@
 import { getMyCellData } from '@/actions/cell'
+import { getMemberCellDataOptimized } from '@/actions/cell-optimized'
 import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,7 +29,9 @@ export default async function MinhaCelulaPage() {
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    const data = await getMyCellData()
+    const optimizedData = await getMemberCellDataOptimized()
+    const data = optimizedData || await getMyCellData()
+    const isLeader = profile?.role === 'LEADER' || profile?.role === 'PASTOR'
     if (!data) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[70vh] text-center p-8 bg-card rounded-[2.5rem] shadow-2xl border border-border/50">
@@ -110,7 +113,8 @@ export default async function MinhaCelulaPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-8">
-                {/* Reuniões Section */}
+                {/* Reuniões Section - Only visible for leaders */}
+                {isLeader && (
                 <Card className="border-none shadow-xl rounded-[1.5rem] sm:rounded-[2.5rem] bg-card overflow-hidden">
                     <CardHeader className="p-4 sm:p-8 pb-2 sm:pb-4">
                         <div className="flex items-center justify-between gap-2">
@@ -172,6 +176,7 @@ export default async function MinhaCelulaPage() {
                         )}
                     </CardContent>
                 </Card>
+                )}
 
                 {/* Members Section */}
                 <Card className="border-none shadow-xl rounded-[1.5rem] sm:rounded-[2.5rem] bg-card overflow-hidden">
@@ -222,7 +227,8 @@ export default async function MinhaCelulaPage() {
                 </Card>
             </div>
 
-            {/* Quick Actions Footer Bar */}
+            {/* Quick Actions Footer Bar - Only visible for leaders */}
+            {isLeader && (
             <div className="grid grid-cols-2 gap-3 sm:gap-4 pb-12">
                 <Link href="/minha-celula/membros/novo" className="group">
                     <div className="flex items-center justify-center gap-2 sm:gap-3 w-full h-14 sm:h-16 font-black border-2 border-border/50 rounded-xl sm:rounded-[1.5rem] bg-card hover:bg-primary/5 hover:border-primary/30 transition-all text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest">
@@ -246,6 +252,7 @@ export default async function MinhaCelulaPage() {
                     </Link>
                 </div>
             </div>
+            )}
 
             <CellAlbumManager
                 cellId={cell.id}

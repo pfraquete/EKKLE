@@ -38,7 +38,7 @@ export default async function MembroMinhaCelulaPage() {
     
     // Fallback to regular query if optimized fails
     const data = optimizedData || await getMemberCellData()
-    const isLeader = profile?.role === 'LEADER'
+    const isLeader = profile?.role === 'LEADER' || profile?.role === 'PASTOR'
 
     if (!data) {
         return (
@@ -194,17 +194,23 @@ export default async function MembroMinhaCelulaPage() {
                     </CardContent>
                 </Card>
 
-                {/* Meetings Section */}
+                {/* Meetings Section - Only visible for leaders */}
+                {isLeader && (
                 <Card className="border-border/40 shadow-xl sm:shadow-2xl rounded-2xl sm:rounded-[2rem] lg:rounded-[3rem] bg-card overflow-hidden">
                     <div className="p-4 sm:p-6 lg:p-10 pb-3 sm:pb-4 lg:pb-6 border-b border-border/40">
-                        <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="p-2.5 sm:p-3 lg:p-4 bg-primary/10 rounded-xl sm:rounded-2xl">
-                                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                        <div className="flex items-center justify-between gap-3 sm:gap-4">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="p-2.5 sm:p-3 lg:p-4 bg-primary/10 rounded-xl sm:rounded-2xl">
+                                    <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground tracking-tighter italic uppercase">Histórico</h3>
+                                    <p className="text-xs sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest">Seus últimos encontros</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground tracking-tighter italic uppercase">Histórico</h3>
-                                <p className="text-xs sm:text-xs text-muted-foreground font-black uppercase tracking-wider sm:tracking-widest">Nossos últimos encontros</p>
-                            </div>
+                            <Link href="/membro/minha-celula/reunioes" className="text-xs font-black text-primary uppercase tracking-widest hover:underline">
+                                Ver Tudo
+                            </Link>
                         </div>
                     </div>
                     <CardContent className="p-4 sm:p-6 lg:p-10">
@@ -215,9 +221,10 @@ export default async function MembroMinhaCelulaPage() {
                         ) : (
                             <div className="space-y-3 sm:space-y-4">
                                 {recentMeetings.map(meeting => (
-                                    <div
+                                    <Link
                                         key={meeting.id}
-                                        className="flex items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl lg:rounded-[2rem] bg-muted/30 border border-border/40"
+                                        href={`/membro/minha-celula/reunioes/${meeting.id}`}
+                                        className="flex items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl lg:rounded-[2rem] bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors"
                                     >
                                         <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
                                             <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-lg sm:rounded-xl lg:rounded-2xl bg-background border border-border flex flex-col items-center justify-center shrink-0 shadow-md sm:shadow-lg">
@@ -240,12 +247,13 @@ export default async function MembroMinhaCelulaPage() {
                                         <div className="p-2 sm:p-3 bg-emerald-500/10 rounded-lg sm:rounded-xl border border-emerald-500/20 flex-shrink-0">
                                             <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
                                         </div>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         )}
                     </CardContent>
                 </Card>
+                )}
             </div>
 
             {/* Leader Actions - Load immediately if leader */}

@@ -1,4 +1,5 @@
 import { getMemberCellData } from '@/actions/cell'
+import { getMemberCellDataOptimized } from '@/actions/cell-optimized'
 import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,12 +13,13 @@ export default async function ReunioesPage() {
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    // Only leaders can access this page
-    if (profile.role !== 'LEADER') {
+    // Only leaders and pastors can access this page
+    if (profile.role !== 'LEADER' && profile.role !== 'PASTOR') {
         redirect('/membro/minha-celula')
     }
 
-    const data = await getMemberCellData()
+    const optimizedData = await getMemberCellDataOptimized()
+    const data = optimizedData || await getMemberCellData()
     if (!data) redirect('/membro/minha-celula')
 
     const { recentMeetings } = data
