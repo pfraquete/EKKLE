@@ -82,7 +82,7 @@ interface CellMemberRow {
     id: string
     full_name: string
     photo_url: string | null
-    birth_date: string | null
+    birthday: string | null
 }
 
 interface CellMeetingAttendance {
@@ -129,7 +129,7 @@ export async function getMyCellData(): Promise<MyCellData | null> {
         // Group members
         supabase
             .from('profiles')
-            .select('id, full_name, photo_url, birth_date')
+            .select('id, full_name, photo_url, birthday')
             .eq('cell_id', cell.id)
             .eq('is_active', true)
             .order('full_name'),
@@ -199,7 +199,7 @@ export async function getMyCellData(): Promise<MyCellData | null> {
             id: member.id,
             fullName: member.full_name,
             photoUrl: member.photo_url,
-            birthDate: member.birth_date || null,
+            birthDate: member.birthday || null,
             consecutiveAbsences
         }
     })
@@ -285,7 +285,7 @@ export async function getMemberCellData(): Promise<MyCellData | null> {
     const [membersResponse, meetingsResponse] = await Promise.all([
         supabase
             .from('profiles')
-            .select('id, full_name, photo_url, birth_date')
+            .select('id, full_name, photo_url, birthday')
             .eq('cell_id', cell.id)
             .eq('is_active', true)
             .order('full_name'),
@@ -348,7 +348,7 @@ export async function getMemberCellData(): Promise<MyCellData | null> {
             id: m.id,
             fullName: m.full_name,
             photoUrl: m.photo_url,
-            birthDate: m.birth_date,
+            birthDate: m.birthday,
             consecutiveAbsences: 0 // Not relevant for members view
         })),
         recentMeetings: meetings.map(m => ({
@@ -390,7 +390,7 @@ export async function getCellDetails(cellId: string): Promise<CellDetails | null
     const [membersResponse, meetingsResponse] = await Promise.all([
         supabase
             .from('profiles')
-            .select('id, full_name, photo_url, birth_date')
+            .select('id, full_name, photo_url, birthday')
             .eq('cell_id', cell.id)
             .eq('is_active', true)
             .order('full_name'),
