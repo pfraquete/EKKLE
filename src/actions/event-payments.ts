@@ -12,7 +12,7 @@ interface CreateEventPaymentInput {
   customerEmail: string;
   customerDocument: string;
   customerPhone?: string;
-  paymentMethod: 'pix' | 'credit_card' | 'boleto';
+  paymentMethod: 'pix' | 'credit_card' | 'boleto' | 'cash';
 }
 
 export async function createEventPayment(input: CreateEventPaymentInput) {
@@ -49,20 +49,79 @@ export async function createEventPayment(input: CreateEventPaymentInput) {
     return { error: 'Este evento é gratuito' };
   }
 
-  // Check if user already paid for this event
+  // Check if user already has a pending or paid payment for this event
   const { data: existingPayment } = await supabase
     .from('event_payments')
     .select('id, status')
     .eq('event_id', input.eventId)
     .eq('user_id', user.id)
-    .eq('status', 'paid')
+    .in('status', ['paid', 'awaiting_confirmation'])
     .single();
 
   if (existingPayment) {
-    return { error: 'Você já pagou por este evento' };
+    if (existingPayment.status === 'paid') {
+      return { error: 'Você já pagou por este evento' };
+    }
+    if (existingPayment.status === 'awaiting_confirmation') {
+      return { error: 'Você já tem um pagamento aguardando confirmação' };
+    }
   }
 
-  // Get church recipient for split
+  const amountCents = Math.round(event.price * 100);
+  const platformFeeCents = Math.round(amountCents * 0.01); // 1% for platform
+  const churchAmountCents = amountCents - platformFeeCents; // 99% for church
+
+  // Handle cash payment (payment at church)
+  if (input.paymentMethod === 'cash') {
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 72); // 72 hours to confirm
+
+    const { data: payment, error: paymentError } = await supabase
+      .from('event_payments')
+      .insert({
+        event_id: input.eventId,
+        user_id: user.id,
+        church_id: event.church_id,
+        order_id: null,
+        amount_cents: amountCents,
+        platform_fee_cents: 0, // No platform fee for cash
+        church_amount_cents: amountCents, // 100% for church
+        status: 'awaiting_confirmation',
+        payment_method: 'cash',
+        expires_at: expiresAt.toISOString()
+      })
+      .select()
+      .single();
+
+    if (paymentError) {
+      console.error('Error saving cash payment:', paymentError);
+      return { error: 'Erro ao registrar pagamento' };
+    }
+
+    // Register user for event with pending status
+    await supabase
+      .from('event_registrations')
+      .upsert({
+        event_id: input.eventId,
+        profile_id: user.id,
+        status: 'pending',
+        payment_status: 'awaiting_confirmation'
+      }, {
+        onConflict: 'event_id,profile_id'
+      });
+
+    revalidatePath('/eventos');
+
+    return {
+      success: true,
+      paymentId: payment.id,
+      paymentMethod: 'cash',
+      expiresAt: expiresAt.toISOString(),
+      message: 'Inscrição registrada! Efetue o pagamento na igreja em até 72 horas para confirmar sua inscrição.'
+    };
+  }
+
+  // For online payments, check church recipient
   const { data: church } = await supabase
     .from('churches')
     .select('pagarme_recipient_id')
@@ -70,12 +129,8 @@ export async function createEventPayment(input: CreateEventPaymentInput) {
     .single();
 
   if (!church?.pagarme_recipient_id) {
-    return { error: 'Igreja não configurada para receber pagamentos' };
+    return { error: 'Igreja não configurada para receber pagamentos online' };
   }
-
-  const amountCents = Math.round(event.price * 100);
-  const platformFeeCents = Math.round(amountCents * 0.01); // 1% for platform
-  const churchAmountCents = amountCents - platformFeeCents; // 99% for church
 
   // Create split rules
   const splitRules = createSplitRules(
@@ -166,6 +221,205 @@ export async function createEventPayment(input: CreateEventPaymentInput) {
   }
 }
 
+export async function confirmCashPayment(paymentId: string) {
+  const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: 'Usuário não autenticado' };
+  }
+
+  // Check if user is admin/pastor
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, church_id')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile || !['pastor', 'pastora', 'admin'].includes(profile.role)) {
+    return { error: 'Sem permissão para confirmar pagamentos' };
+  }
+
+  // Get payment
+  const { data: payment } = await supabase
+    .from('event_payments')
+    .select('*, event:events(id, title)')
+    .eq('id', paymentId)
+    .eq('church_id', profile.church_id)
+    .eq('status', 'awaiting_confirmation')
+    .single();
+
+  if (!payment) {
+    return { error: 'Pagamento não encontrado ou já processado' };
+  }
+
+  // Update payment status
+  const { error: updateError } = await supabase
+    .from('event_payments')
+    .update({
+      status: 'paid',
+      paid_at: new Date().toISOString(),
+      confirmed_by: user.id
+    })
+    .eq('id', paymentId);
+
+  if (updateError) {
+    console.error('Error confirming payment:', updateError);
+    return { error: 'Erro ao confirmar pagamento' };
+  }
+
+  // Update event registration
+  await supabase
+    .from('event_registrations')
+    .update({
+      status: 'confirmed',
+      payment_status: 'paid'
+    })
+    .eq('event_id', payment.event_id)
+    .eq('profile_id', payment.user_id);
+
+  revalidatePath('/dashboard/financeiro');
+  revalidatePath('/eventos');
+
+  return { success: true, message: 'Pagamento confirmado com sucesso!' };
+}
+
+export async function rejectCashPayment(paymentId: string, reason?: string) {
+  const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: 'Usuário não autenticado' };
+  }
+
+  // Check if user is admin/pastor
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, church_id')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile || !['pastor', 'pastora', 'admin'].includes(profile.role)) {
+    return { error: 'Sem permissão para rejeitar pagamentos' };
+  }
+
+  // Get payment
+  const { data: payment } = await supabase
+    .from('event_payments')
+    .select('*')
+    .eq('id', paymentId)
+    .eq('church_id', profile.church_id)
+    .eq('status', 'awaiting_confirmation')
+    .single();
+
+  if (!payment) {
+    return { error: 'Pagamento não encontrado ou já processado' };
+  }
+
+  // Update payment status
+  const { error: updateError } = await supabase
+    .from('event_payments')
+    .update({
+      status: 'cancelled',
+      rejection_reason: reason
+    })
+    .eq('id', paymentId);
+
+  if (updateError) {
+    console.error('Error rejecting payment:', updateError);
+    return { error: 'Erro ao rejeitar pagamento' };
+  }
+
+  // Update event registration
+  await supabase
+    .from('event_registrations')
+    .update({
+      status: 'cancelled',
+      payment_status: 'cancelled'
+    })
+    .eq('event_id', payment.event_id)
+    .eq('profile_id', payment.user_id);
+
+  revalidatePath('/dashboard/financeiro');
+  revalidatePath('/eventos');
+
+  return { success: true, message: 'Pagamento rejeitado' };
+}
+
+export async function getPendingCashPayments() {
+  const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: 'Usuário não autenticado', payments: [] };
+  }
+
+  // Check if user is admin/pastor
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, church_id')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile || !['pastor', 'pastora', 'admin'].includes(profile.role)) {
+    return { error: 'Sem permissão', payments: [] };
+  }
+
+  const { data: payments, error } = await supabase
+    .from('event_payments')
+    .select(`
+      *,
+      event:events(id, title, start_date),
+      user:profiles!event_payments_user_id_fkey(id, full_name, email, phone)
+    `)
+    .eq('church_id', profile.church_id)
+    .eq('status', 'awaiting_confirmation')
+    .eq('payment_method', 'cash')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching pending payments:', error);
+    return { error: 'Erro ao buscar pagamentos', payments: [] };
+  }
+
+  return { payments };
+}
+
+export async function cancelExpiredCashPayments() {
+  const supabase = await createClient();
+  
+  // Find expired payments (older than 72 hours)
+  const { data: expiredPayments, error } = await supabase
+    .from('event_payments')
+    .select('id, event_id, user_id')
+    .eq('status', 'awaiting_confirmation')
+    .eq('payment_method', 'cash')
+    .lt('expires_at', new Date().toISOString());
+
+  if (error || !expiredPayments?.length) {
+    return { cancelled: 0 };
+  }
+
+  // Cancel each expired payment
+  for (const payment of expiredPayments) {
+    await supabase
+      .from('event_payments')
+      .update({ status: 'expired' })
+      .eq('id', payment.id);
+
+    await supabase
+      .from('event_registrations')
+      .update({
+        status: 'cancelled',
+        payment_status: 'expired'
+      })
+      .eq('event_id', payment.event_id)
+      .eq('profile_id', payment.user_id);
+  }
+
+  return { cancelled: expiredPayments.length };
+}
+
 export async function checkEventPaymentStatus(paymentId: string) {
   const supabase = await createClient();
   
@@ -189,7 +443,15 @@ export async function checkEventPaymentStatus(paymentId: string) {
     return { status: 'paid', paid: true };
   }
 
-  // Check with Pagar.me
+  if (payment.status === 'awaiting_confirmation') {
+    return { status: 'awaiting_confirmation', paid: false, message: 'Aguardando confirmação do pagamento na igreja' };
+  }
+
+  if (payment.status === 'expired') {
+    return { status: 'expired', paid: false, message: 'Pagamento expirado. O prazo de 72 horas foi excedido.' };
+  }
+
+  // Check with Pagar.me for online payments
   if (payment.order_id) {
     try {
       const order = await getOrder(payment.order_id);

@@ -196,8 +196,93 @@ async function handleOrderPaid(data: PagarmeWebhookPayload['data']) {
   const supabase = createSupabaseClient();
   const orderId = data.id;
   const metadata = data.metadata;
+  const charge = data.charges?.[0];
   
-  logger.info('[Pagar.me Webhook] Order paid', { orderId });
+  logger.info('[Pagar.me Webhook] Order paid', { orderId, type: metadata?.type });
+  
+  // Handle course payment
+  if (metadata?.type === 'course_payment') {
+    const { error } = await supabase
+      .from('course_payments')
+      .update({
+        status: 'paid',
+        paid_at: charge?.paid_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('pagarme_order_id', orderId);
+    
+    if (error) {
+      logger.error('[Pagar.me Webhook] Error updating course payment', error);
+      throw error;
+    }
+    
+    logger.info('[Pagar.me Webhook] Course payment confirmed', { orderId });
+    logger.webhook('pagarme', 'order.paid', true, { orderId, type: 'course_payment' });
+    return;
+  }
+  
+  // Handle event payment
+  if (metadata?.type === 'event_payment') {
+    const { error } = await supabase
+      .from('event_payments')
+      .update({
+        status: 'paid',
+        paid_at: charge?.paid_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('pagarme_order_id', orderId);
+    
+    if (error) {
+      logger.error('[Pagar.me Webhook] Error updating event payment', error);
+      throw error;
+    }
+    
+    logger.info('[Pagar.me Webhook] Event payment confirmed', { orderId });
+    logger.webhook('pagarme', 'order.paid', true, { orderId, type: 'event_payment' });
+    return;
+  }
+  
+  // Handle cell offering payment
+  if (metadata?.type === 'cell_offering') {
+    const { error } = await supabase
+      .from('cell_offerings')
+      .update({
+        status: 'paid',
+        paid_at: charge?.paid_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('pagarme_order_id', orderId);
+    
+    if (error) {
+      logger.error('[Pagar.me Webhook] Error updating cell offering', error);
+      throw error;
+    }
+    
+    logger.info('[Pagar.me Webhook] Cell offering confirmed', { orderId });
+    logger.webhook('pagarme', 'order.paid', true, { orderId, type: 'cell_offering' });
+    return;
+  }
+  
+  // Handle store order payment
+  if (metadata?.type === 'store_order') {
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        status: 'paid',
+        paid_at: charge?.paid_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('pagarme_order_id', orderId);
+    
+    if (error) {
+      logger.error('[Pagar.me Webhook] Error updating store order', error);
+      throw error;
+    }
+    
+    logger.info('[Pagar.me Webhook] Store order confirmed', { orderId });
+    logger.webhook('pagarme', 'order.paid', true, { orderId, type: 'store_order' });
+    return;
+  }
   
   // Check if this is an annual subscription payment
   if (metadata?.type === 'annual_subscription') {
@@ -218,7 +303,6 @@ async function handleOrderPaid(data: PagarmeWebhookPayload['data']) {
     }
     
     // Update invoice status
-    const charge = data.charges?.[0];
     const { error: invoiceError } = await supabase
       .from('subscription_invoices')
       .update({

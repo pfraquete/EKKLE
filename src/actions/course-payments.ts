@@ -23,10 +23,12 @@ export interface CoursePayment {
   church_id: string;
   order_id: string | null;
   amount_cents: number;
-  status: 'pending' | 'paid' | 'failed' | 'refunded';
+  status: 'pending' | 'paid' | 'failed' | 'refunded' | 'awaiting_confirmation' | 'expired';
   payment_method: string | null;
   paid_at: string | null;
   created_at: string;
+  expires_at?: string | null;
+  confirmed_by?: string | null;
 }
 
 // =====================================================
@@ -35,7 +37,7 @@ export interface CoursePayment {
 
 const paymentInputSchema = z.object({
   course_id: z.string().uuid(),
-  payment_method: z.enum(['credit_card', 'pix']),
+  payment_method: z.enum(['credit_card', 'pix', 'cash']),
   customer: z.object({
     name: z.string().min(1),
     email: z.string().email(),
@@ -82,20 +84,64 @@ export async function createCoursePayment(input: PaymentInput) {
       return { success: false, error: 'Este curso é gratuito' };
     }
 
-    // Check if already paid
+    // Check if already paid or awaiting confirmation
     const { data: existingPayment } = await supabase
       .from('course_payments')
-      .select('id')
+      .select('id, status')
       .eq('course_id', validated.course_id)
       .eq('profile_id', profile.id)
-      .eq('status', 'paid')
+      .in('status', ['paid', 'awaiting_confirmation'])
       .single();
 
     if (existingPayment) {
-      return { success: false, error: 'Você já pagou por este curso' };
+      if (existingPayment.status === 'paid') {
+        return { success: false, error: 'Você já pagou por este curso' };
+      }
+      if (existingPayment.status === 'awaiting_confirmation') {
+        return { success: false, error: 'Você já tem um pagamento aguardando confirmação' };
+      }
     }
 
-    // Get recipient configuration for split
+    // Handle cash payment (payment at church)
+    if (validated.payment_method === 'cash') {
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 72); // 72 hours to confirm
+
+      const { data: payment, error: paymentError } = await supabase
+        .from('course_payments')
+        .insert({
+          course_id: validated.course_id,
+          profile_id: profile.id,
+          church_id: course.church_id,
+          amount_cents: course.price_cents,
+          platform_fee_cents: 0, // No platform fee for cash
+          church_amount_cents: course.price_cents, // 100% for church
+          status: 'awaiting_confirmation',
+          payment_method: 'cash',
+          expires_at: expiresAt.toISOString()
+        })
+        .select()
+        .single();
+
+      if (paymentError || !payment) {
+        console.error('Error saving cash payment:', paymentError);
+        return { success: false, error: 'Erro ao registrar pagamento' };
+      }
+
+      revalidatePath(`/cursos/${validated.course_id}`);
+      revalidatePath('/cursos');
+
+      return {
+        success: true,
+        paid: false,
+        payment_id: payment.id,
+        payment_method: 'cash',
+        expires_at: expiresAt.toISOString(),
+        message: 'Inscrição registrada! Efetue o pagamento na igreja em até 72 horas para confirmar sua inscrição.'
+      };
+    }
+
+    // Get recipient configuration for split (only for online payments)
     const { data: recipient } = await supabase
       .from('recipients')
       .select('*')
@@ -411,4 +457,199 @@ export async function hasUserPaidForCourse(courseId: string): Promise<boolean> {
   } catch (error) {
     return false;
   }
+}
+
+
+// =====================================================
+// CONFIRM CASH PAYMENT (Admin/Pastor only)
+// =====================================================
+
+export async function confirmCourseCashPayment(paymentId: string) {
+  try {
+    const profile = await getProfile();
+    if (!profile) {
+      return { success: false, error: 'Usuário não autenticado' };
+    }
+
+    // Check if user is admin/pastor
+    if (!['pastor', 'pastora', 'admin'].includes(profile.role)) {
+      return { success: false, error: 'Sem permissão para confirmar pagamentos' };
+    }
+
+    const supabase = await createClient();
+
+    // Get payment
+    const { data: payment } = await supabase
+      .from('course_payments')
+      .select('*, course:courses(id, title)')
+      .eq('id', paymentId)
+      .eq('church_id', profile.church_id)
+      .eq('status', 'awaiting_confirmation')
+      .single();
+
+    if (!payment) {
+      return { success: false, error: 'Pagamento não encontrado ou já processado' };
+    }
+
+    // Update payment status
+    const { error: updateError } = await supabase
+      .from('course_payments')
+      .update({
+        status: 'paid',
+        paid_at: new Date().toISOString(),
+        confirmed_by: profile.id
+      })
+      .eq('id', paymentId);
+
+    if (updateError) {
+      console.error('Error confirming payment:', updateError);
+      return { success: false, error: 'Erro ao confirmar pagamento' };
+    }
+
+    // Enroll user in course
+    await supabase.from('course_enrollments').insert({
+      course_id: payment.course_id,
+      profile_id: payment.profile_id,
+      church_id: payment.church_id,
+      enrolled_at: new Date().toISOString(),
+      status: 'ACTIVE',
+    });
+
+    revalidatePath('/dashboard/financeiro');
+    revalidatePath(`/cursos/${payment.course_id}`);
+    revalidatePath('/cursos');
+
+    return { success: true, message: 'Pagamento confirmado com sucesso!' };
+  } catch (error) {
+    console.error('Error confirming cash payment:', error);
+    return { success: false, error: 'Erro ao confirmar pagamento' };
+  }
+}
+
+// =====================================================
+// REJECT CASH PAYMENT (Admin/Pastor only)
+// =====================================================
+
+export async function rejectCourseCashPayment(paymentId: string, reason?: string) {
+  try {
+    const profile = await getProfile();
+    if (!profile) {
+      return { success: false, error: 'Usuário não autenticado' };
+    }
+
+    // Check if user is admin/pastor
+    if (!['pastor', 'pastora', 'admin'].includes(profile.role)) {
+      return { success: false, error: 'Sem permissão para rejeitar pagamentos' };
+    }
+
+    const supabase = await createClient();
+
+    // Get payment
+    const { data: payment } = await supabase
+      .from('course_payments')
+      .select('*')
+      .eq('id', paymentId)
+      .eq('church_id', profile.church_id)
+      .eq('status', 'awaiting_confirmation')
+      .single();
+
+    if (!payment) {
+      return { success: false, error: 'Pagamento não encontrado ou já processado' };
+    }
+
+    // Update payment status
+    const { error: updateError } = await supabase
+      .from('course_payments')
+      .update({
+        status: 'cancelled',
+        rejection_reason: reason
+      })
+      .eq('id', paymentId);
+
+    if (updateError) {
+      console.error('Error rejecting payment:', updateError);
+      return { success: false, error: 'Erro ao rejeitar pagamento' };
+    }
+
+    revalidatePath('/dashboard/financeiro');
+    revalidatePath(`/cursos/${payment.course_id}`);
+    revalidatePath('/cursos');
+
+    return { success: true, message: 'Pagamento rejeitado' };
+  } catch (error) {
+    console.error('Error rejecting cash payment:', error);
+    return { success: false, error: 'Erro ao rejeitar pagamento' };
+  }
+}
+
+// =====================================================
+// GET PENDING CASH PAYMENTS (Admin/Pastor only)
+// =====================================================
+
+export async function getPendingCourseCashPayments() {
+  try {
+    const profile = await getProfile();
+    if (!profile) {
+      return { success: false, error: 'Usuário não autenticado', payments: [] };
+    }
+
+    // Check if user is admin/pastor
+    if (!['pastor', 'pastora', 'admin'].includes(profile.role)) {
+      return { success: false, error: 'Sem permissão', payments: [] };
+    }
+
+    const supabase = await createClient();
+
+    const { data: payments, error } = await supabase
+      .from('course_payments')
+      .select(`
+        *,
+        course:courses(id, title),
+        user:profiles!course_payments_profile_id_fkey(id, full_name, email, phone)
+      `)
+      .eq('church_id', profile.church_id)
+      .eq('status', 'awaiting_confirmation')
+      .eq('payment_method', 'cash')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching pending payments:', error);
+      return { success: false, error: 'Erro ao buscar pagamentos', payments: [] };
+    }
+
+    return { success: true, payments };
+  } catch (error) {
+    console.error('Error getting pending cash payments:', error);
+    return { success: false, error: 'Erro ao buscar pagamentos', payments: [] };
+  }
+}
+
+// =====================================================
+// CANCEL EXPIRED CASH PAYMENTS (Cron job)
+// =====================================================
+
+export async function cancelExpiredCourseCashPayments() {
+  const supabase = await createClient();
+  
+  // Find expired payments (older than 72 hours)
+  const { data: expiredPayments, error } = await supabase
+    .from('course_payments')
+    .select('id, course_id, profile_id')
+    .eq('status', 'awaiting_confirmation')
+    .eq('payment_method', 'cash')
+    .lt('expires_at', new Date().toISOString());
+
+  if (error || !expiredPayments?.length) {
+    return { cancelled: 0 };
+  }
+
+  // Cancel each expired payment
+  for (const payment of expiredPayments) {
+    await supabase
+      .from('course_payments')
+      .update({ status: 'expired' })
+      .eq('id', payment.id);
+  }
+
+  return { cancelled: expiredPayments.length };
 }

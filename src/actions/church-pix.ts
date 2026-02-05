@@ -130,3 +130,40 @@ export async function removeChurchPix() {
     revalidatePath('/membro/dizimos')
     return { success: true }
 }
+
+// =====================================================
+// GET CHURCH PIX FOR MEMBER (Public for members)
+// =====================================================
+
+export async function getChurchPixForMember() {
+    const profile = await getProfile()
+    if (!profile) {
+        return { success: false, error: 'Não autenticado', data: null }
+    }
+
+    const supabase = await createClient()
+
+    const { data: church, error } = await supabase
+        .from('churches')
+        .select('name, pix_key, pix_key_type')
+        .eq('id', profile.church_id)
+        .single()
+
+    if (error || !church) {
+        console.error('Error fetching church PIX for member:', error)
+        return { success: false, error: 'Erro ao buscar informações', data: null }
+    }
+
+    if (!church.pix_key) {
+        return { success: true, data: null, message: 'PIX não configurado pela igreja' }
+    }
+
+    return {
+        success: true,
+        data: {
+            church_name: church.name,
+            pix_key: church.pix_key,
+            pix_key_type: church.pix_key_type,
+        }
+    }
+}
