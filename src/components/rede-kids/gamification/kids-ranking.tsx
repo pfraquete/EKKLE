@@ -33,7 +33,16 @@ export function KidsRanking({ limit = 10 }: KidsRankingProps) {
     async function loadRanking() {
       setLoading(true)
       const data = await getKidsRanking(limit)
-      setRanking(data as RankedChild[])
+      type RankingRow = Omit<RankedChild, 'current_level'> & {
+        current_level: RankedChild['current_level'] | RankedChild['current_level'][]
+      }
+      const normalized = (data as RankingRow[]).map(child => ({
+        ...child,
+        current_level: Array.isArray(child.current_level)
+          ? child.current_level[0] ?? null
+          : child.current_level ?? null,
+      }))
+      setRanking(normalized)
       setLoading(false)
     }
     loadRanking()

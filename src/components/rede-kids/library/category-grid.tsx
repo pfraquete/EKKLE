@@ -42,11 +42,13 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
               <CardContent className="p-4 flex flex-col items-center text-center">
                 <div
                   className="p-3 rounded-xl mb-3"
-                  style={{ backgroundColor: `${category.color}20` }}
+                  style={{
+                    backgroundColor: `${category.color}20`,
+                    color: category.color,
+                  }}
                 >
                   <Icon
-                    className="h-8 w-8"
-                    style={{ color: category.color }}
+                    className="h-8 w-8 text-current"
                   />
                 </div>
                 <h3 className="font-medium text-sm">{category.name}</h3>
