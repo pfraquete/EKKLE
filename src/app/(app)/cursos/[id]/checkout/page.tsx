@@ -176,9 +176,9 @@ export default function CourseCheckoutPage() {
         if (paymentMethod === 'pix' && 'pix_qr_code' in result && result.pix_qr_code) {
           setPixData({
             qr_code: result.pix_qr_code,
-            qr_code_url: result.pix_qr_code_url || null,
-            order_id: result.order_id || null,
-            expires_at: result.pix_expires_at || null
+            qr_code_url: result.pix_qr_code_url || undefined,
+            order_id: result.order_id || '',
+            expires_at: result.pix_expires_at || undefined
           });
           toast.success('QR Code gerado! Escaneie para pagar.');
         }

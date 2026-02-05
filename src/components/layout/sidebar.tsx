@@ -23,7 +23,8 @@ import {
     UserCheck,
     FileText,
     Baby,
-    Newspaper
+    Newspaper,
+    Award
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -166,6 +167,13 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: MessageSquare,
             href: '/dashboard/comunicacoes',
             active: pathname.startsWith('/dashboard/comunicacoes'),
+            show: isPastor
+        },
+        {
+            label: 'Selos',
+            icon: Award,
+            href: '/dashboard/selos',
+            active: pathname.startsWith('/dashboard/selos'),
             show: isPastor
         },
         {
