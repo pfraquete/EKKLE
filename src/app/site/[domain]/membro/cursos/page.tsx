@@ -59,7 +59,7 @@ export default async function MeusCursosPage() {
   }, {}) || {}
 
   // Get available courses (not enrolled)
-  const { data: availableCourses } = await supabase
+  let availableCoursesQuery = supabase
     .from('courses')
     .select(`
       *,
@@ -67,8 +67,17 @@ export default async function MeusCursosPage() {
     `)
     .eq('church_id', church.id)
     .eq('is_published', true)
-    .not('id', 'in', `(${enrolledCourseIds.join(',') || 'null'})`)
-    .order('order_index', { ascending: true })
+
+  // Only exclude enrolled courses if there are any
+  if (enrolledCourseIds.length > 0) {
+    availableCoursesQuery = availableCoursesQuery.not('id', 'in', `(${enrolledCourseIds.join(',')})`)
+  }
+
+  const { data: availableCourses, error: coursesError } = await availableCoursesQuery.order('order_index', { ascending: true })
+
+  if (coursesError) {
+    console.error('Error fetching available courses:', coursesError)
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
