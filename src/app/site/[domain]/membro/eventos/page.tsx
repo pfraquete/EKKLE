@@ -109,7 +109,7 @@ export default async function MeusEventosPage() {
                                     <div className="mt-4 pt-4 border-t border-border/50 flex justify-between items-center">
                                         {event.is_paid && event.price ? (
                                             <span className="font-black text-lg text-foreground">
-                                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(event.price / 100)}
+                                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(event.price))}
                                             </span>
                                         ) : (
                                             <span className="text-emerald-600 font-bold text-sm">Gratuito</span>

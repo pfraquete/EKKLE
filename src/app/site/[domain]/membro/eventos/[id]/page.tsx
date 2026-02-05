@@ -229,7 +229,7 @@ export default async function EventoDetalhePage({ params }: PageProps) {
                       {new Intl.NumberFormat('pt-BR', {
                         style: 'currency',
                         currency: 'BRL',
-                      }).format(event.price / 100)}
+                      }).format(Number(event.price))}
                     </div>
                   </div>
                 </div>
