@@ -117,15 +117,15 @@ export default async function CultoPage({ params, searchParams }: PageProps) {
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl font-bold mb-6">{service.title}</h1>
+            <h1 className="text-4xl font-bold mb-6 text-gray-900">{service.title}</h1>
 
             {/* Service Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 p-6 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 p-6 bg-gray-50 rounded-lg text-gray-900">
               <div className="flex items-start gap-3">
                 <Calendar className="w-5 h-5 text-primary mt-1" />
                 <div>
                   <div className="font-semibold text-sm text-gray-600 mb-1">Data</div>
-                  <div className="text-lg">
+                  <div className="text-lg text-gray-900">
                     {new Date(service.service_date).toLocaleDateString('pt-BR', {
                       day: '2-digit',
                       month: 'long',
@@ -141,7 +141,7 @@ export default async function CultoPage({ params, searchParams }: PageProps) {
                   <div className="font-semibold text-sm text-gray-600 mb-1">
                     Horário
                   </div>
-                  <div className="text-lg">{service.service_time}</div>
+                  <div className="text-lg text-gray-900">{service.service_time}</div>
                 </div>
               </div>
 
@@ -152,7 +152,7 @@ export default async function CultoPage({ params, searchParams }: PageProps) {
                     <div className="font-semibold text-sm text-gray-600 mb-1">
                       Local
                     </div>
-                    <div className="text-lg">{service.location}</div>
+                    <div className="text-lg text-gray-900">{service.location}</div>
                   </div>
                 </div>
               )}
@@ -161,7 +161,7 @@ export default async function CultoPage({ params, searchParams }: PageProps) {
             {/* Description */}
             {service.description && (
               <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">Sobre o Culto</h2>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900">Sobre o Culto</h2>
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {service.description}
                 </p>
