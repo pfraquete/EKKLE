@@ -41,16 +41,24 @@ export const getCachedCellsByChurch = unstable_cache(
       return []
     }
 
-    return (cells || []).map(cell => ({
-      id: cell.id,
-      name: cell.name,
-      leader_id: cell.leader_id,
-      leader_name: (cell.leader as { full_name: string } | null)?.full_name || null,
-      status: cell.status,
-      neighborhood: cell.neighborhood,
-      meeting_day: cell.meeting_day,
-      meeting_time: cell.meeting_time,
-    }))
+    return (cells || []).map(cell => {
+      // Supabase returns relations as arrays, get first item
+      const leaderData = cell.leader as unknown as { full_name: string }[] | null
+      const leaderName = Array.isArray(leaderData) && leaderData.length > 0 
+        ? leaderData[0].full_name 
+        : null
+      
+      return {
+        id: cell.id,
+        name: cell.name,
+        leader_id: cell.leader_id,
+        leader_name: leaderName,
+        status: cell.status,
+        neighborhood: cell.neighborhood,
+        meeting_day: cell.meeting_day,
+        meeting_time: cell.meeting_time,
+      }
+    })
   },
   ['cells-by-church'],
   {
