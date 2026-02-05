@@ -115,10 +115,12 @@ export function FormationTrackView({
                         isCurrent && 'ring-4 ring-offset-2 animate-pulse',
                         !isCompleted && !isCurrent && 'opacity-40'
                       )}
-                      style={{
-                        backgroundColor: isCompleted || isCurrent ? stage.color : '#e5e7eb',
-                        ringColor: stage.color,
-                      }}
+                      style={
+                        {
+                          backgroundColor: isCompleted || isCurrent ? stage.color : '#e5e7eb',
+                          '--tw-ring-color': stage.color,
+                        } as React.CSSProperties
+                      }
                     >
                       <IconComponent
                         className={cn(

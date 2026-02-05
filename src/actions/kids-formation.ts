@@ -897,6 +897,22 @@ export async function getFormationReportData() {
 
   if (!children) return null
 
+  type ChildWithCell = {
+    id: string
+    full_name: string
+    birth_date: string | null
+    gender: string | null
+    parent_name: string | null
+    kids_cell: { name: string } | { name: string }[] | null
+  }
+  type ProgressRecord = {
+    child_id: string
+    stage_id: string
+    completed_at: string | null
+    notes: string | null
+    completed_by_profile: { full_name: string } | { full_name: string }[] | null
+  }
+
   // Get all progress records
   const { data: allProgress } = await supabase
     .from('kids_child_formation_progress')
@@ -910,8 +926,10 @@ export async function getFormationReportData() {
     .eq('church_id', profile.church_id)
 
   // Build report data
-  const childrenWithProgress = children.map(child => {
-    const childProgress = allProgress?.filter(p => p.child_id === child.id) || []
+  const childrenWithProgress = (children as ChildWithCell[]).map(child => {
+    const childProgress = (allProgress as ProgressRecord[] | null)?.filter(
+      p => p.child_id === child.id,
+    ) || []
     const completedStageIds = childProgress.map(p => p.stage_id)
     const completedCount = completedStageIds.length
     const progressPercentage = stages.length > 0 
@@ -920,8 +938,11 @@ export async function getFormationReportData() {
 
     // Find current stage (last completed)
     const lastCompletedStageId = childProgress.length > 0
-      ? childProgress.sort((a, b) => 
-          new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
+      ? childProgress
+        .sort(
+          (a, b) =>
+            new Date(b.completed_at ?? 0).getTime() -
+            new Date(a.completed_at ?? 0).getTime(),
         )[0]?.stage_id
       : null
     const currentStage = stages.find(s => s.id === lastCompletedStageId)
@@ -952,11 +973,15 @@ export async function getFormationReportData() {
       nextStage: nextStage?.name || 'Concluído',
       stageDetails: stages.map(stage => {
         const progress = childProgress.find(p => p.stage_id === stage.id)
+        const completedBy = Array.isArray(progress?.completed_by_profile)
+          ? progress?.completed_by_profile[0]?.full_name
+          : progress?.completed_by_profile?.full_name
+
         return {
           stageName: stage.name,
           completed: !!progress,
           completedAt: progress?.completed_at || null,
-          completedBy: progress?.completed_by_profile?.full_name || null,
+          completedBy: completedBy || null,
           notes: progress?.notes || null,
         }
       }),

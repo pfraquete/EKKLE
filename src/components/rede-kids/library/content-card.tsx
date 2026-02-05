@@ -83,11 +83,11 @@ export function ContentCard({
                 backgroundColor: content.category?.color
                   ? `${content.category.color}20`
                   : '#f3f4f6',
+                color: content.category?.color || '#6b7280',
               }}
             >
               <Icon
-                className="h-5 w-5"
-                style={{ color: content.category?.color || '#6b7280' }}
+                className="h-5 w-5 text-current"
               />
             </div>
             <div>

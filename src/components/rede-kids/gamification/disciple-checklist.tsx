@@ -162,12 +162,12 @@ export function DiscipleChecklist({ childId, date, canEdit = true }: DiscipleChe
                   style={{ 
                     backgroundColor: isCompleted 
                       ? `${activity.color}30` 
-                      : `${activity.color}15` 
+                      : `${activity.color}15`,
+                    color: activity.color,
                   }}
                 >
                   <IconComponent 
-                    className="h-5 w-5"
-                    style={{ color: activity.color }}
+                    className="h-5 w-5 text-current"
                   />
                 </div>
 
