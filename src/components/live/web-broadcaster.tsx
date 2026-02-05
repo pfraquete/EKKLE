@@ -217,9 +217,21 @@ export function WebBroadcaster({
     requestPermissionsAndLoadDevices()
   }, []) // Only run once on mount
 
-  // Connect to LiveKit room
+  // Store token and wsUrl in refs to avoid reconnection on re-renders
+  const tokenRef = useRef(token)
+  const wsUrlRef = useRef(wsUrl)
+  const isConnectedRef = useRef(false)
+
+  // Update refs when props change (but don't trigger reconnection)
   useEffect(() => {
-    if (!token || !wsUrl) return
+    tokenRef.current = token
+    wsUrlRef.current = wsUrl
+  }, [token, wsUrl])
+
+  // Connect to LiveKit room - only once on mount
+  useEffect(() => {
+    if (!tokenRef.current || !wsUrlRef.current) return
+    if (isConnectedRef.current) return // Already connected, don't reconnect
 
     const room = new Room({
       adaptiveStream: true,
@@ -232,11 +244,13 @@ export function WebBroadcaster({
     room.on(RoomEvent.Connected, () => {
       console.log('Connected to LiveKit room')
       setConnectionStatus('connected')
+      isConnectedRef.current = true
     })
 
     room.on(RoomEvent.Disconnected, () => {
       console.log('Disconnected from LiveKit room')
       setConnectionStatus('disconnected')
+      isConnectedRef.current = false
     })
 
     room.on(RoomEvent.Reconnecting, () => {
@@ -247,6 +261,7 @@ export function WebBroadcaster({
     room.on(RoomEvent.Reconnected, () => {
       console.log('Reconnected to LiveKit room')
       setConnectionStatus('connected')
+      isConnectedRef.current = true
     })
 
     room.on(RoomEvent.LocalTrackPublished, (publication) => {
@@ -259,7 +274,7 @@ export function WebBroadcaster({
 
     // Connect to room
     setConnectionStatus('connecting')
-    room.connect(wsUrl, token)
+    room.connect(wsUrlRef.current, tokenRef.current)
       .then(() => {
         console.log('Room connected successfully')
       })
@@ -269,11 +284,14 @@ export function WebBroadcaster({
         setPermissionError('Erro ao conectar à sala de transmissão')
       })
 
+    // Cleanup only on unmount
     return () => {
+      console.log('WebBroadcaster unmounting, disconnecting room')
       room.disconnect()
       roomRef.current = null
+      isConnectedRef.current = false
     }
-  }, [token, wsUrl])
+  }, []) // Empty dependency array - only run once on mount
 
   // Publish camera/microphone
   const publishCamera = useCallback(async () => {
