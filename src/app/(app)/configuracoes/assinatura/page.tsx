@@ -444,7 +444,7 @@ export default function AssinaturaPage() {
                     className="w-full"
                     variant={hasActiveSubscription && subscription?.plan_id === monthlyPlan.id ? 'secondary' : 'outline'}
                     onClick={() => handleSelectPlan(monthlyPlan.id)}
-                    disabled={hasActiveSubscription && subscription?.plan_id === monthlyPlan.id}
+                    disabled={!!(hasActiveSubscription && subscription?.plan_id === monthlyPlan.id)}
                   >
                     <CreditCard className="w-4 h-4 mr-2" />
                     {hasActiveSubscription && subscription?.plan_id === monthlyPlan.id ? 'Plano Atual' : 'Assinar com Cartão'}
