@@ -333,7 +333,7 @@ export async function searchProfilesForLinking(search: string): Promise<{
         email: v.email,
         member_stage: v.member_stage,
         cell_id: v.cell_id,
-        cell_name: (v.cell as { name: string } | null)?.name,
+        cell_name: (v.cell as { name: string }[] | null)?.[0]?.name,
         created_at: v.created_at,
         has_auth_user: false,
       })),
