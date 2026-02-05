@@ -15,6 +15,7 @@ import {
     Search
 } from 'lucide-react'
 import { TitheConfirmButton } from '@/components/tithe/tithe-confirm-button'
+import { MonthSelector } from '@/components/tithe/month-selector'
 
 const MONTHS = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -135,21 +136,7 @@ export default async function DashboardDizimosPage({ searchParams }: PageProps) 
 
             {/* Filters */}
             <div className="flex flex-wrap gap-3">
-                <select
-                    defaultValue={currentMonth}
-                    onChange={(e) => {
-                        const url = new URL(window.location.href)
-                        url.searchParams.set('month', e.target.value)
-                        window.location.href = url.toString()
-                    }}
-                    className="h-10 px-4 rounded-lg bg-background border border-border text-foreground text-sm"
-                >
-                    {MONTHS.map((month, index) => (
-                        <option key={index} value={index + 1}>
-                            {month}
-                        </option>
-                    ))}
-                </select>
+                <MonthSelector currentMonth={currentMonth} />
 
                 <div className="flex rounded-lg border border-border overflow-hidden">
                     <Link
