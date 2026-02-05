@@ -185,7 +185,7 @@ export default function CourseCheckoutPage() {
 
         if (paymentMethod === 'cash') {
           setCashPaymentSuccess(true);
-          setExpiresAt(result.expires_at);
+          setExpiresAt(result.expires_at ?? null);
           toast.success(result.message);
         }
       } catch (error) {
