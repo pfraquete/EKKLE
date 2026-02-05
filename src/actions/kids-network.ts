@@ -157,13 +157,20 @@ export async function getPotentialKidsNetworkMembers() {
 
   const supabase = await createClient()
 
-  // Get all active members not already in kids network
-  const { data, error } = await supabase
+  // First, get all profile IDs that are already in kids network
+  const { data: existingMembers } = await supabase
+    .from('kids_network_membership')
+    .select('profile_id')
+    .eq('church_id', profile.church_id)
+
+  const existingProfileIds = (existingMembers || []).map(m => m.profile_id)
+
+  // Get all active members
+  const { data: allMembers, error } = await supabase
     .from('profiles')
-    .select('id, full_name, email, phone, photo_url, role, is_kids_network')
+    .select('id, full_name, email, phone, photo_url, role')
     .eq('church_id', profile.church_id)
     .eq('is_active', true)
-    .eq('is_kids_network', false)
     .order('full_name')
 
   if (error) {
@@ -171,7 +178,12 @@ export async function getPotentialKidsNetworkMembers() {
     return []
   }
 
-  return data || []
+  // Filter out members who are already in kids network
+  const potentialMembers = (allMembers || []).filter(
+    member => !existingProfileIds.includes(member.id)
+  )
+
+  return potentialMembers
 }
 
 /**
