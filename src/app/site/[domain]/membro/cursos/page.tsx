@@ -221,7 +221,7 @@ export default async function MeusCursosPage() {
               return (
                 <Link
                   key={course.id}
-                  href={`/cursos/${course.id}`}
+                  href={`/membro/cursos/${course.id}`}
                   className="group bg-card border border-border/50 rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden hover:shadow-xl hover:border-primary/10 transition-all duration-300"
                 >
                   <div className="relative h-28 sm:h-36 lg:h-44 w-full overflow-hidden">
