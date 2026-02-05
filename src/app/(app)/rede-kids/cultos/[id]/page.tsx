@@ -14,7 +14,15 @@ import {
   CheckCircle,
   XCircle,
   PlayCircle,
-  Edit,
+  MapPin,
+  Youtube,
+  Theater,
+  Mic,
+  Music,
+  Monitor,
+  HandHeart,
+  Sparkles,
+  Coffee,
 } from 'lucide-react'
 import { WorshipServiceActions } from '@/components/rede-kids/worship-service-actions'
 
@@ -90,6 +98,19 @@ export default async function CultoKidsPage({ params }: Props) {
     }
   }
 
+  const getTypeBadge = (type: string) => {
+    switch (type) {
+      case 'PRESENCIAL':
+        return <span className="text-xs px-2 py-1 bg-green-500/10 text-green-600 rounded">Presencial</span>
+      case 'ONLINE':
+        return <span className="text-xs px-2 py-1 bg-blue-500/10 text-blue-600 rounded">Online</span>
+      case 'HIBRIDO':
+        return <span className="text-xs px-2 py-1 bg-purple-500/10 text-purple-600 rounded">Híbrido</span>
+      default:
+        return null
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
@@ -102,9 +123,10 @@ export default async function CultoKidsPage({ params }: Props) {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold tracking-tight">{service.title}</h1>
               {getStatusBadge(service.status)}
+              {getTypeBadge(service.type)}
             </div>
             <p className="text-muted-foreground">
               {formatDate(service.service_date)}
@@ -147,6 +169,28 @@ export default async function CultoKidsPage({ params }: Props) {
                 </div>
               )}
 
+              {service.location && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Local</p>
+                    <p className="font-medium">{service.location}</p>
+                  </div>
+                </div>
+              )}
+
+              {service.youtube_url && (
+                <div className="flex items-start gap-3">
+                  <Youtube className="w-5 h-5 text-red-500 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">YouTube</p>
+                    <a href={service.youtube_url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                      Assistir transmissão
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {service.theme && (
                 <div className="flex items-start gap-3">
                   <BookOpen className="w-5 h-5 text-muted-foreground mt-0.5" />
@@ -173,6 +217,136 @@ export default async function CultoKidsPage({ params }: Props) {
                   <p className="text-sm">{service.description}</p>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Theater Section */}
+          {service.has_theater && (
+            <div className="bg-card border rounded-xl p-6 space-y-4">
+              <h2 className="font-semibold flex items-center gap-2">
+                <Theater className="w-5 h-5 text-purple-500" />
+                Teatro
+              </h2>
+
+              {service.theater_theme && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Tema do Teatro</p>
+                  <p className="font-medium">{service.theater_theme}</p>
+                </div>
+              )}
+
+              {service.theater_description && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Descrição</p>
+                  <p className="text-sm">{service.theater_description}</p>
+                </div>
+              )}
+
+              {service.theater_cast && service.theater_cast.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Elenco</p>
+                  <div className="flex flex-wrap gap-2">
+                    {service.theater_cast.map((cast) => (
+                      <div
+                        key={cast.id}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-full text-sm"
+                      >
+                        {cast.profile?.full_name || 'Membro'}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Teams Section */}
+          <div className="bg-card border rounded-xl p-6 space-y-4">
+            <h2 className="font-semibold flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Programação e Escala
+            </h2>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {/* Palavra e Altar */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Palavra e Altar</h3>
+                
+                {(service.preacher?.full_name || service.preacher_name) && (
+                  <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                    <Mic className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Pregador</p>
+                      <p className="text-sm font-medium">{service.preacher?.full_name || service.preacher_name}</p>
+                    </div>
+                  </div>
+                )}
+
+                {service.opening?.full_name && (
+                  <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                    <Sparkles className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Abertura</p>
+                      <p className="text-sm font-medium">{service.opening.full_name}</p>
+                    </div>
+                  </div>
+                )}
+
+                {service.offerings?.full_name && (
+                  <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                    <HandHeart className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Ofertas</p>
+                      <p className="text-sm font-medium">{service.offerings.full_name}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Equipes */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Equipes</h3>
+                
+                {service.praise_team && (
+                  <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                    <Music className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Louvor</p>
+                      <p className="text-sm font-medium">{service.praise_team}</p>
+                    </div>
+                  </div>
+                )}
+
+                {service.media_team && (
+                  <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                    <Monitor className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Mídias</p>
+                      <p className="text-sm font-medium">{service.media_team}</p>
+                    </div>
+                  </div>
+                )}
+
+                {service.welcome_team && (
+                  <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                    <HandHeart className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Boas-vindas</p>
+                      <p className="text-sm font-medium">{service.welcome_team}</p>
+                    </div>
+                  </div>
+                )}
+
+                {service.cafeteria_team && (
+                  <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                    <Coffee className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Cantina</p>
+                      <p className="text-sm font-medium">{service.cafeteria_team}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -214,6 +388,19 @@ export default async function CultoKidsPage({ params }: Props) {
                   <span className="font-bold text-lg">{service.visitors_count}</span>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Theater Badge */}
+          {service.has_theater && (
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
+              <Theater className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+              <p className="font-semibold text-purple-600 dark:text-purple-400">Com Teatro</p>
+              {service.theater_cast && service.theater_cast.length > 0 && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {service.theater_cast.length} participante(s)
+                </p>
+              )}
             </div>
           )}
 
