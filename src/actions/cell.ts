@@ -129,7 +129,7 @@ export async function getMyCellData(): Promise<MyCellData | null> {
         // Group members
         supabase
             .from('profiles')
-            .select('id, full_name, photo_url')
+            .select('id, full_name, photo_url, birth_date')
             .eq('cell_id', cell.id)
             .eq('is_active', true)
             .order('full_name'),
@@ -199,6 +199,7 @@ export async function getMyCellData(): Promise<MyCellData | null> {
             id: member.id,
             fullName: member.full_name,
             photoUrl: member.photo_url,
+            birthDate: member.birth_date || null,
             consecutiveAbsences
         }
     })
@@ -389,7 +390,7 @@ export async function getCellDetails(cellId: string): Promise<CellDetails | null
     const [membersResponse, meetingsResponse] = await Promise.all([
         supabase
             .from('profiles')
-            .select('id, full_name, photo_url')
+            .select('id, full_name, photo_url, birth_date')
             .eq('cell_id', cell.id)
             .eq('is_active', true)
             .order('full_name'),
