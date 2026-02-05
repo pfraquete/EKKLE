@@ -167,7 +167,7 @@ export async function createEventPayment(input: CreateEventPaymentInput) {
         amount: amountCents
       }],
       payments: [{
-        payment_method: input.paymentMethod,
+        payment_method: input.paymentMethod as 'credit_card' | 'pix',
         amount: amountCents,
         ...(input.paymentMethod === 'pix' ? {
           pix: {
