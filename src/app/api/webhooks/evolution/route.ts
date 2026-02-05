@@ -271,7 +271,7 @@ async function handleMessageReceived(payload: EvolutionWebhookPayload) {
             to_number: isFromMe ? phone : instancePhone,
             message_type: messageType,
             content: messageText,
-            status: 'received',
+            status: isFromMe ? 'SENT' : 'DELIVERED',
             sent_at: data.messageTimestamp
                 ? new Date(data.messageTimestamp * 1000).toISOString()
                 : new Date().toISOString()

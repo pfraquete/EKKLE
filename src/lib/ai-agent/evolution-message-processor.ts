@@ -202,47 +202,80 @@ function detectIntent(message: string): {
   const lowerMessage = message.toLowerCase().trim()
   const originalMessage = message.trim()
 
+  // PRIMEIRO: Verificar saudações (antes de detectar nomes para evitar "Oi" ser detectado como nome)
+  const greetings = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'hey', 'eai', 'e ai', 'oie', 'opa', 'eae', 'fala', 'salve', 'alo', 'alô']
+  if (greetings.some(g => lowerMessage === g || lowerMessage.startsWith(g + ' ') || lowerMessage.startsWith(g + ','))) {
+    return { type: 'greeting', confidence: 0.9 }
+  }
+
+  // Lista de palavras comuns que NÃO são nomes
+  const notNames = [
+    'oi', 'olá', 'ola', 'bom', 'boa', 'dia', 'tarde', 'noite', 'hey', 'eai', 'oie', 'opa', 'eae', 'fala', 'salve', 'alo', 'alô',
+    'sim', 'não', 'nao', 'ok', 'tudo', 'bem', 'obrigado', 'obrigada', 'valeu', 'brigado', 'brigada',
+    'quero', 'preciso', 'gostaria', 'poderia', 'pode', 'tem', 'onde', 'quando', 'como', 'qual', 'quem',
+    'célula', 'celula', 'culto', 'igreja', 'pastor', 'líder', 'lider', 'oração', 'oracao',
+    'horário', 'horario', 'endereço', 'endereco', 'informação', 'informacao', 'ajuda'
+  ]
+
   // Name response patterns - detectar quando usuário responde com nome
-  // Padrões: "Pedro", "Me chamo Maria", "Sou o João", "Meu nome é Ana"
+  // Padrões: "Me chamo Maria", "Sou o João", "Meu nome é Ana"
   const namePatterns = [
     /^me\s+chamo\s+(.+)$/i,
-    /^sou\s+(?:o|a)?\s*(.+)$/i,
     /^meu\s+nome\s+é\s+(.+)$/i,
     /^pode\s+me\s+chamar\s+de\s+(.+)$/i,
-    /^\u00e9\s+(.+)$/i,
   ]
   
   for (const pattern of namePatterns) {
     const match = originalMessage.match(pattern)
     if (match && match[1]) {
       const name = match[1].trim()
-      // Validar que parece um nome (1-4 palavras, sem números)
-      if (name.length >= 2 && name.length <= 50 && !/\d/.test(name) && name.split(/\s+/).length <= 4) {
+      // Validar que parece um nome (1-4 palavras, sem números, não é palavra comum)
+      if (
+        name.length >= 2 && 
+        name.length <= 50 && 
+        !/\d/.test(name) && 
+        name.split(/\s+/).length <= 4 &&
+        !notNames.includes(name.toLowerCase())
+      ) {
         return { type: 'name_response', confidence: 0.95, extractedName: name }
       }
     }
   }
 
-  // Se a mensagem é curta (1-3 palavras) e parece um nome
-  const words = originalMessage.split(/\s+/)
-  if (words.length >= 1 && words.length <= 3) {
-    const potentialName = originalMessage
-    // Verificar se parece um nome: começa com maiúscula, sem números, sem pontuação excessiva
+  // Padrão "Sou X" - mais restritivo para evitar "Sou novo", "Sou da igreja", etc.
+  const souMatch = originalMessage.match(/^sou\s+(?:o|a)?\s*(.+)$/i)
+  if (souMatch && souMatch[1]) {
+    const name = souMatch[1].trim()
+    // Só aceitar se for 1-2 palavras e começar com maiúscula (parece nome próprio)
     if (
-      potentialName.length >= 2 && 
-      potentialName.length <= 40 &&
-      /^[A-ZÀ-Ü]/.test(potentialName) && 
-      !/\d/.test(potentialName) &&
-      !/[?!@#$%^&*(){}\[\]|\\:";<>,.\/?]/.test(potentialName)
+      name.length >= 2 && 
+      name.length <= 30 && 
+      !/\d/.test(name) && 
+      name.split(/\s+/).length <= 2 &&
+      /^[A-ZÀ-Ü]/.test(name) &&
+      !notNames.includes(name.toLowerCase().split(/\s+/)[0])
     ) {
-      return { type: 'name_response', confidence: 0.8, extractedName: potentialName }
+      return { type: 'name_response', confidence: 0.9, extractedName: name }
     }
   }
 
-  // Greeting patterns
-  const greetings = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'hey', 'eai', 'e ai', 'oie']
-  if (greetings.some(g => lowerMessage === g || lowerMessage.startsWith(g + ' ') || lowerMessage.startsWith(g + ','))) {
-    return { type: 'greeting', confidence: 0.9 }
+  // Se a mensagem é curta (1-2 palavras) e parece um nome próprio
+  const words = originalMessage.split(/\s+/)
+  if (words.length >= 1 && words.length <= 2) {
+    const potentialName = originalMessage
+    const firstWord = words[0].toLowerCase()
+    
+    // Verificar se parece um nome: começa com maiúscula, sem números, sem pontuação, não é palavra comum
+    if (
+      potentialName.length >= 2 && 
+      potentialName.length <= 30 &&
+      /^[A-ZÀ-Ü]/.test(potentialName) && 
+      !/\d/.test(potentialName) &&
+      !/[?!@#$%^&*(){}\[\]|\\:";<>,.\/?]/.test(potentialName) &&
+      !notNames.includes(firstWord)
+    ) {
+      return { type: 'name_response', confidence: 0.8, extractedName: potentialName }
+    }
   }
 
   // Prayer request patterns
@@ -697,8 +730,7 @@ async function executeVisitorFunction(
         church_id: context.churchId,
         role: 'MEMBER',
         member_stage: 'VISITOR',
-        is_active: true,
-        notes: args.interest ? `Interesse: ${args.interest}` : 'Cadastrado via WhatsApp'
+        is_active: true
       }).select('id, full_name').single()
 
       if (error) {
@@ -853,7 +885,7 @@ async function saveMessage(
     to_number: toNumber,
     message_type: 'text',
     content,
-    status: direction === 'OUTBOUND' ? 'sent' : 'received',
+    status: direction === 'OUTBOUND' ? 'SENT' : 'DELIVERED',
     sent_at: new Date().toISOString()
   })
 
