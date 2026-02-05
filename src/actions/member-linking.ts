@@ -103,7 +103,7 @@ export async function getVisitorProfiles(): Promise<{
         email: p.email,
         member_stage: p.member_stage,
         cell_id: p.cell_id,
-        cell_name: (p.cell as { name: string } | null)?.name,
+        cell_name: (p.cell as { name: string }[] | null)?.[0]?.name,
         created_at: p.created_at,
         has_auth_user: false,
       }))
