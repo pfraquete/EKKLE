@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ImagePlus, Video, Loader2, X, Send } from 'lucide-react'
-import { createPost } from '@/actions/feed'
+import { createPost, getPostById } from '@/actions/feed'
 import { registerPostMedia, getMediaUploadUrl } from '@/actions/feed-media'
 import { FeedSettings, FeedPost, canUserPost, UserRole, MediaType } from '@/types/feed'
 import { useToast } from '@/hooks/use-toast'
@@ -37,6 +37,7 @@ export function FeedPostForm({
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [mediaFiles, setMediaFiles] = useState<MediaPreview[]>([])
     const [isUploading, setIsUploading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState<string>('')
     const fileInputRef = useRef<HTMLInputElement>(null)
     const { toast } = useToast()
 
@@ -108,20 +109,27 @@ export function FeedPostForm({
         })
     }
 
-    const uploadMedia = async (postId: string) => {
+    const uploadMedia = async (postId: string): Promise<boolean> => {
         setIsUploading(true)
+        let allSuccessful = true
 
         for (let i = 0; i < mediaFiles.length; i++) {
             const media = mediaFiles[i]
+            setUploadProgress(`Enviando ${i + 1} de ${mediaFiles.length}...`)
 
             try {
                 // Get signed upload URL
+                console.log('[FeedPostForm] Getting upload URL for:', media.file.name)
                 const urlResult = await getMediaUploadUrl(postId, media.file.name, media.file.type)
+                
                 if (!urlResult.success || !urlResult.signedUrl) {
-                    throw new Error(urlResult.error || 'Erro ao gerar URL')
+                    console.error('[FeedPostForm] Failed to get upload URL:', urlResult.error)
+                    throw new Error(urlResult.error || 'Erro ao gerar URL de upload')
                 }
 
-                // Upload file
+                console.log('[FeedPostForm] Uploading file to storage...')
+                
+                // Upload file to Supabase Storage
                 const uploadResponse = await fetch(urlResult.signedUrl, {
                     method: 'PUT',
                     body: media.file,
@@ -131,11 +139,15 @@ export function FeedPostForm({
                 })
 
                 if (!uploadResponse.ok) {
-                    throw new Error('Erro no upload')
+                    const errorText = await uploadResponse.text()
+                    console.error('[FeedPostForm] Upload failed:', uploadResponse.status, errorText)
+                    throw new Error(`Erro no upload: ${uploadResponse.status}`)
                 }
 
+                console.log('[FeedPostForm] File uploaded, registering in database...')
+
                 // Register media in database
-                await registerPostMedia({
+                const registerResult = await registerPostMedia({
                     postId,
                     mediaType: media.type,
                     storagePath: urlResult.storagePath!,
@@ -145,17 +157,28 @@ export function FeedPostForm({
                     mimeType: media.file.type,
                     sortOrder: i,
                 })
+
+                if (!registerResult.success) {
+                    console.error('[FeedPostForm] Failed to register media:', registerResult.error)
+                    throw new Error(registerResult.error || 'Erro ao registrar mídia')
+                }
+
+                console.log('[FeedPostForm] Media registered successfully')
+
             } catch (error) {
-                console.error('Error uploading media:', error)
+                console.error('[FeedPostForm] Error uploading media:', error)
+                allSuccessful = false
                 toast({
                     title: 'Erro no upload',
-                    description: `Falha ao enviar ${media.file.name}`,
+                    description: error instanceof Error ? error.message : `Falha ao enviar ${media.file.name}`,
                     variant: 'destructive',
                 })
             }
         }
 
         setIsUploading(false)
+        setUploadProgress('')
+        return allSuccessful
     }
 
     const handleSubmit = async () => {
@@ -171,25 +194,45 @@ export function FeedPostForm({
         setIsSubmitting(true)
 
         try {
-            const result = await createPost(content)
+            // Create post first
+            const result = await createPost(content || ' ') // Use space if only media
 
-            if (!result.success) {
+            if (!result.success || !result.post) {
                 toast({
                     title: 'Erro',
-                    description: result.error,
+                    description: result.error || 'Falha ao criar post',
                     variant: 'destructive',
                 })
                 return
             }
 
+            const postId = result.post.id
+
             // Upload media if any
-            if (mediaFiles.length > 0 && result.post) {
-                await uploadMedia(result.post.id)
+            if (mediaFiles.length > 0) {
+                const uploadSuccess = await uploadMedia(postId)
+                
+                if (!uploadSuccess) {
+                    // Some uploads failed, but post was created
+                    toast({
+                        title: 'Aviso',
+                        description: 'Post criado, mas algumas mídias falharam no upload',
+                        variant: 'destructive',
+                    })
+                }
+            }
+
+            // Fetch the complete post with media
+            let finalPost: FeedPost | null = null
+            if (mediaFiles.length > 0) {
+                // Wait a bit for database to sync
+                await new Promise(resolve => setTimeout(resolve, 500))
+                finalPost = await getPostById(postId)
             }
 
             toast({
                 title: 'Sucesso',
-                description: result.message || 'Post criado!',
+                description: result.message || 'Post publicado!',
             })
 
             // Clear form
@@ -197,12 +240,12 @@ export function FeedPostForm({
             mediaFiles.forEach(m => URL.revokeObjectURL(m.preview))
             setMediaFiles([])
 
-            // Callback
-            if (onPostCreated && result.post) {
-                onPostCreated(result.post)
+            // Callback with complete post (including media)
+            if (onPostCreated) {
+                onPostCreated(finalPost || result.post)
             }
         } catch (error) {
-            console.error('Error creating post:', error)
+            console.error('[FeedPostForm] Error creating post:', error)
             toast({
                 title: 'Erro',
                 description: 'Falha ao criar post',
@@ -237,7 +280,7 @@ export function FeedPostForm({
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             className="min-h-[80px] resize-none border-0 p-0 focus-visible:ring-0 text-base"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || isUploading}
                         />
 
                         {/* Media Preview */}
@@ -261,7 +304,7 @@ export function FeedPostForm({
                                             type="button"
                                             onClick={() => removeMedia(index)}
                                             className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 transition"
-                                            disabled={isSubmitting}
+                                            disabled={isSubmitting || isUploading}
                                         >
                                             <X className="h-4 w-4" />
                                         </button>
@@ -287,14 +330,14 @@ export function FeedPostForm({
                                             multiple
                                             onChange={handleFileSelect}
                                             className="hidden"
-                                            disabled={isSubmitting || mediaFiles.length >= settings.max_media_per_post}
+                                            disabled={isSubmitting || isUploading || mediaFiles.length >= settings.max_media_per_post}
                                         />
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => fileInputRef.current?.click()}
-                                            disabled={isSubmitting || mediaFiles.length >= settings.max_media_per_post}
+                                            disabled={isSubmitting || isUploading || mediaFiles.length >= settings.max_media_per_post}
                                             className="text-muted-foreground hover:text-primary"
                                         >
                                             <ImagePlus className="h-5 w-5" />
@@ -312,7 +355,7 @@ export function FeedPostForm({
                                 {isSubmitting || isUploading ? (
                                     <>
                                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        {isUploading ? 'Enviando...' : 'Publicando...'}
+                                        {uploadProgress || (isUploading ? 'Enviando mídia...' : 'Publicando...')}
                                     </>
                                 ) : (
                                     <>
