@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Plus, Search, X } from 'lucide-react'
+import { Plus, Search, X, Users, AlertCircle } from 'lucide-react'
 import { addToKidsNetwork } from '@/actions/kids-network'
 import { KIDS_ROLES_LABELS } from '@/lib/constants'
 import { KidsCell } from '@/actions/kids-cells'
@@ -56,6 +56,15 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
     })
   }
 
+  const handleClose = () => {
+    setIsOpen(false)
+    setSelectedMember(null)
+    setSelectedRole('MEMBER_KIDS')
+    setSelectedCell('')
+    setSearch('')
+    setError(null)
+  }
+
   return (
     <>
       <button
@@ -68,12 +77,12 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
 
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col border border-border">
             {/* Header */}
-            <div className="p-4 border-b flex items-center justify-between">
-              <h2 className="font-semibold text-lg">Adicionar à Rede Kids</h2>
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h2 className="font-semibold text-lg text-foreground">Adicionar à Rede Kids</h2>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={handleClose}
                 className="p-2 hover:bg-muted rounded-lg transition-colors"
               >
                 <X className="h-5 w-5" />
@@ -82,7 +91,19 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
 
             {/* Content */}
             <div className="p-4 flex-1 overflow-y-auto space-y-4">
-              {!selectedMember ? (
+              {/* Empty state - no potential members */}
+              {potentialMembers.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="font-semibold text-foreground mb-2">Todos os membros já estão na Rede Kids</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Não há membros disponíveis para adicionar. Todos os membros da igreja já fazem parte da Rede Kids.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Para adicionar novos membros, primeiro cadastre-os na seção de Membros da igreja.
+                  </p>
+                </div>
+              ) : !selectedMember ? (
                 <>
                   {/* Search */}
                   <div className="relative">
@@ -92,16 +113,19 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
                       placeholder="Buscar membro..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   {/* Members list */}
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {filteredMembers.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-4">
-                        Nenhum membro disponível
-                      </p>
+                      <div className="text-center py-4">
+                        <AlertCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-muted-foreground">
+                          {search ? 'Nenhum membro encontrado com esse nome' : 'Nenhum membro disponível'}
+                        </p>
+                      </div>
                     ) : (
                       filteredMembers.map((member) => (
                         <button
@@ -123,13 +147,18 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
                             </div>
                           )}
                           <div>
-                            <p className="font-medium">{member.full_name}</p>
+                            <p className="font-medium text-foreground">{member.full_name}</p>
                             <p className="text-xs text-muted-foreground">{member.email}</p>
                           </div>
                         </button>
                       ))
                     )}
                   </div>
+
+                  {/* Total count */}
+                  <p className="text-xs text-muted-foreground text-center">
+                    {potentialMembers.length} membro{potentialMembers.length !== 1 ? 's' : ''} disponíve{potentialMembers.length !== 1 ? 'is' : 'l'}
+                  </p>
                 </>
               ) : (
                 <>
@@ -149,7 +178,7 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
                       </div>
                     )}
                     <div className="flex-1">
-                      <p className="font-medium">{selectedMember.full_name}</p>
+                      <p className="font-medium text-foreground">{selectedMember.full_name}</p>
                       <p className="text-sm text-muted-foreground">{selectedMember.email}</p>
                     </div>
                     <button
@@ -162,13 +191,13 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
 
                   {/* Role selection */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label className="block text-sm font-medium mb-2 text-foreground">
                       Função na Rede Kids
                     </label>
                     <select
                       value={selectedRole}
                       onChange={(e) => setSelectedRole(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       {Object.entries(KIDS_ROLES_LABELS).map(([value, label]) => (
                         <option key={value} value={value}>
@@ -180,13 +209,13 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
 
                   {/* Cell selection (optional) */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label className="block text-sm font-medium mb-2 text-foreground">
                       Célula Kids (opcional)
                     </label>
                     <select
                       value={selectedCell}
                       onChange={(e) => setSelectedCell(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="">Sem célula</option>
                       {cells.map((cell) => (
@@ -198,21 +227,24 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
                   </div>
 
                   {error && (
-                    <p className="text-sm text-destructive">{error}</p>
+                    <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
+                      <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                      <p className="text-sm">{error}</p>
+                    </div>
                   )}
                 </>
               )}
             </div>
 
             {/* Footer */}
-            {selectedMember && (
-              <div className="p-4 border-t flex gap-2 justify-end">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
-                >
-                  Cancelar
-                </button>
+            <div className="p-4 border-t border-border flex gap-2 justify-end">
+              <button
+                onClick={handleClose}
+                className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors text-foreground"
+              >
+                {potentialMembers.length === 0 ? 'Fechar' : 'Cancelar'}
+              </button>
+              {selectedMember && (
                 <button
                   onClick={handleSubmit}
                   disabled={isPending}
@@ -220,8 +252,8 @@ export function AddMemberDialog({ potentialMembers, cells }: AddMemberDialogProp
                 >
                   {isPending ? 'Adicionando...' : 'Adicionar'}
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}

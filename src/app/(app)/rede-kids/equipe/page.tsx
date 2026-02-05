@@ -65,7 +65,7 @@ export default async function RedeKidsEquipePage() {
             </p>
           </div>
         </div>
-        {canManage && potentialMembers.length > 0 && (
+        {canManage && (
           <AddMemberDialog
             potentialMembers={potentialMembers}
             cells={cells}
