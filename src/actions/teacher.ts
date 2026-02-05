@@ -117,6 +117,8 @@ export async function getTeacherCourses(teacherId?: string) {
         }
 
         const supabase = await createClient()
+        
+        // All teachers and pastors see all courses from their church
         const { data, error } = await supabase
             .from('courses')
             .select(`
@@ -125,7 +127,6 @@ export async function getTeacherCourses(teacherId?: string) {
                 _count:course_enrollments(count)
             `)
             .eq('church_id', profile.church_id)
-            .eq('teacher_id', targetTeacherId)
             .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -171,12 +172,11 @@ export async function getTeacherDashboardStats() {
 
         const supabase = await createClient()
 
-        // Get courses count
+        // Get courses count - All teachers see all courses from their church
         const { count: coursesCount } = await supabase
             .from('courses')
             .select('*', { count: 'exact', head: true })
             .eq('church_id', profile.church_id)
-            .eq('teacher_id', profile.id)
 
         // Get total enrollments across all courses
         const { data: enrollmentsData } = await supabase
