@@ -1,7 +1,7 @@
 import { getChurch } from '@/lib/get-church'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Mail, Instagram, Youtube, MessageCircle } from 'lucide-react'
+import { MapPin, Mail, Instagram, Youtube, MessageCircle, Target, Eye, Heart } from 'lucide-react'
 
 export default async function SobrePage() {
   const church = await getChurch()
@@ -38,7 +38,7 @@ export default async function SobrePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           <div className="bg-white p-8 rounded-lg shadow-md text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🙏</span>
+              <Target className="w-8 h-8 text-primary" />
             </div>
             <h3 className="font-bold text-xl mb-3">Nossa Missão</h3>
             <p className="text-gray-600">
@@ -48,7 +48,7 @@ export default async function SobrePage() {
 
           <div className="bg-white p-8 rounded-lg shadow-md text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">👁️</span>
+              <Eye className="w-8 h-8 text-primary" />
             </div>
             <h3 className="font-bold text-xl mb-3">Nossa Visão</h3>
             <p className="text-gray-600">
@@ -58,7 +58,7 @@ export default async function SobrePage() {
 
           <div className="bg-white p-8 rounded-lg shadow-md text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">❤️</span>
+              <Heart className="w-8 h-8 text-primary" />
             </div>
             <h3 className="font-bold text-xl mb-3">Nossos Valores</h3>
             <p className="text-gray-600">
