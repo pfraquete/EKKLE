@@ -124,7 +124,7 @@ export function EventForm({ initialData }: EventFormProps) {
                 <Input
                   {...form.register('title')}
                   placeholder="Ex: Culto da Família, Curso de Liderança..."
-                  className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30 text-base"
+                  className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30 text-base text-foreground"
                 />
                 {form.formState.errors.title && <p className="text-red-500 text-xs font-bold uppercase tracking-wider ml-2">{form.formState.errors.title.message}</p>}
               </div>
@@ -134,7 +134,7 @@ export function EventForm({ initialData }: EventFormProps) {
                 <Textarea
                   {...form.register('description')}
                   placeholder="Detalhes sobre o evento..."
-                  className="min-h-[150px] bg-muted/30 border-border/40 rounded-2xl p-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30 text-base resize-none"
+                  className="min-h-[150px] bg-muted/30 border-border/40 rounded-2xl p-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30 text-base resize-none text-foreground"
                 />
               </div>
 
@@ -146,7 +146,7 @@ export function EventForm({ initialData }: EventFormProps) {
                     <Input
                       {...form.register('start_date')}
                       type="datetime-local"
-                      className="pl-14 h-16 bg-muted/30 border-border/40 rounded-2xl font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all block"
+                      className="pl-14 h-16 bg-muted/30 border-border/40 rounded-2xl font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all block text-foreground"
                     />
                   </div>
                   {form.formState.errors.start_date && <p className="text-red-500 text-xs font-bold uppercase tracking-wider ml-2">{form.formState.errors.start_date.message}</p>}
@@ -156,7 +156,7 @@ export function EventForm({ initialData }: EventFormProps) {
                   <Input
                     {...form.register('end_time')}
                     type="time"
-                    className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all block"
+                    className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all block text-foreground"
                   />
                 </div>
               </div>
@@ -187,7 +187,7 @@ export function EventForm({ initialData }: EventFormProps) {
                     <Input
                       {...form.register('online_url')}
                       placeholder="https://zoom.us/..."
-                      className="pl-14 h-16 bg-muted/30 border-border/40 rounded-2xl font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all"
+                      className="pl-14 h-16 bg-muted/30 border-border/40 rounded-2xl font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all text-foreground"
                     />
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export function EventForm({ initialData }: EventFormProps) {
                   <Input
                     {...form.register('location')}
                     placeholder="Ex: Auditório Principal"
-                    className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all"
+                    className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all text-foreground"
                   />
                 </div>
               )}
@@ -212,7 +212,7 @@ export function EventForm({ initialData }: EventFormProps) {
               <div className="space-y-3">
                 <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Categoria</Label>
                 <Select value={category} onValueChange={(v) => form.setValue('category', v as EventFormValues['category'])}>
-                  <SelectTrigger className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all">
+                  <SelectTrigger className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all text-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border/40 rounded-2xl shadow-2xl">
@@ -262,7 +262,7 @@ export function EventForm({ initialData }: EventFormProps) {
                       {...form.register('capacity')}
                       type="number"
                       placeholder="Ilimitado"
-                      className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all"
+                      className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-foreground"
                     />
                   </div>
 
@@ -271,7 +271,7 @@ export function EventForm({ initialData }: EventFormProps) {
                     <Input
                       {...form.register('registration_link')}
                       placeholder="Se vazio, usa inscrição interna"
-                      className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all"
+                      className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-foreground"
                     />
                   </div>
 
@@ -293,7 +293,7 @@ export function EventForm({ initialData }: EventFormProps) {
                           {...form.register('price')}
                           type="number"
                           step="0.01"
-                          className="pl-12 h-14 bg-muted/30 border-border/40 rounded-xl font-bold transition-all"
+                          className="pl-12 h-14 bg-muted/30 border-border/40 rounded-xl font-bold transition-all text-foreground"
                         />
                       </div>
                     </div>
