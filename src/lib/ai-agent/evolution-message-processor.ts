@@ -1108,6 +1108,7 @@ export async function processEvolutionMessage(
     const { data: instanceData } = await supabase
       .from('whatsapp_instances')
       .select('phone_number')
+      .eq('church_id', churchId)
       .eq('instance_name', instanceName)
       .single()
 

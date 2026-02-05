@@ -1103,13 +1103,16 @@ async function handleRegisterVisitor(
     const normalizedPhone = args.phone?.replace(/\D/g, '') || '';
     
     if (normalizedPhone) {
-      const { data: existing } = await getSupabaseClient()
+      // Use limit(1) instead of single() to avoid error when multiple matches exist
+      const { data: existingProfiles } = await getSupabaseClient()
         .from('profiles')
         .select('id, full_name')
         .eq('church_id', context.churchId)
         .ilike('phone', `%${normalizedPhone.slice(-9)}%`)
-        .single();
+        .order('created_at', { ascending: false })
+        .limit(1);
 
+      const existing = existingProfiles?.[0];
       if (existing) {
         return {
           success: true,
