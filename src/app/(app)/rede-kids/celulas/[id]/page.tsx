@@ -57,6 +57,16 @@ export default async function CelulaKidsDetailPage({ params }: Props) {
   ])
   const cellMembers = allMembers.filter(m => m.kids_cell_id === id)
 
+  // Find leader from membership table if not set in cell.leader
+  const leaderFromMembership = cellMembers.find(m => m.kids_role === 'LEADER_KIDS')
+  const cellLeader = cell.leader || (leaderFromMembership ? {
+    id: leaderFromMembership.profile_id,
+    full_name: leaderFromMembership.profile.full_name,
+    email: leaderFromMembership.profile.email,
+    phone: leaderFromMembership.profile.phone,
+    photo_url: leaderFromMembership.profile.photo_url
+  } : null)
+
   const isPastor = profile.role === 'PASTOR'
   const isPastoraKids = profile.kids_role === 'PASTORA_KIDS'
   const isDiscipuladoraKids = profile.kids_role === 'DISCIPULADORA_KIDS'
@@ -90,7 +100,7 @@ export default async function CelulaKidsDetailPage({ params }: Props) {
               </span>
             </div>
             <p className="text-muted-foreground">
-              {cell.leader?.full_name || 'Sem líder definido'}
+              {cellLeader?.full_name || 'Sem líder definido'}
             </p>
           </div>
         </div>
