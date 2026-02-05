@@ -141,11 +141,17 @@ export async function createEventPayment(input: CreateEventPaymentInput) {
 
   try {
     // Create order in Pagar.me
+    const document = input.customerDocument.replace(/\D/g, '');
+    const documentType = document.length > 11 ? 'CNPJ' : 'CPF';
+    const customerType = document.length > 11 ? 'company' : 'individual';
+    
     const order = await createOrder({
       customer: {
         name: input.customerName,
         email: input.customerEmail,
-        document: input.customerDocument.replace(/\D/g, ''),
+        document: document,
+        document_type: documentType,
+        type: customerType,
         phones: input.customerPhone ? {
           mobile_phone: {
             country_code: '55',

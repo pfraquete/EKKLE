@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ProfileForm } from '@/components/forms/profile-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Globe, MessageSquare, ChevronRight, Wallet, CreditCard, Newspaper } from 'lucide-react'
+import { Globe, MessageSquare, ChevronRight, Wallet, CreditCard, Newspaper, QrCode } from 'lucide-react'
 
 export default async function SettingsPage() {
     const profile = await getProfile()
@@ -80,6 +80,20 @@ export default async function SettingsPage() {
                                 <div>
                                     <p className="text-sm font-bold text-foreground">Pagamentos</p>
                                     <p className="text-xs text-muted-foreground">Conta bancária e recebimentos</p>
+                                </div>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </Link>
+
+                        <Link
+                            href="/configuracoes/pix"
+                            className="flex items-center justify-between p-4 bg-muted/40 rounded-2xl hover:bg-muted/60 transition-colors"
+                        >
+                            <div className="flex items-center gap-3">
+                                <QrCode className="h-5 w-5 text-primary" />
+                                <div>
+                                    <p className="text-sm font-bold text-foreground">PIX da Igreja</p>
+                                    <p className="text-xs text-muted-foreground">Chave PIX para dízimos e ofertas</p>
                                 </div>
                             </div>
                             <ChevronRight className="h-5 w-5 text-muted-foreground" />
