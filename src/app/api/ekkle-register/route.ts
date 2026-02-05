@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { fullName, email, phone, nickname, password } = body
+    const { fullName, email, phone, nickname, password, churchId } = body
 
     // Validate required fields
     if (!fullName || !email || !password) {
@@ -108,6 +108,30 @@ export async function POST(request: NextRequest) {
       }
     )
 
+    // Determine effective church: if churchId provided, validate it; otherwise use Ekkle Hub
+    let effectiveChurchId = EKKLE_HUB_ID
+    let effectiveChurchName = 'Ekkle'
+
+    if (churchId) {
+      const { data: church, error: churchError } = await supabase
+        .from('churches')
+        .select('id, name, is_public_listed')
+        .eq('id', churchId)
+        .eq('is_public_listed', true)
+        .neq('id', EKKLE_HUB_ID)
+        .single()
+
+      if (churchError || !church) {
+        return NextResponse.json(
+          { error: 'Igreja selecionada não encontrada ou não está aceitando membros' },
+          { status: 400 }
+        )
+      }
+
+      effectiveChurchId = church.id
+      effectiveChurchName = church.name
+    }
+
     // Check if email already exists in profiles (globally - across all churches)
     const { data: existingProfile } = await supabase
       .from('profiles')
@@ -145,8 +169,8 @@ export async function POST(request: NextRequest) {
       email_confirm: true, // Auto-confirm email
       user_metadata: {
         full_name: fullName,
-        church_id: EKKLE_HUB_ID,
-        is_ekkle_user: true,
+        church_id: effectiveChurchId,
+        is_ekkle_user: !churchId,
       },
     })
 
@@ -159,10 +183,10 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // 2. Create profile in profiles table - belongs to Ekkle Hub
+      // 2. Create profile in profiles table
       const profileData = {
         id: authUser.user.id,
-        church_id: EKKLE_HUB_ID,
+        church_id: effectiveChurchId,
         full_name: fullName.trim(),
         email,
         phone: phone || null,
@@ -196,7 +220,7 @@ export async function POST(request: NextRequest) {
       const emailResult = await sendWelcomeEmail({
         to: email,
         name: fullName,
-        churchName: 'Ekkle',
+        churchName: effectiveChurchName,
         loginUrl,
       })
 
