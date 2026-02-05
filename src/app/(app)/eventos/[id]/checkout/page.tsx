@@ -83,9 +83,9 @@ export default function EventCheckoutPage() {
   // PIX state
   const [pixData, setPixData] = useState<{
     qr_code: string;
-    qr_code_url: string;
+    qr_code_url?: string;
     order_id: string;
-    expires_at: string;
+    expires_at?: string;
   } | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
 
