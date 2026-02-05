@@ -62,7 +62,8 @@ export async function getKidsNetworkMembers(): Promise<KidsNetworkMember[]> {
 
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  // First get memberships
+  const { data: memberships, error } = await supabase
     .from('kids_network_membership')
     .select(`
       id,
@@ -77,10 +78,6 @@ export async function getKidsNetworkMembers(): Promise<KidsNetworkMember[]> {
         phone,
         photo_url,
         role
-      ),
-      kids_cell:kids_cells (
-        id,
-        name
       )
     `)
     .eq('church_id', profile.church_id)
@@ -91,7 +88,34 @@ export async function getKidsNetworkMembers(): Promise<KidsNetworkMember[]> {
     return []
   }
 
-  return (data || []) as unknown as KidsNetworkMember[]
+  // Get cell IDs that have memberships
+  const cellIds = (memberships || [])
+    .map(m => m.kids_cell_id)
+    .filter((id): id is string => id !== null)
+
+  // Fetch cells if there are any
+  let cellsMap: Record<string, { id: string; name: string }> = {}
+  if (cellIds.length > 0) {
+    const { data: cells } = await supabase
+      .from('kids_cells')
+      .select('id, name')
+      .in('id', cellIds)
+
+    if (cells) {
+      cellsMap = cells.reduce((acc, cell) => {
+        acc[cell.id] = cell
+        return acc
+      }, {} as Record<string, { id: string; name: string }>)
+    }
+  }
+
+  // Combine memberships with cells
+  const data = (memberships || []).map(m => ({
+    ...m,
+    kids_cell: m.kids_cell_id ? cellsMap[m.kids_cell_id] || null : null
+  }))
+
+  return data as unknown as KidsNetworkMember[]
 }
 
 /**
@@ -109,7 +133,7 @@ export async function getKidsNetworkMembersByRole(kidsRole: string): Promise<Kid
 
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  const { data: memberships, error } = await supabase
     .from('kids_network_membership')
     .select(`
       id,
@@ -124,10 +148,6 @@ export async function getKidsNetworkMembersByRole(kidsRole: string): Promise<Kid
         phone,
         photo_url,
         role
-      ),
-      kids_cell:kids_cells (
-        id,
-        name
       )
     `)
     .eq('church_id', profile.church_id)
@@ -139,7 +159,32 @@ export async function getKidsNetworkMembersByRole(kidsRole: string): Promise<Kid
     return []
   }
 
-  return (data || []) as unknown as KidsNetworkMember[]
+  // Get cell IDs
+  const cellIds = (memberships || [])
+    .map(m => m.kids_cell_id)
+    .filter((id): id is string => id !== null)
+
+  let cellsMap: Record<string, { id: string; name: string }> = {}
+  if (cellIds.length > 0) {
+    const { data: cells } = await supabase
+      .from('kids_cells')
+      .select('id, name')
+      .in('id', cellIds)
+
+    if (cells) {
+      cellsMap = cells.reduce((acc, cell) => {
+        acc[cell.id] = cell
+        return acc
+      }, {} as Record<string, { id: string; name: string }>)
+    }
+  }
+
+  const data = (memberships || []).map(m => ({
+    ...m,
+    kids_cell: m.kids_cell_id ? cellsMap[m.kids_cell_id] || null : null
+  }))
+
+  return data as unknown as KidsNetworkMember[]
 }
 
 /**
@@ -275,18 +320,31 @@ export async function addToKidsNetwork(data: {
   const supabase = await createClient()
 
   // Verify target profile exists and is in same church
-  const { data: targetProfile } = await supabase
+  const { data: targetProfile, error: profileError } = await supabase
     .from('profiles')
-    .select('id, church_id, is_kids_network')
+    .select('id, church_id')
     .eq('id', data.profileId)
     .eq('church_id', profile.church_id)
     .maybeSingle()
 
-  if (!targetProfile) {
-    throw new Error('Membro não encontrado')
+  if (profileError) {
+    console.error('Error fetching target profile:', profileError)
+    throw new Error('Erro ao buscar membro')
   }
 
-  if (targetProfile.is_kids_network) {
+  if (!targetProfile) {
+    throw new Error('Membro não encontrado na sua igreja')
+  }
+
+  // Check if already in kids network by looking at membership table directly
+  const { data: existingMembership } = await supabase
+    .from('kids_network_membership')
+    .select('id')
+    .eq('profile_id', data.profileId)
+    .eq('church_id', profile.church_id)
+    .maybeSingle()
+
+  if (existingMembership) {
     throw new Error('Este membro já faz parte da Rede Kids')
   }
 
