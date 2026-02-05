@@ -180,9 +180,9 @@ export default function EventCheckoutPage() {
         if (paymentMethod === 'pix' && 'pixQrCode' in result && result.pixQrCode) {
           setPixData({
             qr_code: result.pixQrCode,
-            qr_code_url: result.pixQrCodeUrl || null,
-            order_id: result.orderId || null,
-            expires_at: result.expiresAt || null
+            qr_code_url: result.pixQrCodeUrl || undefined,
+            order_id: result.orderId || '',
+            expires_at: result.expiresAt || undefined
           });
           toast.success('QR Code gerado! Escaneie para pagar.');
         }
