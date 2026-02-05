@@ -1,6 +1,7 @@
+import { Suspense } from 'react'
 import { getMemberCellData } from '@/actions/cell'
+import { getMemberCellDataOptimized } from '@/actions/cell-optimized'
 import { getProfile } from '@/actions/auth'
-import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -17,18 +18,26 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
-import { getCellPhotos } from '@/actions/cell-album'
-import { CellPhotoGallery } from '@/components/cell-album/cell-photo-gallery'
 import { CreateInviteLinkDialog } from '@/components/cell-invites/create-invite-link-dialog'
-import { PrayerWall } from '@/components/cell-prayer/prayer-wall'
+import { AsyncPrayerWall, AsyncPhotoGallery } from '@/components/cell/async-cell-sections'
 import { CellBirthdays } from '@/components/cell-prayer/cell-birthdays'
-import { getCellPrayerRequests } from '@/actions/cell-prayer'
+import { 
+    PrayerWallSkeleton, 
+    BirthdaysSkeleton, 
+    PhotoGallerySkeleton 
+} from '@/components/cell/cell-loading-skeletons'
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
 export default async function MembroMinhaCelulaPage() {
-    const profile = await getProfile()
-    const data = await getMemberCellData()
+    // Fetch profile and cell data in parallel
+    const [profile, optimizedData] = await Promise.all([
+        getProfile(),
+        getMemberCellDataOptimized()
+    ])
+    
+    // Fallback to regular query if optimized fails
+    const data = optimizedData || await getMemberCellData()
     const isLeader = profile?.role === 'LEADER'
 
     if (!data) {
@@ -55,9 +64,6 @@ export default async function MembroMinhaCelulaPage() {
     // Handle leader object which might be an array or single object from Supabase join
     const leader = Array.isArray(cell.leader) ? cell.leader[0] : cell.leader
 
-    const { data: photos } = await getCellPhotos(cell.id)
-    const { data: prayerRequests } = await getCellPrayerRequests(cell.id)
-
     // Prepare members data for birthdays component
     const membersForBirthdays = members.map(m => ({
         id: m.id,
@@ -68,7 +74,7 @@ export default async function MembroMinhaCelulaPage() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 lg:space-y-12 pb-8 animate-in fade-in duration-700">
-            {/* Premium Header Architecture */}
+            {/* Premium Header Architecture - Loads immediately */}
             <div className="relative group overflow-hidden rounded-2xl sm:rounded-[2rem] lg:rounded-[3rem] bg-zinc-950 p-0.5 sm:p-1 shadow-xl sm:shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-primary/10 opacity-50" />
                 <div className="absolute top-0 right-0 w-40 sm:w-80 h-40 sm:h-80 bg-primary/20 blur-[60px] sm:blur-[120px] -mr-20 sm:-mr-40 -mt-20 sm:-mt-40 rounded-full" />
@@ -144,6 +150,7 @@ export default async function MembroMinhaCelulaPage() {
                 </Card>
             </div>
 
+            {/* Members and Meetings - Load immediately (critical content) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
                 {/* Members Section */}
                 <Card className="border-border/40 shadow-xl sm:shadow-2xl rounded-2xl sm:rounded-[2rem] lg:rounded-[3rem] bg-card overflow-hidden">
@@ -241,7 +248,7 @@ export default async function MembroMinhaCelulaPage() {
                 </Card>
             </div>
 
-            {/* Ações do Líder */}
+            {/* Leader Actions - Load immediately if leader */}
             {isLeader && (
                 <div className="bg-card border border-border/40 rounded-2xl sm:rounded-[2rem] lg:rounded-[3rem] p-4 sm:p-6 lg:p-10 shadow-xl sm:shadow-2xl">
                     <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 lg:mb-8">
@@ -259,17 +266,23 @@ export default async function MembroMinhaCelulaPage() {
                 </div>
             )}
 
-            {/* Prayer Wall and Birthdays */}
+            {/* Prayer Wall and Birthdays - Stream with Suspense */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
-                <PrayerWall 
-                    cellId={cell.id} 
-                    initialRequests={prayerRequests || []} 
-                    currentUserId={profile?.id || ''}
-                />
+                <Suspense fallback={<PrayerWallSkeleton />}>
+                    <AsyncPrayerWall 
+                        cellId={cell.id} 
+                        currentUserId={profile?.id || ''}
+                    />
+                </Suspense>
+                
+                {/* Birthdays doesn't need async loading, render directly */}
                 <CellBirthdays members={membersForBirthdays} />
             </div>
 
-            <CellPhotoGallery photos={photos || []} />
+            {/* Photo Gallery - Stream with Suspense (heaviest content) */}
+            <Suspense fallback={<PhotoGallerySkeleton />}>
+                <AsyncPhotoGallery cellId={cell.id} />
+            </Suspense>
         </div>
     )
 }

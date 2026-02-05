@@ -4,6 +4,23 @@ import type { NextRequest } from 'next/server'
 // Reserved subdomains that cannot be used for churches
 const RESERVED_SUBDOMAINS = ['www', 'admin', 'api', 'app', 'dashboard', 'auth', 'dev', 'staging', 'test']
 
+// In-memory cache for church data (reduces database queries in middleware)
+const churchCache = new Map<string, { church: ChurchData | null; timestamp: number }>()
+const CHURCH_CACHE_TTL = 300000 // 5 minutes
+
+interface ChurchData {
+    id: string
+    name: string
+    slug: string
+    logo_url: string | null
+    description: string | null
+    address: string | null
+    instagram_url: string | null
+    whatsapp_url: string | null
+    youtube_channel_url: string | null
+    website_settings: Record<string, unknown>
+}
+
 /**
  * Extracts the subdomain from the hostname
  * Examples:
@@ -73,12 +90,22 @@ export function extractSubdomain(hostname: string): string | null {
 }
 
 /**
- * Resolves the church from the subdomain
+ * Resolves the church from the subdomain with in-memory caching
  * Returns church data if found, null otherwise
+ * 
+ * OPTIMIZED: Uses in-memory cache to reduce database queries
  */
-export async function resolveChurchFromSubdomain(subdomain: string | null) {
+export async function resolveChurchFromSubdomain(subdomain: string | null): Promise<ChurchData | null> {
     if (!subdomain) {
         return null
+    }
+
+    // Check cache first
+    const cached = churchCache.get(subdomain)
+    const now = Date.now()
+    
+    if (cached && (now - cached.timestamp) < CHURCH_CACHE_TTL) {
+        return cached.church
     }
 
     // Create Supabase client with service role for public church lookup
@@ -101,8 +128,13 @@ export async function resolveChurchFromSubdomain(subdomain: string | null) {
         .single()
 
     if (error || !church) {
+        // Cache negative result too (prevents repeated queries for invalid subdomains)
+        churchCache.set(subdomain, { church: null, timestamp: now })
         return null
     }
+
+    // Cache the result
+    churchCache.set(subdomain, { church, timestamp: now })
 
     return church
 }
@@ -162,4 +194,15 @@ export function isAdminRoute(pathname: string): boolean {
  */
 export function isSuperAdminRoute(pathname: string): boolean {
     return pathname.startsWith('/admin')
+}
+
+/**
+ * Invalidate church cache - call when church data is updated
+ */
+export function invalidateChurchCache(slug?: string): void {
+    if (slug) {
+        churchCache.delete(slug)
+    } else {
+        churchCache.clear()
+    }
 }

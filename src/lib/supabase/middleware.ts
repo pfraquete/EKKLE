@@ -47,7 +47,7 @@ const CHURCH_FEATURE_ROUTES = [
 
 // Cache for subscription status (in-memory, per-request)
 const subscriptionCache = new Map<string, { isActive: boolean; timestamp: number }>()
-const SUBSCRIPTION_CACHE_TTL = 60000 // 1 minute
+const SUBSCRIPTION_CACHE_TTL = 300000 // 5 minutes (safe because subscription changes are rare)
 
 /**
  * Helper to redirect while preserving cookies
