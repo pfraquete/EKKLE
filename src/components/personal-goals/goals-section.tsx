@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { GoalsList } from './goals-list'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Target, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
-import { getPersonalGoals, type PersonalGoal } from '@/actions/personal-goals'
+import { getPersonalGoals } from '@/actions/personal-goals'
+import type { PersonalGoal } from '@/lib/personal-goals-config'
 
 interface GoalsSectionProps {
   initialGoals: PersonalGoal[]
@@ -26,7 +27,6 @@ export function GoalsSection({ initialGoals }: GoalsSectionProps) {
   }
 
   const pendingCount = goals.filter((g) => !g.is_completed).length
-  const completedCount = goals.filter((g) => g.is_completed).length
 
   return (
     <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">

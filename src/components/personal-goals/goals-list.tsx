@@ -5,9 +5,8 @@ import { GoalCard } from './goal-card'
 import { GoalForm } from './goal-form'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/utils'
 import { Plus, Target, CheckCircle2, Clock, Trophy } from 'lucide-react'
-import type { PersonalGoal } from '@/actions/personal-goals'
+import type { PersonalGoal } from '@/lib/personal-goals-config'
 
 interface GoalsListProps {
   goals: PersonalGoal[]

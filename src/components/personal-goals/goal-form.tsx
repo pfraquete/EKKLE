@@ -21,15 +21,14 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { Loader2, Plus, BookOpen } from 'lucide-react'
+import { createPersonalGoal, updatePersonalGoal } from '@/actions/personal-goals'
 import {
-  createPersonalGoal,
-  updatePersonalGoal,
+  categoryConfig,
+  priorityConfig,
   type PersonalGoal,
   type GoalCategory,
   type GoalPriority,
-  categoryConfig,
-  priorityConfig,
-} from '@/actions/personal-goals'
+} from '@/lib/personal-goals-config'
 
 interface GoalFormProps {
   open: boolean

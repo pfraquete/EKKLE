@@ -36,15 +36,8 @@ import {
   Target,
   BookOpen,
 } from 'lucide-react'
-import {
-  markGoalCompleted,
-  reopenGoal,
-  deletePersonalGoal,
-  type PersonalGoal,
-  type GoalCategory,
-  categoryConfig,
-  priorityConfig,
-} from '@/actions/personal-goals'
+import { markGoalCompleted, reopenGoal, deletePersonalGoal } from '@/actions/personal-goals'
+import { categoryConfig, priorityConfig, type PersonalGoal } from '@/lib/personal-goals-config'
 
 interface GoalCardProps {
   goal: PersonalGoal
