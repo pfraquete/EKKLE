@@ -3,7 +3,7 @@ import { getProfile } from '@/actions/auth'
 import { redirect, notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronLeft, Users, UserPlus, FileText, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, Users, UserPlus, FileText, CheckCircle2, Pencil } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
@@ -37,12 +37,17 @@ export default async function MeetingSummaryPage({
                         <ChevronLeft className="h-6 w-6" />
                     </Link>
                 </Button>
-                <div>
+                <div className="flex-1">
                     <h1 className="text-xl font-black text-white">Resumo da Reunião</h1>
                     <p className="text-xs text-primary font-bold uppercase tracking-widest mt-1">
                         {format(new Date(meeting.date), "dd 'de' MMMM", { locale: ptBR })}
                     </p>
                 </div>
+                <Button variant="outline" size="icon" asChild className="rounded-full border-zinc-800 text-zinc-400 hover:text-primary hover:border-primary/50">
+                    <Link href={`/membro/minha-celula/reunioes/${id}/editar`}>
+                        <Pencil className="h-4 w-4" />
+                    </Link>
+                </Button>
             </div>
 
             {/* Stats Overview */}

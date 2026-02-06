@@ -239,6 +239,40 @@ export async function updateProfile(formData: FormData) {
     return { success: true }
 }
 
+export async function updateMyProfile(data: {
+    full_name: string
+    phone?: string
+    birthday?: string
+}) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Não autenticado')
+
+    const updateData: Record<string, string | null> = {
+        full_name: data.full_name,
+        phone: data.phone || null,
+    }
+
+    if (data.birthday !== undefined) {
+        updateData.birthday = data.birthday || null
+    }
+
+    const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', user.id)
+
+    if (error) {
+        console.error('Update profile error:', error)
+        return { success: false, error: 'Falha ao atualizar perfil' }
+    }
+
+    revalidatePath('/membro')
+    revalidatePath('/', 'layout')
+
+    return { success: true }
+}
+
 export async function getChurchMembers() {
     try {
         const profile = await getProfile()

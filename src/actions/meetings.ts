@@ -196,5 +196,139 @@ export async function createFullMeetingReport(data: FullMeetingReportInput) {
 
     revalidatePath('/minha-celula')
     revalidatePath('/minha-celula/reunioes')
+    revalidatePath('/membro/minha-celula/reunioes')
     return { success: true, meetingId: meeting.id }
+}
+
+export interface UpdateMeetingReportInput {
+    meetingId: string
+    date: string
+    hasIcebreaker: boolean
+    hasWorship: boolean
+    hasWord: boolean
+    hasPrayer: boolean
+    hasSnack: boolean
+    memberAttendance: {
+        profileId: string
+        present: boolean
+    }[]
+    visitorsArray: {
+        name: string
+        phone?: string
+    }[]
+    visitorsCount: number
+    decisionsCount: number
+    observations?: string
+}
+
+export async function updateMeetingReport(data: UpdateMeetingReportInput) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    if (profile.role !== 'LEADER' && profile.role !== 'PASTOR') {
+        throw new Error('Sem permissão')
+    }
+    const churchId = profile.church_id
+    const supabase = await createClient()
+
+    // 1. Update meeting date
+    const { error: meetingError } = await supabase
+        .from('cell_meetings')
+        .update({ date: data.date })
+        .eq('id', data.meetingId)
+        .eq('church_id', churchId)
+
+    if (meetingError) throw new Error(meetingError.message)
+
+    // 2. Upsert report (update if exists, create if not)
+    const { data: existingReport } = await supabase
+        .from('cell_reports')
+        .select('id')
+        .eq('meeting_id', data.meetingId)
+        .eq('church_id', churchId)
+        .maybeSingle()
+
+    if (existingReport) {
+        const { error: reportError } = await supabase
+            .from('cell_reports')
+            .update({
+                has_icebreaker: data.hasIcebreaker,
+                has_worship: data.hasWorship,
+                has_word: data.hasWord,
+                has_prayer: data.hasPrayer,
+                has_snack: data.hasSnack,
+                visitors_count: data.visitorsCount,
+                decisions_count: data.decisionsCount,
+                observations: data.observations || null,
+            })
+            .eq('id', existingReport.id)
+
+        if (reportError) throw new Error(reportError.message)
+    } else {
+        const { error: reportError } = await supabase
+            .from('cell_reports')
+            .insert({
+                meeting_id: data.meetingId,
+                church_id: churchId,
+                has_icebreaker: data.hasIcebreaker,
+                has_worship: data.hasWorship,
+                has_word: data.hasWord,
+                has_prayer: data.hasPrayer,
+                has_snack: data.hasSnack,
+                visitors_count: data.visitorsCount,
+                decisions_count: data.decisionsCount,
+                observations: data.observations || null,
+                submitted_by: profile.id
+            })
+
+        if (reportError) throw new Error(reportError.message)
+    }
+
+    // 3. Delete old attendance and recreate
+    const { error: deleteAttError } = await supabase
+        .from('attendance')
+        .delete()
+        .eq('context_id', data.meetingId)
+        .eq('context_type', 'CELL_MEETING')
+        .eq('church_id', churchId)
+
+    if (deleteAttError) throw new Error(`Erro ao limpar presença: ${deleteAttError.message}`)
+
+    // 4. Insert updated member attendance
+    const memberRecords = data.memberAttendance.map((m) => ({
+        church_id: churchId,
+        context_type: 'CELL_MEETING' as const,
+        context_id: data.meetingId,
+        context_date: data.date,
+        profile_id: m.profileId,
+        status: m.present ? 'PRESENT' : 'ABSENT',
+        checked_in_by: profile.id
+    }))
+
+    if (memberRecords.length > 0) {
+        const { error: attendanceError } = await supabase.from('attendance').insert(memberRecords)
+        if (attendanceError) throw new Error(`Erro ao registrar presença: ${attendanceError.message}`)
+    }
+
+    // 5. Insert updated visitors
+    const visitorRecords = data.visitorsArray.map((v) => ({
+        church_id: churchId,
+        context_type: 'CELL_MEETING' as const,
+        context_id: data.meetingId,
+        context_date: data.date,
+        visitor_name: v.name,
+        visitor_phone: v.phone || null,
+        status: 'PRESENT',
+        checked_in_by: profile.id
+    }))
+
+    if (visitorRecords.length > 0) {
+        const { error: visitorError } = await supabase.from('attendance').insert(visitorRecords)
+        if (visitorError) throw new Error(`Erro ao registrar visitantes: ${visitorError.message}`)
+    }
+
+    revalidatePath('/minha-celula')
+    revalidatePath('/minha-celula/reunioes')
+    revalidatePath('/membro/minha-celula/reunioes')
+    revalidatePath(`/membro/minha-celula/reunioes/${data.meetingId}`)
+    return { success: true }
 }

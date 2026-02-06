@@ -1,9 +1,10 @@
 import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { User, Mail, Phone, Calendar, AtSign, ChevronRight } from 'lucide-react'
+import { User, Mail, Phone, Calendar, AtSign, ChevronRight, Cake } from 'lucide-react'
 import { ProfilePhotoUpload } from '@/components/profile/profile-photo-upload'
 import { NicknameForm } from '@/components/chat'
+import { EditProfileForm } from '@/components/profile/edit-profile-form'
 import { MemberDashboardStats } from '@/components/membro/member-dashboard-stats'
 import { getMemberStats } from '@/actions/member-stats'
 import Link from 'next/link'
@@ -95,6 +96,11 @@ export default async function MembroPage() {
         <div className="bg-card border border-border rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg sm:shadow-xl">
           <div className="bg-muted/30 border-b border-border p-4 sm:p-6 lg:p-8 flex items-center justify-between">
             <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground uppercase tracking-tight">Informações Pessoais</h2>
+            <EditProfileForm profile={{
+              full_name: profile.full_name || '',
+              phone: profile.phone || null,
+              birthday: profile.birthday || null,
+            }} />
           </div>
 
           <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 lg:space-y-8">
@@ -155,6 +161,23 @@ export default async function MembroPage() {
 
             <div className="flex items-start gap-3 sm:gap-4 lg:gap-5">
               <div className="p-2 sm:p-2.5 lg:p-3 bg-primary/10 rounded-xl sm:rounded-2xl flex-shrink-0">
+                <Cake className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs sm:text-xs font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1">
+                  Aniversário
+                </div>
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-foreground">
+                  {profile?.birthday
+                    ? new Date(profile.birthday + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })
+                    : <span className="text-muted-foreground italic text-sm">Não informado</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 sm:gap-4 lg:gap-5">
+              <div className="p-2 sm:p-2.5 lg:p-3 bg-primary/10 rounded-xl sm:rounded-2xl flex-shrink-0">
                 <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
@@ -178,7 +201,7 @@ export default async function MembroPage() {
           <div className="p-4 sm:p-6 lg:p-8 bg-muted/20 border-t border-border">
             <p className="text-xs sm:text-xs text-muted-foreground font-medium flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-pulse flex-shrink-0" />
-              Clique na foto de perfil para alterá-la. Para outras informações, entre em contato com a secretaria.
+              Clique na foto para alterá-la ou em &quot;Editar&quot; para atualizar seus dados.
             </p>
           </div>
         </div>
