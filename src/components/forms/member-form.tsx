@@ -16,6 +16,7 @@ interface MemberFormProps {
     cellId: string
     churchId: string
     currentUserRole?: string
+    redirectPath?: string
 }
 
 interface MemberFormData {
@@ -29,7 +30,7 @@ interface MemberFormData {
     role?: string
 }
 
-export function MemberForm({ initialData, cellId, churchId, currentUserRole }: MemberFormProps) {
+export function MemberForm({ initialData, cellId, churchId, currentUserRole, redirectPath = '/minha-celula/membros' }: MemberFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -50,7 +51,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
                 await createMember(formData)
             }
 
-            router.push('/minha-celula/membros')
+            router.push(redirectPath)
             router.refresh()
         } catch (error) {
             console.error(error)
@@ -66,7 +67,7 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole }: M
                 await deleteMember(initialData.id)
             }
             setShowDeleteDialog(false)
-            router.push('/minha-celula/membros')
+            router.push(redirectPath)
             router.refresh()
         } catch (error) {
             console.error(error)

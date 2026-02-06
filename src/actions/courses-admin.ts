@@ -15,6 +15,7 @@ const courseSchema = z.object({
   is_paid: z.boolean().default(false),
   price_cents: z.number().min(0).default(0),
   enrollment_start_date: z.string().optional().or(z.literal('')),
+  course_start_date: z.string().optional().or(z.literal('')),
 })
 
 const videoSchema = z.object({
@@ -43,6 +44,9 @@ export async function adminCreateCourse(data: CourseInput) {
     const enrollmentStartDate = validated.enrollment_start_date
       ? new Date(validated.enrollment_start_date).toISOString()
       : null
+    const courseStartDate = validated.course_start_date
+      ? new Date(validated.course_start_date).toISOString()
+      : null
     const supabase = await createClient()
 
     const { data: course, error } = await supabase
@@ -50,6 +54,7 @@ export async function adminCreateCourse(data: CourseInput) {
       .insert({
         ...validated,
         enrollment_start_date: enrollmentStartDate,
+        course_start_date: courseStartDate,
         church_id: profile.church_id,
         created_by: profile.id,
       })
@@ -85,6 +90,9 @@ export async function adminUpdateCourse(courseId: string, data: CourseInput) {
     const enrollmentStartDate = validated.enrollment_start_date
       ? new Date(validated.enrollment_start_date).toISOString()
       : null
+    const courseStartDate = validated.course_start_date
+      ? new Date(validated.course_start_date).toISOString()
+      : null
     const supabase = await createClient()
 
     const { error } = await supabase
@@ -92,6 +100,7 @@ export async function adminUpdateCourse(courseId: string, data: CourseInput) {
       .update({
         ...validated,
         enrollment_start_date: enrollmentStartDate,
+        course_start_date: courseStartDate,
       })
       .eq('id', courseId)
       .eq('church_id', profile.church_id)

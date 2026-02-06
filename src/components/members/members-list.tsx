@@ -25,14 +25,16 @@ interface Member {
     email: string | null
     member_stage: string
     last_attendance: string | null
+    has_account?: boolean
 }
 
 interface MembersListProps {
     members: Member[]
     itemsPerPage?: number
+    basePath?: string
 }
 
-export function MembersList({ members, itemsPerPage = 10 }: MembersListProps) {
+export function MembersList({ members, itemsPerPage = 10, basePath = '/minha-celula/membros' }: MembersListProps) {
     const [searchTerm, setSearchTerm] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
     const [stageFilter, setStageFilter] = useState<string | null>(null)
@@ -151,7 +153,7 @@ export function MembersList({ members, itemsPerPage = 10 }: MembersListProps) {
                     </div>
                 ) : (
                     paginatedMembers.map(member => (
-                        <Link key={member.id} href={`/minha-celula/membros/${member.id}`}>
+                        <Link key={member.id} href={`${basePath}/${member.id}`}>
                             <Card className="border-none shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                                 <CardContent className="p-4 flex items-center gap-4">
                                     <Avatar className="h-14 w-14 border-2 border-background shadow-sm shrink-0">
@@ -165,6 +167,9 @@ export function MembersList({ members, itemsPerPage = 10 }: MembersListProps) {
                                         <div className="flex items-center gap-2 mb-1">
                                             <p className="font-bold text-foreground truncate">{member.full_name}</p>
                                             {getStageBadge(member.member_stage)}
+                                            {member.has_account === false && (
+                                                <Badge variant="warning" className="text-[10px] px-1.5 py-0">Sem conta</Badge>
+                                            )}
                                         </div>
 
                                         <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">

@@ -25,6 +25,7 @@ type Course = {
   is_paid: boolean
   price_cents: number
   enrollment_start_date: string | null
+  course_start_date: string | null
 }
 type Video = { id: string; title: string; description: string | null; video_url: string; duration_seconds: number; order_index: number; is_published: boolean }
 
@@ -41,6 +42,9 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
   const [enrollmentStartDate, setEnrollmentStartDate] = useState(
     course.enrollment_start_date ? new Date(course.enrollment_start_date).toISOString().split('T')[0] : ''
   )
+  const [courseStartDate, setCourseStartDate] = useState(
+    course.course_start_date ? new Date(course.course_start_date).toISOString().split('T')[0] : ''
+  )
 
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value / 100)
   const formatDate = (value?: string | null) => value ? new Date(value).toLocaleDateString('pt-BR') : 'Sem data definida'
@@ -52,6 +56,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
       thumbnail_url: courseData.thumbnail_url || undefined,
       price_cents: courseData.is_paid ? courseData.price_cents : 0,
       enrollment_start_date: enrollmentStartDate || undefined,
+      course_start_date: courseStartDate || undefined,
     })
     if (result.success) { setEditMode(false); router.refresh() }
     else alert(result.error)
@@ -151,23 +156,33 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
                 />
               </div>
 
+              <div className="space-y-3">
+                <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Módulos</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={courseData.modules_count}
+                  onChange={(e) => setCourseData({ ...courseData, modules_count: Number(e.target.value) })}
+                  className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all text-base"
+                />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Módulos</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={courseData.modules_count}
-                    onChange={(e) => setCourseData({ ...courseData, modules_count: Number(e.target.value) })}
-                    className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all text-base"
-                  />
-                </div>
                 <div className="space-y-3">
                   <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Início das Inscrições</Label>
                   <Input
                     type="date"
                     value={enrollmentStartDate}
                     onChange={(e) => setEnrollmentStartDate(e.target.value)}
+                    className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all text-base block"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Início do Curso</Label>
+                  <Input
+                    type="date"
+                    value={courseStartDate}
+                    onChange={(e) => setCourseStartDate(e.target.value)}
                     className="h-16 bg-muted/30 border-border/40 rounded-2xl px-6 font-bold transition-all text-base block"
                   />
                 </div>
@@ -244,7 +259,7 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
 
           {course.description && <p className="text-foreground text-lg font-medium leading-relaxed mb-8">{course.description}</p>}
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-muted/30 rounded-2xl p-6 border border-border">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 bg-muted/30 rounded-2xl p-6 border border-border">
             <div className="space-y-1">
               <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Módulos</span>
               <p className="text-lg font-bold text-foreground">{course.modules_count}</p>
@@ -252,6 +267,10 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
             <div className="space-y-1">
               <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Inscrições</span>
               <p className="text-lg font-bold text-foreground">{formatDate(course.enrollment_start_date)}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Início do Curso</span>
+              <p className="text-lg font-bold text-foreground">{formatDate(course.course_start_date)}</p>
             </div>
             <div className="space-y-1">
               <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Investimento</span>

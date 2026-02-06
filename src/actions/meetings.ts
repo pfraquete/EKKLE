@@ -51,6 +51,7 @@ export async function getMeetingData(meetingId: string) {
 
     const supabase = await createClient()
 
+    // Fetch meeting with cell and report (attendance has no direct FK to cell_meetings)
     const { data: meeting, error } = await supabase
         .from('cell_meetings')
         .select(`
@@ -64,8 +65,7 @@ export async function getMeetingData(meetingId: string) {
           photo_url
         )
       ),
-      report:cell_reports(*),
-      attendance(*)
+      report:cell_reports(*)
     `)
         .eq('id', meetingId)
         .eq('church_id', churchId)
@@ -75,7 +75,15 @@ export async function getMeetingData(meetingId: string) {
         console.error('[getMeetingData] Error:', error)
         return null
     }
-    return meeting
+
+    // Fetch attendance separately (context_id is not a FK to cell_meetings)
+    const { data: attendance } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('context_id', meetingId)
+        .eq('context_type', 'CELL_MEETING')
+
+    return { ...meeting, attendance: attendance || [] }
 }
 
 export interface FullMeetingReportInput {

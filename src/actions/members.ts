@@ -82,6 +82,7 @@ export async function createMember(formData: FormData) {
     if (error) throw new Error(error.message)
 
     revalidatePath('/minha-celula/membros')
+    revalidatePath('/membro/minha-celula/membros')
     return { success: true }
 }
 
@@ -127,6 +128,7 @@ export async function updateMember(id: string, formData: FormData) {
     if (error) throw new Error(error.message)
 
     revalidatePath('/minha-celula/membros')
+    revalidatePath('/membro/minha-celula/membros')
     return { success: true }
 }
 
@@ -145,6 +147,7 @@ export async function deleteMember(id: string) {
     if (error) throw new Error(error.message)
 
     revalidatePath('/minha-celula/membros')
+    revalidatePath('/membro/minha-celula/membros')
     return { success: true }
 }
 
