@@ -245,6 +245,28 @@ export async function addDepartmentMember(departmentId: string, profileId: strin
     return { success: true }
 }
 
+export async function updateDepartmentMemberRole(departmentId: string, profileId: string, role: 'LEADER' | 'MEMBER') {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+    if (profile.role !== 'PASTOR') throw new Error('Sem permissão')
+
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('department_members')
+        .update({ role })
+        .eq('department_id', departmentId)
+        .eq('profile_id', profileId)
+
+    if (error) {
+        console.error('Error updating member role:', error)
+        return { success: false, error: 'Erro ao atualizar cargo do membro' }
+    }
+
+    revalidatePath(`/departamentos/${departmentId}`)
+    return { success: true }
+}
+
 export async function removeDepartmentMember(departmentId: string, profileId: string) {
     const profile = await getProfile()
     if (!profile) throw new Error('Não autenticado')

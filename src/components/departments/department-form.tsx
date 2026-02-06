@@ -145,7 +145,18 @@ export function DepartmentForm({ department, members = [] }: DepartmentFormProps
                         </div>
 
                         {isEditing && (
-                            <input type="hidden" name="status" value={department.status} />
+                            <div className="space-y-2">
+                                <Label htmlFor="status">Status</Label>
+                                <select
+                                    id="status"
+                                    name="status"
+                                    defaultValue={department.status}
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                    <option value="ACTIVE">Ativo</option>
+                                    <option value="INACTIVE">Inativo</option>
+                                </select>
+                            </div>
                         )}
 
                         <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">

@@ -18,7 +18,7 @@ interface DepartmentDetailPageProps {
 export default async function DepartmentDetailPage({ params }: DepartmentDetailPageProps) {
     const { id } = await params
     const profile = await getProfile()
-    if (!profile) redirect('/login')
+    if (!profile || profile.role !== 'PASTOR') redirect('/dashboard')
     if (!(await isModuleEnabled('departments'))) redirect('/dashboard')
 
     const data = await getDepartmentById(id)
