@@ -58,7 +58,7 @@ export async function getMeetingData(meetingId: string) {
       cell:cells(
         id,
         name,
-        members:profiles(
+        members:profiles!cell_id(
           id,
           full_name,
           photo_url
@@ -71,7 +71,10 @@ export async function getMeetingData(meetingId: string) {
         .eq('church_id', churchId)
         .single()
 
-    if (error) return null
+    if (error) {
+        console.error('[getMeetingData] Error:', error)
+        return null
+    }
     return meeting
 }
 

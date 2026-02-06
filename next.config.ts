@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.scripture.api.bible https://*.twilio.com https://*.mux.com https://*.litix.io https://*.openai.com https://*.livekit.cloud wss://*.livekit.cloud; frame-src 'self' https://js.stripe.com https://*.zoom.us; media-src 'self' https://*.supabase.co https://*.mux.com https://*.livekit.cloud blob:;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.scripture.api.bible https://*.twilio.com https://*.mux.com https://*.litix.io https://*.openai.com https://*.livekit.cloud wss://*.livekit.cloud; frame-src 'self' https://js.stripe.com https://*.zoom.us; media-src 'self' https://*.supabase.co https://*.mux.com https://*.livekit.cloud blob:;",
           },
         ],
       },

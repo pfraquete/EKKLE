@@ -17,8 +17,8 @@ export default async function MeetingSummaryPage({
     const profile = await getProfile()
     if (!profile) redirect('/login')
 
-    // Only leaders can access this page
-    if (profile.role !== 'LEADER') {
+    // Only leaders and pastors can access this page
+    if (profile.role !== 'LEADER' && profile.role !== 'PASTOR') {
         redirect('/membro/minha-celula')
     }
 

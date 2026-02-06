@@ -2,8 +2,9 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getMemberTithes, getChurchPixInfo } from '@/actions/tithes'
-import { Heart, Copy, Check, Upload, Calendar, CheckCircle, Clock, QrCode } from 'lucide-react'
+import { Heart, Upload, Calendar, CheckCircle, Clock, QrCode } from 'lucide-react'
 import { TitheTable } from '@/components/tithe/tithe-table'
+import { PixCopyButton } from '@/components/tithe/pix-copy-button'
 
 const MONTHS = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -134,18 +135,3 @@ export default async function DizimosPage() {
     )
 }
 
-// Client component for copy button
-function PixCopyButton({ pixKey }: { pixKey: string }) {
-    return (
-        <button
-            type="button"
-            onClick={() => {
-                navigator.clipboard.writeText(pixKey)
-            }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all"
-        >
-            <Copy className="w-4 h-4" />
-            <span className="hidden sm:inline">Copiar</span>
-        </button>
-    )
-}
