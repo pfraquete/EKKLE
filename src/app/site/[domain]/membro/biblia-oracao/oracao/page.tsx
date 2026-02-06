@@ -4,7 +4,9 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Mic, History, BarChart3, Plus, Video, Users } from 'lucide-react'
 import { getPrayerHistory, getPrayerStreak, getPrayerStats } from '@/actions/prayers'
+import { getPersonalGoals } from '@/actions/personal-goals'
 import { PrayerHistoryItem, StreakDisplay, PrayerStatsCard } from '@/components/prayers'
+import { GoalsSection } from '@/components/personal-goals'
 import { Button } from '@/components/ui/button'
 
 export default async function OracaoPage() {
@@ -23,16 +25,18 @@ export default async function OracaoPage() {
     redirect('/login')
   }
 
-  // Get prayer data
-  const [historyResult, streakResult, weeklyStatsResult] = await Promise.all([
+  // Get prayer data and personal goals
+  const [historyResult, streakResult, weeklyStatsResult, goalsResult] = await Promise.all([
     getPrayerHistory(1, 5),
     getPrayerStreak(),
     getPrayerStats('week'),
+    getPersonalGoals(),
   ])
 
   const prayers = historyResult.success ? historyResult.prayers : []
   const streak = streakResult.success ? streakResult.streak : null
   const weeklyStats = weeklyStatsResult.success ? weeklyStatsResult.stats : null
+  const goals = goalsResult.success ? goalsResult.goals : []
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -97,6 +101,9 @@ export default async function OracaoPage() {
           period="week"
         />
       )}
+
+      {/* Personal Goals Section */}
+      <GoalsSection initialGoals={goals} />
 
       {/* Recent Prayers */}
       <section>
