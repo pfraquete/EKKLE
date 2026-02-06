@@ -293,6 +293,7 @@ export async function approveCellRequest(requestId: string) {
 
     revalidatePath('/minha-celula')
     revalidatePath('/minha-celula/solicitacoes')
+    revalidatePath('/membro/minha-celula/membros')
     revalidatePath('/celulas')
 
     return { success: true }
@@ -385,6 +386,7 @@ export async function rejectCellRequest(requestId: string, reason?: string) {
     }
 
     revalidatePath('/minha-celula/solicitacoes')
+    revalidatePath('/membro/minha-celula/membros')
     revalidatePath('/celulas')
 
     return { success: true }
@@ -417,7 +419,8 @@ export async function getPendingCellRequests() {
                 id,
                 full_name,
                 email,
-                phone
+                phone,
+                photo_url
             )
         `)
         .eq('status', 'PENDING')

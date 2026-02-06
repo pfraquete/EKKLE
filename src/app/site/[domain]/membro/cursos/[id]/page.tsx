@@ -3,15 +3,26 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, BookOpen } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowLeft, BookOpen, Play, Lock, Clock, CalendarClock } from 'lucide-react'
 import { CoursePlayer } from '@/components/courses/course-player'
-import { enrollInCourse, getCourseEnrollment, getAllVideoProgress } from '@/actions/courses'
+import { getCourseEnrollment, getAllVideoProgress } from '@/actions/courses'
 import { getCourseLiveLessons } from '@/actions/course-live-lessons'
 import { getProfile } from '@/actions/auth'
+import { EnrollButton } from '@/components/courses/enroll-button'
 
 type PageProps = {
   params: Promise<{ id: string }>
   searchParams: Promise<{ video?: string }>
+}
+
+function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`
+  }
+  return `${minutes}m`
 }
 
 export default async function MemberCoursePage({ params, searchParams }: PageProps) {
@@ -49,40 +60,147 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
   // Get enrollment
   const enrollment = await getCourseEnrollment(courseId)
 
+  // Get course videos (needed for both preview and player)
+  const { data: videos } = await supabase
+    .from('course_videos')
+    .select('*')
+    .eq('course_id', courseId)
+    .eq('is_published', true)
+    .order('order_index', { ascending: true })
+
+  // =====================================================
+  // NOT ENROLLED — Show course detail/preview page
+  // =====================================================
   if (!enrollment) {
-    // Auto-enroll if not enrolled
-    const result = await enrollInCourse(courseId)
-    if (!result.success) {
-      return (
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="bg-card border border-destructive/20 rounded-[2rem] p-12 text-center overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-destructive/5 rounded-full blur-3xl" />
-            <h2 className="text-2xl font-black text-foreground mb-4 italic">Ops! Algo deu errado.</h2>
-            <p className="text-muted-foreground font-medium mb-8">{result.error}</p>
-            <Link
-              href="/membro/cursos"
-              className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-8 py-4 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/10 transition-all hover:scale-105"
-            >
-              Voltar para Meus Cursos
-            </Link>
+    const totalDuration = videos?.reduce((acc, video) => acc + (video.duration_seconds || 0), 0) || 0
+    const enrollmentStartDate = course.enrollment_start_date ? new Date(course.enrollment_start_date) : null
+    const enrollmentOpen = !enrollmentStartDate || enrollmentStartDate <= new Date()
+
+    return (
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
+        <Link
+          href="/membro/cursos"
+          className="group flex items-center gap-3 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
+        >
+          <div className="w-8 h-8 rounded-full bg-card border border-border/50 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+            <ArrowLeft className="w-4 h-4" />
+          </div>
+          Voltar para Meus Cursos
+        </Link>
+
+        {/* Course Header */}
+        <div className="bg-card border border-border/40 rounded-3xl overflow-hidden">
+          {/* Thumbnail */}
+          <div className="relative h-48 sm:h-64 lg:h-72 w-full overflow-hidden">
+            {course.thumbnail_url ? (
+              <Image
+                src={course.thumbnail_url}
+                alt={course.title}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-muted flex items-center justify-center">
+                <BookOpen className="w-20 h-20 text-muted-foreground/10" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+          </div>
+
+          {/* Course Info */}
+          <div className="p-6 sm:p-8 lg:p-10 space-y-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight mb-3">
+                {course.title}
+              </h1>
+              {course.description && (
+                <p className="text-muted-foreground font-medium leading-relaxed whitespace-pre-wrap">
+                  {course.description}
+                </p>
+              )}
+            </div>
+
+            {/* Stats */}
+            <div className="flex flex-wrap gap-4">
+              {videos && videos.length > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-xl">
+                  <Play className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold text-foreground">
+                    {videos.length} {videos.length === 1 ? 'aula' : 'aulas'}
+                  </span>
+                </div>
+              )}
+              {totalDuration > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-xl">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold text-foreground">
+                    {formatDuration(totalDuration)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Enrollment Date Warning */}
+            {!enrollmentOpen && enrollmentStartDate && (
+              <div className="flex items-start gap-3 p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 text-amber-600">
+                <CalendarClock className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-bold text-sm">Inscrições ainda não abertas</p>
+                  <p className="text-sm mt-0.5">
+                    As inscrições abrem em {enrollmentStartDate.toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Enroll Button */}
+            <EnrollButton
+              courseId={courseId}
+              isEnrolled={false}
+              isAuthenticated={true}
+              isEnrollmentOpen={enrollmentOpen}
+            />
           </div>
         </div>
-      )
-    }
-    // Redirect to reload with enrollment
-    redirect(`/membro/cursos/${courseId}`)
+
+        {/* Video List (locked) */}
+        {videos && videos.length > 0 && (
+          <div className="bg-card border border-border/40 rounded-3xl overflow-hidden">
+            <div className="p-6 sm:p-8 border-b border-border/40">
+              <h2 className="text-lg font-black text-foreground uppercase tracking-widest">Conteúdo do Curso</h2>
+            </div>
+            <div className="divide-y divide-border/30">
+              {videos.map((video, index) => (
+                <div key={video.id} className="flex items-center gap-4 px-6 sm:px-8 py-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-bold text-sm">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-sm text-foreground line-clamp-1">{video.title}</h3>
+                    {video.duration_seconds > 0 && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {formatDuration(video.duration_seconds)}
+                      </p>
+                    )}
+                  </div>
+                  <Lock className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
   }
 
-  // Get course videos and live lessons in parallel
-  const [{ data: videos }, liveLessonsResult] = await Promise.all([
-    supabase
-      .from('course_videos')
-      .select('*')
-      .eq('course_id', courseId)
-      .eq('is_published', true)
-      .order('order_index', { ascending: true }),
-    getCourseLiveLessons(courseId),
-  ])
+  // =====================================================
+  // ENROLLED — Show course player (existing behavior)
+  // =====================================================
+  const liveLessonsResult = await getCourseLiveLessons(courseId)
 
   // Filter live lessons to only SCHEDULED and LIVE
   const liveLessons = (liveLessonsResult.data || []).filter(

@@ -1,12 +1,14 @@
 import { getMembers } from '@/actions/members'
 import { getProfile } from '@/actions/auth'
 import { getMemberCellData } from '@/actions/cell'
+import { getPendingCellRequests } from '@/actions/cell-requests'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, Users, Plus } from 'lucide-react'
+import { ChevronLeft, Users, Plus, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { MembersList } from '@/components/members/members-list'
 import { ExportMembersButton } from '@/components/members/export-members-button'
+import { RequestList } from '@/components/cells/request-list'
 
 export default async function MembrosPage() {
     const profile = await getProfile()
@@ -17,8 +19,11 @@ export default async function MembrosPage() {
         redirect('/membro/minha-celula')
     }
 
-    const members = await getMembers(profile.cell_id)
-    const cellData = await getMemberCellData()
+    const [members, cellData, { data: pendingRequests }] = await Promise.all([
+        getMembers(profile.cell_id),
+        getMemberCellData(),
+        getPendingCellRequests(),
+    ])
     const cellName = cellData?.cell?.name || 'Minha Célula'
 
     // Add account status to each member
@@ -26,6 +31,24 @@ export default async function MembrosPage() {
         ...member,
         has_account: !!(member.email && member.email.includes('@'))
     }))
+
+    // Transform pending requests for RequestList component
+    const requestsForList = (pendingRequests || []).map(request => {
+        const requestProfile = Array.isArray(request.profile) ? request.profile[0] : request.profile
+        const requestCell = Array.isArray(request.cell) ? request.cell[0] : request.cell
+        return {
+            id: request.id,
+            created_at: request.created_at,
+            status: 'PENDING' as const,
+            profile: {
+                id: requestProfile?.id || '',
+                full_name: requestProfile?.full_name || 'Sem nome',
+                photo_url: requestProfile?.photo_url || null,
+                phone: requestProfile?.phone || null,
+            },
+            cell: { name: requestCell?.name || cellName },
+        }
+    })
 
     return (
         <div className="space-y-6 pb-24 max-w-4xl mx-auto">
@@ -58,6 +81,22 @@ export default async function MembrosPage() {
                     </Link>
                 </div>
             </div>
+
+            {/* Pending Requests */}
+            {requestsForList.length > 0 && (
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <UserPlus className="h-4 w-4 text-primary" />
+                        <h2 className="text-sm font-black text-foreground uppercase tracking-widest">
+                            Solicitações Pendentes
+                        </h2>
+                        <span className="bg-primary text-primary-foreground text-xs font-black px-2 py-0.5 rounded-full">
+                            {requestsForList.length}
+                        </span>
+                    </div>
+                    <RequestList requests={requestsForList} />
+                </div>
+            )}
 
             {/* Members List with Search, Filters, and Pagination */}
             <MembersList
