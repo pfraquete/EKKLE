@@ -24,7 +24,8 @@ import {
     FileText,
     Baby,
     Newspaper,
-    Award
+    Award,
+    Building2
 } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { Profile } from '@/actions/auth'
@@ -40,6 +41,9 @@ export function Sidebar({ profile }: SidebarProps) {
 
     const isPastor = profile.role === 'PASTOR'
     const isDiscipulador = profile.role === 'DISCIPULADOR'
+    const cellsEnabled = profile.modules?.cells_enabled ?? true
+    const departmentsEnabled = profile.modules?.departments_enabled ?? false
+    const ebdEnabled = profile.modules?.ebd_enabled ?? false
 
     const routes = [
         {
@@ -90,14 +94,28 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: Home,
             href: '/minha-celula',
             active: pathname.startsWith('/minha-celula'),
-            show: profile.role === 'LEADER' || isPastor
+            show: (profile.role === 'LEADER' || isPastor) && cellsEnabled
         },
         {
             label: 'Células',
             icon: CalendarCheck2,
             href: '/celulas',
             active: pathname.startsWith('/celulas'),
-            show: isPastor
+            show: isPastor && cellsEnabled
+        },
+        {
+            label: 'Departamentos',
+            icon: Building2,
+            href: '/departamentos',
+            active: pathname.startsWith('/departamentos'),
+            show: isPastor && departmentsEnabled
+        },
+        {
+            label: 'EBD',
+            icon: BookOpen,
+            href: '/ebd',
+            active: pathname.startsWith('/ebd'),
+            show: isPastor && ebdEnabled
         },
         {
             label: 'Membros',
@@ -111,7 +129,7 @@ export function Sidebar({ profile }: SidebarProps) {
             icon: Shield,
             href: '/dashboard/discipuladores',
             active: pathname.startsWith('/dashboard/discipuladores'),
-            show: isPastor
+            show: isPastor && cellsEnabled
         },
         {
             label: 'Cultos',

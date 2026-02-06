@@ -1,5 +1,6 @@
 import { getAllCellsOverview } from '@/actions/admin'
 import { getProfile } from '@/actions/auth'
+import { isModuleEnabled } from '@/actions/church-modules'
 import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ import { ptBR } from 'date-fns/locale'
 export default async function CellsPage() {
     const profile = await getProfile()
     if (!profile || profile.role !== 'PASTOR') redirect('/dashboard')
+    if (!(await isModuleEnabled('cells'))) redirect('/dashboard')
 
     const cells = await getAllCellsOverview()
 

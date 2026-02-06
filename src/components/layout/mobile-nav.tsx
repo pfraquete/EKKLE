@@ -23,7 +23,8 @@ import {
     Settings,
     LogOut,
     Baby,
-    Newspaper
+    Newspaper,
+    Building2
 } from 'lucide-react'
 import { Profile, signOut } from '@/actions/auth'
 
@@ -36,6 +37,9 @@ export function MobileNav({ profile }: MobileNavProps) {
     const [isOpen, setIsOpen] = useState(false)
     const isPastor = profile.role === 'PASTOR'
     const isLeader = profile.role === 'LEADER'
+    const cellsEnabled = profile.modules?.cells_enabled ?? true
+    const departmentsEnabled = profile.modules?.departments_enabled ?? false
+    const ebdEnabled = profile.modules?.ebd_enabled ?? false
 
     // Links para o bottom nav (apenas 4 principais)
     const bottomLinks = [
@@ -58,14 +62,14 @@ export function MobileNav({ profile }: MobileNavProps) {
             label: 'Célula',
             href: '/minha-celula',
             active: pathname.startsWith('/minha-celula'),
-            show: isLeader || isPastor
+            show: (isLeader || isPastor) && cellsEnabled
         },
         {
             icon: CalendarCheck2,
             label: 'Células',
             href: '/celulas',
             active: pathname.startsWith('/celulas'),
-            show: isPastor
+            show: isPastor && cellsEnabled
         },
         {
             icon: Users,
@@ -97,14 +101,28 @@ export function MobileNav({ profile }: MobileNavProps) {
             label: 'Minha Célula',
             href: '/minha-celula',
             active: pathname.startsWith('/minha-celula'),
-            show: isLeader || isPastor
+            show: (isLeader || isPastor) && cellsEnabled
         },
         {
             icon: CalendarCheck2,
             label: 'Células',
             href: '/celulas',
             active: pathname.startsWith('/celulas'),
-            show: isPastor
+            show: isPastor && cellsEnabled
+        },
+        {
+            icon: Building2,
+            label: 'Departamentos',
+            href: '/departamentos',
+            active: pathname.startsWith('/departamentos'),
+            show: isPastor && departmentsEnabled
+        },
+        {
+            icon: BookOpen,
+            label: 'EBD',
+            href: '/ebd',
+            active: pathname.startsWith('/ebd'),
+            show: isPastor && ebdEnabled
         },
         {
             icon: Users,

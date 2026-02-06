@@ -5,6 +5,12 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { isEkkleHubUser } from '@/lib/ekkle-utils'
 
+export interface ChurchModules {
+    cells_enabled: boolean
+    departments_enabled: boolean
+    ebd_enabled: boolean
+}
+
 export interface Profile {
     id: string
     church_id: string
@@ -22,6 +28,8 @@ export interface Profile {
     is_kids_network: boolean
     kids_role: 'PASTORA_KIDS' | 'DISCIPULADORA_KIDS' | 'LEADER_KIDS' | 'MEMBER_KIDS' | null
     kids_cell_id: string | null
+    // Module configuration
+    modules?: ChurchModules
 }
 
 /**
@@ -48,6 +56,43 @@ export async function getProfile(): Promise<Profile | null> {
     }
 
     return profile
+}
+
+/**
+ * Get the current user's profile with church module configuration.
+ * Used by layout/navigation components that need to know which modules are active.
+ */
+export async function getProfileWithModules(): Promise<Profile | null> {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+    if (error || !profile) {
+        console.error('Error fetching profile:', error)
+        return null
+    }
+
+    const { data: modules } = await supabase
+        .from('church_modules')
+        .select('cells_enabled, departments_enabled, ebd_enabled')
+        .eq('church_id', profile.church_id)
+        .single()
+
+    return {
+        ...profile,
+        modules: modules ?? {
+            cells_enabled: true,
+            departments_enabled: false,
+            ebd_enabled: false,
+        }
+    } as Profile
 }
 
 export async function signIn(formData: FormData) {

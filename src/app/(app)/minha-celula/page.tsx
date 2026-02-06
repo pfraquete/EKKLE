@@ -1,6 +1,7 @@
 import { getMyCellData } from '@/actions/cell'
 import { getMemberCellDataOptimized } from '@/actions/cell-optimized'
 import { getProfile } from '@/actions/auth'
+import { isModuleEnabled } from '@/actions/church-modules'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sáb
 export default async function MinhaCelulaPage() {
     const profile = await getProfile()
     if (!profile) redirect('/login')
+    if (!(await isModuleEnabled('cells'))) redirect('/dashboard')
 
     const optimizedData = await getMemberCellDataOptimized()
     const data = optimizedData || await getMyCellData()

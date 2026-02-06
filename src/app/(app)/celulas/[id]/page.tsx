@@ -1,5 +1,6 @@
 import { getCellDetails } from '@/actions/cell'
 import { getProfile } from '@/actions/auth'
+import { isModuleEnabled } from '@/actions/church-modules'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -22,6 +23,7 @@ export default async function CellDetailsPage({ params }: CellDetailsPageProps) 
     const { id } = await params
     const profile = await getProfile()
     if (!profile) redirect('/login')
+    if (!(await isModuleEnabled('cells'))) redirect('/dashboard')
 
     const data = await getCellDetails(id)
     if (!data) redirect('/celulas')

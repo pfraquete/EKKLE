@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ProfileForm } from '@/components/forms/profile-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Globe, MessageSquare, ChevronRight, Wallet, CreditCard, Newspaper, QrCode } from 'lucide-react'
+import { Globe, MessageSquare, ChevronRight, Wallet, CreditCard, Newspaper, QrCode, Blocks } from 'lucide-react'
 
 export default async function SettingsPage() {
     const profile = await getProfile()
@@ -29,6 +29,20 @@ export default async function SettingsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
+                        <Link
+                            href="/configuracoes/modulos"
+                            className="flex items-center justify-between p-4 bg-muted/40 rounded-2xl hover:bg-muted/60 transition-colors"
+                        >
+                            <div className="flex items-center gap-3">
+                                <Blocks className="h-5 w-5 text-primary" />
+                                <div>
+                                    <p className="text-sm font-bold text-foreground">Módulos</p>
+                                    <p className="text-xs text-muted-foreground">Células, Departamentos e EBD</p>
+                                </div>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </Link>
+
                         <Link
                             href="/configuracoes/feed"
                             className="flex items-center justify-between p-4 bg-muted/40 rounded-2xl hover:bg-muted/60 transition-colors"

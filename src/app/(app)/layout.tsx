@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getProfile } from '@/actions/auth'
+import { getProfileWithModules } from '@/actions/auth'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { MobileNav } from '@/components/layout/mobile-nav'
@@ -12,7 +12,7 @@ export default async function AppLayout({
 }: {
     children: React.ReactNode
 }) {
-    const profile = await getProfile()
+    const profile = await getProfileWithModules()
 
     logger.debug('[AppLayout] Profile check', { role: profile?.role, hasCell: !!profile?.cell_id })
 

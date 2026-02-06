@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getProfile } from '@/actions/auth'
+import { isModuleEnabled } from '@/actions/church-modules'
 import { getDiscipuladorDashboardData } from '@/actions/discipulador'
 import {
   Users,
@@ -26,6 +27,10 @@ export default async function SupervisaoPage() {
   }
 
   if (profile.role !== 'DISCIPULADOR') {
+    redirect('/dashboard')
+  }
+
+  if (!(await isModuleEnabled('cells'))) {
     redirect('/dashboard')
   }
 

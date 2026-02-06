@@ -160,6 +160,7 @@ export async function adminGetCourses() {
       .from('courses')
       .select(`*, course_videos(count)`)
       .eq('church_id', profile.church_id)
+      .neq('course_type', 'EBD_CLASSE')
       .order('order_index', { ascending: true })
 
     if (error) throw new Error('Erro ao buscar cursos')
