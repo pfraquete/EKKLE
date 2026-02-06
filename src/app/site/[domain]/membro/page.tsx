@@ -168,10 +168,11 @@ export default async function MembroPage() {
                   Aniversário
                 </div>
                 <div className="text-base sm:text-lg lg:text-xl font-bold text-foreground">
-                  {profile?.birthday
-                    ? new Date(profile.birthday + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })
-                    : <span className="text-muted-foreground italic text-sm">Não informado</span>
-                  }
+                  {profile?.birthday ? (
+                    <span>{new Date(profile.birthday + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}</span>
+                  ) : (
+                    <span className="text-muted-foreground italic text-sm">Não informado</span>
+                  )}
                 </div>
               </div>
             </div>
