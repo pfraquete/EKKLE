@@ -1,8 +1,17 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { getProfile } from './auth'
 import { revalidatePath } from 'next/cache'
+
+// Admin client for bypassing RLS on profile updates
+const getAdminClient = () => {
+    return createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+}
 
 /**
  * Request to join a cell
@@ -179,14 +188,16 @@ export async function getMyCellRequests() {
 
 /**
  * Approve a cell request (for cell leaders and pastors)
+ * Optionally link the new member to an existing non-real profile
  */
-export async function approveCellRequest(requestId: string) {
+export async function approveCellRequest(requestId: string, linkToProfileId?: string) {
     const profile = await getProfile()
     if (!profile) {
         return { success: false, error: 'Não autenticado' }
     }
 
     const supabase = await createClient()
+    const adminClient = getAdminClient()
 
     // Get request details
     const { data: request, error: requestError } = await supabase
@@ -227,7 +238,7 @@ export async function approveCellRequest(requestId: string) {
     }
 
     // Check if member is already in another cell
-    const { data: memberProfile } = await supabase
+    const { data: memberProfile } = await adminClient
         .from('profiles')
         .select('cell_id')
         .eq('id', request.profile_id)
@@ -237,8 +248,8 @@ export async function approveCellRequest(requestId: string) {
         return { success: false, error: 'Este membro já participa de outra célula' }
     }
 
-    // Update request status
-    const { error: updateRequestError } = await supabase
+    // Update request status using admin client
+    const { error: updateRequestError } = await adminClient
         .from('cell_requests')
         .update({
             status: 'APPROVED',
@@ -252,27 +263,50 @@ export async function approveCellRequest(requestId: string) {
         return { success: false, error: 'Erro ao aprovar solicitação' }
     }
 
-    // Update member's profile to add them to the cell
-    const { error: updateProfileError } = await supabase
+    // Update member's profile to add them to the cell using admin client
+    const { error: updateProfileError } = await adminClient
         .from('profiles')
         .update({
             cell_id: request.cell_id,
-            member_stage: 'MEMBER', // Upgrade from VISITOR to MEMBER
+            member_stage: 'MEMBER',
         })
         .eq('id', request.profile_id)
 
     if (updateProfileError) {
         console.error('Error updating profile:', updateProfileError)
         // Rollback request status
-        await supabase
+        await adminClient
             .from('cell_requests')
             .update({ status: 'PENDING', reviewed_by: null, reviewed_at: null })
             .eq('id', requestId)
         return { success: false, error: 'Erro ao adicionar membro à célula' }
     }
 
+    // If linking to a non-real profile, transfer attendance history and deactivate it
+    if (linkToProfileId) {
+        try {
+            // Transfer attendance records from non-real profile to real member
+            await adminClient
+                .from('attendance')
+                .update({ profile_id: request.profile_id })
+                .eq('profile_id', linkToProfileId)
+
+            // Deactivate the non-real profile
+            await adminClient
+                .from('profiles')
+                .update({
+                    is_active: false,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', linkToProfileId)
+        } catch (linkError) {
+            console.error('Error linking profiles:', linkError)
+            // Don't fail the approval if linking fails
+        }
+    }
+
     // Send notification to member
-    const { data: member } = await supabase
+    const { data: member } = await adminClient
         .from('profiles')
         .select('email, full_name')
         .eq('id', request.profile_id)
@@ -282,13 +316,17 @@ export async function approveCellRequest(requestId: string) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ekkle.up.railway.app'
         const cellUrl = `${appUrl}/minha-celula`
 
-        const { sendCellApprovalNotification } = await import('@/lib/email')
-        await sendCellApprovalNotification({
-            to: member.email,
-            memberName: member.full_name,
-            cellName: cell.name,
-            cellUrl
-        })
+        try {
+            const { sendCellApprovalNotification } = await import('@/lib/email')
+            await sendCellApprovalNotification({
+                to: member.email,
+                memberName: member.full_name,
+                cellName: cell.name,
+                cellUrl
+            })
+        } catch (emailError) {
+            console.error('Error sending approval notification:', emailError)
+        }
     }
 
     revalidatePath('/minha-celula')

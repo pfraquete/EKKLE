@@ -32,6 +32,16 @@ export default async function MembrosPage() {
         has_account: !!(member.email && member.email.includes('@'))
     }))
 
+    // Get non-real members (no account) for linking option
+    const nonRealMembers = membersWithAccountStatus
+        .filter(m => !m.has_account && m.is_active !== false)
+        .map(m => ({
+            id: m.id,
+            full_name: m.full_name,
+            phone: m.phone || null,
+            member_stage: m.member_stage || 'VISITOR',
+        }))
+
     // Transform pending requests for RequestList component
     const requestsForList = (pendingRequests || []).map(request => {
         const requestProfile = Array.isArray(request.profile) ? request.profile[0] : request.profile
@@ -94,7 +104,7 @@ export default async function MembrosPage() {
                             {requestsForList.length}
                         </span>
                     </div>
-                    <RequestList requests={requestsForList} />
+                    <RequestList requests={requestsForList} nonRealMembers={nonRealMembers} />
                 </div>
             )}
 
