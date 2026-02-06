@@ -123,7 +123,6 @@ export async function getTeacherCourses(teacherId?: string) {
             .from('courses')
             .select(`
                 *,
-                teacher:profiles!teacher_id(full_name, photo_url),
                 _count:course_enrollments(count)
             `)
             .eq('church_id', profile.church_id)
@@ -131,7 +130,25 @@ export async function getTeacherCourses(teacherId?: string) {
 
         if (error) throw error
 
-        return { success: true, data }
+        // Fetch teacher profiles for courses that have teacher_id
+        const teacherIds = [...new Set((data || []).map((c: any) => c.teacher_id).filter(Boolean))]
+        let teacherMap: Record<string, { full_name: string; photo_url: string | null }> = {}
+        if (teacherIds.length > 0) {
+            const { data: teachers } = await supabase
+                .from('profiles')
+                .select('id, full_name, photo_url')
+                .in('id', teacherIds)
+            if (teachers) {
+                teacherMap = Object.fromEntries(teachers.map(t => [t.id, { full_name: t.full_name, photo_url: t.photo_url }]))
+            }
+        }
+
+        const coursesWithTeacher = (data || []).map((course: any) => ({
+            ...course,
+            teacher: course.teacher_id ? teacherMap[course.teacher_id] || null : null,
+        }))
+
+        return { success: true, data: coursesWithTeacher }
     } catch (error) {
         console.error('Error fetching teacher courses:', error)
         return { success: false, error: 'Erro ao buscar cursos do professor' }
@@ -324,13 +341,17 @@ export async function getTeacherCourseDetails(courseId: string) {
             return { success: false, error: 'Não autenticado' }
         }
 
+        // Must be a teacher or pastor
+        if (!profile.is_teacher && profile.role !== 'PASTOR') {
+            return { success: false, error: 'Não autorizado' }
+        }
+
         const supabase = await createClient()
 
         const { data: course, error } = await supabase
             .from('courses')
             .select(`
                 *,
-                teacher:profiles!teacher_id(full_name, photo_url),
                 videos:course_videos(id, title, duration_seconds, order_index, is_published),
                 enrollments:course_enrollments(
                     id,
@@ -355,12 +376,18 @@ export async function getTeacherCourseDetails(courseId: string) {
             return { success: false, error: 'Curso não encontrado' }
         }
 
-        // Verify authorization
-        if (course.teacher_id !== profile.id && profile.role !== 'PASTOR') {
-            return { success: false, error: 'Não autorizado' }
+        // Fetch teacher profile separately if teacher_id is set
+        let teacher = null
+        if (course.teacher_id) {
+            const { data: teacherData } = await supabase
+                .from('profiles')
+                .select('full_name, photo_url')
+                .eq('id', course.teacher_id)
+                .single()
+            teacher = teacherData
         }
 
-        return { success: true, data: course }
+        return { success: true, data: { ...course, teacher } }
     } catch (error) {
         console.error('Error fetching course details:', error)
         return { success: false, error: 'Erro ao buscar detalhes do curso' }
