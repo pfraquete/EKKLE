@@ -3,15 +3,15 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, UploadCloud, Loader2, Users, Save, X } from 'lucide-react'
+import { ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, UploadCloud, Loader2, Users, Save, X, Radio, Calendar, Clock, MessageSquare, Play } from 'lucide-react'
 import { adminUpdateCourse, adminDeleteCourse, adminCreateVideo, adminUpdateVideo, adminDeleteVideo, adminUploadCourseVideo } from '@/actions/courses-admin'
+import { createLiveLesson, cancelLiveLesson } from '@/actions/course-live-lessons'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import { ImageUpload } from '@/components/ui/image-upload'
 
 type Course = {
@@ -28,11 +28,24 @@ type Course = {
   course_start_date: string | null
 }
 type Video = { id: string; title: string; description: string | null; video_url: string; duration_seconds: number; order_index: number; is_published: boolean }
+type LiveLesson = {
+  id: string
+  title: string
+  description: string | null
+  scheduled_start: string
+  scheduled_end: string | null
+  status: 'SCHEDULED' | 'LIVE' | 'ENDED' | 'CANCELLED'
+  mux_playback_id: string | null
+  chat_enabled: boolean
+  created_at: string
+}
 
-export function CourseDetailView({ course, videos, canDelete }: { course: Course; videos: Video[]; canDelete: boolean }) {
+export function CourseDetailView({ course, videos, liveLessons, canDelete }: { course: Course; videos: Video[]; liveLessons: LiveLesson[]; canDelete: boolean }) {
   const router = useRouter()
   const [editMode, setEditMode] = useState(false)
   const [videoForm, setVideoForm] = useState(false)
+  const [liveForm, setLiveForm] = useState(false)
+  const [contentTypeSelector, setContentTypeSelector] = useState(false)
   const [editingVideo, setEditingVideo] = useState<Video | null>(null)
   const [courseData, setCourseData] = useState(course)
   const [videoData, setVideoData] = useState({ title: '', description: '', video_url: '', duration_seconds: 0, order_index: videos.length, is_published: false })
@@ -45,6 +58,9 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
   const [courseStartDate, setCourseStartDate] = useState(
     course.course_start_date ? new Date(course.course_start_date).toISOString().split('T')[0] : ''
   )
+  // Live lesson form state
+  const [liveData, setLiveData] = useState({ title: '', description: '', scheduled_start: '', scheduled_end: '', chat_enabled: true })
+  const [liveSaving, setLiveSaving] = useState(false)
 
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value / 100)
   const formatDate = (value?: string | null) => value ? new Date(value).toLocaleDateString('pt-BR') : 'Sem data definida'
@@ -95,6 +111,58 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
     }
     setVideoUploading(false)
   }
+
+  const handleCreateLiveLesson = async () => {
+    if (!liveData.title.trim() || !liveData.scheduled_start) return
+    setLiveSaving(true)
+    const result = await createLiveLesson(course.id, {
+      title: liveData.title.trim(),
+      description: liveData.description.trim() || undefined,
+      scheduled_start: new Date(liveData.scheduled_start).toISOString(),
+      scheduled_end: liveData.scheduled_end ? new Date(liveData.scheduled_end).toISOString() : undefined,
+      chat_enabled: liveData.chat_enabled,
+    })
+    if (result.success) {
+      setLiveForm(false)
+      setLiveData({ title: '', description: '', scheduled_start: '', scheduled_end: '', chat_enabled: true })
+      router.refresh()
+    } else {
+      alert(result.error)
+    }
+    setLiveSaving(false)
+  }
+
+  const handleCancelLiveLesson = async (id: string) => {
+    if (!confirm('Cancelar esta aula ao vivo?')) return
+    const result = await cancelLiveLesson(id)
+    if (result.success) router.refresh()
+    else alert(result.error)
+  }
+
+  const openAddContent = () => {
+    setContentTypeSelector(true)
+    setVideoForm(false)
+    setLiveForm(false)
+  }
+
+  const selectVideoType = () => {
+    setContentTypeSelector(false)
+    setVideoForm(true)
+    setLiveForm(false)
+    setEditingVideo(null)
+    setVideoData({ title: '', description: '', video_url: '', duration_seconds: 0, order_index: videos.length, is_published: false })
+  }
+
+  const selectLiveType = () => {
+    setContentTypeSelector(false)
+    setLiveForm(true)
+    setVideoForm(false)
+    setLiveData({ title: '', description: '', scheduled_start: '', scheduled_end: '', chat_enabled: true })
+  }
+
+  // Filter live lessons (hide cancelled)
+  const activeLiveLessons = liveLessons.filter(l => l.status !== 'CANCELLED')
+  const totalContent = videos.length + activeLiveLessons.length
 
   return (
     <div className="space-y-6">
@@ -280,11 +348,12 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
         </div>
       )}
 
+      {/* Content Section */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-black text-foreground tracking-tight">Vídeos do Curso <span className="text-muted-foreground ml-2 text-xl">({videos.length})</span></h2>
+          <h2 className="text-2xl font-black text-foreground tracking-tight">Conteúdo do Curso <span className="text-muted-foreground ml-2 text-xl">({totalContent})</span></h2>
           <button
-            onClick={() => { setVideoForm(true); setEditingVideo(null); setVideoData({ title: '', description: '', video_url: '', duration_seconds: 0, order_index: videos.length, is_published: false }) }}
+            onClick={openAddContent}
             className="bg-primary text-primary-foreground px-5 py-3 rounded-2xl flex items-center gap-2 font-black shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             <Plus className="w-5 h-5" />
@@ -292,9 +361,40 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
           </button>
         </div>
 
+        {/* Content Type Selector */}
+        {contentTypeSelector && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <button
+              onClick={selectVideoType}
+              className="bg-card border-2 border-border hover:border-primary/50 rounded-2xl p-8 text-center transition-all hover:shadow-lg group"
+            >
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                <UploadCloud className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="font-black text-foreground text-lg mb-2">Vídeo Gravado</h3>
+              <p className="text-sm text-muted-foreground font-medium">Faça upload de um vídeo pré-gravado para os alunos assistirem no próprio ritmo</p>
+            </button>
+            <button
+              onClick={selectLiveType}
+              className="bg-card border-2 border-border hover:border-red-500/50 rounded-2xl p-8 text-center transition-all hover:shadow-lg group"
+            >
+              <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-red-500/20 transition-colors">
+                <Radio className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="font-black text-foreground text-lg mb-2">Aula Ao Vivo</h3>
+              <p className="text-sm text-muted-foreground font-medium">Agende uma transmissão ao vivo com chat em tempo real para os alunos</p>
+            </button>
+          </div>
+        )}
+
+        {/* Video Form */}
         {videoForm && (
           <Card className="bg-card rounded-3xl shadow-xl border-border/50 animate-in fade-in slide-in-from-top-4 duration-500 overflow-hidden">
             <CardContent className="p-8 space-y-6">
+              <div className="flex items-center gap-2 mb-2">
+                <UploadCloud className="w-5 h-5 text-primary" />
+                <span className="text-xs font-black uppercase tracking-widest text-primary">Vídeo Gravado</span>
+              </div>
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título da Aula</Label>
@@ -377,48 +477,181 @@ export function CourseDetailView({ course, videos, canDelete }: { course: Course
           </Card>
         )}
 
+        {/* Live Lesson Form */}
+        {liveForm && (
+          <Card className="bg-card rounded-3xl shadow-xl border-border/50 animate-in fade-in slide-in-from-top-4 duration-500 overflow-hidden">
+            <CardContent className="p-8 space-y-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Radio className="w-5 h-5 text-red-500" />
+                <span className="text-xs font-black uppercase tracking-widest text-red-500">Aula Ao Vivo</span>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Título da Aula</Label>
+                  <Input
+                    value={liveData.title}
+                    onChange={(e) => setLiveData({ ...liveData, title: e.target.value })}
+                    className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-base"
+                    placeholder="Ex: Aula sobre Romanos 8"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Descrição (opcional)</Label>
+                  <Textarea
+                    value={liveData.description}
+                    onChange={(e) => setLiveData({ ...liveData, description: e.target.value })}
+                    rows={2}
+                    className="bg-muted/30 border-border/40 rounded-xl p-4 font-bold transition-all resize-none text-base"
+                    placeholder="O que será abordado nesta aula ao vivo?"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2 flex items-center gap-2">
+                      <Calendar className="w-3.5 h-3.5" />
+                      Data/Hora Início
+                    </Label>
+                    <Input
+                      type="datetime-local"
+                      value={liveData.scheduled_start}
+                      onChange={(e) => setLiveData({ ...liveData, scheduled_start: e.target.value })}
+                      className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-base block"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-2 flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5" />
+                      Data/Hora Fim (opcional)
+                    </Label>
+                    <Input
+                      type="datetime-local"
+                      value={liveData.scheduled_end}
+                      onChange={(e) => setLiveData({ ...liveData, scheduled_end: e.target.value })}
+                      className="h-14 bg-muted/30 border-border/40 rounded-xl px-4 font-bold transition-all text-base block"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 px-1 py-2">
+                  <Checkbox
+                    id="chat_enabled"
+                    checked={liveData.chat_enabled}
+                    onCheckedChange={(checked) => setLiveData({ ...liveData, chat_enabled: !!checked })}
+                    className="w-5 h-5 border-border/50 rounded-md data-[state=checked]:bg-primary"
+                  />
+                  <Label htmlFor="chat_enabled" className="text-xs font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none flex items-center gap-2">
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    Habilitar chat ao vivo
+                  </Label>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border/40">
+                <Button
+                  onClick={handleCreateLiveLesson}
+                  disabled={liveSaving || !liveData.title.trim() || !liveData.scheduled_start}
+                  className="flex-1 h-14 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-red-500/20 transition-all gap-2"
+                >
+                  {liveSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Radio className="w-4 h-4" />}
+                  {liveSaving ? 'Criando...' : 'Criar Aula Ao Vivo'}
+                </Button>
+                <Button variant="ghost" onClick={() => setLiveForm(false)} className="h-14 border border-border/50 bg-muted/20 rounded-xl font-black text-xs uppercase tracking-widest text-muted-foreground hover:bg-muted/40 transition-all">
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Content List */}
         <div className="grid gap-3">
-          {videos.length === 0 ? (
+          {totalContent === 0 ? (
             <div className="bg-muted/10 border-2 border-dashed border-border rounded-3xl p-12 text-center">
               <p className="text-muted-foreground font-bold">Nenhuma aula cadastrada ainda.</p>
             </div>
           ) : (
-            videos.map((video, i) => (
-              <div key={video.id} className="bg-card border border-border rounded-2xl p-5 flex items-center gap-5 hover:bg-muted/30 transition-all group">
-                <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-black text-sm shrink-0">
-                  {i + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-foreground truncate">{video.title}</h3>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-muted px-1.5 py-0.5 rounded">
-                      {Math.floor(video.duration_seconds / 60)}:{(video.duration_seconds % 60).toString().padStart(2, '0')}
-                    </p>
-                    {!video.is_published && (
-                      <span className="text-xs font-black text-amber-500 uppercase tracking-widest bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-                        Rascunho
+            <>
+              {/* Videos */}
+              {videos.map((video, i) => (
+                <div key={video.id} className="bg-card border border-border rounded-2xl p-5 flex items-center gap-5 hover:bg-muted/30 transition-all group">
+                  <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-black text-sm shrink-0">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-foreground truncate">{video.title}</h3>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-muted px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <Play className="w-3 h-3" />
+                        {Math.floor(video.duration_seconds / 60)}:{(video.duration_seconds % 60).toString().padStart(2, '0')}
                       </span>
+                      {!video.is_published && (
+                        <span className="text-xs font-black text-amber-500 uppercase tracking-widest bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                          Rascunho
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => { setEditingVideo(video); setVideoData({ ...video, description: video.description || '' }); setVideoForm(true); setLiveForm(false); setContentTypeSelector(false) }}
+                      className="p-2.5 hover:bg-muted rounded-xl text-muted-foreground transition-colors"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDeleteVideo(video.id)}
+                        className="p-2.5 hover:bg-red-500/10 text-red-500 rounded-xl transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => { setEditingVideo(video); setVideoData({ ...video, description: video.description || '' }); setVideoForm(true) }}
-                    className="p-2.5 hover:bg-muted rounded-xl text-muted-foreground transition-colors"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  {canDelete && (
-                    <button
-                      onClick={() => handleDeleteVideo(video.id)}
-                      className="p-2.5 hover:bg-red-500/10 text-red-500 rounded-xl transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
+              ))}
+
+              {/* Live Lessons */}
+              {activeLiveLessons.map((lesson) => {
+                const statusConfig: Record<string, { label: string; color: string }> = {
+                  SCHEDULED: { label: 'Agendada', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
+                  LIVE: { label: 'Ao Vivo', color: 'text-red-500 bg-red-500/10 border-red-500/20' },
+                  ENDED: { label: 'Encerrada', color: 'text-muted-foreground bg-muted border-border' },
+                }
+                const status = statusConfig[lesson.status] || statusConfig.ENDED
+
+                return (
+                  <div key={lesson.id} className="bg-card border border-border rounded-2xl p-5 flex items-center gap-5 hover:bg-muted/30 transition-all group">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${lesson.status === 'LIVE' ? 'bg-red-500/10 text-red-500' : 'bg-primary/10 text-primary'}`}>
+                      <Radio className={`w-5 h-5 ${lesson.status === 'LIVE' ? 'animate-pulse' : ''}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-foreground truncate">{lesson.title}</h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-xs font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${status.color}`}>
+                          {status.label}
+                        </span>
+                        <span className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(lesson.scheduled_start).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                      {lesson.status === 'SCHEDULED' && canDelete && (
+                        <button
+                          onClick={() => handleCancelLiveLesson(lesson.id)}
+                          className="p-2.5 hover:bg-red-500/10 text-red-500 rounded-xl transition-colors"
+                          title="Cancelar aula"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </>
           )}
         </div>
       </div>

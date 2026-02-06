@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import { getProfile } from '@/actions/auth'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
@@ -8,21 +7,14 @@ import { isEkkleHubUser } from '@/lib/ekkle-utils'
 import { logger } from '@/lib/logger'
 import { ImpersonationWrapper } from '@/components/admin/impersonation-wrapper'
 
-// Routes that LEADER role can access in the dashboard
-const LEADER_ALLOWED_ROUTES = [
-    '/dashboard/cultos',
-]
-
 export default async function AppLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
     const profile = await getProfile()
-    const headersList = await headers()
-    const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
 
-    logger.debug('[AppLayout] Profile check', { role: profile?.role, hasCell: !!profile?.cell_id, path: pathname })
+    logger.debug('[AppLayout] Profile check', { role: profile?.role, hasCell: !!profile?.cell_id })
 
     if (!profile) {
         redirect('/login')
@@ -34,20 +26,10 @@ export default async function AppLayout({
         redirect('/ekkle/membro')
     }
 
-    // MEMBER role with a cell should use member area
-    // MEMBER without cell needs dashboard access to choose a cell
-    if (profile.role === 'MEMBER' && profile.cell_id) {
-        logger.debug('[AppLayout] Redirecting MEMBER to /membro')
+    // Only PASTOR can access the dashboard (SUPER_ADMIN is handled by middleware)
+    if (profile.role !== 'PASTOR') {
+        logger.debug('[AppLayout] Redirecting non-PASTOR to /membro', { role: profile.role })
         redirect('/membro')
-    }
-
-    // LEADER role redirects to member area, EXCEPT for specific allowed routes
-    if (profile.role === 'LEADER') {
-        const isAllowedRoute = LEADER_ALLOWED_ROUTES.some(route => pathname.startsWith(route))
-        if (!isAllowedRoute) {
-            logger.debug('[AppLayout] Redirecting LEADER to /membro')
-            redirect('/membro')
-        }
     }
 
     return (

@@ -156,6 +156,7 @@ export async function createLiveLesson(courseId: string, input: {
 
         revalidatePath(`/membro/professor/cursos/${courseId}`)
         revalidatePath('/membro/aulas-ao-vivo')
+        revalidatePath('/dashboard/cursos')
 
         return { success: true, data }
     } catch (error) {
@@ -211,6 +212,7 @@ export async function updateLiveLesson(lessonId: string, input: {
         }
 
         revalidatePath(`/membro/professor/cursos/${lesson.course_id}`)
+        revalidatePath('/dashboard/cursos')
         return { success: true }
     } catch (error) {
         console.error('Error updating live lesson:', error)
@@ -392,6 +394,7 @@ export async function cancelLiveLesson(lessonId: string) {
         }
 
         revalidatePath(`/membro/professor/cursos/${lesson.course_id}`)
+        revalidatePath('/dashboard/cursos')
         return { success: true }
     } catch (error) {
         console.error('Error cancelling live lesson:', error)

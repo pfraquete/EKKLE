@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, BookOpen } from 'lucide-react'
 import { CoursePlayer } from '@/components/courses/course-player'
 import { enrollInCourse, getCourseEnrollment, getAllVideoProgress } from '@/actions/courses'
+import { getCourseLiveLessons } from '@/actions/course-live-lessons'
 import { getProfile } from '@/actions/auth'
 
 type PageProps = {
@@ -72,15 +73,26 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
     redirect(`/membro/cursos/${courseId}`)
   }
 
-  // Get course videos
-  const { data: videos } = await supabase
-    .from('course_videos')
-    .select('*')
-    .eq('course_id', courseId)
-    .eq('is_published', true)
-    .order('order_index', { ascending: true })
+  // Get course videos and live lessons in parallel
+  const [{ data: videos }, liveLessonsResult] = await Promise.all([
+    supabase
+      .from('course_videos')
+      .select('*')
+      .eq('course_id', courseId)
+      .eq('is_published', true)
+      .order('order_index', { ascending: true }),
+    getCourseLiveLessons(courseId),
+  ])
 
-  if (!videos || videos.length === 0) {
+  // Filter live lessons to only SCHEDULED and LIVE
+  const liveLessons = (liveLessonsResult.data || []).filter(
+    (l) => l.status === 'SCHEDULED' || l.status === 'LIVE'
+  )
+
+  const hasVideos = videos && videos.length > 0
+  const hasLiveLessons = liveLessons.length > 0
+
+  if (!hasVideos && !hasLiveLessons) {
     return (
       <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
         <Link
@@ -103,25 +115,26 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
   }
 
   // Get all video progress
-  const videoProgress = await getAllVideoProgress(enrollment.id)
+  const videoProgress = hasVideos ? await getAllVideoProgress(enrollment.id) : []
   const progressMap = new Map(
     videoProgress.map((p) => [p.video_id, p])
   )
 
   // Determine which video to show
-  let currentVideo = videos[0]
-  if (videoId) {
-    const selectedVideo = videos.find((v) => v.id === videoId)
+  const safeVideos = videos || []
+  let currentVideo = safeVideos[0] || null
+  if (videoId && safeVideos.length > 0) {
+    const selectedVideo = safeVideos.find((v) => v.id === videoId)
     if (selectedVideo) {
       currentVideo = selectedVideo
     }
-  } else {
+  } else if (safeVideos.length > 0) {
     // Find first incomplete video or last video
-    const incompleteVideo = videos.find((v) => !progressMap.get(v.id)?.completed)
+    const incompleteVideo = safeVideos.find((v) => !progressMap.get(v.id)?.completed)
     if (incompleteVideo) {
       currentVideo = incompleteVideo
     } else {
-      currentVideo = videos[videos.length - 1]
+      currentVideo = safeVideos[safeVideos.length - 1]
     }
   }
 
@@ -150,11 +163,19 @@ export default async function MemberCoursePage({ params, searchParams }: PagePro
 
       <CoursePlayer
         course={course}
-        videos={videos}
+        videos={safeVideos}
         currentVideo={currentVideo}
         enrollment={enrollment}
         videoProgress={videoProgress}
         profile={profile}
+        liveLessons={liveLessons.map(l => ({
+          id: l.id,
+          title: l.title,
+          description: l.description,
+          scheduled_start: l.scheduled_start,
+          status: l.status as 'SCHEDULED' | 'LIVE' | 'ENDED' | 'CANCELLED',
+          mux_playback_id: l.mux_playback_id,
+        }))}
       />
     </div>
   )

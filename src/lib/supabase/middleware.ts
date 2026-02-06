@@ -287,6 +287,36 @@ export async function updateSession(request: NextRequest) {
         }
     }
 
+    // =====================================================
+    // DASHBOARD ACCESS - PASTOR ONLY
+    // =====================================================
+    if (isAdmin && user && userProfile) {
+        if (userProfile.role !== 'PASTOR' && userProfile.role !== 'SUPER_ADMIN') {
+            // Redirect non-pastor to member area on their church subdomain
+            if (userProfile.church_slug) {
+                const redirectUrl = new URL(request.url)
+                const baseHost = redirectUrl.host
+                    .replace('www.', '')
+                    .replace('app.', '')
+
+                // Remove existing subdomain if present
+                const rootDomain = baseHost.includes('localhost')
+                    ? baseHost
+                    : baseHost.split('.').slice(subdomain ? 1 : 0).join('.')
+
+                if (!baseHost.includes('localhost')) {
+                    redirectUrl.host = `${userProfile.church_slug}.${rootDomain}`
+                }
+                redirectUrl.pathname = '/membro'
+                return redirectWithCookies(redirectUrl, supabaseResponse, request)
+            }
+            // Fallback: redirect to /membro on current host
+            const url = request.nextUrl.clone()
+            url.pathname = '/membro'
+            return redirectWithCookies(url, supabaseResponse, request)
+        }
+    }
+
     // Admin routes require authentication
     if (isAdmin && !user) {
         const url = request.nextUrl.clone()
