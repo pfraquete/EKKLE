@@ -71,7 +71,7 @@ export default async function BibliaOracaoPage() {
       bg: 'bg-blue-500/15',
     },
     {
-      href: '/membro/biblia-oracao/oracao#alvos',
+      href: '/membro/biblia-oracao/alvos',
       icon: Target,
       label: 'Meus Alvos',
       color: 'text-pink-400',

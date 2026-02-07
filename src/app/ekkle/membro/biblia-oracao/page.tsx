@@ -65,7 +65,7 @@ export default async function EkkleBibliaOracaoPage() {
       bg: 'bg-blue-500/15',
     },
     {
-      href: '/ekkle/membro/biblia-oracao/oracao#alvos',
+      href: '/ekkle/membro/biblia-oracao/alvos',
       icon: Target,
       label: 'Meus Alvos',
       color: 'text-pink-400',
