@@ -11,7 +11,6 @@ import {
   ListChecks,
   History,
   UserCheck,
-  BarChart3,
   DoorOpen,
   Target,
 } from 'lucide-react'
@@ -97,13 +96,6 @@ export default async function BibliaOracaoPage() {
       label: 'Parceiro de Oração',
       color: 'text-cyan-400',
       bg: 'bg-cyan-500/15',
-    },
-    {
-      href: '/membro/biblia-oracao/oracao/relatorios',
-      icon: BarChart3,
-      label: 'Relatórios',
-      color: 'text-amber-400',
-      bg: 'bg-amber-500/15',
     },
     {
       href: '/membro/biblia-oracao/oracao/salas',
