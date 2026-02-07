@@ -23,6 +23,7 @@ export async function middleware(request: NextRequest) {
             // These are admin routes that exist in the (app) group
             const isBypassRoute =
                 url.pathname.startsWith('/login') ||
+                url.pathname.startsWith('/cadastro') ||
                 url.pathname.startsWith('/register') ||
                 url.pathname.startsWith('/registro') ||
                 url.pathname.startsWith('/forgot-password') ||
