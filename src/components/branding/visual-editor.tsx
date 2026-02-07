@@ -127,7 +127,7 @@ export function VisualEditor() {
 
                             <div className="space-y-2">
                                 <Label>Modo do Tema</Label>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                     {themeOptions.modes.map((mode) => (
                                         <button
                                             key={mode.value}

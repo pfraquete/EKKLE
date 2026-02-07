@@ -227,7 +227,7 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="church-info" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6">
               <TabsTrigger value="church-info" className="flex items-center gap-2">
                 <Church className="h-4 w-4" />
                 <span className="hidden sm:inline">Minha Igreja</span>
@@ -397,7 +397,7 @@ export function AgentConfigPanel({ initialConfig }: AgentConfigPanelProps) {
                   <div className="space-y-3">
                     {config.service_times.map((service, index) => (
                       <div key={index} className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                        <div className="flex-1 grid grid-cols-3 gap-3">
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <Input
                             value={service.name}
                             onChange={(e) => updateServiceTime(index, 'name', e.target.value)}

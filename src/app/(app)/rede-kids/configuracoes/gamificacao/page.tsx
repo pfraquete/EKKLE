@@ -83,7 +83,7 @@ export default function GamificacaoConfigPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="verses" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="verses" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
             Versículos

@@ -252,7 +252,7 @@ export default function IgrejasPage() {
 
       {/* Church Detail Dialog */}
       <Dialog open={!!selectedChurch} onOpenChange={() => setSelectedChurch(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           {selectedChurch && (
             <>
               <DialogHeader>

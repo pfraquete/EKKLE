@@ -65,7 +65,7 @@ export default async function MemberCelulasFinanceiroPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid gap-4 grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                 <div className="bg-card border border-border/50 rounded-2xl p-4">
                     <div className="flex items-center gap-2 mb-2">
                         <div className="p-1.5 rounded-lg bg-blue-500/10">

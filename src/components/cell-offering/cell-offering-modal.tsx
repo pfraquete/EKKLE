@@ -335,7 +335,7 @@ export function CellOfferingModal({ profile, onClose }: CellOfferingModalProps) 
                                             placeholder="Endereço"
                                             className="w-full h-12 px-4 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                                         />
-                                        <div className="grid grid-cols-3 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                             <input
                                                 type="text"
                                                 value={billingZip}

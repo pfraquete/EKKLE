@@ -214,7 +214,7 @@ export default function CellsConfigPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {layoutOptions.map((option) => {
               const Icon = option.icon
               const isSelected = config.layout === option.value

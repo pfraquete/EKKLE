@@ -61,7 +61,7 @@ export default async function MemberTransacoesPage({
             </div>
 
             {/* Summary Cards */}
-            <div className="grid gap-4 grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4">
                     <div className="flex items-center gap-2 mb-2">
                         <div className="p-1.5 rounded-lg bg-emerald-500/10">

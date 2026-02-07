@@ -91,7 +91,7 @@ export default async function AttendancePage({ params }: Props) {
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Card className="border-none shadow-sm">
                     <CardContent className="p-4 text-center">
                         <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center mx-auto mb-2">

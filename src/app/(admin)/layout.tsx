@@ -1,5 +1,5 @@
 import { requireSuperAdmin, getUnresolvedAlertsCount } from '@/lib/admin-auth'
-import { AdminSidebar, AdminHeader } from '@/components/admin/layout'
+import { AdminSidebar, AdminHeader, AdminMobileNav } from '@/components/admin/layout'
 
 export default async function AdminLayout({
     children,
@@ -15,12 +15,13 @@ export default async function AdminLayout({
             <AdminSidebar profile={profile} alertsCount={alertsCount} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <AdminHeader profile={profile} alertsCount={alertsCount} />
-                <main className="flex-1 overflow-y-auto p-6 bg-zinc-950">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6 bg-zinc-950">
                     <div className="max-w-7xl mx-auto w-full">
                         {children}
                     </div>
                 </main>
             </div>
+            <AdminMobileNav profile={profile} alertsCount={alertsCount} />
         </div>
     )
 }

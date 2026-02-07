@@ -179,99 +179,144 @@ export default async function DashboardDizimosPage({ searchParams }: PageProps) 
                 </div>
             ) : (
                 <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                    <table className="w-full min-w-[600px]">
-                        <thead className="bg-muted/30">
-                            <tr>
-                                <th className="px-3 md:px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                    Membro
-                                </th>
-                                <th className="px-3 md:px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                    Valor
-                                </th>
-                                <th className="px-3 md:px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                    Status
-                                </th>
-                                <th className="px-3 md:px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                    Comprovante
-                                </th>
-                                <th className="px-3 md:px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                    Ação
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {tithes.map((tithe: any) => (
-                                <tr key={tithe.id} className="hover:bg-muted/20 transition-colors">
-                                    <td className="px-3 md:px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted/30 flex-shrink-0">
-                                                {tithe.profile?.photo_url ? (
-                                                    <Image
-                                                        src={tithe.profile.photo_url}
-                                                        alt={tithe.profile.full_name}
-                                                        fill
-                                                        className="object-cover"
-                                                        unoptimized
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground font-bold">
-                                                        {(tithe.profile?.full_name || 'A')[0].toUpperCase()}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-foreground">
-                                                    {tithe.profile?.full_name || 'Membro'}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {tithe.profile?.email}
-                                                </p>
-                                            </div>
+                    {/* Mobile: Card list */}
+                    <div className="md:hidden divide-y divide-border">
+                        {tithes.map((tithe: any) => (
+                            <div key={tithe.id} className="p-4 space-y-3">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted/30 flex-shrink-0">
+                                            {tithe.profile?.photo_url ? (
+                                                <Image
+                                                    src={tithe.profile.photo_url}
+                                                    alt={tithe.profile.full_name}
+                                                    fill
+                                                    className="object-cover"
+                                                    unoptimized
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-muted-foreground font-bold">
+                                                    {(tithe.profile?.full_name || 'A')[0].toUpperCase()}
+                                                </div>
+                                            )}
                                         </div>
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4">
-                                        <span className="font-bold text-foreground">
-                                            {formatCurrency(tithe.amount_cents / 100)}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-foreground text-sm truncate">
+                                                {tithe.profile?.full_name || 'Membro'}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground truncate">
+                                                {tithe.profile?.email}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span className="font-bold text-foreground flex-shrink-0">
+                                        {formatCurrency(tithe.amount_cents / 100)}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
                                         {tithe.status === 'CONFIRMED' ? (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg text-xs font-bold">
-                                                <CheckCircle className="w-3.5 h-3.5" />
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded-md text-xs font-bold">
+                                                <CheckCircle className="w-3 h-3" />
                                                 Confirmado
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-xs font-bold">
-                                                <Clock className="w-3.5 h-3.5" />
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-500/10 text-amber-500 rounded-md text-xs font-bold">
+                                                <Clock className="w-3 h-3" />
                                                 Pendente
                                             </span>
                                         )}
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        {tithe.receipt_url ? (
+                                        {tithe.receipt_url && (
                                             <a
                                                 href={tithe.receipt_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary/20 transition-colors"
+                                                className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-bold"
                                             >
-                                                <Eye className="w-3.5 h-3.5" />
+                                                <Eye className="w-3 h-3" />
                                                 Ver
                                             </a>
-                                        ) : (
-                                            <span className="text-muted-foreground text-sm">-</span>
                                         )}
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        {tithe.status === 'PENDING' && (
-                                            <TitheConfirmButton titheId={tithe.id} />
-                                        )}
-                                    </td>
+                                    </div>
+                                    {tithe.status === 'PENDING' && (
+                                        <TitheConfirmButton titheId={tithe.id} />
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop: Table */}
+                    <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-muted/30">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Membro</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Valor</th>
+                                    <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</th>
+                                    <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Comprovante</th>
+                                    <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">Ação</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {tithes.map((tithe: any) => (
+                                    <tr key={tithe.id} className="hover:bg-muted/20 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted/30 flex-shrink-0">
+                                                    {tithe.profile?.photo_url ? (
+                                                        <Image
+                                                            src={tithe.profile.photo_url}
+                                                            alt={tithe.profile.full_name}
+                                                            fill
+                                                            className="object-cover"
+                                                            unoptimized
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-muted-foreground font-bold">
+                                                            {(tithe.profile?.full_name || 'A')[0].toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-foreground">{tithe.profile?.full_name || 'Membro'}</p>
+                                                    <p className="text-xs text-muted-foreground">{tithe.profile?.email}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="font-bold text-foreground">{formatCurrency(tithe.amount_cents / 100)}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            {tithe.status === 'CONFIRMED' ? (
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg text-xs font-bold">
+                                                    <CheckCircle className="w-3.5 h-3.5" />
+                                                    Confirmado
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-xs font-bold">
+                                                    <Clock className="w-3.5 h-3.5" />
+                                                    Pendente
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            {tithe.receipt_url ? (
+                                                <a href={tithe.receipt_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary/20 transition-colors">
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    Ver
+                                                </a>
+                                            ) : (
+                                                <span className="text-muted-foreground text-sm">-</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            {tithe.status === 'PENDING' && <TitheConfirmButton titheId={tithe.id} />}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}

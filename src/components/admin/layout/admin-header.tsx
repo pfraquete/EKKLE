@@ -24,9 +24,9 @@ export function AdminHeader({ profile, alertsCount }: AdminHeaderProps) {
     }
 
     return (
-        <header className="h-16 border-b border-zinc-800 bg-zinc-900 flex items-center justify-between px-6">
-            {/* Search */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-md">
+        <header className="h-16 border-b border-zinc-800 bg-zinc-900 flex items-center justify-between px-4 md:px-6">
+            {/* Search - hidden on mobile */}
+            <form onSubmit={handleSearch} className="hidden md:block flex-1 max-w-md">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                     <input
@@ -39,16 +39,21 @@ export function AdminHeader({ profile, alertsCount }: AdminHeaderProps) {
                 </div>
             </form>
 
+            {/* Mobile: page title placeholder */}
+            <div className="md:hidden flex-1">
+                <span className="font-semibold text-sm text-zinc-200">Admin Panel</span>
+            </div>
+
             {/* Right side */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
                 {/* Alerts indicator */}
                 {alertsCount && alertsCount.total > 0 && (
                     <Link
                         href="/admin/alerts"
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                        className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors"
                     >
                         <AlertTriangle className="h-4 w-4 text-red-400" />
-                        <span className="text-sm font-medium text-red-400">
+                        <span className="hidden sm:inline text-sm font-medium text-red-400">
                             {alertsCount.critical > 0
                                 ? `${alertsCount.critical} critico${alertsCount.critical > 1 ? 's' : ''}`
                                 : `${alertsCount.total} alerta${alertsCount.total > 1 ? 's' : ''}`
@@ -59,15 +64,15 @@ export function AdminHeader({ profile, alertsCount }: AdminHeaderProps) {
 
                 {/* Notifications */}
                 <button
-                    className="relative p-2 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-colors"
+                    className="relative p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-colors"
                     aria-label="Notificacoes"
                 >
                     <Bell className="h-5 w-5" />
                 </button>
 
                 {/* User info */}
-                <div className="flex items-center gap-3 pl-4 border-l border-zinc-700">
-                    <div className="text-right">
+                <div className="flex items-center gap-3 pl-3 md:pl-4 border-l border-zinc-700">
+                    <div className="hidden md:block text-right">
                         <p className="text-sm font-semibold text-zinc-200 leading-none">
                             {profile.full_name || 'Super Admin'}
                         </p>
@@ -75,8 +80,8 @@ export function AdminHeader({ profile, alertsCount }: AdminHeaderProps) {
                             Super Admin
                         </p>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                        <span className="text-sm font-bold text-white">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                        <span className="text-xs md:text-sm font-bold text-white">
                             {profile.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'SA'}
                         </span>
                     </div>

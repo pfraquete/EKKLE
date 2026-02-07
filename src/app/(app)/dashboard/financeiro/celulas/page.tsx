@@ -116,67 +116,76 @@ export default async function DashboardCelulasFinanceiroPage() {
                 </div>
             ) : (
                 <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                    <table className="w-full min-w-[400px]">
-                        <thead className="bg-muted/30">
-                            <tr>
-                                <th className="px-3 md:px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                    Célula
-                                </th>
-                                <th className="px-3 md:px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                    Líder
-                                </th>
-                                <th className="px-3 md:px-6 py-4 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                    Saldo
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {cells.map((cellBalance: any) => (
-                                <tr key={cellBalance.id} className="hover:bg-muted/20 transition-colors">
-                                    <td className="px-3 md:px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                                <Building2 className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <span className="font-bold text-foreground">
-                                                {cellBalance.cell?.name || 'Célula'}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted/30 flex-shrink-0">
-                                                {cellBalance.cell?.leader?.photo_url ? (
-                                                    <Image
-                                                        src={cellBalance.cell.leader.photo_url}
-                                                        alt={cellBalance.cell.leader.full_name}
-                                                        fill
-                                                        className="object-cover"
-                                                        unoptimized
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-bold">
-                                                        {(cellBalance.cell?.leader?.full_name || 'L')[0].toUpperCase()}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <span className="text-foreground">
-                                                {cellBalance.cell?.leader?.full_name || 'Sem líder'}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <span className={`font-black text-lg ${
-                                            cellBalance.balance_cents > 0 ? 'text-emerald-500' : 'text-muted-foreground'
-                                        }`}>
-                                            {formatCurrency(cellBalance.balance_cents / 100)}
-                                        </span>
-                                    </td>
+                    {/* Mobile: Card list */}
+                    <div className="md:hidden divide-y divide-border">
+                        {cells.map((cellBalance: any) => (
+                            <div key={cellBalance.id} className="p-4 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                        <Building2 className="w-5 h-5 text-primary" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-bold text-foreground text-sm truncate">
+                                            {cellBalance.cell?.name || 'Célula'}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground truncate">
+                                            {cellBalance.cell?.leader?.full_name || 'Sem líder'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className={`font-black text-base flex-shrink-0 ${
+                                    cellBalance.balance_cents > 0 ? 'text-emerald-500' : 'text-muted-foreground'
+                                }`}>
+                                    {formatCurrency(cellBalance.balance_cents / 100)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop: Table */}
+                    <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-muted/30">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Célula</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground">Líder</th>
+                                    <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">Saldo</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {cells.map((cellBalance: any) => (
+                                    <tr key={cellBalance.id} className="hover:bg-muted/20 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                                    <Building2 className="w-5 h-5 text-primary" />
+                                                </div>
+                                                <span className="font-bold text-foreground">{cellBalance.cell?.name || 'Célula'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="relative w-8 h-8 rounded-full overflow-hidden bg-muted/30 flex-shrink-0">
+                                                    {cellBalance.cell?.leader?.photo_url ? (
+                                                        <Image src={cellBalance.cell.leader.photo_url} alt={cellBalance.cell.leader.full_name} fill className="object-cover" unoptimized />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-bold">
+                                                            {(cellBalance.cell?.leader?.full_name || 'L')[0].toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span className="text-foreground">{cellBalance.cell?.leader?.full_name || 'Sem líder'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <span className={`font-black text-lg ${cellBalance.balance_cents > 0 ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                                                {formatCurrency(cellBalance.balance_cents / 100)}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}

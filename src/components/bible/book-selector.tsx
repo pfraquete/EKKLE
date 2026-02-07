@@ -118,7 +118,7 @@ export function BookSelector({ selectedBook, onSelectBook, className }: BookSele
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Selecionar Livro</DialogTitle>
         </DialogHeader>

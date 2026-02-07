@@ -219,7 +219,7 @@ export default async function CommunicationsPage({ searchParams }: Communication
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Link
                     href="/admin/support/communications?status=draft"
                     className="p-4 rounded-xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/50 transition-colors"
