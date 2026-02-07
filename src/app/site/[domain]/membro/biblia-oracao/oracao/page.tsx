@@ -2,7 +2,7 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Mic, History, BarChart3, Plus, Video, Users } from 'lucide-react'
+import { Mic, History, Plus, Video, Users } from 'lucide-react'
 import { getPrayerHistory, getPrayerStreak, getPrayerStats } from '@/actions/prayers'
 import { getPersonalGoals } from '@/actions/personal-goals'
 import { PrayerHistoryItem, StreakDisplay, PrayerStatsCard } from '@/components/prayers'
@@ -78,12 +78,6 @@ export default async function OracaoPage() {
           <Button variant="outline" className="w-full py-8 rounded-2xl">
             <Video className="w-5 h-5 mr-2" />
             Salas
-          </Button>
-        </Link>
-        <Link href="/membro/biblia-oracao/oracao/relatorios" className="col-span-2 sm:col-span-4">
-          <Button variant="ghost" className="w-full py-4 rounded-2xl text-muted-foreground">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Ver Relatórios
           </Button>
         </Link>
       </div>
