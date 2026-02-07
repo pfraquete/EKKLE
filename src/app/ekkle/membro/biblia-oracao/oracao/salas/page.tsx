@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { getPrayerRooms, createPrayerRoom, PrayerRoom } from '@/actions/prayer-rooms'
+import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -78,7 +79,7 @@ export default function EkklePrayerRoomsPage() {
       setIsPublic(true)
       loadRooms()
     } else {
-      alert(result.error)
+      toast.error(result.error || 'Erro ao criar sala')
     }
     setCreating(false)
   }

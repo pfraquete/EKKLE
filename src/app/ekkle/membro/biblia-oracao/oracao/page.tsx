@@ -38,10 +38,10 @@ export default async function EkkleOracaoPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-            Oracao
+            Oração
           </h1>
           <p className="text-sm text-muted-foreground font-medium mt-1">
-            Seu diario de oracao pessoal
+            Seu diário de oração pessoal
           </p>
         </div>
 
@@ -59,7 +59,7 @@ export default async function EkkleOracaoPage() {
         <Link href="/ekkle/membro/biblia-oracao/oracao/nova" className="col-span-2">
           <Button className="w-full py-8 text-lg bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-2xl">
             <Mic className="w-6 h-6 mr-3" />
-            Gravar Nova Oracao
+            Gravar Nova Oração
           </Button>
         </Link>
         <Link href="/ekkle/membro/biblia-oracao/oracao/parceiro">
@@ -77,7 +77,7 @@ export default async function EkkleOracaoPage() {
         <Link href="/ekkle/membro/biblia-oracao/oracao/relatorios" className="col-span-2 sm:col-span-4">
           <Button variant="ghost" className="w-full py-4 rounded-2xl text-muted-foreground">
             <BarChart3 className="w-4 h-4 mr-2" />
-            Ver Relatorios
+            Ver Relatórios
           </Button>
         </Link>
       </div>
@@ -105,7 +105,7 @@ export default async function EkkleOracaoPage() {
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-8 bg-primary rounded-full" />
             <h2 className="text-lg font-black text-foreground uppercase tracking-tight">
-              Oracoes Recentes
+              Orações Recentes
             </h2>
           </div>
           <Link
@@ -131,15 +131,15 @@ export default async function EkkleOracaoPage() {
           <div className="text-center py-12 bg-card border border-dashed border-border rounded-2xl">
             <Mic className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
             <h3 className="text-lg font-bold text-foreground mb-2">
-              Nenhuma oracao ainda
+              Nenhuma oração ainda
             </h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-              Comece a gravar suas oracoes para criar um diario espiritual e acompanhar suas peticoes
+              Comece a gravar suas orações para criar um diário espiritual e acompanhar suas petições
             </p>
             <Link href="/ekkle/membro/biblia-oracao/oracao/nova">
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                Gravar Primeira Oracao
+                Gravar Primeira Oração
               </Button>
             </Link>
           </div>

@@ -116,7 +116,7 @@ export async function getAvailablePlans(): Promise<{
         // Get current user's church
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         const { data: profile } = await supabase
@@ -126,7 +126,7 @@ export async function getAvailablePlans(): Promise<{
             .single()
 
         if (!profile?.church_id) {
-            return { success: false, error: 'Igreja nao encontrada' }
+            return { success: false, error: 'Igreja não encontrada' }
         }
 
         // Get public plans + church plans
@@ -199,7 +199,7 @@ export async function startReadingPlan(
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         const { data: profile } = await supabase
@@ -209,7 +209,7 @@ export async function startReadingPlan(
             .single()
 
         if (!profile?.church_id) {
-            return { success: false, error: 'Igreja nao encontrada' }
+            return { success: false, error: 'Igreja não encontrada' }
         }
 
         // Check if user already has an active plan
@@ -221,7 +221,7 @@ export async function startReadingPlan(
             .single()
 
         if (existingPlan) {
-            return { success: false, error: 'Voce ja possui um plano ativo. Pause ou complete o atual primeiro.' }
+            return { success: false, error: 'Você já possui um plano ativo. Pause ou complete o atual primeiro.' }
         }
 
         // Create user plan
@@ -267,7 +267,7 @@ export async function getMyActivePlan(): Promise<{
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         // Get active plan with plan details
@@ -332,7 +332,7 @@ export async function getTodaysReading(): Promise<{
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         // Get active plan
@@ -365,7 +365,7 @@ export async function getTodaysReading(): Promise<{
         if (error && error.code !== 'PGRST116') throw error
 
         if (!reading) {
-            return { success: false, error: 'Leitura nao encontrada para hoje' }
+            return { success: false, error: 'Leitura não encontrada para hoje' }
         }
 
         // Check if already completed
@@ -432,25 +432,25 @@ export async function getBiblePassage(
         if (errorMessage.includes('429') || errorMessage.includes('rate')) {
             return {
                 success: false,
-                error: 'Muitas requisicoes. Aguarde alguns segundos e tente novamente.'
+                error: 'Muitas requisições. Aguarde alguns segundos e tente novamente.'
             }
         }
 
         if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
             return {
                 success: false,
-                error: 'Conexao lenta. Tente novamente.'
+                error: 'Conexão lenta. Tente novamente.'
             }
         }
 
         if (errorMessage.includes('No verses') || errorMessage.includes('not found')) {
             return {
                 success: false,
-                error: 'Passagem nao encontrada. Verifique o livro e capitulo selecionados.'
+                error: 'Passagem não encontrada. Verifique o livro e capítulo selecionados.'
             }
         }
 
-        return { success: false, error: 'Erro ao buscar passagem biblica. Tente novamente.' }
+        return { success: false, error: 'Erro ao buscar passagem bíblica. Tente novamente.' }
     }
 }
 
@@ -470,7 +470,7 @@ export async function markReadingComplete(
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         const { data: profile } = await supabase
@@ -480,7 +480,7 @@ export async function markReadingComplete(
             .single()
 
         if (!profile?.church_id) {
-            return { success: false, error: 'Igreja nao encontrada' }
+            return { success: false, error: 'Igreja não encontrada' }
         }
 
         // Get active plan
@@ -503,7 +503,7 @@ export async function markReadingComplete(
             .single()
 
         if (!reading) {
-            return { success: false, error: 'Leitura nao encontrada' }
+            return { success: false, error: 'Leitura não encontrada' }
         }
 
         // Check if already completed
@@ -515,7 +515,7 @@ export async function markReadingComplete(
             .single()
 
         if (existing) {
-            return { success: false, error: 'Leitura ja foi completada' }
+            return { success: false, error: 'Leitura já foi completada' }
         }
 
         // Insert progress (trigger will update streak)
@@ -563,7 +563,7 @@ export async function pauseReadingPlan(): Promise<{
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         const { error } = await supabase
@@ -594,7 +594,7 @@ export async function resumeReadingPlan(): Promise<{
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         const { error } = await supabase
@@ -635,7 +635,7 @@ export async function createGroupPlan(
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         const { data: profile } = await supabase
@@ -645,7 +645,7 @@ export async function createGroupPlan(
             .single()
 
         if (!profile?.church_id) {
-            return { success: false, error: 'Igreja nao encontrada' }
+            return { success: false, error: 'Igreja não encontrada' }
         }
 
         // Check if user is leader of this cell
@@ -656,11 +656,11 @@ export async function createGroupPlan(
             .single()
 
         if (!cell) {
-            return { success: false, error: 'Celula nao encontrada' }
+            return { success: false, error: 'Célula não encontrada' }
         }
 
         if (cell.leader_id !== user.id && profile.role !== 'ADMIN' && profile.role !== 'PASTOR') {
-            return { success: false, error: 'Apenas lideres podem criar planos de grupo' }
+            return { success: false, error: 'Apenas líderes podem criar planos de grupo' }
         }
 
         // Check if cell already has active plan
@@ -672,7 +672,7 @@ export async function createGroupPlan(
             .single()
 
         if (existingPlan) {
-            return { success: false, error: 'Esta celula ja possui um plano ativo' }
+            return { success: false, error: 'Esta célula já possui um plano ativo' }
         }
 
         // Get plan name if not provided
@@ -740,7 +740,7 @@ export async function getCellGroupPlan(): Promise<{
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         // Get user's cell
@@ -751,7 +751,7 @@ export async function getCellGroupPlan(): Promise<{
             .single()
 
         if (!profile?.cell_id) {
-            return { success: false, error: 'Voce nao pertence a uma celula' }
+            return { success: false, error: 'Você não pertence a uma célula' }
         }
 
         // Get active group plan
@@ -817,7 +817,7 @@ export async function joinGroupPlan(groupPlanId: string): Promise<{
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         const { data: profile } = await supabase
@@ -827,7 +827,7 @@ export async function joinGroupPlan(groupPlanId: string): Promise<{
             .single()
 
         if (!profile?.church_id) {
-            return { success: false, error: 'Igreja nao encontrada' }
+            return { success: false, error: 'Igreja não encontrada' }
         }
 
         // Verify group plan exists and user's cell matches
@@ -839,11 +839,11 @@ export async function joinGroupPlan(groupPlanId: string): Promise<{
             .single()
 
         if (!groupPlan) {
-            return { success: false, error: 'Plano de grupo nao encontrado' }
+            return { success: false, error: 'Plano de grupo não encontrado' }
         }
 
         if (groupPlan.cell_id !== profile.cell_id) {
-            return { success: false, error: 'Voce nao pertence a esta celula' }
+            return { success: false, error: 'Você não pertence a esta célula' }
         }
 
         // Check if already member
@@ -855,7 +855,7 @@ export async function joinGroupPlan(groupPlanId: string): Promise<{
             .single()
 
         if (existing) {
-            return { success: false, error: 'Voce ja participa deste plano' }
+            return { success: false, error: 'Você já participa deste plano' }
         }
 
         // Join
@@ -894,7 +894,7 @@ export async function markGroupReadingComplete(
 
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            return { success: false, error: 'Nao autenticado' }
+            return { success: false, error: 'Não autenticado' }
         }
 
         const { data: profile } = await supabase
@@ -928,7 +928,7 @@ export async function markGroupReadingComplete(
             .single()
 
         if (!membership) {
-            return { success: false, error: 'Voce nao participa deste plano' }
+            return { success: false, error: 'Você não participa deste plano' }
         }
 
         // Get reading info
@@ -939,7 +939,7 @@ export async function markGroupReadingComplete(
             .single()
 
         if (!reading) {
-            return { success: false, error: 'Leitura nao encontrada' }
+            return { success: false, error: 'Leitura não encontrada' }
         }
 
         // Check if already completed
@@ -951,7 +951,7 @@ export async function markGroupReadingComplete(
             .single()
 
         if (existing) {
-            return { success: false, error: 'Leitura ja foi completada' }
+            return { success: false, error: 'Leitura já foi completada' }
         }
 
         // Insert progress
@@ -1033,7 +1033,7 @@ export async function getGroupMembersProgress(groupPlanId: string): Promise<{
             .single()
 
         if (!groupPlan) {
-            return { success: false, error: 'Plano nao encontrado' }
+            return { success: false, error: 'Plano não encontrado' }
         }
 
         const { count: totalReadings } = await supabase

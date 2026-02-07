@@ -34,7 +34,7 @@ export default async function BibleReaderPage() {
         </Link>
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-foreground">
-            Ler Biblia
+            Ler Bíblia
           </h1>
           <p className="text-sm text-muted-foreground">
             Leitura livre da Palavra de Deus

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { getMemberDetails } from '@/actions/members'
 import { getUserBadges } from '@/actions/badges'
+import { getProfile } from '@/actions/auth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,13 +16,15 @@ import {
     Clock,
     CheckCircle2,
     XCircle,
-    Award
+    Award,
+    Shield
 } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Image from 'next/image'
+import { RoleEditor } from '@/components/members/role-editor'
 
 export default async function MemberDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -29,16 +32,19 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
     let member = null
     let attendance: any[] = []
     let userBadges: any[] = []
-    
+    let currentUserProfile: any = null
+
     try {
-        const [memberResult, badgesResult] = await Promise.all([
+        const [memberResult, badgesResult, profile] = await Promise.all([
             getMemberDetails(id),
-            getUserBadges(id).catch(() => ({ data: null, error: 'Failed to load badges' }))
+            getUserBadges(id).catch(() => ({ data: null, error: 'Failed to load badges' })),
+            getProfile()
         ])
-        
+
         member = memberResult.member
         attendance = memberResult.attendance || []
         userBadges = badgesResult.data || []
+        currentUserProfile = profile
     } catch (error) {
         console.error('Error loading member details:', error)
     }
@@ -63,6 +69,15 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
         'LEADER': 'Líder',
         'PASTOR': 'Pastor'
     }
+
+    const ROLE_LABELS: Record<string, string> = {
+        'MEMBER': 'Membro',
+        'LEADER': 'Líder',
+        'PASTOR': 'Pastor',
+    }
+
+    const isPastor = currentUserProfile?.role === 'PASTOR'
+    const isSelf = currentUserProfile?.id === member.id
 
     return (
         <div className="max-w-5xl mx-auto space-y-6 pb-20">
@@ -358,6 +373,44 @@ export default async function MemberDetailsPage({ params }: { params: Promise<{ 
                                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">ID do Sistema</p>
                                 <p className="text-xs font-mono text-muted-foreground">{member.id}</p>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Role / Permission Section */}
+                    <Card className="border-none shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                <Shield className="h-5 w-5 text-primary" />
+                                Permissão no Sistema
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {isPastor && !isSelf ? (
+                                <RoleEditor
+                                    memberId={member.id}
+                                    currentRole={member.role || 'MEMBER'}
+                                    memberName={member.full_name}
+                                />
+                            ) : (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-3">
+                                        <Shield className="h-5 w-5 text-muted-foreground" />
+                                        <Badge variant="secondary" className="font-bold text-sm">
+                                            {ROLE_LABELS[member.role] || member.role || 'Membro'}
+                                        </Badge>
+                                    </div>
+                                    {!isPastor && (
+                                        <p className="text-xs text-muted-foreground">
+                                            Apenas pastores podem alterar permissões.
+                                        </p>
+                                    )}
+                                    {isSelf && (
+                                        <p className="text-xs text-muted-foreground">
+                                            Você não pode alterar sua própria permissão.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>

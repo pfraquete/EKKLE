@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PrayerItemCard } from './prayer-item-card'
 import { Heart, BookOpen, Sparkles, Users } from 'lucide-react'
@@ -16,35 +16,33 @@ const tabs = [
   { value: 'all', label: 'Todos', icon: null },
   { value: 'MOTIVO', label: 'Motivos', icon: Heart, color: 'text-rose-500' },
   { value: 'PROMESSA', label: 'Promessas', icon: BookOpen, color: 'text-blue-500' },
-  { value: 'TRANSFORMACAO', label: 'Transformacoes', icon: Sparkles, color: 'text-purple-500' },
+  { value: 'TRANSFORMACAO', label: 'Transformações', icon: Sparkles, color: 'text-purple-500' },
   { value: 'PESSOA', label: 'Pessoas', icon: Users, color: 'text-emerald-500' },
 ]
 
 export function PrayerItemsList({ items, onItemAnswered }: PrayerItemsListProps) {
   const [activeTab, setActiveTab] = useState('all')
 
-  const filteredItems =
+  const counts = useMemo(() => ({
+    all: items.length,
+    MOTIVO: items.filter((i) => i.item_type === 'MOTIVO').length,
+    PROMESSA: items.filter((i) => i.item_type === 'PROMESSA').length,
+    TRANSFORMACAO: items.filter((i) => i.item_type === 'TRANSFORMACAO').length,
+    PESSOA: items.filter((i) => i.item_type === 'PESSOA').length,
+  }), [items])
+
+  const filteredItems = useMemo(() =>
     activeTab === 'all'
       ? items
-      : items.filter((item) => item.item_type === activeTab)
-
-  const getCounts = () => {
-    return {
-      all: items.length,
-      MOTIVO: items.filter((i) => i.item_type === 'MOTIVO').length,
-      PROMESSA: items.filter((i) => i.item_type === 'PROMESSA').length,
-      TRANSFORMACAO: items.filter((i) => i.item_type === 'TRANSFORMACAO').length,
-      PESSOA: items.filter((i) => i.item_type === 'PESSOA').length,
-    }
-  }
-
-  const counts = getCounts()
+      : items.filter((item) => item.item_type === activeTab),
+    [items, activeTab]
+  )
 
   if (items.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground text-sm">
-          Nenhum item extraido desta oracao ainda.
+          Nenhum item extraído desta oração ainda.
         </p>
       </div>
     )

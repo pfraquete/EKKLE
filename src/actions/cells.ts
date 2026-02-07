@@ -173,10 +173,11 @@ export async function createCell(formData: FormData) {
             throw new Error('Falha ao criar registro da célula: ' + cellError.message)
         }
 
-        // 5. Update profile role and link cell
-        const updateData: { role: string; cell_id: string; full_name?: string } = {
+        // 5. Update profile role, member_stage and link cell
+        const updateData: { role: string; cell_id: string; member_stage: string; full_name?: string } = {
             role: 'LEADER',
             cell_id: cell.id,
+            member_stage: 'LEADER',
         }
         // Só atualiza o nome se foi fornecido (modo criação)
         if (leaderName) {

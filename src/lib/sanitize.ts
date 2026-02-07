@@ -8,8 +8,11 @@
  * ```ts
  * const safeSettings = sanitizeSettings(church.website_settings)
  * const safeName = sanitizeString(userInput)
+ * const safeHtml = sanitizeHtml(bibleContent)
  * ```
  */
+
+import DOMPurify from 'isomorphic-dompurify'
 
 /**
  * HTML entities that need escaping
@@ -304,6 +307,22 @@ export function sanitizeWebsiteSettings(
   return sanitizeSettings<SanitizedWebsiteSettings>(settings);
 }
 
+/**
+ * Sanitize HTML content using DOMPurify
+ * Allows safe HTML tags for rendering rich content (e.g., Bible passages)
+ * Strips scripts, event handlers, and other dangerous content
+ */
+export function sanitizeHtml(html: string): string {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'b', 'i', 'em', 'strong', 'u', 'span', 'div',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li', 'blockquote', 'sup', 'sub',
+    ],
+    ALLOWED_ATTR: ['class', 'style', 'id', 'data-verse'],
+  })
+}
+
 const sanitizeUtils = {
   escapeHtml,
   sanitizeString,
@@ -313,6 +332,7 @@ const sanitizeUtils = {
   formatPhoneDisplay,
   sanitizeSettings,
   sanitizeWebsiteSettings,
+  sanitizeHtml,
 };
 
 export default sanitizeUtils;

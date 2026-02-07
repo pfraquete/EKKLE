@@ -53,7 +53,7 @@ export default async function EkklePrayerPartnerPage() {
           </Link>
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-foreground">
-              Parceiro de Oracao
+              Parceiro de Oração
             </h1>
             <p className="text-sm text-muted-foreground">
               Orem um pelo outro esta semana
@@ -120,7 +120,7 @@ export default async function EkklePrayerPartnerPage() {
             className="text-sm text-muted-foreground hover:text-primary inline-flex items-center gap-1"
           >
             <Settings className="w-4 h-4" />
-            Configuracoes
+            Configurações
           </Link>
         </div>
       )}

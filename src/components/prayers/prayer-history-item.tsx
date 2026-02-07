@@ -37,7 +37,7 @@ export function PrayerHistoryItem({ prayer, href }: PrayerHistoryItemProps) {
     },
     COMPLETED: {
       icon: CheckCircle,
-      label: 'Concluido',
+      label: 'Concluído',
       color: 'text-emerald-500',
       bgColor: 'bg-emerald-500/10',
       animate: false,
@@ -119,9 +119,9 @@ export function PrayerHistoryItem({ prayer, href }: PrayerHistoryItemProps) {
               ) : (
                 <p className="text-sm text-muted-foreground italic">
                   {prayer.transcription_status === 'PROCESSING'
-                    ? 'Transcricao em andamento...'
+                    ? 'Transcrição em andamento...'
                     : prayer.transcription_status === 'FAILED'
-                    ? 'Erro na transcricao'
+                    ? 'Erro na transcrição'
                     : 'Aguardando processamento'}
                 </p>
               )}
@@ -134,7 +134,7 @@ export function PrayerHistoryItem({ prayer, href }: PrayerHistoryItemProps) {
                     className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-xs"
                   >
                     <Sparkles className="w-3 h-3 mr-1" />
-                    Bencao Recebida
+                    Bênção Recebida
                   </Badge>
                 )}
                 {prayer.session_type === 'GROUP' && (

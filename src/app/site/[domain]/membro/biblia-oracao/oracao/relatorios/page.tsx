@@ -67,12 +67,6 @@ export default function RelatoriosOracaoPage() {
 
   const currentReport = activeTab === 'WEEKLY' ? weeklyReport : monthlyReport
 
-  const formatPeriod = (start: string, end: string) => {
-    const startDate = new Date(start)
-    const endDate = new Date(end)
-    return `${startDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} - ${endDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}`
-  }
-
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
@@ -85,7 +79,7 @@ export default function RelatoriosOracaoPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-black text-foreground tracking-tight">
-            Relatorios de Oracao
+            Relatórios de Oração
           </h1>
           <p className="text-sm text-muted-foreground font-medium mt-1">
             Seu resumo espiritual estilo Spotify Wrapped
@@ -148,7 +142,7 @@ export default function RelatoriosOracaoPage() {
             ) : (
               <Sparkles className="w-4 h-4 mr-2" />
             )}
-            Gerar Novo Relatorio
+            Gerar Novo Relatório
           </Button>
         </div>
       )}
@@ -181,7 +175,7 @@ function ReportCard({
         <CardContent className="p-6 sm:p-8">
           <div className="text-center mb-6">
             <p className="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">
-              {report.report_type === 'WEEKLY' ? 'Sua Semana de Oracao' : 'Seu Mes de Oracao'}
+              {report.report_type === 'WEEKLY' ? 'Sua Semana de Oração' : 'Seu Mês de Oração'}
             </p>
             <p className="text-sm opacity-60">
               {formatPeriod(report.report_period_start, report.report_period_end)}
@@ -193,7 +187,7 @@ function ReportCard({
             <div className="text-center p-4 bg-white/10 rounded-2xl">
               <Calendar className="w-6 h-6 mx-auto mb-2 opacity-80" />
               <div className="text-4xl font-black">{report.total_prayers}</div>
-              <p className="text-xs uppercase tracking-wider opacity-70">Oracoes</p>
+              <p className="text-xs uppercase tracking-wider opacity-70">Orações</p>
             </div>
             <div className="text-center p-4 bg-white/10 rounded-2xl">
               <Clock className="w-6 h-6 mx-auto mb-2 opacity-80" />
@@ -216,7 +210,7 @@ function ReportCard({
           {report.longest_session_minutes > 0 && (
             <div className="text-center p-3 bg-white/5 rounded-xl">
               <p className="text-xs uppercase tracking-wider opacity-60 mb-1">
-                Maior sessao de oracao
+                Maior sessão de oração
               </p>
               <p className="text-lg font-bold">{report.longest_session_minutes} minutos</p>
             </div>
@@ -274,7 +268,7 @@ function ReportCard({
 
       {shareUrl && (
         <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
-          <p className="text-xs text-emerald-600 font-medium">Link copiado para a area de transferencia!</p>
+          <p className="text-xs text-emerald-600 font-medium">Link copiado para a área de transferência!</p>
         </div>
       )}
     </div>
@@ -295,10 +289,10 @@ function EmptyReportState({
     <div className="text-center py-12 bg-card border border-dashed border-border rounded-2xl">
       <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
       <h3 className="text-lg font-bold text-foreground mb-2">
-        Nenhum relatorio {type} ainda
+        Nenhum relatório {type} ainda
       </h3>
       <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-        Gere seu primeiro relatorio para ver um resumo das suas oracoes
+        Gere seu primeiro relatório para ver um resumo das suas orações
       </p>
       <Button onClick={onGenerate} disabled={isGenerating}>
         {isGenerating ? (
@@ -306,7 +300,7 @@ function EmptyReportState({
         ) : (
           <Sparkles className="w-4 h-4 mr-2" />
         )}
-        Gerar Relatorio
+        Gerar Relatório
       </Button>
     </div>
   )

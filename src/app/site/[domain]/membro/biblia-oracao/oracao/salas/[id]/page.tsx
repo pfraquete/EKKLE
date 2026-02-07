@@ -42,6 +42,7 @@ import {
   VideoProvider,
 } from '@/actions/prayer-rooms'
 import { DailyVideoCall } from '@/components/video/daily-video-call'
+import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -108,7 +109,7 @@ export default function PrayerRoomDetailPage({
         window.open(result.joinUrl, '_blank')
       }
     } else {
-      alert(result.error)
+      toast.error(result.error || 'Erro ao processar ação')
     }
     setJoining(false)
   }
@@ -127,7 +128,7 @@ export default function PrayerRoomDetailPage({
     if (result.success) {
       router.push('/membro/biblia-oracao/oracao/salas')
     } else {
-      alert(result.error)
+      toast.error(result.error || 'Erro ao processar ação')
     }
     setEnding(false)
   }
@@ -137,7 +138,7 @@ export default function PrayerRoomDetailPage({
     if (result.success) {
       router.push('/membro/biblia-oracao/oracao/salas')
     } else {
-      alert(result.error)
+      toast.error(result.error || 'Erro ao processar ação')
     }
   }
 

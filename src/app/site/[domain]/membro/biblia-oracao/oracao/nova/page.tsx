@@ -75,10 +75,10 @@ export default function NovaOracaoPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-black text-foreground tracking-tight">
-            Nova Oracao
+            Nova Oração
           </h1>
           <p className="text-sm text-muted-foreground font-medium">
-            Grave sua oracao para registrar e analisar
+            Grave sua oração para registrar e analisar
           </p>
         </div>
       </div>
@@ -88,13 +88,13 @@ export default function NovaOracaoPage() {
         <CardContent className="p-4">
           <h3 className="font-bold text-foreground mb-2">Como funciona:</h3>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>1. Toque no botao para comecar a gravar</li>
-            <li>2. Fale sua oracao naturalmente</li>
+            <li>1. Toque no botão para começar a gravar</li>
+            <li>2. Fale sua oração naturalmente</li>
             <li>3. Pause ou pare quando terminar</li>
             <li>4. Confirme para salvar e transcrever</li>
           </ul>
           <p className="text-xs text-primary mt-3 font-medium">
-            A IA ira transcrever e extrair os pontos importantes da sua oracao automaticamente.
+            A IA irá transcrever e extrair os pontos importantes da sua oração automaticamente.
           </p>
         </CardContent>
       </Card>
@@ -118,7 +118,7 @@ export default function NovaOracaoPage() {
         <Card className="border-blue-500/20 bg-blue-500/5">
           <CardContent className="p-6 text-center">
             <Loader2 className="w-8 h-8 mx-auto mb-4 text-blue-500 animate-spin" />
-            <h3 className="font-bold text-foreground mb-1">Salvando sua oracao...</h3>
+            <h3 className="font-bold text-foreground mb-1">Salvando sua oração...</h3>
             <p className="text-sm text-muted-foreground">
               Isso pode levar alguns segundos
             </p>
@@ -128,8 +128,8 @@ export default function NovaOracaoPage() {
 
       {/* Tips */}
       <div className="text-center text-xs text-muted-foreground space-y-1 pt-4">
-        <p>Dica: Fale claramente e em um ambiente silencioso para melhor transcricao.</p>
-        <p>Suas oracoes sao privadas e apenas voce pode ver.</p>
+        <p>Dica: Fale claramente e em um ambiente silencioso para melhor transcrição.</p>
+        <p>Suas orações são privadas e apenas você pode ver.</p>
       </div>
     </div>
   )

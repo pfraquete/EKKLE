@@ -7,6 +7,7 @@ import { BookOpen, Check, ChevronRight, Loader2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { markReadingComplete, getBiblePassage } from '@/actions/bible-reading'
 import { getBookName } from '@/lib/bible-utils'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -120,7 +121,7 @@ export function TodaysReadingCard({
                         ) : content ? (
                             <div
                                 className="prose prose-sm max-w-none dark:prose-invert"
-                                dangerouslySetInnerHTML={{ __html: content }}
+                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
                             />
                         ) : (
                             <p className="text-muted-foreground text-center py-8">

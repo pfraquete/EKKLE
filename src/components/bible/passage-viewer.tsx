@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Loader2, BookOpen, ZoomIn, ZoomOut } from 'lucide-react'
 import { getBiblePassage } from '@/actions/bible-reading'
 import { getBookName } from '@/lib/bible-utils'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
 
 interface PassageViewerProps {
@@ -27,7 +28,13 @@ export function PassageViewer({
     const [reference, setReference] = useState<string>('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [fontSize, setFontSize] = useState(16)
+    const [fontSize, setFontSize] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('bible-reader-font-size')
+            return saved ? parseInt(saved, 10) : 16
+        }
+        return 16
+    })
 
     useEffect(() => {
         loadPassage()
@@ -49,8 +56,16 @@ export function PassageViewer({
         setLoading(false)
     }
 
-    const increaseFontSize = () => setFontSize(prev => Math.min(prev + 2, 24))
-    const decreaseFontSize = () => setFontSize(prev => Math.max(prev - 2, 12))
+    const increaseFontSize = () => setFontSize(prev => {
+        const next = Math.min(prev + 2, 24)
+        localStorage.setItem('bible-reader-font-size', String(next))
+        return next
+    })
+    const decreaseFontSize = () => setFontSize(prev => {
+        const next = Math.max(prev - 2, 12)
+        localStorage.setItem('bible-reader-font-size', String(next))
+        return next
+    })
 
     const displayReference = reference || (
         chapterEnd && chapterEnd !== chapterStart
@@ -119,11 +134,11 @@ export function PassageViewer({
                     <div
                         className="prose prose-sm max-w-none dark:prose-invert"
                         style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}
-                        dangerouslySetInnerHTML={{ __html: content }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
                     />
                 ) : (
                     <p className="text-muted-foreground text-center py-8">
-                        Conteudo nao disponivel
+                        Conteúdo não disponível
                     </p>
                 )}
             </CardContent>

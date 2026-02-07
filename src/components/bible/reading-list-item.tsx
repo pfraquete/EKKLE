@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { markReadingComplete, getBiblePassage } from '@/actions/bible-reading'
 import { getBookName } from '@/lib/bible-utils'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -140,7 +141,7 @@ export function ReadingListItem({
                             <>
                                 <div
                                     className="prose prose-sm max-w-none dark:prose-invert max-h-64 overflow-y-auto mb-4"
-                                    dangerouslySetInnerHTML={{ __html: content }}
+                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
                                 />
                                 {!completed && (
                                     <Button

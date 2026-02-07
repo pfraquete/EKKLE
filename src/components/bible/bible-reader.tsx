@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Loader2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, BookOpen } from 'lucide-react'
 import { getBiblePassage } from '@/actions/bible-reading'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { BookSelector, BIBLE_BOOKS_DATA, getBookChapters, getBookName } from './book-selector'
 import { VersionSelector, getVersionName } from './version-selector'
 import { cn } from '@/lib/utils'
@@ -43,7 +44,13 @@ export function BibleReader({
   const [reference, setReference] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [fontSize, setFontSize] = useState(16)
+  const [fontSize, setFontSize] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('bible-reader-font-size')
+      return saved ? parseInt(saved, 10) : 16
+    }
+    return 16
+  })
 
   const maxChapters = getBookChapters(book)
 
@@ -130,8 +137,16 @@ export function BibleReader({
     }
   }
 
-  const increaseFontSize = () => setFontSize(prev => Math.min(prev + 2, 24))
-  const decreaseFontSize = () => setFontSize(prev => Math.max(prev - 2, 12))
+  const increaseFontSize = () => setFontSize(prev => {
+    const next = Math.min(prev + 2, 24)
+    localStorage.setItem('bible-reader-font-size', String(next))
+    return next
+  })
+  const decreaseFontSize = () => setFontSize(prev => {
+    const next = Math.max(prev - 2, 12)
+    localStorage.setItem('bible-reader-font-size', String(next))
+    return next
+  })
 
   // Check if at beginning or end
   const isFirstChapter = book === 'GEN' && chapter === 1
@@ -159,12 +174,12 @@ export function BibleReader({
               onValueChange={(v) => handleChapterChange(parseInt(v, 10))}
             >
               <SelectTrigger className="w-full sm:w-[120px]">
-                <SelectValue placeholder="Capitulo" />
+                <SelectValue placeholder="Capítulo" />
               </SelectTrigger>
               <SelectContent>
                 {chapterOptions.map(ch => (
                   <SelectItem key={ch} value={String(ch)}>
-                    Capitulo {ch}
+                    Capítulo {ch}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -238,11 +253,11 @@ export function BibleReader({
             <div
               className="p-6 prose prose-sm max-w-none dark:prose-invert"
               style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}
-              dangerouslySetInnerHTML={{ __html: content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
             />
           ) : (
             <p className="text-muted-foreground text-center py-8">
-              Conteudo nao disponivel
+              Conteúdo não disponível
             </p>
           )}
         </CardContent>
@@ -270,7 +285,7 @@ export function BibleReader({
           disabled={isLastChapter || loading}
           className="gap-2"
         >
-          Proximo
+          Próximo
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

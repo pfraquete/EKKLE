@@ -50,10 +50,10 @@ export default async function HistoricoOracaoPage({ searchParams }: Props) {
           </Link>
           <div>
             <h1 className="text-2xl font-black text-foreground tracking-tight">
-              Historico de Oracoes
+              Histórico de Orações
             </h1>
             <p className="text-sm text-muted-foreground font-medium mt-1">
-              {total} {total === 1 ? 'oracao registrada' : 'oracoes registradas'}
+              {total} {total === 1 ? 'oração registrada' : 'orações registradas'}
             </p>
           </div>
         </div>
@@ -81,15 +81,15 @@ export default async function HistoricoOracaoPage({ searchParams }: Props) {
         <div className="text-center py-12 bg-card border border-dashed border-border rounded-2xl">
           <Mic className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
           <h3 className="text-lg font-bold text-foreground mb-2">
-            Nenhuma oracao ainda
+            Nenhuma oração ainda
           </h3>
           <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-            Comece a gravar suas oracoes para criar um diario espiritual
+            Comece a gravar suas orações para criar um diário espiritual
           </p>
           <Link href="/membro/biblia-oracao/oracao/nova">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Gravar Primeira Oracao
+              Gravar Primeira Oração
             </Button>
           </Link>
         </div>
@@ -106,12 +106,12 @@ export default async function HistoricoOracaoPage({ searchParams }: Props) {
             </Link>
           )}
           <span className="text-sm text-muted-foreground px-4">
-            Pagina {page} de {totalPages}
+            Página {page} de {totalPages}
           </span>
           {page < totalPages && (
             <Link href={`/membro/biblia-oracao/oracao/historico?page=${page + 1}`}>
               <Button variant="outline" size="sm">
-                Proxima
+                Próxima
               </Button>
             </Link>
           )}

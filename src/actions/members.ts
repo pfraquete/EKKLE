@@ -151,6 +151,39 @@ export async function deleteMember(id: string) {
     return { success: true }
 }
 
+export async function updateMemberRole(memberId: string, newRole: 'MEMBER' | 'LEADER' | 'PASTOR') {
+    const profile = await getProfile()
+    if (!profile) return { success: false, error: 'Não autenticado' }
+
+    if (profile.role !== 'PASTOR') {
+        return { success: false, error: 'Apenas pastores podem alterar permissões' }
+    }
+
+    if (memberId === profile.id) {
+        return { success: false, error: 'Você não pode alterar sua própria permissão' }
+    }
+
+    const validRoles = ['MEMBER', 'LEADER', 'PASTOR'] as const
+    if (!validRoles.includes(newRole)) {
+        return { success: false, error: 'Permissão inválida' }
+    }
+
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole, updated_at: new Date().toISOString() })
+        .eq('id', memberId)
+        .eq('church_id', profile.church_id)
+
+    if (error) return { success: false, error: error.message }
+
+    revalidatePath(`/membros/${memberId}`)
+    revalidatePath('/membros')
+    revalidatePath('/minha-celula/membros')
+    return { success: true }
+}
+
 export async function getMembers(cellId: string) {
     const profile = await getProfile()
     if (!profile) return []
