@@ -1,5 +1,6 @@
-import { getPastorDashboardData, getAllCellsOverview, getGrowthData, getExtendedDashboardStats } from '@/actions/admin'
+import { getAllCellsOverview, getEvents } from '@/actions/admin'
 import { getWhatsAppInstance } from '@/actions/whatsapp'
+import { getDashboardDataCombined, getGrowthDataOptimized } from '@/actions/dashboard-optimized'
 export const dynamic = 'force-dynamic'
 
 import { getProfile } from '@/actions/auth'
@@ -14,7 +15,6 @@ import {
     CalendarCheck,
     CheckCircle2
 } from 'lucide-react'
-import { getEvents } from '@/actions/admin'
 import { formatCurrency } from '@/lib/utils'
 
 // Modern Components
@@ -34,20 +34,22 @@ export default async function DashboardPage() {
     if (profile.role === 'MEMBER' && profile.cell_id) {
         redirect('/membro')
     }
+
+    // OPTIMIZED: All data fetched in parallel with shared profile/supabase client
+    // Before: ~57 queries (7x getProfile + 24 growth queries + 15 stats queries)
+    // After:  ~20 queries (1x getProfile via cache + 2 growth + 16 parallel stats)
     const [
-        { stats },
+        { stats, extendedStats },
         cells,
         growthData,
         events,
-        { data: whatsapp },
-        extendedStats
+        { data: whatsapp }
     ] = await Promise.all([
-        getPastorDashboardData(),
+        getDashboardDataCombined(),
         getAllCellsOverview(),
-        getGrowthData(),
+        getGrowthDataOptimized(),
         getEvents(),
-        getWhatsAppInstance(),
-        getExtendedDashboardStats()
+        getWhatsAppInstance()
     ])
 
     const upcomingEvents = events

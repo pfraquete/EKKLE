@@ -1,4 +1,4 @@
-import { getChurchMembers } from '@/actions/admin'
+import { getChurchMembersOptimized } from '@/actions/members-optimized'
 import { getProfile } from '@/actions/auth'
 import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
@@ -34,7 +34,7 @@ export default async function MembersPage() {
         redirect('/dashboard')
     }
 
-    const members = await getChurchMembers() as ChurchMember[]
+    const members = await getChurchMembersOptimized() as ChurchMember[]
 
     const getStageBadge = (stage: string) => {
         switch (stage) {

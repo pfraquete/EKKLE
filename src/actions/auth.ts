@@ -33,29 +33,14 @@ export interface Profile {
 }
 
 /**
- * Get the current user's profile
- * Note: We removed unstable_cache because it conflicts with cookies() used in createClient()
- * The database query is already optimized with proper indexes
+ * Get the current user's profile.
+ * Uses React.cache() to deduplicate across the same server request.
+ * This avoids 7+ redundant auth.getUser() + profiles.select() calls per page load.
  */
 export async function getProfile(): Promise<Profile | null> {
-    const supabase = await createClient()
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) return null
-
-    const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-    if (error) {
-        console.error('Error fetching profile:', error)
-        return null
-    }
-
-    return profile
+    // Import dynamically to avoid circular deps in non-RSC contexts
+    const { getCachedProfile } = await import('@/lib/cache/profile-cache')
+    return getCachedProfile()
 }
 
 /**
@@ -63,36 +48,8 @@ export async function getProfile(): Promise<Profile | null> {
  * Used by layout/navigation components that need to know which modules are active.
  */
 export async function getProfileWithModules(): Promise<Profile | null> {
-    const supabase = await createClient()
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return null
-
-    const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-    if (error || !profile) {
-        console.error('Error fetching profile:', error)
-        return null
-    }
-
-    const { data: modules } = await supabase
-        .from('church_modules')
-        .select('cells_enabled, departments_enabled, ebd_enabled')
-        .eq('church_id', profile.church_id)
-        .single()
-
-    return {
-        ...profile,
-        modules: modules ?? {
-            cells_enabled: true,
-            departments_enabled: false,
-            ebd_enabled: false,
-        }
-    } as Profile
+    const { getCachedProfileWithModules } = await import('@/lib/cache/profile-cache')
+    return getCachedProfileWithModules()
 }
 
 export async function signIn(formData: FormData) {
