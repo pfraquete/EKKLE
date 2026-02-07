@@ -2,16 +2,21 @@ import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen, Flame, ArrowRight, Calendar, CheckCircle, Play, Clock, Users } from 'lucide-react'
-import { getMyActivePlan, getTodaysReading, getAvailablePlans } from '@/actions/bible-reading'
+import {
+  BookOpen,
+  Flame,
+  Calendar,
+  Clock,
+  Users,
+  ListChecks,
+  History,
+  UserCheck,
+  BarChart3,
+  DoorOpen,
+  Target,
+} from 'lucide-react'
+import { getMyActivePlan } from '@/actions/bible-reading'
 import { getPrayerStreak, getPrayerStats } from '@/actions/prayers'
-import { TodaysReadingCard } from '@/components/bible/todays-reading-card'
-import { StreakDisplay } from '@/components/bible/streak-display'
-import { StreakDisplay as PrayerStreakDisplay } from '@/components/prayers/streak-display'
-import { PlanCard } from '@/components/bible/plan-card'
-import { Progress } from '@/components/ui/progress'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 
 export default async function BibliaOracaoPage() {
   const church = await getChurch()
@@ -29,301 +34,185 @@ export default async function BibliaOracaoPage() {
     redirect('/login')
   }
 
-  // Get active plan
+  // Get stats for the summary card
   const activePlanResult = await getMyActivePlan()
   const activePlan = activePlanResult.data
 
-  // Get today's reading if has active plan
-  let todaysReading = null
-  if (activePlan) {
-    const todaysResult = await getTodaysReading()
-    if (todaysResult.success && todaysResult.data) {
-      todaysReading = todaysResult.data
-    }
-  }
-
-  // Get available plans for suggestions
-  const plansResult = await getAvailablePlans()
-  const availablePlans = plansResult.data?.slice(0, 3) || []
-
-  // Get prayer stats
   const streakResult = await getPrayerStreak()
   const prayerStreak = streakResult.success ? streakResult.streak : null
 
   const weeklyStatsResult = await getPrayerStats('week')
   const weeklyStats = weeklyStatsResult.success ? weeklyStatsResult.stats : null
 
-  // Calculate progress
   const progressPercent = activePlan
     ? Math.round((activePlan.progress.length / activePlan.totalReadings) * 100)
     : 0
 
+  const menuItems = [
+    {
+      href: '/membro/biblia-oracao/oracao',
+      icon: Flame,
+      label: 'Oração',
+      color: 'text-orange-400',
+      bg: 'bg-orange-500/15',
+    },
+    {
+      href: '/membro/biblia-oracao/leitor',
+      icon: BookOpen,
+      label: 'Ler Bíblia',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/15',
+    },
+    {
+      href: '/membro/biblia-oracao/planos',
+      icon: ListChecks,
+      label: 'Planos de Leitura',
+      color: 'text-blue-400',
+      bg: 'bg-blue-500/15',
+    },
+    {
+      href: '/membro/biblia-oracao/oracao#alvos',
+      icon: Target,
+      label: 'Meus Alvos',
+      color: 'text-pink-400',
+      bg: 'bg-pink-500/15',
+    },
+    {
+      href: '/membro/biblia-oracao/oracao/nova',
+      icon: Flame,
+      label: 'Nova Oração',
+      color: 'text-rose-400',
+      bg: 'bg-rose-500/15',
+    },
+    {
+      href: '/membro/biblia-oracao/oracao/historico',
+      icon: History,
+      label: 'Histórico',
+      color: 'text-purple-400',
+      bg: 'bg-purple-500/15',
+    },
+    {
+      href: '/membro/biblia-oracao/oracao/parceiro',
+      icon: UserCheck,
+      label: 'Parceiro de Oração',
+      color: 'text-cyan-400',
+      bg: 'bg-cyan-500/15',
+    },
+    {
+      href: '/membro/biblia-oracao/oracao/relatorios',
+      icon: BarChart3,
+      label: 'Relatórios',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/15',
+    },
+    {
+      href: '/membro/biblia-oracao/oracao/salas',
+      icon: DoorOpen,
+      label: 'Salas de Oração',
+      color: 'text-indigo-400',
+      bg: 'bg-indigo-500/15',
+    },
+  ]
+
+  // Add "Meu Plano" only if there's an active plan
+  if (activePlan) {
+    menuItems.splice(3, 0, {
+      href: '/membro/biblia-oracao/meu-plano',
+      icon: Calendar,
+      label: 'Meu Plano',
+      color: 'text-teal-400',
+      bg: 'bg-teal-500/15',
+    })
+  }
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-2xl mx-auto space-y-6 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">Biblia e Oracao</h1>
-        <p className="text-sm sm:text-base text-muted-foreground font-medium mt-1">
-          Sua jornada espiritual diaria
+        <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+          Bíblia e Oração
+        </h1>
+        <p className="text-sm text-muted-foreground font-medium mt-1">
+          Sua jornada espiritual diária
         </p>
       </div>
 
-      {/* Prayer Quick Actions */}
-      <section className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      {/* Stats Summary Card */}
+      <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-5 text-primary-foreground">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-xs sm:text-xs font-black uppercase tracking-widest text-primary/70 mb-1">
-              Oracao
+            <p className="text-xs font-bold uppercase tracking-widest opacity-80">Resumo Semanal</p>
+            <p className="text-lg font-black mt-0.5">
+              {activePlan ? activePlan.plan.name : 'Comece um plano'}
             </p>
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground">
-              Converse com Deus
-            </h2>
           </div>
-          {prayerStreak && (
-            <PrayerStreakDisplay
-              currentStreak={prayerStreak.current_streak}
-              longestStreak={prayerStreak.longest_streak}
-              size="md"
-            />
+          {prayerStreak && prayerStreak.current_streak > 0 && (
+            <div className="flex items-center gap-1.5 bg-white/20 rounded-xl px-3 py-1.5">
+              <Flame className="w-4 h-4 fill-orange-300 text-orange-300" />
+              <span className="text-sm font-black">{prayerStreak.current_streak}d</span>
+            </div>
           )}
         </div>
 
-        {/* Prayer Stats */}
-        {weeklyStats && (
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-background/50 rounded-xl p-3 text-center">
-              <div className="flex items-center justify-center gap-1 text-primary mb-1">
-                <Calendar className="w-4 h-4" />
-                <span className="text-lg font-black">{weeklyStats.totalPrayers}</span>
-              </div>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Esta Semana
-              </p>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white/10 rounded-xl p-3 text-center">
+            <div className="flex items-center justify-center gap-1 mb-0.5">
+              <Calendar className="w-3.5 h-3.5 opacity-80" />
+              <span className="text-lg font-black">{weeklyStats?.totalPrayers ?? 0}</span>
             </div>
-            <div className="bg-background/50 rounded-xl p-3 text-center">
-              <div className="flex items-center justify-center gap-1 text-blue-500 mb-1">
-                <Clock className="w-4 h-4" />
-                <span className="text-lg font-black">{weeklyStats.totalMinutes}</span>
-              </div>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Minutos
-              </p>
+            <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Orações</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-3 text-center">
+            <div className="flex items-center justify-center gap-1 mb-0.5">
+              <Clock className="w-3.5 h-3.5 opacity-80" />
+              <span className="text-lg font-black">{weeklyStats?.totalMinutes ?? 0}</span>
             </div>
-            <div className="bg-background/50 rounded-xl p-3 text-center">
-              <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
-                <Users className="w-4 h-4" />
-                <span className="text-lg font-black">{weeklyStats.peoplePrayed}</span>
-              </div>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Pessoas
-              </p>
+            <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Minutos</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-3 text-center">
+            <div className="flex items-center justify-center gap-1 mb-0.5">
+              <Users className="w-3.5 h-3.5 opacity-80" />
+              <span className="text-lg font-black">{weeklyStats?.peoplePrayed ?? 0}</span>
+            </div>
+            <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Pessoas</p>
+          </div>
+        </div>
+
+        {activePlan && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold opacity-80">Progresso</span>
+              <span className="text-xs font-black">
+                {activePlan.progress.length}/{activePlan.totalReadings} dias
+              </span>
+            </div>
+            <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
           </div>
         )}
-
-        {/* Prayer Action */}
-        <Link href="/membro/biblia-oracao/oracao">
-          <Button className="w-full py-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
-            <Flame className="w-5 h-5 mr-2" />
-            Espaco de Oracao
-          </Button>
-        </Link>
-      </section>
-
-      {/* Divider */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 h-px bg-border" />
-        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          Leitura Biblica
-        </span>
-        <div className="flex-1 h-px bg-border" />
       </div>
 
-      {/* Free Bible Reading */}
-      <Link href="/membro/biblia-oracao/leitor">
-        <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-          <CardContent className="flex items-center gap-4 p-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-foreground">Ler Biblia</h3>
-              <p className="text-sm text-muted-foreground">
-                Leitura livre de qualquer livro e capitulo
-              </p>
-            </div>
-            <ArrowRight className="w-5 h-5 text-muted-foreground" />
-          </CardContent>
-        </Card>
-      </Link>
-
-      {/* Active Plan Section */}
-      {activePlan ? (
-        <>
-          {/* Plan Overview Card */}
-          <section className="bg-card border border-border/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <p className="text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">
-                  Plano Atual
-                </p>
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground">
-                  {activePlan.plan.name}
-                </h2>
-              </div>
-              <StreakDisplay
-                streak={activePlan.current_streak}
-                longestStreak={activePlan.longest_streak}
-                size="md"
-              />
-            </div>
-
-            {/* Progress */}
-            <div className="bg-muted/30 p-4 rounded-xl sm:rounded-2xl border border-border/50 mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs sm:text-xs font-black uppercase tracking-widest text-muted-foreground">
-                  Progresso Geral
-                </span>
-                <span className="text-sm font-black text-primary">
-                  {activePlan.progress.length} / {activePlan.totalReadings} dias
-                </span>
-              </div>
-              <Progress value={progressPercent} className="h-2.5" />
-              <p className="text-xs text-muted-foreground mt-2">
-                {progressPercent}% concluido
-              </p>
-            </div>
-
-            <Link
-              href="/membro/biblia-oracao/meu-plano"
-              className="flex items-center justify-center gap-2 w-full py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-bold text-sm transition-colors"
-            >
-              Ver Plano Completo
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </section>
-
-          {/* Today's Reading */}
-          {todaysReading && (
-            <section>
-              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="w-1 sm:w-1.5 h-6 sm:h-8 bg-primary rounded-full" />
-                <h2 className="text-lg sm:text-xl font-black text-foreground uppercase tracking-tight">
-                  Leitura de Hoje
-                </h2>
-              </div>
-
-              <TodaysReadingCard
-                readingId={todaysReading.reading.id}
-                dayNumber={todaysReading.dayNumber}
-                bookId={todaysReading.reading.book_id}
-                chapterStart={todaysReading.reading.chapter_start}
-                chapterEnd={todaysReading.reading.chapter_end}
-                readingTitle={todaysReading.reading.reading_title}
-                isCompleted={todaysReading.isCompleted}
-              />
-            </section>
-          )}
-        </>
-      ) : (
-        <>
-          {/* No Active Plan - CTA */}
-          <section className="text-center py-8 sm:py-12 lg:py-16 bg-card border border-dashed border-border rounded-2xl sm:rounded-3xl">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-primary/10 rounded-xl sm:rounded-2xl lg:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary" />
-            </div>
-            <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-foreground mb-2">
-              Comece sua Jornada Biblica
-            </h3>
-            <p className="text-sm sm:text-base text-muted-foreground font-medium mb-6 max-w-md mx-auto px-4">
-              Escolha um plano de leitura e desenvolva o habito diario de ler a Palavra de Deus
-            </p>
-            <Link
-              href="/membro/biblia-oracao/planos"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
-            >
-              <Play className="w-4 h-4" />
-              Explorar Planos
-            </Link>
-          </section>
-
-          {/* Available Plans Preview */}
-          {availablePlans.length > 0 && (
-            <section>
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-1 sm:w-1.5 h-6 sm:h-8 bg-muted-foreground/30 rounded-full" />
-                  <h2 className="text-lg sm:text-xl font-black text-foreground uppercase tracking-tight">
-                    Planos Disponiveis
-                  </h2>
-                </div>
-                <Link
-                  href="/membro/biblia-oracao/planos"
-                  className="text-primary text-xs sm:text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all"
-                >
-                  Ver todos <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {availablePlans.map((plan) => (
-                  <PlanCard
-                    key={plan.id}
-                    id={plan.id}
-                    name={plan.name}
-                    description={plan.description}
-                    durationDays={plan.duration_days}
-                    planType={plan.plan_type}
-                    href={`/membro/biblia-oracao/planos/${plan.id}`}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-        </>
-      )}
-
-      {/* Quick Stats */}
-      {activePlan && (
-        <section className="grid grid-cols-3 gap-3 sm:gap-4">
-          <div className="bg-card border border-border/50 rounded-xl sm:rounded-2xl p-4 text-center">
-            <div className="text-2xl sm:text-3xl font-black text-primary mb-1">
-              {activePlan.progress.length}
-            </div>
-            <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Dias Lidos
-            </p>
-          </div>
-          <div className="bg-card border border-border/50 rounded-xl sm:rounded-2xl p-4 text-center">
-            <div className="text-2xl sm:text-3xl font-black text-orange-500 mb-1 flex items-center justify-center gap-1">
-              <Flame className="w-5 h-5 sm:w-6 sm:h-6 fill-orange-400" />
-              {activePlan.current_streak}
-            </div>
-            <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Sequencia
-            </p>
-          </div>
-          <div className="bg-card border border-border/50 rounded-xl sm:rounded-2xl p-4 text-center">
-            <div className="text-2xl sm:text-3xl font-black text-muted-foreground mb-1">
-              {activePlan.totalReadings - activePlan.progress.length}
-            </div>
-            <p className="text-xs sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Restantes
-            </p>
-          </div>
-        </section>
-      )}
-
-      {/* Browse Plans Link */}
-      {activePlan && (
-        <div className="text-center pt-4">
+      {/* Menu Grid */}
+      <div className="grid grid-cols-3 gap-3">
+        {menuItems.map((item) => (
           <Link
-            href="/membro/biblia-oracao/planos"
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            key={item.href}
+            href={item.href}
+            className="flex flex-col items-center gap-2.5 p-4 bg-card border border-border/50 rounded-2xl hover:border-primary/30 hover:bg-accent/50 transition-all active:scale-95"
           >
-            Explorar outros planos de leitura
+            <div className={`w-12 h-12 ${item.bg} rounded-xl flex items-center justify-center`}>
+              <item.icon className={`w-6 h-6 ${item.color}`} />
+            </div>
+            <span className="text-xs font-bold text-foreground text-center leading-tight">
+              {item.label}
+            </span>
           </Link>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   )
 }
