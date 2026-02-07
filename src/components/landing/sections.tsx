@@ -268,8 +268,8 @@ export const ScreenshotsSection = memo(function ScreenshotsSection() {
         {/* Screenshot principal com navegação */}
         <AnimatedSection>
           <motion.div variants={scaleIn} className="relative max-w-6xl mx-auto">
-            {/* Glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 to-[#B8962E]/20 rounded-3xl blur-3xl" />
+            {/* Glow effect - reduced on mobile */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-[#B8962E]/10 md:from-[#D4AF37]/20 md:to-[#B8962E]/20 rounded-3xl blur-xl md:blur-3xl" />
             
             {/* Container do screenshot */}
             <div className="relative bg-[#141414] border border-[#2A2A2A] rounded-3xl overflow-hidden shadow-2xl">
@@ -311,15 +311,15 @@ export const ScreenshotsSection = memo(function ScreenshotsSection() {
                 {/* Navegação lateral */}
                 <button
                   onClick={prevSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-all backdrop-blur-sm"
+                  className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-all touch-manipulation"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
                 <button
                   onClick={nextSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-all backdrop-blur-sm"
+                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-all touch-manipulation"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
               </div>
 

@@ -1,10 +1,18 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Zap, ArrowRight, Play, Star, Users, CheckCircle2 } from 'lucide-react'
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768)
+  }, [])
+  return isMobile
+}
 
 const STATS = [
   { value: '152', label: 'Membros', color: 'text-white' },
@@ -16,12 +24,17 @@ const STATS = [
 const AVATARS = ['👨‍💼', '👩‍💼', '👨‍🦳', '👩', '👨']
 
 export const HeroSection = memo(function HeroSection() {
+  const isMobile = useIsMobile()
+  // On mobile, reduce animation durations and delays for snappier feel
+  const dur = isMobile ? 0.3 : 0.6
+  const baseDel = isMobile ? 0 : 0.1
+
   return (
     <section className="pt-32 md:pt-40 pb-20 relative overflow-hidden">
-      {/* Background Effects */}
+      {/* Background Effects - reduced blur on mobile for performance */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#D4AF37]/5 to-transparent" />
-      <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] bg-[#D4AF37]/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] bg-[#B8962E]/10 rounded-full blur-[120px]" />
+      <div className="absolute top-1/4 left-1/4 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] md:w-[500px] md:h-[500px] bg-[#D4AF37]/10 rounded-full blur-[60px] md:blur-[120px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] md:w-[500px] md:h-[500px] bg-[#B8962E]/10 rounded-full blur-[60px] md:blur-[120px]" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -31,7 +44,7 @@ export const HeroSection = memo(function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: dur }}
               className="inline-flex items-center gap-2 bg-[#141414] border border-[#2A2A2A] rounded-full px-4 py-2 mb-8"
             >
               <Zap className="w-4 h-4 text-[#D4AF37]" />
@@ -44,7 +57,7 @@ export const HeroSection = memo(function HeroSection() {
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              transition={{ duration: dur, delay: baseDel }}
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
             >
               Transforme a{' '}
@@ -58,7 +71,7 @@ export const HeroSection = memo(function HeroSection() {
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: dur, delay: baseDel * 2 }}
               className="text-lg sm:text-xl text-[#A0A0A0] mb-10 max-w-xl mx-auto lg:mx-0"
             >
               Gerencie células, membros, eventos, loja virtual e comunicação em um único lugar.
@@ -69,7 +82,7 @@ export const HeroSection = memo(function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: dur, delay: baseDel * 3 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
             >
               <Link
@@ -92,7 +105,7 @@ export const HeroSection = memo(function HeroSection() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.35 }}
+              transition={{ duration: dur, delay: baseDel * 3.5 }}
               className="flex items-center gap-3 justify-center lg:justify-start mb-6 bg-[#141414]/50 border border-[#D4AF37]/20 rounded-xl px-4 py-3 max-w-fit mx-auto lg:mx-0"
             >
               <Users className="w-5 h-5 text-[#D4AF37]" />
@@ -105,7 +118,7 @@ export const HeroSection = memo(function HeroSection() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+              transition={{ duration: dur, delay: baseDel * 4 }}
               className="flex flex-wrap items-center gap-6 justify-center lg:justify-start"
             >
               <div className="flex -space-x-3">
@@ -133,13 +146,13 @@ export const HeroSection = memo(function HeroSection() {
 
           {/* Right Image - Dashboard Screenshot */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: isMobile ? 0 : 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={{ duration: isMobile ? 0.3 : 0.8, delay: isMobile ? 0.1 : 0.3 }}
             className="relative"
           >
-            {/* Glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/30 to-[#B8962E]/20 rounded-3xl blur-2xl scale-105" />
+            {/* Glow effect - reduced on mobile */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/20 to-[#B8962E]/10 md:from-[#D4AF37]/30 md:to-[#B8962E]/20 rounded-3xl blur-xl md:blur-2xl scale-105" />
             
             <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/50 border border-[#2A2A2A]">
               {/* Browser bar */}
@@ -170,7 +183,7 @@ export const HeroSection = memo(function HeroSection() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
+                transition={{ duration: dur, delay: isMobile ? 0.2 : 0.8 }}
                 className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-[#141414]/95 backdrop-blur-lg rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[#2A2A2A]"
               >
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center">
