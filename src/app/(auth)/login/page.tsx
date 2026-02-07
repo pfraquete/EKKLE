@@ -29,7 +29,7 @@ export default async function LoginPage({
                         {church ? (
                             <div className="flex flex-col items-center gap-4">
                                 {church.logo_url ? (
-                                    <div className="w-20 h-20 relative bg-white rounded-2xl p-2 shadow-inner">
+                                    <div className="w-24 h-24 relative bg-white rounded-2xl p-2 shadow-inner">
                                         <Image
                                             src={church.logo_url}
                                             alt={church.name}
@@ -38,8 +38,8 @@ export default async function LoginPage({
                                         />
                                     </div>
                                 ) : (
-                                    <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center">
-                                        <span className="text-2xl font-black text-primary">{church.name[0]}</span>
+                                    <div className="w-24 h-24 bg-primary/10 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl font-black text-primary">{church.name[0]}</span>
                                     </div>
                                 )}
                                 <div className="space-y-1">
@@ -75,7 +75,7 @@ export default async function LoginPage({
 
                         <form className="space-y-5">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Email</Label>
+                                <Label htmlFor="email" className="text-sm font-bold uppercase tracking-widest text-[#A0A0A0] ml-1">Email</Label>
                                 <Input
                                     id="email"
                                     name="email"
@@ -83,13 +83,13 @@ export default async function LoginPage({
                                     autoComplete="email"
                                     placeholder="exemplo@ekkle.com"
                                     required
-                                    className="h-12 rounded-xl bg-background border-border"
+                                    className="h-12 rounded-xl bg-background border-white/10"
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between px-1">
-                                    <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Senha</Label>
+                                    <Label htmlFor="password" className="text-sm font-bold uppercase tracking-widest text-[#A0A0A0]">Senha</Label>
                                     <Link
                                         href="/forgot-password"
                                         className="text-xs text-primary hover:underline font-bold"
@@ -104,7 +104,7 @@ export default async function LoginPage({
                                     autoComplete="current-password"
                                     placeholder="••••••••"
                                     required
-                                    className="h-12 rounded-xl bg-background border-border"
+                                    className="h-12 rounded-xl bg-background border-white/10"
                                 />
                             </div>
 

@@ -45,7 +45,7 @@ export const HeroSection = memo(function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: dur }}
-              className="inline-flex items-center gap-2 bg-[#141414] border border-[#2A2A2A] rounded-full px-4 py-2 mb-8"
+              className="inline-flex items-center gap-2 bg-[#141414] border border-white/10 rounded-full px-4 py-2 mb-6"
             >
               <Zap className="w-4 h-4 text-[#D4AF37]" />
               <span className="text-sm text-[#F5F5F5]">
@@ -58,7 +58,7 @@ export const HeroSection = memo(function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: dur, delay: baseDel }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.15]"
             >
               Transforme a{' '}
               <span className="bg-gradient-to-r from-[#D4AF37] via-[#F2D675] to-[#B8962E] bg-clip-text text-transparent">
@@ -94,7 +94,7 @@ export const HeroSection = memo(function HeroSection() {
               </Link>
               <a
                 href="#screenshots"
-                className="group bg-[#141414] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#1A1A1A] transition-colors border border-[#2A2A2A] flex items-center justify-center gap-2"
+                className="group bg-[#141414] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#1A1A1A] transition-colors border border-white/10 flex items-center justify-center gap-2"
               >
                 <Play className="w-5 h-5" />
                 Ver Sistema
