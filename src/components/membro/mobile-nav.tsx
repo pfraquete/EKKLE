@@ -14,10 +14,8 @@ import {
     Home,
     Menu,
     X,
-    Wallet,
     BookMarked,
     Calendar,
-    Package,
     LogOut,
     MessageCircle,
     ClipboardList,
@@ -180,13 +178,6 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             show: true
         },
         {
-            icon: Wallet,
-            label: 'Meus Dízimos',
-            href: '/membro/dizimos',
-            active: pathname.startsWith('/membro/dizimos'),
-            show: true
-        },
-        {
             icon: Calendar,
             label: 'Eventos',
             href: '/eventos',
@@ -198,13 +189,6 @@ export function MemberMobileNav({ profile }: MobileNavProps) {
             label: 'Loja',
             href: '/membro/loja',
             active: pathname.startsWith('/membro/loja'),
-            show: true
-        },
-        {
-            icon: Package,
-            label: 'Meus Pedidos',
-            href: '/membro/pedidos',
-            active: pathname.startsWith('/membro/pedidos'),
             show: true
         },
     ]

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { signOut } from '@/actions/auth'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { BookOpen, User, ShoppingBag, Package, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video, GraduationCap, HandCoins, Landmark, BookMarked, MessageCircle, Newspaper } from 'lucide-react'
+import { BookOpen, User, ShoppingBag, Calendar, Home, LogOut, Search, Sparkles, Radio, Users, ClipboardList, Image, ChevronDown, Video, GraduationCap, HandCoins, Landmark, BookMarked, MessageCircle, Newspaper } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SidebarNavProps {
@@ -66,11 +66,6 @@ export function SidebarNav({ profile }: SidebarNavProps) {
         ? [{ href: '/membro/professor', label: 'Área do Professor', icon: GraduationCap }]
         : []
 
-    // Finance items (visible to all members)
-    const financeItems = [
-        { href: '/membro/dizimos', label: 'Dízimos e Ofertas', icon: HandCoins },
-    ]
-
     // Finance team items (only for finance team members or pastors)
     const financeTeamItems = isFinanceTeam
         ? [{ href: '/membro/financeiro', label: 'Financeiro Igreja', icon: Landmark }]
@@ -78,7 +73,6 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
     const bottomNavItems = [
         { href: '/membro/loja', label: 'Loja Virtual', icon: ShoppingBag },
-        { href: '/membro/pedidos', label: 'Meus Pedidos', icon: Package },
     ]
 
     const renderNavItem = (item: { href: string; label: string; icon: any }) => {
@@ -181,9 +175,6 @@ export function SidebarNav({ profile }: SidebarNavProps) {
 
             {/* Teacher-only items (Área do Professor) */}
             {teacherItems.map(renderNavItem)}
-
-            {/* Finance items (Dízimos e Ofertas) */}
-            {financeItems.map(renderNavItem)}
 
             {/* Finance team items (Financeiro Igreja) */}
             {financeTeamItems.map(renderNavItem)}

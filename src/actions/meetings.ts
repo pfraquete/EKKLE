@@ -332,3 +332,43 @@ export async function updateMeetingReport(data: UpdateMeetingReportInput) {
     revalidatePath(`/membro/minha-celula/reunioes/${data.meetingId}`)
     return { success: true }
 }
+
+export async function deleteMeeting(meetingId: string) {
+    const profile = await getProfile()
+    if (!profile) throw new Error('Não autenticado')
+
+    if (profile.role !== 'LEADER' && profile.role !== 'PASTOR') {
+        throw new Error('Sem permissão')
+    }
+
+    const supabase = await createClient()
+
+    // Delete attendance records
+    await supabase
+        .from('attendance')
+        .delete()
+        .eq('context_id', meetingId)
+        .eq('context_type', 'CELL_MEETING')
+
+    // Delete reports
+    await supabase
+        .from('cell_reports')
+        .delete()
+        .eq('meeting_id', meetingId)
+
+    // Delete the meeting itself
+    const { error } = await supabase
+        .from('cell_meetings')
+        .delete()
+        .eq('id', meetingId)
+        .eq('church_id', profile.church_id)
+
+    if (error) {
+        throw new Error(`Erro ao excluir reunião: ${error.message}`)
+    }
+
+    revalidatePath('/minha-celula')
+    revalidatePath('/minha-celula/reunioes')
+    revalidatePath('/membro/minha-celula/reunioes')
+    return { success: true }
+}

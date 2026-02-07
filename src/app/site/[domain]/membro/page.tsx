@@ -1,7 +1,7 @@
 import { getChurch } from '@/lib/get-church'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { User, Mail, Phone, Calendar, AtSign, ChevronRight, Cake } from 'lucide-react'
+import { User, Mail, Phone, Calendar, AtSign, ChevronRight, Cake, HandCoins } from 'lucide-react'
 import { ProfilePhotoUpload } from '@/components/profile/profile-photo-upload'
 import { NicknameForm } from '@/components/chat'
 import { EditProfileForm } from '@/components/profile/edit-profile-form'
@@ -77,7 +77,7 @@ export default async function MembroPage() {
         )}
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Link href="/membro/biblia-oracao">
             <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2 rounded-2xl">
               <span className="text-2xl">📖</span>
@@ -88,6 +88,12 @@ export default async function MembroPage() {
             <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2 rounded-2xl">
               <span className="text-2xl">🎓</span>
               <span className="text-xs font-bold uppercase tracking-wider">Meus Cursos</span>
+            </Button>
+          </Link>
+          <Link href="/membro/dizimos">
+            <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2 rounded-2xl">
+              <HandCoins className="w-6 h-6 text-primary" />
+              <span className="text-xs font-bold uppercase tracking-wider">Dízimos e Ofertas</span>
             </Button>
           </Link>
         </div>

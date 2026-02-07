@@ -2,8 +2,10 @@ import { getProfile } from '@/actions/auth';
 import { getProducts, getProductCategories } from '@/actions/products';
 import { redirect } from 'next/navigation';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ShoppingBag, Package } from 'lucide-react';
 import { StoreCatalog } from '@/components/store/store-catalog';
+import Link from 'next/link';
 
 export default async function MemberStorePage() {
   const profile = await getProfile();
@@ -22,10 +24,17 @@ export default async function MemberStorePage() {
           <div className="p-3 bg-primary/10 rounded-2xl">
             <ShoppingBag className="w-8 h-8 text-primary" />
           </div>
-          <div>
-            <h1 className="text-4xl font-black text-foreground tracking-tight">Loja Virtual</h1>
-            <p className="text-muted-foreground font-medium">Confira os produtos selecionados da nossa comunidade</p>
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight">Loja Virtual</h1>
+            <p className="text-sm sm:text-base text-muted-foreground font-medium">Confira os produtos selecionados da nossa comunidade</p>
           </div>
+          <Button variant="outline" asChild className="rounded-xl gap-2">
+            <Link href="/membro/pedidos">
+              <Package className="w-4 h-4" />
+              <span className="hidden sm:inline">Meus Pedidos</span>
+              <span className="sm:hidden">Pedidos</span>
+            </Link>
+          </Button>
         </div>
       </div>
 
