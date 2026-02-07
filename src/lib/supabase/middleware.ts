@@ -192,8 +192,10 @@ export async function updateSession(request: NextRequest) {
                 church_id: profile.church_id,
                 role: profile.role,
                 church_slug: (() => {
-                    const churchesData = profile.churches as unknown as { slug: string }[] | null
-                    return Array.isArray(churchesData) && churchesData.length > 0 ? churchesData[0].slug : null
+                    const churchesData = profile.churches as unknown
+                    if (Array.isArray(churchesData) && churchesData.length > 0) return (churchesData[0] as { slug: string }).slug
+                    if (churchesData && typeof churchesData === 'object' && 'slug' in churchesData) return (churchesData as { slug: string }).slug
+                    return null
                 })()
             }
         }

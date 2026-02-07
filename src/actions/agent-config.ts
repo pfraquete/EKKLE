@@ -449,6 +449,10 @@ export async function getAgentActiveStatus(): Promise<{ isActive: boolean; churc
 
   return { 
     isActive: config?.is_active ?? false,
-    churchName: (profile.churches as any)?.name
+    churchName: (() => {
+      const c = profile.churches as any
+      if (Array.isArray(c) && c.length > 0) return c[0].name
+      return c?.name
+    })()
   }
 }
