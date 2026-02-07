@@ -34,7 +34,11 @@ export default async function MembersPage() {
         redirect('/dashboard')
     }
 
-    const members = await getChurchMembersOptimized() as ChurchMember[]
+    const rawMembers = await getChurchMembersOptimized()
+    const members: ChurchMember[] = rawMembers.map((m) => ({
+        ...m,
+        cell: Array.isArray(m.cell) ? m.cell[0] ?? null : m.cell ?? null,
+    }))
 
     const getStageBadge = (stage: string) => {
         switch (stage) {
