@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Check, ChevronLeft, Loader2, UserPlus, X } from 'lucide-react'
+import { Check, Loader2, UserPlus, X } from 'lucide-react'
 
 interface ServiceAttendanceViewProps {
     churchId: string
@@ -117,14 +117,9 @@ export function ServiceAttendanceView({ churchId, initialDate, initialData }: Se
 
     return (
         <div className="space-y-6 pb-24">
-            <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" className="rounded-full" onClick={() => router.back()}>
-                    <ChevronLeft className="h-6 w-6" />
-                </Button>
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">Presença no Culto</h1>
-                    <p className="text-sm text-muted-foreground">Registre os presentes no culto.</p>
-                </div>
+            <div>
+                <h2 className="text-lg font-bold text-foreground">Presença no Culto</h2>
+                <p className="text-sm text-muted-foreground">Registre os presentes no culto.</p>
             </div>
 
             <Card className="border-none shadow-md">

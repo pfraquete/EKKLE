@@ -44,7 +44,7 @@ export default async function MemberDetalhesCultoPage({ params }: { params: Prom
             </Link>
 
             <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-black text-foreground">{service.title}</h1>
+                <h1 className="text-xl sm:text-2xl font-black text-foreground">{service.title}</h1>
                 <p className="text-muted-foreground flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4" />
                     {new Date(service.service_date + 'T12:00:00').toLocaleDateString('pt-BR')} às {service.service_time.slice(0, 5)}
@@ -52,17 +52,17 @@ export default async function MemberDetalhesCultoPage({ params }: { params: Prom
             </div>
 
             <Tabs defaultValue="checklist" className="space-y-6">
-                <TabsList className="bg-muted/50 p-1 rounded-2xl w-full sm:w-auto overflow-x-auto">
-                    <TabsTrigger value="checklist" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-2">
-                        <CheckSquare className="h-4 w-4" />
+                <TabsList className="bg-muted/50 p-1 rounded-2xl w-full sm:w-auto">
+                    <TabsTrigger value="checklist" className="rounded-xl px-3 sm:px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-1.5 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-initial">
+                        <CheckSquare className="h-4 w-4 hidden sm:block" />
                         Checklist
                     </TabsTrigger>
-                    <TabsTrigger value="programming" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-2">
-                        <ClipboardList className="h-4 w-4" />
+                    <TabsTrigger value="programming" className="rounded-xl px-3 sm:px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-1.5 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-initial">
+                        <ClipboardList className="h-4 w-4 hidden sm:block" />
                         Programação
                     </TabsTrigger>
-                    <TabsTrigger value="attendance" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-2">
-                        <Users className="h-4 w-4" />
+                    <TabsTrigger value="attendance" className="rounded-xl px-3 sm:px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-1.5 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-initial">
+                        <Users className="h-4 w-4 hidden sm:block" />
                         Presença
                     </TabsTrigger>
                 </TabsList>
