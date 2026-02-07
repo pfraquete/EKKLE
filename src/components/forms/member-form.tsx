@@ -178,7 +178,6 @@ export function MemberForm({ initialData, cellId, churchId, currentUserRole, red
                                     <SelectValue placeholder="Selecione o vínculo" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="PASTOR">Pastor</SelectItem>
                                     <SelectItem value="LEADER">Líder de Célula</SelectItem>
                                     <SelectItem value="TRAINING_LEADER">Líder em Treinamento</SelectItem>
                                     <SelectItem value="GUARDIAN_ANGEL">Anjo da Guarda</SelectItem>
