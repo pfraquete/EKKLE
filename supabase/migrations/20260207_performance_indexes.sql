@@ -29,9 +29,9 @@ ON attendance(church_id, context_date, status);
 CREATE INDEX IF NOT EXISTS idx_orders_church_payment 
 ON orders(church_id, payment_status);
 
--- Course enrollments: church_id + status (used in enrollment stats)
-CREATE INDEX IF NOT EXISTS idx_enrollments_church_status 
-ON course_enrollments(church_id, status);
+-- Course enrollments: church_id + completed_at (used in enrollment stats)
+CREATE INDEX IF NOT EXISTS idx_enrollments_church_completed 
+ON course_enrollments(church_id, completed_at);
 
 -- Events: church_id + start_date (used in upcoming events)
 CREATE INDEX IF NOT EXISTS idx_events_church_start 

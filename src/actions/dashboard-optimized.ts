@@ -147,7 +147,7 @@ export async function getDashboardDataCombined(): Promise<{
             .from('course_enrollments')
             .select('*', { count: 'exact', head: true })
             .eq('church_id', churchId)
-            .eq('status', 'COMPLETED'),
+            .not('completed_at', 'is', null),
         // Extended stats - orders
         supabase
             .from('orders')
