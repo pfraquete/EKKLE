@@ -1,16 +1,23 @@
 import { getProfile } from '@/actions/auth'
 import { getServices } from '@/actions/services'
+import { getChecklistTemplates } from '@/actions/service-checklist'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Video, Calendar, Eye, EyeOff } from 'lucide-react'
 import { ServiceActions } from '@/components/services/service-actions'
+import { ServiceChecklistTemplateManager } from '@/components/services/service-checklist-template-manager'
 
 export default async function CultosAdminPage() {
   const profile = await getProfile()
   if (!profile) redirect('/login')
   if (profile.role !== 'PASTOR' && profile.role !== 'LEADER') redirect('/dashboard')
 
-  const services = await getServices()
+  const isPastor = profile.role === 'PASTOR'
+
+  const [services, checklistTemplates] = await Promise.all([
+    getServices(),
+    isPastor ? getChecklistTemplates() : Promise.resolve([]),
+  ])
 
   return (
     <div className="space-y-6">
@@ -70,6 +77,10 @@ export default async function CultosAdminPage() {
             )
           })}
         </div>
+      )}
+
+      {isPastor && (
+        <ServiceChecklistTemplateManager templates={checklistTemplates} />
       )}
     </div>
   )

@@ -1,12 +1,14 @@
 import { getProfile } from '@/actions/auth'
 import { getService } from '@/actions/services'
 import { getServiceAttendanceByDate } from '@/actions/service-attendance'
+import { getServiceChecklist } from '@/actions/service-checklist'
 import { redirect, notFound } from 'next/navigation'
 import { ServiceForm } from '@/components/services/service-form'
 import { ServiceProgrammingView } from '@/components/services/service-programming-view'
 import { ServiceAttendanceView } from '@/components/cultos/service-attendance-view'
+import { ServiceChecklistView } from '@/components/services/service-checklist-view'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Calendar, ClipboardList, Users, Settings } from 'lucide-react'
+import { Calendar, ClipboardList, Users, Settings, CheckSquare } from 'lucide-react'
 
 export default async function DetalhesCultoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -21,11 +23,14 @@ export default async function DetalhesCultoPage({ params }: { params: Promise<{ 
 
   if (!isPastor && !isLeader) redirect('/dashboard')
 
-  // Get initial attendance data
-  const attendanceData = await getServiceAttendanceByDate({
-    churchId: profile.church_id,
-    date: service.service_date
-  })
+  // Get initial attendance data and checklist
+  const [attendanceData, checklistData] = await Promise.all([
+    getServiceAttendanceByDate({
+      churchId: profile.church_id,
+      date: service.service_date
+    }),
+    getServiceChecklist(id),
+  ])
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20">
@@ -37,8 +42,12 @@ export default async function DetalhesCultoPage({ params }: { params: Promise<{ 
         </p>
       </div>
 
-      <Tabs defaultValue="programming" className="space-y-6">
+      <Tabs defaultValue="checklist" className="space-y-6">
         <TabsList className="bg-muted/50 p-1 rounded-2xl w-full sm:w-auto overflow-x-auto">
+          <TabsTrigger value="checklist" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-2">
+            <CheckSquare className="h-4 w-4" />
+            Checklist
+          </TabsTrigger>
           <TabsTrigger value="programming" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all font-bold gap-2">
             <ClipboardList className="h-4 w-4" />
             Programação
@@ -54,6 +63,14 @@ export default async function DetalhesCultoPage({ params }: { params: Promise<{ 
             </TabsTrigger>
           )}
         </TabsList>
+
+        <TabsContent value="checklist" className="mt-0 outline-none">
+          <ServiceChecklistView
+            serviceId={id}
+            templates={checklistData.templates}
+            items={checklistData.items}
+          />
+        </TabsContent>
 
         <TabsContent value="programming" className="mt-0 outline-none">
           <ServiceProgrammingView service={service} />
